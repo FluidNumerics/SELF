@@ -32,6 +32,7 @@ module SELF_Tensor_3D_t
   use FEQParse
   use SELF_HDF5
   use SELF_Data
+  use SELF_DataPool
 
   use HDF5
   use iso_c_binding
@@ -44,9 +45,19 @@ module SELF_Tensor_3D_t
     real(prec),pointer,contiguous,dimension(:,:,:,:,:,:,:) :: boundary
     real(prec),pointer,contiguous,dimension(:,:,:,:,:,:,:) :: extBoundary
 
+    !! High-water-mark backing store for the arrays above (AMR Stage 6b/6c; see SELF_DataPool).
+    !! The public members are pointers remapped onto the leading part of these pools at the exact
+    !! logical shape, so every extent, stride and shape() is unchanged while Resize can reuse the
+    !! storage across an adaptation epoch. Nothing should index the pools directly.
+    real(prec),pointer,contiguous :: pool_interior(:) => null()
+    real(prec),pointer,contiguous :: pool_boundary(:) => null()
+    real(prec),pointer,contiguous :: pool_extBoundary(:) => null()
+
   contains
 
     procedure,public :: Init => Init_Tensor3D_t
+    procedure,public :: Resize => Resize_Tensor3D_t
+    procedure,public :: MapArrays => MapArrays_Tensor3D_t
     procedure,public :: Free => Free_Tensor3D_t
 
     procedure,public :: BoundaryInterp => BoundaryInterp_Tensor3D_t
@@ -76,9 +87,7 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:3,1:3), &
-             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3,1:3), &
-             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3,1:3))
+    call this%MapArrays(interp%N+1,nVar,nElem)
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:9*nVar))
@@ -108,14 +117,78 @@ contains
     this%nVar = 0
     this%nElem = 0
 
-    deallocate(this%interior)
-    deallocate(this%boundary)
-    deallocate(this%extBoundary)
+    ! The public arrays point into the pools rather than owning storage (Stage 6b/6c), so they
+    ! are nullified and the pools released.
+    this%interior => null()
+    this%boundary => null()
+    this%extBoundary => null()
+    if(associated(this%pool_interior)) deallocate(this%pool_interior)
+    if(associated(this%pool_boundary)) deallocate(this%pool_boundary)
+    if(associated(this%pool_extBoundary)) deallocate(this%pool_extBoundary)
 
     deallocate(this%meta)
     deallocate(this%eqn)
 
   endsubroutine Free_Tensor3D_t
+
+  subroutine MapArrays_Tensor3D_t(this,Np,nVar,nElem)
+    !! Size the backing pools for (Np,nVar,nElem) and remap the public arrays onto them at the
+    !! exact logical shape. See SELF_DataPool for why this is done with pointer remapping rather
+    !! than by over-allocating the element dimension.
+    implicit none
+    class(Tensor3D_t),intent(inout) :: this
+    integer,intent(in) :: Np
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+    ! Local
+    integer :: nInt,nBnd
+
+    nInt = Np*Np*Np*nElem*nVar*3*3
+    nBnd = Np*Np*6*nElem*nVar*3*3
+
+    call EnsurePool(this%pool_interior,nInt)
+    call EnsurePool(this%pool_boundary,nBnd)
+    call EnsurePool(this%pool_extBoundary,nBnd)
+
+    this%interior(1:Np,1:Np,1:Np,1:nElem,1:nVar,1:3,1:3) => this%pool_interior(1:nInt)
+    this%boundary(1:Np,1:Np,1:6,1:nElem,1:nVar,1:3,1:3) => this%pool_boundary(1:nBnd)
+    this%extBoundary(1:Np,1:Np,1:6,1:nElem,1:nVar,1:3,1:3) => this%pool_extBoundary(1:nBnd)
+
+  endsubroutine MapArrays_Tensor3D_t
+
+  subroutine Resize_Tensor3D_t(this,interp,nVar,nElem)
+    !! Rebind a live object to a new element count, reusing existing storage when it fits (AMR
+    !! Stage 6b/6c). Unlike Init - which is intent(out), so it resets the object, reallocates,
+    !! zeroes and reconstructs the 9*nVar equation parsers - this preserves metadata and parsers
+    !! (neither depends on nElem) and touches storage only when it must grow.
+    !!
+    !! All arrays are zeroed, exactly as Init leaves them. See Resize_Scalar3D_t for why that is
+    !! required rather than merely tidy: a reused pool holds indeterminate values and the boundary
+    !! arrays are not all rewritten before they are read.
+    implicit none
+    class(Tensor3D_t),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    if(nVar /= this%nVar) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : Resize cannot change nVar. Use Free followed by Init.'
+      stop 1
+    endif
+
+    this%interp => interp
+    this%nElem = nElem
+    this%N = interp%N
+    this%M = interp%M
+
+    call this%MapArrays(interp%N+1,nVar,nElem)
+
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%extBoundary = 0.0_prec
+
+  endsubroutine Resize_Tensor3D_t
 
   subroutine UpdateHost_Tensor3D_t(this)
     implicit none

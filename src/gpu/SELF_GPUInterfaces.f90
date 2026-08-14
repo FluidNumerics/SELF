@@ -81,6 +81,18 @@ module SELF_GPUInterfaces
     endsubroutine RefinementIndicator_2D_gpu
   endinterface
 
+  interface
+    subroutine RefinementIndicator_3D_gpu(Pmodal,f,w,ratio,gate, &
+                                          N,nVar,ivar,nEl) &
+      bind(c,name="RefinementIndicator_3D_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      implicit none
+      type(c_ptr),value :: Pmodal,f,w,ratio,gate
+      integer(c_int),value :: N,nVar,ivar,nEl
+    endsubroutine RefinementIndicator_3D_gpu
+  endinterface
+
   ! MappedData
 
   ! Model

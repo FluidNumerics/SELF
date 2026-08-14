@@ -82,40 +82,69 @@ add_fortran_tests (
     "mesh2d_uniform_refine.f90"
     "mesh3d_uniform_refine.f90"
     "solution_transfer_2d.f90"
+    "solution_transfer_3d.f90"
     "quadtree_balance_2d.f90"
     "octree_balance_3d.f90"
     "adaptive_mortar_2d.f90"
     "adaptive_mortar_3d.f90"
     "transfer_plan_2d.f90"
+    "transfer_plan_3d.f90"
     "transfer_plan_2d_guard_badleaf.f90"
+    "transfer_plan_3d_guard_badleaf.f90"
     "transfer_plan_2d_guard_snapshot.f90"
+    "transfer_plan_3d_guard_snapshot.f90"
     "transfer_plan_2d_guard_unbuilt.f90"
+    "transfer_plan_3d_guard_unbuilt.f90"
     "transfer_plan_2d_guard_range.f90"
+    "transfer_plan_3d_guard_range.f90"
     "amr_controller_2d_guard_decomp.f90"
+    "amr_controller_3d_guard_decomp.f90"
     "lineareuler2d_amr_soundwave.f90"
+    "lineareuler3d_amr_soundwave.f90"
     "lineareuler2d_amr_coarsen_wake.f90"
     "dgmodel2d_regrid_guard_uninit.f90"
+    "dgmodel3d_regrid_guard_uninit.f90"
     "data_2d_device_memory.f90"
     "geometry_2d_reuse.f90"
+    "geometry_3d_reuse.f90"
     "scalar_2d_guard_resize_nvar.f90"
+    "scalar_3d_guard_resize_nvar.f90"
     "vector_2d_guard_resize_nvar.f90"
+    "vector_3d_guard_resize_nvar.f90"
     "tensor_2d_guard_resize_nvar.f90"
+    "tensor_3d_guard_resize_nvar.f90"
     "dgmodel2d_guard_transfer_unstaged.f90"
+    "dgmodel3d_guard_transfer_unstaged.f90"
     "amr_controller_2d_guard_maxlevel.f90"
+    "amr_controller_3d_guard_maxlevel.f90"
     "amr_controller_2d_guard_wrongmesh.f90"
+    "amr_controller_3d_guard_wrongmesh.f90"
     "refinement_indicator_2d_guard_thresholds.f90"
+    "refinement_indicator_3d_guard_thresholds.f90"
     "refinement_indicator_2d_guard_setthresholds.f90"
+    "refinement_indicator_3d_guard_setthresholds.f90"
     "refinement_indicator_2d_guard_degree.f90"
+    "refinement_indicator_3d_guard_degree.f90"
     "refinement_indicator_2d_guard_nelem.f90"
+    "refinement_indicator_3d_guard_nelem.f90"
     "refinement_indicator_2d_guard_ivar.f90"
+    "refinement_indicator_3d_guard_ivar.f90"
     "refinement_indicator_2d_guard_relfloor.f90"
+    "refinement_indicator_3d_guard_relfloor.f90"
     "refinement_indicator_2d_guard_energyscale.f90"
+    "refinement_indicator_3d_guard_energyscale.f90"
     "refinement_indicator_2d_guard_energyweights.f90"
+    "refinement_indicator_3d_guard_energyweights.f90"
     "refinement_indicator_2d_guard_negweight.f90"
+    "refinement_indicator_3d_guard_negweight.f90"
     "refinement_indicator_2d_guard_emptyweights.f90"
+    "refinement_indicator_3d_guard_emptyweights.f90"
     "refinement_indicator_2d_guard_weightcount.f90"
+    "refinement_indicator_3d_guard_weightcount.f90"
     "refinement_indicator_2d_guard_gatesize.f90"
+    "refinement_indicator_3d_guard_gatesize.f90"
     "refinement_indicator_2d_guard_significantfloor.f90"
+    "refinement_indicator_3d_guard_significantfloor.f90"
     "adaptive_mesh_2d_guard_unbalanced.f90"
     "adaptive_mesh_3d_guard_unbalanced.f90"
     "meshrefine_2d_guard_multirank.f90"
@@ -149,8 +178,11 @@ add_fortran_tests (
     "mappedvectordgdivergence_2d_linear_structuredmesh.f90"
     "mortarprojection_identity.f90"
     "refinement_indicator_2d_spectraldecay.f90"
+    "refinement_indicator_3d_spectraldecay.f90"
     "refinement_indicator_2d_relative_floor.f90"
+    "refinement_indicator_3d_relative_floor.f90"
     "refinement_indicator_2d_energy_hysteresis.f90"
+    "refinement_indicator_3d_energy_hysteresis.f90"
     "mappedscalarmortarexchange_2d_linear.f90"
     "mappedscalarmortarexchange_3d_linear.f90"
     "mappedvectordgdivergence_2d_mortar.f90"
@@ -250,18 +282,31 @@ set_tests_properties(
     ec_advection_2d_mortar_guard
     ec_advection_3d_mortar_guard
     refinement_indicator_2d_guard_thresholds
+    refinement_indicator_3d_guard_thresholds
     refinement_indicator_2d_guard_setthresholds
+    refinement_indicator_3d_guard_setthresholds
     refinement_indicator_2d_guard_degree
+    refinement_indicator_3d_guard_degree
     refinement_indicator_2d_guard_nelem
+    refinement_indicator_3d_guard_nelem
     refinement_indicator_2d_guard_ivar
+    refinement_indicator_3d_guard_ivar
     refinement_indicator_2d_guard_relfloor
+    refinement_indicator_3d_guard_relfloor
     refinement_indicator_2d_guard_energyscale
+    refinement_indicator_3d_guard_energyscale
     refinement_indicator_2d_guard_energyweights
+    refinement_indicator_3d_guard_energyweights
     refinement_indicator_2d_guard_negweight
+    refinement_indicator_3d_guard_negweight
     refinement_indicator_2d_guard_emptyweights
+    refinement_indicator_3d_guard_emptyweights
     refinement_indicator_2d_guard_weightcount
+    refinement_indicator_3d_guard_weightcount
     refinement_indicator_2d_guard_gatesize
+    refinement_indicator_3d_guard_gatesize
     refinement_indicator_2d_guard_significantfloor
+    refinement_indicator_3d_guard_significantfloor
     adaptive_mesh_2d_guard_unbalanced
     adaptive_mesh_3d_guard_unbalanced
     meshrefine_2d_guard_multirank
@@ -269,17 +314,29 @@ set_tests_properties(
     quadtree_2d_guard_multirank
     octree_3d_guard_multirank
     transfer_plan_2d_guard_badleaf
+    transfer_plan_3d_guard_badleaf
     transfer_plan_2d_guard_snapshot
+    transfer_plan_3d_guard_snapshot
     transfer_plan_2d_guard_unbuilt
+    transfer_plan_3d_guard_unbuilt
     transfer_plan_2d_guard_range
+    transfer_plan_3d_guard_range
     amr_controller_2d_guard_decomp
+    amr_controller_3d_guard_decomp
     dgmodel2d_regrid_guard_uninit
+    dgmodel3d_regrid_guard_uninit
     amr_controller_2d_guard_maxlevel
+    amr_controller_3d_guard_maxlevel
     amr_controller_2d_guard_wrongmesh
+    amr_controller_3d_guard_wrongmesh
     scalar_2d_guard_resize_nvar
+    scalar_3d_guard_resize_nvar
     vector_2d_guard_resize_nvar
+    vector_3d_guard_resize_nvar
     tensor_2d_guard_resize_nvar
+    tensor_3d_guard_resize_nvar
     dgmodel2d_guard_transfer_unstaged
+    dgmodel3d_guard_transfer_unstaged
     mesh3d_read_guard_missingfile
     mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)
@@ -299,6 +356,7 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "lineareuler2d_mortar_soundwave_mpi.f90"
                        "lineareuler3d_mortar_soundwave_mpi.f90"
                        "lineareuler2d_amr_soundwave_mpi.f90"
+                       "lineareuler3d_amr_soundwave_mpi.f90"
                        "geometry_2d_reuse_mpi.f90"
                        "advection_diffusion_2d_mortar_mpi.f90"
                        "advection_diffusion_2d_rk3_mpi.f90"

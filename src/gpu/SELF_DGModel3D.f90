@@ -41,6 +41,7 @@ module SELF_DGModel3D
 
     procedure :: Init => Init_DGModel3D
     procedure :: Free => Free_DGModel3D
+    procedure :: Regrid => Regrid_DGModel3D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel3D
 
@@ -395,6 +396,70 @@ contains
     call Free_DGModel3D_t(this)
 
   endsubroutine Free_DGModel3D
+
+  subroutine Regrid_DGModel3D(this,mesh,geometry)
+    !! GPU regrid: release the device copies of the old boundary-condition element/side
+    !! arrays, rebuild the model storage and BC maps on the new mesh (base Regrid), then
+    !! upload the new BC arrays to the device - the same device bookkeeping Init/Free do
+    !! around the base Init/Free.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    ! Free hyperbolic BC device arrays (old mesh)
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    ! Free parabolic BC device arrays (old mesh)
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    call Regrid_DGModel3D_t(this,mesh,geometry)
+
+    ! Upload hyperbolic BC element/side arrays to device (new mesh)
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+    ! Upload parabolic BC element/side arrays to device (new mesh)
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+  endsubroutine Regrid_DGModel3D
 
   subroutine CalculateTendency_DGModel3D(this)
     implicit none

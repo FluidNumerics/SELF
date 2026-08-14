@@ -41,10 +41,17 @@ module SELF_Vector_3D
     type(c_ptr) :: extBoundary_gpu
     type(c_ptr) :: avgBoundary_gpu
     type(c_ptr) :: boundaryNormal_gpu
+    !! Bytes currently allocated for each device buffer, so Resize can reuse them (Stage 6b).
+    integer(c_size_t) :: alloc_interior = 0
+    integer(c_size_t) :: alloc_boundary = 0
+    integer(c_size_t) :: alloc_extBoundary = 0
+    integer(c_size_t) :: alloc_avgBoundary = 0
+    integer(c_size_t) :: alloc_boundaryNormal = 0
 
   contains
 
     procedure,public :: Init => Init_Vector3D
+    procedure,public :: Resize => Resize_Vector3D
     procedure,public :: Free => Free_Vector3D
 
     procedure,public :: UpdateHost => UpdateHost_Vector3D
@@ -84,11 +91,7 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:3), &
-             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
-             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
-             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
-             this%boundaryNormal(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
+    call this%MapArrays(interp%N+1,nVar,nElem)
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:3*nVar))
@@ -110,38 +113,68 @@ contains
     this%extBoundary = 0.0_prec
     this%avgBoundary = 0.0_prec
 
-    call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
-    call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
-    call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
-    call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
-    call gpuCheck(hipMalloc(this%boundaryNormal_gpu,sizeof(this%boundaryNormal)))
+    call EnsureDeviceBuffers_Vector3D(this)
 
     call this%UpdateDevice()
 
   endsubroutine Init_Vector3D
 
+  subroutine EnsureDeviceBuffers_Vector3D(this)
+    !! Grow each device buffer to hold the current logical array, reusing the existing allocation
+    !! when the bytes already fit (AMR Stage 6b). A device pointer carries no shape, so only byte
+    !! capacity has to be tracked.
+    implicit none
+    class(Vector3D),intent(inout) :: this
+
+    call EnsureDeviceBuffer(this%interior_gpu,this%alloc_interior,sizeof(this%interior))
+    call EnsureDeviceBuffer(this%boundary_gpu,this%alloc_boundary,sizeof(this%boundary))
+    call EnsureDeviceBuffer(this%extBoundary_gpu,this%alloc_extBoundary, &
+                            sizeof(this%extBoundary))
+    call EnsureDeviceBuffer(this%avgBoundary_gpu,this%alloc_avgBoundary, &
+                            sizeof(this%avgBoundary))
+    call EnsureDeviceBuffer(this%boundaryNormal_gpu,this%alloc_boundaryNormal, &
+                            sizeof(this%boundaryNormal))
+
+  endsubroutine EnsureDeviceBuffers_Vector3D
+
+  subroutine Resize_Vector3D(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing host pools and device buffers where they fit.
+    !! Deliberately does NOT call UpdateDevice: Init uploads freshly zeroed arrays, which is
+    !! pure waste in the adaptive loop because the fields are rewritten immediately after.
+    implicit none
+    class(Vector3D),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_Vector3D_t(this,interp,nVar,nElem)
+    call EnsureDeviceBuffers_Vector3D(this)
+
+  endsubroutine Resize_Vector3D
+
   subroutine Free_Vector3D(this)
     implicit none
     class(Vector3D),intent(inout) :: this
 
-    this%interp => null()
-    this%nVar = 0
-    this%nElem = 0
-
-    deallocate(this%interior)
-    deallocate(this%boundary)
-    deallocate(this%boundaryNormal)
-    deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-
-    deallocate(this%meta)
-    deallocate(this%eqn)
+    ! Host storage is owned by the pools in the parent type (Stage 6b), so the parent Free
+    ! releases it rather than deallocating these pointers.
+    call Free_Vector3D_t(this)
 
     call gpuCheck(hipFree(this%interior_gpu))
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
     call gpuCheck(hipFree(this%boundaryNormal_gpu))
+    this%interior_gpu = c_null_ptr
+    this%boundary_gpu = c_null_ptr
+    this%extBoundary_gpu = c_null_ptr
+    this%avgBoundary_gpu = c_null_ptr
+    this%boundaryNormal_gpu = c_null_ptr
+    this%alloc_interior = 0
+    this%alloc_boundary = 0
+    this%alloc_extBoundary = 0
+    this%alloc_avgBoundary = 0
+    this%alloc_boundaryNormal = 0
 
   endsubroutine Free_Vector3D
 

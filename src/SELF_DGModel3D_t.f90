@@ -37,6 +37,7 @@ module SELF_DGModel3D_t
   use FEQParse
   use SELF_Model
   use SELF_BoundaryConditions
+  use SELF_TransferPlan_3D
 
   implicit none
 
@@ -48,6 +49,8 @@ module SELF_DGModel3D_t
     type(MappedScalar3D)   :: fluxDivergence
     type(MappedScalar3D)   :: dSdt
     type(MappedScalar3D)   :: workSol
+    ! Host staging for the pre-regrid solution (see StageSolutionForTransfer)
+    real(prec),allocatable :: transferStage(:,:,:,:,:)
     type(Mesh3D),pointer   :: mesh
     type(SEMHex),pointer  :: geometry
     type(BoundaryConditionList) :: hyperbolicBCs
@@ -58,6 +61,9 @@ module SELF_DGModel3D_t
     procedure :: Init => Init_DGModel3D_t
     procedure :: SetMetadata => SetMetadata_DGModel3D_t
     procedure :: Free => Free_DGModel3D_t
+    procedure :: Regrid => Regrid_DGModel3D_t
+    procedure :: StageSolutionForTransfer => StageSolutionForTransfer_DGModel3D_t
+    procedure :: ApplyTransferPlan => ApplyTransferPlan_DGModel3D_t
     procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel3D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel3D_t
@@ -160,8 +166,140 @@ contains
     call this%hyperbolicBCs%Free()
     call this%parabolicBCs%Free()
     call this%AdditionalFree()
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
 
   endsubroutine Free_DGModel3D_t
+
+  subroutine Regrid_DGModel3D_t(this,mesh,geometry)
+    !! Rebind a live model to a new mesh/geometry pair (AMR regrid). The mesh-sized solution
+    !! storage is reallocated and the boundary-condition registrations and maps are rebuilt
+    !! for the new mesh, while everything that is not mesh-sized is preserved: the time state
+    !! (t, dt, entropy, IO counter), the time-integrator selection, configuration flags, and
+    !! any model-specific parameters (Init is intent(out) and would reset all of these).
+    !! nvar/nstepped are unchanged - the model solves the same equations on a new mesh.
+    !!
+    !! The solution interior is left UNINITIALIZED: the caller transfers the solution from the
+    !! previous mesh (e.g. ApplyTransferPlan on a BuildTransferPlan mapping) and then calls
+    !! solution%UpdateDevice. Regrid runs once per adaptation epoch, between time steps; it is
+    !! not a per-step hot path.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+
+    if(.not. associated(this%mesh)) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : Regrid called on a model that has not been initialized.'
+      stop 1
+    endif
+
+    ! Free everything sized by the old mesh, mirroring Free (AdditionalFree releases any
+    ! model-specific mesh-sized state so AdditionalInit can rebuild it below).
+    ! Boundary-condition registrations are rebuilt because the boundary face set changes with
+    ! the mesh. The mesh-sized fields are NOT freed: they are resized in place below, which
+    ! reuses their storage whenever the new element count fits.
+    call this%hyperbolicBCs%Free()
+    call this%parabolicBCs%Free()
+    call this%AdditionalFree()
+
+    ! Rebuild on the new mesh, mirroring the mesh-sized portion of Init.
+    this%mesh => mesh
+    this%geometry => geometry
+
+    ! Resize rather than Free + Init. Init is intent(out), so it would reset the whole object,
+    ! reallocate every array, zero it, reconstruct the equation parsers and - on GPU builds -
+    ! upload the zeros, all of which the adaptive loop then discards (the 2-D AMR work
+    ! attributed over half of an adaptation to exactly that cycle).
+    call this%solution%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%workSol%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%dSdt%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%solutionGradient%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%flux%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%source%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%fluxDivergence%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+
+    call this%solution%AssociateGeometry(geometry)
+    call this%solutionGradient%AssociateGeometry(geometry)
+    call this%flux%AssociateGeometry(geometry)
+    call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%hyperbolicBCs%Init()
+    call this%parabolicBCs%Init()
+
+    call this%AdditionalInit()
+
+    call this%MapBoundaryConditions()
+
+    call this%SetMetadata()
+
+  endsubroutine Regrid_DGModel3D_t
+
+  subroutine StageSolutionForTransfer_DGModel3D_t(this)
+    !! Preserve the current solution ahead of a regrid, so that Regrid may release the storage
+    !! it lives in. Pair with ApplyTransferPlan, which consumes the staged copy:
+    !!
+    !!     call model%StageSolutionForTransfer()
+    !!     call model%Regrid(newMesh,newGeom)
+    !!     call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+    !!
+    !! This base implementation stages on the host, which on a GPU build means a
+    !! device-to-host copy of the whole field; a device-resident staging override is the 3-D
+    !! analogue of the 2-D Stage 6a optimization.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: Np,nEl
+
+    Np = this%solution%interp%N+1
+    nEl = this%solution%nElem
+
+    call this%solution%UpdateHost()
+
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
+    allocate(this%transferStage(1:Np,1:Np,1:Np,1:nEl,1:this%nvar))
+    this%transferStage(1:Np,1:Np,1:Np,1:nEl,1:this%nvar) = &
+      this%solution%interior(1:Np,1:Np,1:Np,1:nEl,1:this%nvar)
+
+  endsubroutine StageSolutionForTransfer_DGModel3D_t
+
+  subroutine ApplyTransferPlan_DGModel3D_t(this,plan,interp,eFirst,eLast,uGlobal)
+    !! Transfer the staged pre-regrid solution onto the regridded mesh through plan, filling the
+    !! rank-local element range [eFirst,eLast] of the new solution.
+    !!
+    !! uGlobal is optional and supplies the GLOBAL old field when the caller has already
+    !! assembled one (the multi-rank allgather path); when absent the locally staged copy from
+    !! StageSolutionForTransfer is used, which is the whole field on a single rank.
+    !!
+    !! This base implementation runs the portable host transfer and uploads the result; a
+    !! device-resident transfer override is the 3-D analogue of the 2-D Stage 6a optimization.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! target: a device override takes c_loc of the plan's arrays to upload them, which requires
+    ! the POINTER or TARGET attribute. Declared here too so any override's characteristics match.
+    type(TransferPlan3D),intent(in),target :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    real(prec),intent(in),optional :: uGlobal(:,:,:,:,:)
+
+    if(present(uGlobal)) then
+      call ApplyTransferPlanRange(plan,interp,this%nvar,uGlobal,eFirst,eLast, &
+                                  this%solution%interior)
+    else
+      if(.not. allocated(this%transferStage)) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : ApplyTransferPlan called without a staged solution.'
+        stop 1
+      endif
+      call ApplyTransferPlanRange(plan,interp,this%nvar,this%transferStage,eFirst,eLast, &
+                                  this%solution%interior)
+    endif
+
+    call this%solution%UpdateDevice()
+
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
+
+  endsubroutine ApplyTransferPlan_DGModel3D_t
 
   subroutine ReportMetrics_DGModel3D_t(this)
     !! Base method for reporting the entropy of a model

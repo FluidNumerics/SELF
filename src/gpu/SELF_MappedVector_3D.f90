@@ -45,6 +45,7 @@ module SELF_MappedVector_3D
 
   contains
 
+    procedure,public :: Resize => Resize_MappedVector3D
     procedure,public :: Free => Free_MappedVector3D
     procedure,public :: SideExchange => SideExchange_MappedVector3D
     procedure,public :: MPIExchangeAsync => MPIExchangeAsync_MappedVector3D
@@ -64,6 +65,28 @@ module SELF_MappedVector_3D
   endtype MappedVector3D
 
 contains
+
+  subroutine Resize_MappedVector3D(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing host pools and device buffers where they fit (AMR
+    !! Stage 6b). Inherits the Vector3D resize (host pools plus the five device buffers) and adds
+    !! this class's mortar buffers, which are sized by mesh%nMortars rather than nElem: nMortars
+    !! changes with the mesh independently of the element count, so a stale buffer would silently
+    !! under-size the next mortar exchange. They are invalidated here and lazily re-created at
+    !! the correct size on next use.
+    implicit none
+    class(MappedVector3D),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_MappedVector3D_t(this,interp,nVar,nElem)
+    call EnsureDeviceBuffers_Vector3D(this)
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
+
+  endsubroutine Resize_MappedVector3D
 
   subroutine Free_MappedVector3D(this)
     implicit none

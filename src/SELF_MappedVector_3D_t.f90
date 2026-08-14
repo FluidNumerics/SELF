@@ -66,6 +66,8 @@ module SELF_MappedVector_3D_t
     procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector3D_t
     procedure,private :: ApplyFlip => ApplyFlip_MappedVector3D_t
 
+    procedure,public :: Resize => Resize_MappedVector3D_t
+
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector3D_t
 
     !procedure,public :: WriteTecplot => WriteTecplot_MappedVector3D_t
@@ -73,6 +75,28 @@ module SELF_MappedVector_3D_t
   endtype MappedVector3D_t
 
 contains
+
+  subroutine Resize_MappedVector3D_t(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing storage where it fits (AMR Stage 6b). See
+    !! Resize_MappedScalar3D_t for why the mortar staging buffer is invalidated rather than resized.
+    implicit none
+    class(MappedVector3D_t),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_Vector3D_t(this,interp,nVar,nElem)
+    if(allocated(this%mortarBuff)) deallocate(this%mortarBuff)
+
+    ! The geometry binding refers to the PREVIOUS mesh's geometry, which the caller is
+    ! about to destroy. It must be dropped here so the AssociateGeometry that follows a
+    ! regrid actually rebinds: AssociateGeometry is a no-op when a geometry is already
+    ! associated, so leaving the stale one in place silently kept every mapped operation
+    ! reading freed metric terms - observed as NaN entropy on the first step after an
+    ! adaptation. Free + Init used to hide this by nulling the pointer.
+    call this%DissociateGeometry()
+
+  endsubroutine Resize_MappedVector3D_t
 
   subroutine AssociateGeometry_MappedVector3D_t(this,geometry)
     implicit none
