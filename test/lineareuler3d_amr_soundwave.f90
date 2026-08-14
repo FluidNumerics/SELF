@@ -55,11 +55,11 @@ program LinearEuler3D_AMR_SoundWave
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
   integer,parameter :: controlDegree = 4
   integer,parameter :: targetDegree = 6
-  integer,parameter :: maxLevel = 2
+  integer,parameter :: maxLevel = 1
   integer,parameter :: nEpochs = 3
   real(prec),parameter :: dx = 0.25_prec ! 3 x 3 x 3 base mesh spanning 0.75 m^3
-  real(prec),parameter :: dtBase = 1.0e-3_prec ! stable on the level-0 mesh
-  real(prec),parameter :: epochLength = 0.01_prec
+  real(prec),parameter :: dtBase = 2.0e-3_prec ! stable on the level-0 mesh
+  real(prec),parameter :: epochLength = 0.03_prec
   real(prec),parameter :: rho0 = 1.0_prec
   real(prec),parameter :: amp = 1.0e-4_prec
   real(prec),parameter :: Lr = 0.05_prec ! pulse half-width << dx: under-resolved at level 0
