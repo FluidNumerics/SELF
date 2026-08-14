@@ -53,13 +53,13 @@ program LinearEuler3D_AMR_SoundWave
   implicit none
 
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
-  integer,parameter :: controlDegree = 5
-  integer,parameter :: targetDegree = 7
+  integer,parameter :: controlDegree = 4
+  integer,parameter :: targetDegree = 6
   integer,parameter :: maxLevel = 2
-  integer,parameter :: nEpochs = 4
-  real(prec),parameter :: dx = 0.25_prec ! 4 x 4 x 4 base mesh spanning 1 m^3
+  integer,parameter :: nEpochs = 3
+  real(prec),parameter :: dx = 0.25_prec ! 3 x 3 x 3 base mesh spanning 0.75 m^3
   real(prec),parameter :: dtBase = 1.0e-3_prec ! stable on the level-0 mesh
-  real(prec),parameter :: epochLength = 0.02_prec
+  real(prec),parameter :: epochLength = 0.01_prec
   real(prec),parameter :: rho0 = 1.0_prec
   real(prec),parameter :: amp = 1.0e-4_prec
   real(prec),parameter :: Lr = 0.05_prec ! pulse half-width << dx: under-resolved at level 0
@@ -86,7 +86,7 @@ program LinearEuler3D_AMR_SoundWave
   ! Radiation (outflow) conditions on all domain boundaries
   bcids(1:6) = SELF_BC_RADIATION
 
-  call mesh%StructuredMesh(4,4,4,1,1,1,dx,dx,dx,bcids)
+  call mesh%StructuredMesh(3,3,3,1,1,1,dx,dx,dx,bcids)
   call interp%Init(N=controlDegree, &
                    controlNodeType=GAUSS, &
                    M=targetDegree, &
@@ -108,12 +108,12 @@ program LinearEuler3D_AMR_SoundWave
   ! ---- (a) Initial adaptation: refine until the (re-evaluated) pulse is resolved ----
   ! After each mesh change the initial condition is re-evaluated analytically on the new mesh,
   ! so the indicator sees the true pulse rather than its coarse-mesh interpolant.
-  call modelobj%SphericalSoundWave(amp,Lr,0.5_prec,0.5_prec,0.5_prec)
+  call modelobj%SphericalSoundWave(amp,Lr,0.375_prec,0.375_prec,0.375_prec)
   nElemPrev = modelobj%mesh%nElem
   do i = 1,maxLevel+2
     call controller%Adapt(modelobj,adapted)
     if(.not. adapted) exit
-    call modelobj%SphericalSoundWave(amp,Lr,0.5_prec,0.5_prec,0.5_prec)
+    call modelobj%SphericalSoundWave(amp,Lr,0.375_prec,0.375_prec,0.375_prec)
   enddo
   print*,"initial adaptation: nElem ",nElemPrev," -> ",modelobj%mesh%nElem, &
     ", max level ",controller%forest%MaxLevel()

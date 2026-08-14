@@ -392,3 +392,17 @@ set_tests_properties(lineareuler2d_amr_soundwave_geom_full PROPERTIES
 add_test(NAME lineareuler2d_amr_soundwave_geom_noreuse COMMAND lineareuler2d_amr_soundwave)
 set_tests_properties(lineareuler2d_amr_soundwave_geom_noreuse PROPERTIES
                      LABELS "serial" ENVIRONMENT "SELF_AMR_GEOM_NO_REUSE=1")
+
+# 3-D equivalents: the same switches gate the 3-D controller's incremental geometry path, and
+# lineareuler3d_amr_soundwave carries the same conservation/entropy assertions.
+add_test(NAME lineareuler3d_amr_soundwave_geom_verify COMMAND lineareuler3d_amr_soundwave)
+set_tests_properties(lineareuler3d_amr_soundwave_geom_verify PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_AMR_GEOM_VERIFY=1")
+
+add_test(NAME lineareuler3d_amr_soundwave_geom_full COMMAND lineareuler3d_amr_soundwave)
+set_tests_properties(lineareuler3d_amr_soundwave_geom_full PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_AMR_GEOM_FULL=1")
+
+add_test(NAME lineareuler3d_amr_soundwave_geom_noreuse COMMAND lineareuler3d_amr_soundwave)
+set_tests_properties(lineareuler3d_amr_soundwave_geom_noreuse PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_AMR_GEOM_NO_REUSE=1")
