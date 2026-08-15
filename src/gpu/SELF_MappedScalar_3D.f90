@@ -156,6 +156,8 @@ contains
     type(Lagrange),intent(in),target :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
+    ! Local
+    integer :: n,iError
 
     call Resize_MappedScalar3D_t(this,interp,nVar,nElem)
     call EnsureDeviceBuffers_MappedScalar3D(this)
@@ -163,6 +165,30 @@ contains
       call gpuCheck(hipFree(this%mortarBuff_gpu))
       this%mortarBuff_gpu = c_null_ptr
     endif
+
+    ! The aggregated halo-exchange state is sized by the mesh/partition, not by nElem
+    ! alone: the packed buffer bytes scale with the shared-side count, the persistent
+    ! requests bake in per-neighbor counts, displacements, and ranks, and
+    ! halo_static_done records that the static (non-stepped) variables' traces have
+    ! already been carried - none of which survives a regrid. Tear all of it down so
+    ! the next SideExchangeStart rebuilds against the new mesh; leaving it in place
+    ! made the first post-regrid pack kernel write a grown halo through the old,
+    ! smaller buffer (a GPU memory fault on the multi-rank adaptive path).
+    if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
+    if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
+    this%halo_sendbuf_gpu = c_null_ptr
+    this%halo_recvbuf_gpu = c_null_ptr
+    if(allocated(this%halo_reqs)) then
+      ! Resize runs between time steps with MPI up (unlike Free, which may run after
+      ! the last mesh finalized MPI), so the requests can be released unconditionally.
+      do n = 1,size(this%halo_reqs)
+        call MPI_REQUEST_FREE(this%halo_reqs(n),iError)
+      enddo
+      deallocate(this%halo_reqs)
+    endif
+    this%halo_nactive = 0
+    this%halo_inflight = 0
+    this%halo_static_done = .false.
 
   endsubroutine Resize_MappedScalar3D
 

@@ -86,6 +86,14 @@ contains
       this%mortarBuff_gpu = c_null_ptr
     endif
 
+    ! The packed halo-exchange buffers are sized by the mesh/partition's shared-side
+    ! count, which changes with a regrid; free them so the next exchange rebuilds
+    ! against the new mesh (see Resize_MappedScalar3D for the failure this prevents).
+    if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
+    if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
+    this%halo_sendbuf_gpu = c_null_ptr
+    this%halo_recvbuf_gpu = c_null_ptr
+
   endsubroutine Resize_MappedVector3D
 
   subroutine Free_MappedVector3D(this)
