@@ -83,6 +83,7 @@ add_fortran_tests (
     "mesh3d_uniform_refine.f90"
     "solution_transfer_2d.f90"
     "solution_transfer_3d.f90"
+    "solution_transfer_3d_device.f90"
     "quadtree_balance_2d.f90"
     "octree_balance_3d.f90"
     "adaptive_mortar_2d.f90"
@@ -115,6 +116,7 @@ add_fortran_tests (
     "tensor_3d_guard_resize_nvar.f90"
     "dgmodel2d_guard_transfer_unstaged.f90"
     "dgmodel3d_guard_transfer_unstaged.f90"
+    "dgmodel3d_guard_transfer_reapply.f90"
     "amr_controller_2d_guard_maxlevel.f90"
     "amr_controller_3d_guard_maxlevel.f90"
     "amr_controller_2d_guard_wrongmesh.f90"
@@ -337,6 +339,7 @@ set_tests_properties(
     tensor_3d_guard_resize_nvar
     dgmodel2d_guard_transfer_unstaged
     dgmodel3d_guard_transfer_unstaged
+    dgmodel3d_guard_transfer_reapply
     mesh3d_read_guard_missingfile
     mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)

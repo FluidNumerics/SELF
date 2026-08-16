@@ -32,16 +32,34 @@ module SELF_DGModel3D
   use SELF_BoundaryConditions
   use SELF_Geometry_3D
   use SELF_Mesh_3D
+  use SELF_TransferPlan_3D
 
   implicit none
 
   type,extends(DGModel3D_t) :: DGModel3D
+    !! Device-resident staging for the AMR solution transfer (the 3-D analogue of 2-D Stage 6a).
+    !! These buffers persist across adaptation epochs and grow monotonically, so a settled run
+    !! performs no allocation here at all; xferAllocBytes / planAllocElem record the current
+    !! capacity.
+    type(c_ptr) :: xferOld_gpu = c_null_ptr !! pre-regrid solution, staged device-side
+    integer(c_size_t) :: xferAllocBytes = 0
+    type(c_ptr) :: xferKind_gpu = c_null_ptr !! plan%sourceKind
+    type(c_ptr) :: xferElem_gpu = c_null_ptr !! plan%sourceElem
+    type(c_ptr) :: xferFamily_gpu = c_null_ptr !! plan%family
+    type(c_ptr) :: xferDepth_gpu = c_null_ptr !! plan%depth
+    type(c_ptr) :: xferPath_gpu = c_null_ptr !! plan%path
+    integer :: planAllocElem = 0 !! new-element count the plan buffers are sized for
+    integer :: planAllocStride = 0 !! plan%path leading dimension they are sized for
+    integer :: xferNOld = 0 !! element count of the staged field (its device stride)
 
   contains
 
     procedure :: Init => Init_DGModel3D
     procedure :: Free => Free_DGModel3D
     procedure :: Regrid => Regrid_DGModel3D
+
+    procedure :: StageSolutionForTransfer => StageSolutionForTransfer_DGModel3D
+    procedure :: ApplyTransferPlan => ApplyTransferPlan_DGModel3D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel3D
 
@@ -393,9 +411,160 @@ contains
       bc => bc%next
     enddo
 
+    ! Release the AMR transfer staging buffers. These are lazily created by
+    ! StageSolutionForTransfer / ApplyTransferPlan and survive across adaptation epochs (and
+    ! across Regrid, which runs between the two), so they are owned by the model and released
+    ! only here.
+    if(c_associated(this%xferOld_gpu)) call gpuCheck(hipFree(this%xferOld_gpu))
+    if(c_associated(this%xferKind_gpu)) call gpuCheck(hipFree(this%xferKind_gpu))
+    if(c_associated(this%xferElem_gpu)) call gpuCheck(hipFree(this%xferElem_gpu))
+    if(c_associated(this%xferFamily_gpu)) call gpuCheck(hipFree(this%xferFamily_gpu))
+    if(c_associated(this%xferDepth_gpu)) call gpuCheck(hipFree(this%xferDepth_gpu))
+    if(c_associated(this%xferPath_gpu)) call gpuCheck(hipFree(this%xferPath_gpu))
+    this%xferOld_gpu = c_null_ptr
+    this%xferKind_gpu = c_null_ptr
+    this%xferElem_gpu = c_null_ptr
+    this%xferFamily_gpu = c_null_ptr
+    this%xferDepth_gpu = c_null_ptr
+    this%xferPath_gpu = c_null_ptr
+    this%xferAllocBytes = 0
+    this%planAllocElem = 0
+    this%planAllocStride = 0
+    this%xferNOld = 0
+
     call Free_DGModel3D_t(this)
 
   endsubroutine Free_DGModel3D
+
+  subroutine StageSolutionForTransfer_DGModel3D(this)
+    !! Stage the pre-regrid solution on the DEVICE, replacing the base implementation's
+    !! device-to-host copy of the whole field. Pair with ApplyTransferPlan, which consumes the
+    !! staged copy:
+    !!
+    !!     call model%StageSolutionForTransfer()
+    !!     call model%Regrid(newMesh,newGeom)
+    !!     call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+    !!
+    !! The staging buffer is model-owned and grows monotonically, so a settled adapting run
+    !! performs no allocation in this path; it is released in Free.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer(c_size_t) :: nbytes
+
+    nbytes = int(this%solution%interp%N+1,c_size_t)*(this%solution%interp%N+1)* &
+             (this%solution%interp%N+1)*this%solution%nElem*this%nvar*prec
+
+    if(nbytes > this%xferAllocBytes) then
+      if(c_associated(this%xferOld_gpu)) call gpuCheck(hipFree(this%xferOld_gpu))
+      call gpuCheck(hipMalloc(this%xferOld_gpu,nbytes))
+      this%xferAllocBytes = nbytes
+    endif
+
+    call gpuCheck(hipMemcpy(this%xferOld_gpu,this%solution%interior_gpu,nbytes, &
+                            hipMemcpyDeviceToDevice))
+
+    ! Remember the staged field's element count: it is the stride the transfer kernel must use
+    ! to index the staged buffer, and it is no longer recoverable from the model after Regrid.
+    this%xferNOld = this%solution%nElem
+
+  endsubroutine StageSolutionForTransfer_DGModel3D
+
+  subroutine ApplyTransferPlan_DGModel3D(this,plan,interp,eFirst,eLast,uGlobal)
+    !! Apply the transfer plan on the device, writing solution%interior_gpu directly and moving
+    !! no solution data across the PCIe/xGMI link.
+    !!
+    !! uGlobal is the multi-rank escape hatch: when the caller has assembled a global old field
+    !! on the host (the Stage-5 v1 allgather migration), this falls back to the portable host
+    !! path. A device transfer only pays off on several ranks together with a point-to-point
+    !! (Stage-5 v2) migration; on a single rank it stands alone, which is the case optimized
+    !! here.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    type(TransferPlan3D),intent(in),target :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    real(prec),intent(in),optional :: uGlobal(:,:,:,:,:)
+    ! Local
+    integer :: nLocal,pathStride
+    integer(c_size_t) :: nb
+
+    if(present(uGlobal)) then
+      call ApplyTransferPlan_DGModel3D_t(this,plan,interp,eFirst,eLast,uGlobal)
+      return
+    endif
+
+    ! The guard is on xferNOld, not on c_associated(xferOld_gpu). The staging buffer is a
+    ! persistent capacity buffer and stays allocated after use, so testing the pointer would only
+    ! catch a missing stage before the FIRST epoch; from the second on, an unpaired call would
+    ! silently transfer the previous epoch's field. xferNOld is set by StageSolutionForTransfer
+    ! and cleared below, so it tracks the stage/apply pairing the way the base implementation's
+    ! allocatable transferStage does.
+    if(this%xferNOld <= 0) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : ApplyTransferPlan called without a staged solution.'
+      stop 1
+    endif
+
+    ! The device kernel holds three (N+1)^3 working buffers in shared memory, sized to a compile
+    ! time bound; guard the degree here rather than overrunning them.
+    if(interp%N+1 > 12) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : the device solution transfer supports N+1 <= AMR3D_MAXNP (12).'
+      stop 1
+    endif
+
+    nLocal = eLast-eFirst+1
+    pathStride = size(plan%path,1)
+
+    ! (Re)size the device copies of the plan's integer arrays, reusing them across epochs.
+    if(plan%nNew > this%planAllocElem .or. pathStride > this%planAllocStride) then
+      if(c_associated(this%xferKind_gpu)) call gpuCheck(hipFree(this%xferKind_gpu))
+      if(c_associated(this%xferElem_gpu)) call gpuCheck(hipFree(this%xferElem_gpu))
+      if(c_associated(this%xferFamily_gpu)) call gpuCheck(hipFree(this%xferFamily_gpu))
+      if(c_associated(this%xferDepth_gpu)) call gpuCheck(hipFree(this%xferDepth_gpu))
+      if(c_associated(this%xferPath_gpu)) call gpuCheck(hipFree(this%xferPath_gpu))
+
+      nb = int(plan%nNew,c_size_t)*c_int
+      call gpuCheck(hipMalloc(this%xferKind_gpu,nb))
+      call gpuCheck(hipMalloc(this%xferElem_gpu,nb))
+      call gpuCheck(hipMalloc(this%xferDepth_gpu,nb))
+      call gpuCheck(hipMalloc(this%xferFamily_gpu,8_c_size_t*nb))
+      call gpuCheck(hipMalloc(this%xferPath_gpu,int(pathStride,c_size_t)*nb))
+
+      ! All five are freed and re-allocated together, so both capacities describe the same set
+      ! of buffers. They track the last plan rather than a high-water mark (as in the 2-D
+      ! implementation this mirrors): a later epoch that grows either dimension re-allocates,
+      ! and a settled mesh - the case that matters - trips neither condition.
+      this%planAllocElem = plan%nNew
+      this%planAllocStride = pathStride
+    endif
+
+    nb = int(plan%nNew,c_size_t)*c_int
+    call gpuCheck(hipMemcpy(this%xferKind_gpu,c_loc(plan%sourceKind), &
+                            nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferElem_gpu,c_loc(plan%sourceElem), &
+                            nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferDepth_gpu,c_loc(plan%depth), &
+                            nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferFamily_gpu,c_loc(plan%family), &
+                            8_c_size_t*nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferPath_gpu,c_loc(plan%path), &
+                            int(pathStride,c_size_t)*nb,hipMemcpyHostToDevice))
+
+    call TransferSolution_3D_gpu(this%xferOld_gpu,this%solution%interior_gpu, &
+                                 this%xferKind_gpu,this%xferElem_gpu,this%xferFamily_gpu, &
+                                 this%xferDepth_gpu,this%xferPath_gpu, &
+                                 interp%mortarR_gpu,interp%mortarP_gpu, &
+                                 pathStride,eFirst-1,interp%N,this%nvar, &
+                                 this%xferNOld,this%solution%nElem,nLocal)
+
+    ! The staged field has been consumed. The buffer itself is kept (it is the capacity that
+    ! makes a settled run allocation-free); only the pairing marker is cleared.
+    this%xferNOld = 0
+
+  endsubroutine ApplyTransferPlan_DGModel3D
 
   subroutine Regrid_DGModel3D(this,mesh,geometry)
     !! GPU regrid: release the device copies of the old boundary-condition element/side

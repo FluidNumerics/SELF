@@ -584,11 +584,15 @@ contains
     !! re-evaluate its time step (RecommendedTimeStep) before the next ForwardStep. When the
     !! leaf set is unchanged the model is untouched.
     !!
-    !! Where the transferred solution lives on return: the portable transfer runs on the host
-    !! and uploads the result with solution%UpdateDevice, so both mirrors are fresh. If a
-    !! device-resident transfer override is added later (the 3-D analogue of the 2-D Stage 6a),
-    !! the host mirror becomes stale here and callers must UpdateHost before reading it, as
-    !! Write_DGModel3D_t does.
+    !! Where the transferred solution lives on return: on a GPU build the transfer is performed
+    !! on the device (the 3-D analogue of the 2-D Stage 6a) and the result is left there, so
+    !! solution%interior (the host mirror) is STALE afterwards. This matches the rest of the
+    !! time loop, where the device is authoritative and a caller that wants host data calls
+    !! solution%UpdateHost() first - as Write_DGModel3D_t does before writing a snapshot. Before
+    !! the device transfer existed the mirror happened to be fresh here because the transfer ran
+    !! on the host; do not rely on that. On CPU builds host and device are the same storage and
+    !! the question does not arise. The multi-rank path still transfers on the host (see step 6),
+    !! so both mirrors are fresh there.
     implicit none
     class(AMRController3D),intent(inout) :: this
     class(DGModel3D_t),intent(inout) :: model
@@ -712,12 +716,17 @@ contains
 
     ! ---- 6. Regrid the model and transfer (migrate) the solution ----
     ! The solution is staged before Regrid (which releases the storage it lives in) and
-    ! transferred onto the new mesh afterwards.
+    ! transferred onto the new mesh afterwards. Both steps are type-bound and backend-specific:
+    ! the portable implementation stages on the host and runs ApplyTransferPlanRange, while the
+    ! GPU backend stages device-to-device and applies the plan in a kernel. That moves the
+    ! per-element tensor-product interpolation onto the device - which is where the measured
+    ! saving comes from - and incidentally leaves no solution data crossing the host link.
     !
     ! On several ranks the old field must first be assembled globally, because each rank then
     ! fills exactly its new contiguous element range and elements that changed ranks are
     ! migrated by construction (the 2-D Stage-5 v1 migration). That allgather is a host
-    ! operation, so the multi-rank path stays on the portable host transfer.
+    ! operation, so the multi-rank path stays on the portable host transfer: a device transfer
+    ! only pays off there once migration is point-to-point (Stage-5 v2).
     eFirst = -1 ! set below, once newMesh's decomposition is known
     if(model%mesh%decomp%nRanks > 1) then
       Np = this%interp%N+1

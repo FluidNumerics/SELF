@@ -1,10 +1,12 @@
 # Adaptive Mesh Refinement (AMR)
 
-This page describes SELF's approach to adaptive mesh refinement for 2-D discontinuous
-Galerkin spectral element models. It documents the **refinement trigger** that is
-implemented today and lays out a **staged design** for the remaining mesh-adaptation
-machinery so that the invasive parts (dynamic mesh mutation, solution transfer, MPI
-re-partitioning, and GPU re-allocation) can be reviewed and landed incrementally.
+This page describes SELF's approach to adaptive mesh refinement for discontinuous Galerkin
+spectral element models. Sections 1-5 document the **2-D** implementation, which came first: the
+refinement trigger, and the staged design along which the invasive parts (dynamic mesh mutation,
+solution transfer, MPI re-partitioning, and GPU re-allocation) were reviewed and landed.
+[Section 6](#6-three-dimensional-amr-octrees-face-mortars) covers the **3-D** stack - octrees and
+2:1 face mortars - which is a deliberate transcription of the 2-D one and records only what
+differs.
 
 AMR in SELF builds directly on the 2:1 nonconforming (mortar) interface support
 (see [Nonconforming (Mortar) Interfaces](../Models/nonconforming-mortar-interfaces.md)).
@@ -913,7 +915,180 @@ band tracking the expanding wavefront.
 
 ---
 
-## 6. References
+## 6. Three-dimensional AMR (octrees + face mortars)
+
+Everything above describes the 2-D implementation, which came first and remains the more
+thoroughly exercised of the two. The 3-D stack is a deliberate transcription of it - octrees in
+place of quadtrees, 2:1 **face** mortars in place of edge mortars, eight children in place of four
+- and is implemented and validated end to end. This section records what is the same, what is
+genuinely different, and what is not done yet.
+
+The design record is [AMR (3D) Design](../Contributing/AMR3D-Design.md); it is a delta document,
+and where a 3-D module is a mechanical transcription the 2-D design remains the authoritative
+rationale.
+
+### 6.1 Status
+
+| Component | 2-D | 3-D |
+| --- | --- | --- |
+| Modal-decay indicator (CPU + GPU) | Implemented | Implemented (`SELF_RefinementIndicator_3D`) |
+| `h`-refinement primitives, uniform refinement | Implemented | Implemented (`SELF_RefinementPrimitives_3D`) |
+| Adaptive forest, level tracking, 2:1 balancing | Quadtree | Octree (`SELF_OctreeMesh_3D`) |
+| Nonconforming mesh emission | Implemented | Implemented (face mortars) |
+| Transfer plan + solution transfer | Implemented | Implemented (`SELF_TransferPlan_3D`) |
+| Model regrid + AMR controller | Implemented | Implemented (`SELF_AMRController_3D`) |
+| MPI re-partitioning (replicated forest, allgathered migration) | Implemented (v1) | Implemented (v1) |
+| Device-side solution transfer | Implemented (Stage 6a) | **Implemented** (§6.4) |
+| Amortized high-water-mark storage | Implemented (Stage 6b) | Inherited via the shared data classes |
+| Geometry reuse across an epoch | Implemented (Stage 6c) | Implemented (`SELF_AMR_GEOM_*` switches) |
+| Example | ultrasound point source | `linear_euler3d_amr_spherical_soundwave` |
+| Coarsen-wake regression | Implemented | **Not yet** |
+
+The pilot model is `LinearEuler3D`. Note it carries `nvar = 6`: `u, v, w, P` are advanced in
+time, while `c` and `rho0` are spatially varying but time-constant background fields. They are
+still solution variables, so the transfer must carry all six - a transfer that moved only the
+prognostic variables would silently blank the medium on every newly created element.
+
+### 6.2 What is genuinely different from 2-D
+
+- **Eight children, not four.** `transferAxc/Ayc/Azc(1:8)` map an octant to its
+  `(x,y,z)` half, in CGNS corner order: children 1-4 walk the x/y quadrants of the lower-z layer,
+  5-8 the same quadrants of the upper-z layer.
+- **Triple tensor products.** Prolongation is
+  `U_child = (R_kx ⊗ R_ky ⊗ R_kz) U_parent`; restriction is
+  `U_parent = Σ_c (P_kx ⊗ P_ky ⊗ P_kz) U_child(c)`. Each 1-D `P_k` carries the half-interval
+  Jacobian, so the triple product carries **1/8** rather than 1/4, which is what makes the 3-D
+  restriction conservative. The identities are the same: `Restrict(Prolong(u)) = u`, and
+  `Σ w³ u_parent = (1/8) Σ_c Σ w³ u_child`.
+- **Cost scales far more steeply.** A level of refinement multiplies the element count by 8
+  rather than 4, and each element carries `(N+1)³` nodes rather than `(N+1)²`. Adaptation is
+  therefore a much larger share of a 3-D epoch than of a 2-D one at comparable settings: in the
+  maxLevel-3 case measured in §6.4, adaptation is 89% of the epoch loop before this change and 88%
+  after, against roughly 50% for the 2-D ultrasound case.
+- **Balancing is face-based.** The forest balances across faces and tolerates 2-level edge and
+  corner jumps, because DG face mortars carry all interface data and hanging edges/corners carry
+  none. `EmitMesh` guards `MaxLevelJump() <= 1`.
+
+### 6.3 The transfer protocol and where the solution lives
+
+The plan (`SELF_TransferPlan_3D`) is built on the host after the last forest mutation, and
+classifies every new leaf as `COPY`, `PROLONG` or `RESTRICT`, with a `depth` and an octant `path`
+for any further descent. It is applied around the regrid as a three-step, type-bound protocol on
+the model, so the backend split that already selects `Regrid` selects the transfer too:
+
+```fortran
+call model%StageSolutionForTransfer()   ! preserve the field; Regrid may then free it
+call model%Regrid(newMesh,newGeom)
+call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+```
+
+Staging exists because `Regrid` reallocates (or resizes) the storage the solution lives in. The
+portable implementation stages into a host array whose lifetime is exactly stage-to-apply;
+applying without a preceding stage is a hard error, pinned by
+`test/dgmodel3d_guard_transfer_unstaged.f90`.
+
+`ApplyTransferPlan` takes an optional `uGlobal`, the **multi-rank escape hatch**. The forest is
+rank-replicated and migration is gather-then-slice, so on more than one rank the controller
+allgathers the old field on the host and passes it through `uGlobal`; each rank then fills exactly
+its own new element range and elements that changed ranks are migrated by construction. That
+allgather is inherently a host operation, so the multi-rank branch stays on the portable host
+transfer on every backend, exactly as in 2-D.
+
+**Where the solution lives after `Adapt`.** On a single-rank GPU build the transferred solution is
+left on the **device**, so `solution%interior` (the host mirror) is **stale**. This matches the
+rest of the time loop, where the device is authoritative and a caller wanting host data calls
+`UpdateHost()` first, as `Write_DGModel3D_t` does. Before the device transfer existed the mirror
+happened to be fresh; do not rely on that. On CPU builds the two are the same storage.
+
+### 6.4 Device-side transfer (implemented)
+
+Until this landed, a single-rank GPU adaptation epoch moved the entire solution across the host
+link twice - `UpdateHost` before the regrid, `UpdateDevice` after - and ran the triple
+tensor-product interpolation on the CPU in between. Both steps are now overridden on the GPU
+backend: staging is a device-to-device copy into a model-owned buffer, and the plan is applied by
+`TransferSolution_3D_gpu` (`src/gpu/SELF_SolutionTransfer.cpp`).
+
+**Kernel.** One workgroup per new element with `(N+1)²` threads, where thread `(a,b)` owns one
+`(a,b)` pencil and loops the free index through each of the three directional passes - the same
+decomposition the 3-D modal indicator uses. An `(N+1)³` thread block is not an option: it is 4096
+threads at `N = 15`, past the block limit, and it would push the working buffers into per-thread
+scratch. The three `(N+1)³` working buffers are static `__shared__` arrays sized `AMR3D_MAXNP³`
+with `AMR3D_MAXNP = 12`, i.e. 41 kB reserved per block at any degree; the Fortran caller guards
+`N+1 <= 12` so a larger degree fails loudly rather than overrunning.
+
+A dynamic-shared variant sized to the degree actually in use (12 kB at `N = 7`, the idiom
+`SELF_MatrixMultiply.cpp` uses) was implemented and measured, and was **1-3% slower** on a B300
+across three runs at two refinement depths - the SM shared budget there is large enough that 41 kB
+per block does not gate occupancy, so the launch-time sizing was pure overhead. It was therefore
+not adopted. The argument for it has not gone away on a 64 kB-LDS AMD device, where the static
+footprint admits one workgroup per CU rather than five; that case has not been measured, and since
+the alternative on every platform is the host round trip this kernel replaces, the static form
+cannot regress anything as it stands.
+
+**One deliberate divergence from the host.** The host descent calls `ProlongToChildren`, which
+forms all eight children and discards seven; the kernel applies only the operator triple of the
+child actually on the recorded path - an eighth of the work per descent step. What is dropped is
+the seven discarded children, which are independent computations writing disjoint slices, and not
+any term of the retained value: each contraction sums the same products against the same mortar
+column in the same ascending index order as the host loop, so the reduction order is preserved.
+Device and host nonetheless agree to round-off rather than bitwise, because the device compiler
+contracts these multiply-accumulates into FMAs.
+
+`test/solution_transfer_3d_device.f90` pins the result value by value against the portable
+`ApplyTransferPlanRange`, on an epoch built to contain all three transfer kinds and prolongation
+depths 0-2, with a non-polynomial field that differs in every variable. That is the check the AMR
+regressions cannot make: conservation and entropy non-growth are invariants a kernel with a
+transposed direction could still satisfy.
+
+**Measurements.** One B300 (sm_103, CUDA 13, fp64), `linear_euler3d_amr_spherical_soundwave`,
+20 epochs, mean of three runs, before and after differing **only** in the three files that
+implement the transfer. `tAdapt` is reported per adapting epoch, because epochs whose leaf set is
+unchanged cost only an indicator pass and mixing the two makes the metric depend on how many
+epochs happened to adapt:
+
+| maxLevel | elements | adapting epochs | before | after | |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 512 | 1 | 119.5 ms | **101.6 ms** | -15.0% |
+| 2 | 4,096 | 10 | 571.6 ms | **516.3 ms** | -9.7% |
+| 3 | 20,784 | 20 | 2182.6 ms | **1959.6 ms** | -10.2% |
+
+Time integration is unchanged, as it must be - nothing on this path runs inside `ForwardStep`.
+`tForwardStep` over the same runs was 0.672 -> 0.615 s, 2.152 -> 2.116 s and 5.199 -> 5.176 s,
+all inside the run-to-run spread (which is under 1% on `tAdapt`).
+
+**Where the saving actually comes from, which is not where you would guess.** It is tempting to
+credit the two eliminated full-field host/device copies, and the 2-D Stage 6a note above leads
+with them. Do the arithmetic for the maxLevel-3 case: 20,784 elements x 125 nodes x 6 variables x
+8 B is a 125 MB field, so the round trip is 250 MB, which at PCIe Gen5 rates is roughly 5 ms -
+**0.2%** of a 2183 ms adaptation. The copies are not the story at this scale.
+
+The 223 ms actually saved is the **host-side interpolation**: the portable
+`ApplyTransferPlanRange` runs the triple tensor-product contractions on one CPU core for every
+new element, and that work moves onto the GPU. The kernel also does an eighth of the descent work
+the host does, because it prolongs onto the child on the recorded path instead of forming all
+eight and discarding seven. Both effects scale with element count, which is why the saving holds
+at roughly 10% of adaptation across a 40x range in mesh size while the copy time would have
+faded to nothing.
+
+The remaining ~90% of an adaptation is geometry generation, regrid and the indicator - untouched
+by this change, and where the next 3-D optimization work belongs.
+
+### 6.5 What is not done in 3-D
+
+- **A coarsening regression.** 2-D has `lineareuler2d_amr_coarsen_wake`, which pins the amplitude
+  gate's ability to release the mesh behind a passing front (§2.1.1). There is no 3-D analogue, so
+  3-D coarsening is exercised only incidentally, by the soundwave regression and by the transfer
+  tests' hand-built epochs.
+- **Point-to-point migration (Stage-5 v2).** Multi-rank runs still allgather the old field on the
+  host. Until that changes, the device transfer cannot be used on more than one rank, because the
+  migration it would have to feed from is a host operation.
+- **A 3-D visualization script.** 2-D ships `examples/linear_euler2d_amr_plot.py`. The 3-D
+  example writes the same self-describing HDF5 snapshots (solution + geometry per file, so the
+  changing mesh needs no special handling downstream) but no renderer is provided.
+
+---
+
+## 7. References
 
 - P.-O. Persson and J. Peraire, *Sub-cell shock capturing for discontinuous Galerkin methods*,
   AIAA 2006-112 (2006).
