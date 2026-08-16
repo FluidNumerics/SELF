@@ -36,6 +36,7 @@ module SELF_MappedScalar_3D
   type,extends(MappedScalar3D_t),public :: MappedScalar3D
 
     type(c_ptr) :: jas_gpu ! jacobian weighted scalar for gradient calculation
+    type(c_ptr) :: mortarBuff_gpu = c_null_ptr ! mortar trace staging (lazy allocation)
 
     ! Packed device buffers and persistent MPI requests for the aggregated
     ! halo exchange. The side tables are shared across fields and live on
@@ -44,12 +45,16 @@ module SELF_MappedScalar_3D
     type(c_ptr) :: halo_sendbuf_gpu = c_null_ptr ! packed device send buffer
     type(c_ptr) :: halo_recvbuf_gpu = c_null_ptr ! packed device receive buffer
     integer,allocatable :: halo_reqs(:) ! persistent requests; receives in 1:nnbr, sends in nnbr+1:2*nnbr
+    !! Bytes currently allocated for jas_gpu, so Resize can reuse it (Stage 6b). The capacity
+    !! counters for the five arrays inherited from Scalar3D are declared there.
+    integer(c_size_t) :: alloc_jas = 0
     integer :: halo_nactive = 0 ! variable count baked into halo_reqs
     integer :: halo_inflight = 0 ! variable count of the exchange in flight (0 = none)
     logical :: halo_static_done = .false. ! all variables have been exchanged at least once
 
   contains
     procedure,public :: Init => Init_MappedScalar3D
+    procedure,public :: Resize => Resize_MappedScalar3D
     procedure,public :: Free => Free_MappedScalar3D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar3D
@@ -57,6 +62,8 @@ module SELF_MappedScalar_3D
     procedure,public :: SideExchange => SideExchange_MappedScalar3D
     procedure,public :: SideExchangeStart => SideExchangeStart_MappedScalar3D
     procedure,public :: SideExchangeFinish => SideExchangeFinish_MappedScalar3D
+    procedure,public :: MortarExchange => MortarExchange_MappedScalar3D
+    procedure,private :: MPIMortarExchangeAsync => MPIMortarExchangeAsync_MappedScalar3D
 
     generic,public :: MappedGradient => MappedGradient_MappedScalar3D
     procedure,private :: MappedGradient_MappedScalar3D
@@ -103,11 +110,10 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%boundarynormal(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:3*nvar))
+    call this%MapArrays(interp%N+1,nVar,nElem)
+
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:nVar))
 
     this%interior = 0.0_prec
     this%boundary = 0.0_prec
@@ -115,20 +121,76 @@ contains
     this%avgBoundary = 0.0_prec
     this%boundarynormal = 0.0_prec
 
-    allocate(this%meta(1:nVar))
-    allocate(this%eqn(1:nVar))
-
-    call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
-    call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
-    call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
-    call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
-    call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize = int(interp%N+1,c_size_t)*(interp%N+1)*(interp%N+1)*nelem*nvar*9*prec
-    call gpuCheck(hipMalloc(this%jas_gpu,workSize))
+    call EnsureDeviceBuffers_MappedScalar3D(this)
 
     call this%UpdateDevice()
 
   endsubroutine Init_MappedScalar3D
+
+  subroutine EnsureDeviceBuffers_MappedScalar3D(this)
+    !! Grow the device buffers to hold the current logical arrays, reusing existing allocations
+    !! when the bytes already fit (AMR Stage 6b).
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    ! Local
+    integer(c_size_t) :: workSize
+
+    call EnsureDeviceBuffers_Scalar3D(this)
+
+    workSize = int(this%interp%N+1,c_size_t)*(this%interp%N+1)*(this%interp%N+1)* &
+               this%nElem*this%nVar*9*prec
+    call EnsureDeviceBuffer(this%jas_gpu,this%alloc_jas,workSize)
+
+  endsubroutine EnsureDeviceBuffers_MappedScalar3D
+
+  subroutine Resize_MappedScalar3D(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing host pools and device buffers where they fit
+    !! (AMR Stage 6b), and without uploading zeros the way Init does.
+    !!
+    !! The mortar buffers are sized by mesh%nMortars, not nElem, and nMortars changes with the
+    !! mesh independently of the element count, so they are invalidated here and lazily
+    !! re-created at the right size by the next mortar exchange. Leaving a stale buffer in place
+    !! would silently under-size that exchange.
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+    ! Local
+    integer :: n,iError
+
+    call Resize_MappedScalar3D_t(this,interp,nVar,nElem)
+    call EnsureDeviceBuffers_MappedScalar3D(this)
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
+
+    ! The aggregated halo-exchange state is sized by the mesh/partition, not by nElem
+    ! alone: the packed buffer bytes scale with the shared-side count, the persistent
+    ! requests bake in per-neighbor counts, displacements, and ranks, and
+    ! halo_static_done records that the static (non-stepped) variables' traces have
+    ! already been carried - none of which survives a regrid. Tear all of it down so
+    ! the next SideExchangeStart rebuilds against the new mesh; leaving it in place
+    ! made the first post-regrid pack kernel write a grown halo through the old,
+    ! smaller buffer (a GPU memory fault on the multi-rank adaptive path).
+    if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
+    if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
+    this%halo_sendbuf_gpu = c_null_ptr
+    this%halo_recvbuf_gpu = c_null_ptr
+    if(allocated(this%halo_reqs)) then
+      ! Resize runs between time steps with MPI up (unlike Free, which may run after
+      ! the last mesh finalized MPI), so the requests can be released unconditionally.
+      do n = 1,size(this%halo_reqs)
+        call MPI_REQUEST_FREE(this%halo_reqs(n),iError)
+      enddo
+      deallocate(this%halo_reqs)
+    endif
+    this%halo_nactive = 0
+    this%halo_inflight = 0
+    this%halo_static_done = .false.
+
+  endsubroutine Resize_MappedScalar3D
 
   subroutine Free_MappedScalar3D(this)
     implicit none
@@ -137,16 +199,9 @@ contains
     integer :: n,iError
     logical :: mpiIsFinalized
 
-    this%nVar = 0
-    this%nElem = 0
-    this%interp => null()
-    deallocate(this%interior)
-    deallocate(this%boundary)
-    deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-    deallocate(this%boundarynormal)
-    deallocate(this%meta)
-    deallocate(this%eqn)
+    ! Host storage is owned by the pools in the parent type (Stage 6b), so the parent Free
+    ! releases it rather than deallocating these pointers.
+    call Free_Scalar3D_t(this)
 
     call gpuCheck(hipFree(this%interior_gpu))
     call gpuCheck(hipFree(this%boundary_gpu))
@@ -154,6 +209,11 @@ contains
     call gpuCheck(hipFree(this%avgBoundary_gpu))
     call gpuCheck(hipFree(this%boundarynormal_gpu))
     call gpuCheck(hipFree(this%jas_gpu))
+
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
 
     if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
     if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
@@ -362,6 +422,143 @@ contains
     call this%SideExchangeFinish(mesh)
 
   endsubroutine SideExchange_MappedScalar3D
+
+  subroutine MPIMortarExchangeAsync_MappedScalar3D(this,mesh)
+    !! GPU-resident analogue of the base-class mortar message posting; messages are
+    !! posted on device memory (GPU-aware MPI), following MPIExchangeAsync.
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar
+    integer :: eB,sB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+    real(prec),pointer :: boundary(:,:,:,:,:)
+    real(prec),pointer :: mortarBuff(:,:,:,:,:)
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+    call c_f_pointer(this%boundary_gpu,boundary, &
+                     [this%interp%N+1,this%interp%N+1,6,this%nelem,this%nvar])
+    call c_f_pointer(this%mortarBuff_gpu,mortarBuff, &
+                     [this%interp%N+1,this%interp%N+1,8,mesh%nMortars,this%nvar])
+
+    do ivar = 1,this%nvar
+      do m = 1,mesh%nMortars
+
+        eB = mesh%mortarInfo(1,m)
+        sB = mesh%mortarInfo(2,m)
+        rB = mesh%decomp%elemToRank(eB)
+
+        do q = 1,4
+
+          eS = mesh%mortarInfo(2*q+1,m)
+          sS = mesh%mortarInfo(2*q+2,m)/10
+          rS = mesh%decomp%elemToRank(eS)
+          globalSideId = mesh%mortarInfo(10+q,m)
+          tag = globalSideId+mesh%nUniqueSides*(ivar-1)
+
+          if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(mortarBuff(:,:,4+q,m,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+            msgCount = msgCount+1
+            call MPI_ISEND(boundary(:,:,sB,eB-offset,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(mortarBuff(:,:,q,m,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+            msgCount = msgCount+1
+            call MPI_ISEND(boundary(:,:,sS,eS-offset,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          endif
+
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarExchangeAsync_MappedScalar3D
+
+  subroutine MortarExchange_MappedScalar3D(this,mesh)
+    !! GPU implementation of the mortar exchange (see the base class for the
+    !! algorithm) : traces are staged, reoriented, restricted, and projected in
+    !! device memory with the SELF_Mortar kernels.
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: offset
+    integer(c_size_t) :: buffSize
+
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    if(.not. c_associated(this%mortarBuff_gpu)) then
+      ! The MortarFlip_3D kernel stages one face through shared memory
+      ! (MORTAR3D_MAXNP in SELF_Mortar.cpp bounds the block size).
+      if(this%interp%N+1 > 16) then
+        print*,__FILE__,' : Error : 3D mortar kernels support N+1 <= 16.'
+        stop 1
+      endif
+      buffSize = int(this%interp%N+1,c_size_t)*(this%interp%N+1)*8* &
+                 mesh%nMortars*this%nvar*prec
+      call gpuCheck(hipMalloc(this%mortarBuff_gpu,buffSize))
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarExchangeAsync(mesh)
+    endif
+
+    ! Stage rank-local traces in the big face's coordinates
+    call MortarGather_3D_gpu(this%mortarBuff_gpu,this%boundary_gpu, &
+                             mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                             mesh%nMortars,this%nelem)
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      ! Reorient small-face traces received over MPI
+      call MortarFlip_3D_gpu(this%mortarBuff_gpu,mesh%mortarInfo_gpu, &
+                             mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
+                             this%interp%N,this%nvar,mesh%nMortars)
+    endif
+
+    ! Small faces get the restricted big-face trace; the big face gets the L2
+    ! projection of the small-face traces
+    call MortarScatter_3D_gpu(this%extBoundary_gpu,this%mortarBuff_gpu, &
+                              this%interp%mortarR_gpu,this%interp%mortarP_gpu, &
+                              mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                              mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                              mesh%nMortars,this%nelem)
+
+  endsubroutine MortarExchange_MappedScalar3D
 
   subroutine MappedGradient_MappedScalar3D(this,df)
   !! Calculates the gradient of a function using the strong form of the gradient

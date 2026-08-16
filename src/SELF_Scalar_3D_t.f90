@@ -32,6 +32,7 @@ module SELF_Scalar_3D_t
   use FEQParse
   use SELF_HDF5
   use SELF_Data
+  use SELF_DataPool
 
   use HDF5
   use iso_c_binding
@@ -46,9 +47,21 @@ module SELF_Scalar_3D_t
     real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: avgBoundary
     real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: boundarynormal
 
+    !! High-water-mark backing store for the arrays above (AMR Stage 6b; see SELF_DataPool).
+    !! The public members are pointers remapped onto the leading part of these pools at the
+    !! exact logical shape, so every extent, stride and shape() stays exactly as before while
+    !! Resize can reuse the storage across an adaptation epoch. Nothing should index the pools.
+    real(prec),pointer,contiguous :: pool_interior(:) => null()
+    real(prec),pointer,contiguous :: pool_boundary(:) => null()
+    real(prec),pointer,contiguous :: pool_extBoundary(:) => null()
+    real(prec),pointer,contiguous :: pool_avgBoundary(:) => null()
+    real(prec),pointer,contiguous :: pool_boundarynormal(:) => null()
+
   contains
 
     procedure,public :: Init => Init_Scalar3D_t
+    procedure,public :: Resize => Resize_Scalar3D_t
+    procedure,public :: MapArrays => MapArrays_Scalar3D_t
     procedure,public :: Free => Free_Scalar3D_t
 
     procedure,public :: UpdateHost => UpdateHost_Scalar3D_t
@@ -82,11 +95,7 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%boundarynormal(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:3*nvar))
+    call this%MapArrays(interp%N+1,nVar,nElem)
 
     this%interior = 0.0_prec
     this%boundary = 0.0_prec
@@ -99,6 +108,74 @@ contains
 
   endsubroutine Init_Scalar3D_t
 
+  subroutine MapArrays_Scalar3D_t(this,Np,nVar,nElem)
+    !! Size the backing pools for (Np,nVar,nElem) and remap the public arrays onto them at the
+    !! exact logical shape. Bounds-remapping a rank-1 contiguous target to a rank-5 pointer is
+    !! what keeps every extent and stride identical to a plain allocate while allowing the pool
+    !! underneath to be larger and reused. See SELF_DataPool.
+    implicit none
+    class(Scalar3D_t),intent(inout) :: this
+    integer,intent(in) :: Np
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call EnsurePool(this%pool_interior,Np*Np*Np*nElem*nVar)
+    call EnsurePool(this%pool_boundary,Np*Np*6*nElem*nVar)
+    call EnsurePool(this%pool_extBoundary,Np*Np*6*nElem*nVar)
+    call EnsurePool(this%pool_avgBoundary,Np*Np*6*nElem*nVar)
+    call EnsurePool(this%pool_boundarynormal,Np*Np*6*nElem*3*nVar)
+
+    this%interior(1:Np,1:Np,1:Np,1:nElem,1:nVar) => this%pool_interior(1:Np*Np*Np*nElem*nVar)
+    this%boundary(1:Np,1:Np,1:6,1:nElem,1:nVar) => this%pool_boundary(1:Np*Np*6*nElem*nVar)
+    this%extBoundary(1:Np,1:Np,1:6,1:nElem,1:nVar) => &
+      this%pool_extBoundary(1:Np*Np*6*nElem*nVar)
+    this%avgBoundary(1:Np,1:Np,1:6,1:nElem,1:nVar) => &
+      this%pool_avgBoundary(1:Np*Np*6*nElem*nVar)
+    this%boundarynormal(1:Np,1:Np,1:6,1:nElem,1:3*nVar) => &
+      this%pool_boundarynormal(1:Np*Np*6*nElem*3*nVar)
+
+  endsubroutine MapArrays_Scalar3D_t
+
+  subroutine Resize_Scalar3D_t(this,interp,nVar,nElem)
+    !! Rebind a live object to a new element count, reusing the existing storage when it fits
+    !! (AMR Stage 6b). Unlike Init - which is intent(out) and therefore resets the whole object,
+    !! reallocates, zeroes and, on GPU builds, uploads those zeros - this preserves metadata and
+    !! equation parsers (neither depends on nElem) and touches storage only when it must grow.
+    !!
+    !! All arrays are zeroed, exactly as Init leaves them. This is not optional: a pool that has
+    !! been reused (or freshly allocated at a larger capacity) holds indeterminate values, and
+    !! the boundary arrays are not all fully rewritten before they are read - leaving them alone
+    !! produced NaN entropy on the first step after an adaptation. The saving over Free + Init is
+    !! the allocation itself, the device upload of zeros, and the metadata and equation-parser
+    !! reconstruction; the zeroing is required for correctness and is kept.
+    implicit none
+    class(Scalar3D_t),intent(inout) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    if(nVar /= this%nVar) then
+      ! Metadata and equation parsers are sized by nVar; a change means this is not a regrid.
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : Resize cannot change nVar. Use Free followed by Init.'
+      stop 1
+    endif
+
+    this%interp => interp
+    this%nElem = nElem
+    this%N = interp%N
+    this%M = interp%M
+
+    call this%MapArrays(interp%N+1,nVar,nElem)
+
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
+
+  endsubroutine Resize_Scalar3D_t
+
   subroutine Free_Scalar3D_t(this)
     implicit none
     class(Scalar3D_t),intent(inout) :: this
@@ -106,11 +183,18 @@ contains
     this%nVar = 0
     this%nElem = 0
     this%interp => null()
-    deallocate(this%interior)
-    deallocate(this%boundary)
-    deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-    deallocate(this%boundarynormal)
+    ! The public arrays point into the pools rather than owning their storage, so they are
+    ! nullified and the pools are released (AMR Stage 6b).
+    this%interior => null()
+    this%boundary => null()
+    this%extBoundary => null()
+    this%avgBoundary => null()
+    this%boundarynormal => null()
+    if(associated(this%pool_interior)) deallocate(this%pool_interior)
+    if(associated(this%pool_boundary)) deallocate(this%pool_boundary)
+    if(associated(this%pool_extBoundary)) deallocate(this%pool_extBoundary)
+    if(associated(this%pool_avgBoundary)) deallocate(this%pool_avgBoundary)
+    if(associated(this%pool_boundarynormal)) deallocate(this%pool_boundarynormal)
     deallocate(this%meta)
     deallocate(this%eqn)
 

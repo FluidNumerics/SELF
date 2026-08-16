@@ -41,6 +41,7 @@ module SELF_DGModel3D
 
     procedure :: Init => Init_DGModel3D
     procedure :: Free => Free_DGModel3D
+    procedure :: Regrid => Regrid_DGModel3D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel3D
 
@@ -174,6 +175,12 @@ contains
     ! perform the side exchange to populate the
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh)
+
+    ! populate the solutionGradient % extBoundary attribute on
+    ! nonconforming (mortar) interfaces
+    if(this%mesh%nMortars > 0) then
+      call this%solutionGradient%MortarExchange(this%mesh)
+    endif
 
   endsubroutine CalculateSolutionGradient_DGModel3D
 
@@ -390,6 +397,70 @@ contains
 
   endsubroutine Free_DGModel3D
 
+  subroutine Regrid_DGModel3D(this,mesh,geometry)
+    !! GPU regrid: release the device copies of the old boundary-condition element/side
+    !! arrays, rebuild the model storage and BC maps on the new mesh (base Regrid), then
+    !! upload the new BC arrays to the device - the same device bookkeeping Init/Free do
+    !! around the base Init/Free.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    ! Free hyperbolic BC device arrays (old mesh)
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    ! Free parabolic BC device arrays (old mesh)
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    call Regrid_DGModel3D_t(this,mesh,geometry)
+
+    ! Upload hyperbolic BC element/side arrays to device (new mesh)
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+    ! Upload parabolic BC element/side arrays to device (new mesh)
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+  endsubroutine Regrid_DGModel3D
+
   subroutine CalculateTendency_DGModel3D(this)
     implicit none
     class(DGModel3D),intent(inout) :: this
@@ -412,8 +483,14 @@ contains
 
     if(this%gradient_enabled) then
       ! The BR gradient consumes extBoundary (through the side averages), so
-      ! the exchange must complete before the gradient is computed.
+      ! the exchange must complete before the gradient is computed. The mortar
+      ! exchange runs after SideExchangeFinish : it posts its own messages on
+      ! mesh%decomp%requests and fills extBoundary on nonconforming faces,
+      ! which the side averages also consume.
       call this%solution%SideExchangeFinish(this%mesh)
+      if(this%mesh%nMortars > 0) then
+        call this%solution%MortarExchange(this%mesh)
+      endif
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
@@ -425,11 +502,21 @@ contains
       ! first consumer of extBoundary and runs after the exchange completes.
       ! FluxMethod and BoundaryFlux write disjoint outputs (flux interior
       ! vs. boundarynormal), so this reordering does not change any
-      ! floating-point results.
+      ! floating-point results. The mortar exchange runs after
+      ! SideExchangeFinish for the same reason.
       call this%SourceMethod() ! User supplied
       call this%FluxMethod() ! User supplied
       call this%solution%SideExchangeFinish(this%mesh)
+      if(this%mesh%nMortars > 0) then
+        call this%solution%MortarExchange(this%mesh)
+      endif
       call this%BoundaryFlux() ! User supplied
+    endif
+
+    ! On mortar interfaces, replace the big face's surface-flux integrand with the
+    ! projection of the small faces' integrands so that the interface is conservative
+    if(this%mesh%nMortars > 0) then
+      call this%flux%MortarFluxCollect(this%mesh)
     endif
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)

@@ -44,13 +44,38 @@ module SELF_Geometry_3D
     type(Vector3D) :: nHat ! Normal Vectors pointing across coordinate lines
     type(Scalar3D) :: nScale ! Boundary scale
     type(Scalar3D) :: J ! Jacobian of the transformation
-    integer :: nElem
+    !! Default-initialized so a freshly allocated object can be distinguished from an
+    !! initialized one (the controller uses nElem == 0 to decide Init versus Resize).
+    integer :: nElem = 0
 
+    !! Cached scratch for GenerateFromMesh (AMR Stage 6c). Both were previously constructed and
+    !! destroyed on every call, which the adaptive loop makes once per epoch:
+    !!
+    !!   meshToModel - the nGeo -> N interpolant. It depends only on
+    !!     (mesh%nGeo, mesh%quadrature, interp%N, interp%controlNodeType), all of which are
+    !!     invariant across adaptation, yet building it costs a quadrature plus eight matrices
+    !!     and, on GPU builds, eight device allocations and uploads.
+    !!   xMesh - staging for the mesh node coordinates. Only its element count changes between
+    !!     epochs, so it is resized rather than rebuilt.
+    !!
+    !! meshToModel is a POINTER so that xMesh may hold a valid interp pointer into it: a
+    !! derived-type component cannot carry TARGET, and pointing at a component of an object that
+    !! is not itself a target is not conforming, whereas an allocated pointer is always a valid
+    !! target. Same reasoning as the storage pools in SELF_DataPool.
+    type(Lagrange),pointer :: meshToModel => null()
+    type(Vector3D) :: xMesh
+    logical :: scratchReady = .false.
+    integer :: scratchNGeo = -1
   contains
 
     procedure,public :: Init => Init_SEMHex
+    procedure,public :: Resize => Resize_SEMHex
     procedure,public :: Free => Free_SEMHex
     procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMHex
+    procedure,public :: GenerateFromNodeCoords => GenerateFromNodeCoords_SEMHex
+    procedure,public :: CopyElements => CopyElements_SEMHex
+    procedure,public :: UploadGeometry => UploadGeometry_SEMHex
+    procedure,private :: EnsureScratch => EnsureScratch_SEMHex
     procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
     procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
     procedure,public :: WriteTecplot => WriteTecplot_SEMHex
@@ -95,6 +120,98 @@ contains
 
   endsubroutine Init_SEMHex
 
+  subroutine Resize_SEMHex(myGeom,interp,nElem)
+    !! Rebind a live geometry to a new element count, reusing storage where it fits (AMR Stage
+    !! 6c). This replaces the Free + Init cycle the adaptive loop performed on a freshly allocated
+    !! SEMHex every epoch, which threw away exactly the amortization Stage 6b introduced: each
+    !! member Free released its pools and device buffers, and each Init reallocated, zeroed,
+    !! rebuilt metadata and equation parsers, and uploaded the zeros.
+    !!
+    !! Contents are undefined afterwards; GenerateFromMesh (or the incremental reuse path) fills
+    !! them. The cached nGeo -> N scratch is preserved, which is what makes caching it worthwhile.
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
+    type(Lagrange),pointer,intent(in) :: interp
+    integer,intent(in) :: nElem
+
+    myGeom%nElem = nElem
+
+    call myGeom%x%Resize(interp,1,nElem)
+    call myGeom%dxds%Resize(interp,1,nElem)
+    call myGeom%dsdx%Resize(interp,1,nElem)
+    call myGeom%nHat%Resize(interp,1,nElem)
+    call myGeom%nScale%Resize(interp,1,nElem)
+    call myGeom%J%Resize(interp,1,nElem)
+
+  endsubroutine Resize_SEMHex
+
+  subroutine CopyElements_SEMHex(myGeom,src,srcIdx,dstIdx,n)
+    !! Copy whole-element geometry blocks from src into myGeom: element srcIdx(k) of src becomes
+    !! element dstIdx(k) of myGeom, for k = 1..n (AMR Stage 6c).
+    !!
+    !! This is exact, not an interpolation, and it is what lets an adaptation epoch skip
+    !! regenerating the elements it did not change. Every geometry quantity for an element depends
+    !! only on that element's own mesh node coordinates - GenerateFromMesh, CalculateMetricTerms
+    !! and CalculateContravariantBasis contain no neighbour coupling, no side pairing and no
+    !! reduction, and the ±sign convention for normals is element-local - so moving an element's
+    !! block between two geometries preserves it exactly.
+    !!
+    !! Element is dimension 4 of every array, so each element's data is contiguous within a given
+    !! set of trailing indices; the whole-slice assignments below are the natural expression of
+    !! that and let the compiler emit block copies.
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
+    type(SEMHex),intent(in) :: src
+    integer,intent(in) :: srcIdx(:)
+    integer,intent(in) :: dstIdx(:)
+    integer,intent(in) :: n
+    ! Local
+    integer :: k,s,d
+
+    do k = 1,n
+      s = srcIdx(k)
+      d = dstIdx(k)
+
+      myGeom%x%interior(:,:,:,d,:,:) = src%x%interior(:,:,:,s,:,:)
+      myGeom%x%boundary(:,:,:,d,:,:) = src%x%boundary(:,:,:,s,:,:)
+
+      myGeom%dxds%interior(:,:,:,d,:,:,:) = src%dxds%interior(:,:,:,s,:,:,:)
+      myGeom%dxds%boundary(:,:,:,d,:,:,:) = src%dxds%boundary(:,:,:,s,:,:,:)
+
+      myGeom%dsdx%interior(:,:,:,d,:,:,:) = src%dsdx%interior(:,:,:,s,:,:,:)
+      myGeom%dsdx%boundary(:,:,:,d,:,:,:) = src%dsdx%boundary(:,:,:,s,:,:,:)
+
+      myGeom%nHat%interior(:,:,:,d,:,:) = src%nHat%interior(:,:,:,s,:,:)
+      myGeom%nHat%boundary(:,:,:,d,:,:) = src%nHat%boundary(:,:,:,s,:,:)
+
+      myGeom%nScale%interior(:,:,:,d,:) = src%nScale%interior(:,:,:,s,:)
+      myGeom%nScale%boundary(:,:,:,d,:) = src%nScale%boundary(:,:,:,s,:)
+
+      myGeom%J%interior(:,:,:,d,:) = src%J%interior(:,:,:,s,:)
+      myGeom%J%boundary(:,:,:,d,:) = src%J%boundary(:,:,:,s,:)
+    enddo
+
+  endsubroutine CopyElements_SEMHex
+
+  subroutine UploadGeometry_SEMHex(myGeom)
+    !! Push the geometry the solver kernels read to the device. Mirrors the uploads that
+    !! GenerateFromMesh's own path performs, for use when geometry was assembled by element copy
+    !! rather than generated (AMR Stage 6c).
+    !!
+    !! dxds is included, unlike the 2-D UploadGeometry: the 3-D CalculateMetricTerms uploads it
+    !! after its boundary interpolation, so an assembled geometry mirrors that exactly.
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
+
+    call myGeom%x%UpdateDevice()
+    call myGeom%dxds%UpdateDevice()
+    call myGeom%dsdx%UpdateDevice()
+    call myGeom%nHat%UpdateDevice()
+    call myGeom%nScale%UpdateDevice()
+    call myGeom%J%UpdateDevice()
+
+  endsubroutine UploadGeometry_SEMHex
+
   subroutine Free_SEMHex(myGeom)
     implicit none
     class(SEMHex),intent(inout) :: myGeom
@@ -106,46 +223,105 @@ contains
     call myGeom%nScale%Free()
     call myGeom%J%Free()
 
+    ! Cached GenerateFromMesh scratch (Stage 6c).
+    if(myGeom%scratchReady) then
+      call myGeom%xMesh%Free()
+      call myGeom%meshToModel%Free()
+      deallocate(myGeom%meshToModel)
+      myGeom%meshToModel => null()
+      myGeom%scratchReady = .false.
+      myGeom%scratchNGeo = -1
+    endif
+
   endsubroutine Free_SEMHex
 
   subroutine GenerateFromMesh_SEMHex(myGeom,mesh)
     implicit none
     class(SEMHex),intent(inout) :: myGeom
     type(Mesh3D),intent(in) :: mesh
+
+    call myGeom%GenerateFromNodeCoords(mesh%nodeCoords,mesh%nGeo,mesh%quadrature,mesh%nElem)
+    call myGeom%x%UpdateDevice()
+    call myGeom%x%BoundaryInterp() ! Boundary interp will run on GPU if enabled, hence why we close in update host/device
+    call myGeom%x%UpdateHost()
+    call myGeom%CalculateMetricTerms()
+
+  endsubroutine GenerateFromMesh_SEMHex
+
+  subroutine GenerateFromNodeCoords_SEMHex(myGeom,nodeCoords,nGeo,quadrature,nElem)
+    !! Generate geometry for nElem elements directly from their mesh node coordinates (AMR Stage
+    !! 6c). GenerateFromMesh is a thin wrapper over this.
+    !!
+    !! Taking the coordinates rather than a Mesh3D is what allows the adaptive loop to generate a
+    !! COMPACTED set of elements - just the ones an epoch actually changed - without teaching the
+    !! shared data classes about element subsets. The generation loops still run over every element
+    !! they are given; the saving comes from being given fewer.
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
+    real(prec),intent(in) :: nodeCoords(1:3,1:nGeo+1,1:nGeo+1,1:nGeo+1,1:nElem)
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: quadrature
+    integer,intent(in) :: nElem
     ! Local
-    integer :: iel
-    integer :: i,j,k
-    type(Lagrange),target :: meshToModel
-    type(Vector3D) :: xMesh
+    integer :: iel,i,j,k
 
-    call meshToModel%Init(mesh%nGeo,mesh%quadrature, &
-                          myGeom%x%interp%N, &
-                          myGeom%x%interp%controlNodeType)
+    if(nElem <= 0) return
 
-    call xMesh%Init(meshToModel, &
-                    1,mesh%nElem)
+    call myGeom%EnsureScratch(nGeo,quadrature,nElem)
 
     ! Set the element internal mesh locations
-    do iel = 1,mesh%nElem
-      do k = 1,mesh%nGeo+1
-        do j = 1,mesh%nGeo+1
-          do i = 1,mesh%nGeo+1
-            xMesh%interior(i,j,k,iel,1,1:3) = mesh%nodeCoords(1:3,i,j,k,iel)
+    do iel = 1,nElem
+      do k = 1,nGeo+1
+        do j = 1,nGeo+1
+          do i = 1,nGeo+1
+            myGeom%xMesh%interior(i,j,k,iel,1,1:3) = nodeCoords(1:3,i,j,k,iel)
           enddo
         enddo
       enddo
     enddo
 
-    call xMesh%GridInterp(myGeom%x%interior)
-    call myGeom%x%UpdateDevice()
-    call myGeom%x%BoundaryInterp()
-    call myGeom%x%UpdateHost()
-    call myGeom%CalculateMetricTerms()
+    call myGeom%xMesh%GridInterp(myGeom%x%interior)
 
-    call xMesh%Free()
-    call meshToModel%Free()
+  endsubroutine GenerateFromNodeCoords_SEMHex
 
-  endsubroutine GenerateFromMesh_SEMHex
+  subroutine EnsureScratch_SEMHex(myGeom,nGeo,quadrature,nElem)
+    !! Prepare the cached GenerateFromMesh scratch for a mesh with nGeo/quadrature and nElem
+    !! elements (AMR Stage 6c). The nGeo -> N interpolant is built once and reused; the node
+    !! coordinate staging is resized, so an adapting run stops rebuilding either one per epoch.
+    !!
+    !! The interpolant is rebuilt only if nGeo or the quadrature actually changes, which does not
+    !! happen across adaptation but is handled so that reusing one SEMHex against a different
+    !! mesh family stays correct.
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: quadrature
+    integer,intent(in) :: nElem
+
+    if(myGeom%scratchReady) then
+      if(myGeom%scratchNGeo /= nGeo .or. myGeom%meshToModel%controlNodeType /= quadrature) then
+        call myGeom%xMesh%Free()
+        call myGeom%meshToModel%Free()
+        deallocate(myGeom%meshToModel)
+        myGeom%meshToModel => null()
+        myGeom%scratchReady = .false.
+      endif
+    endif
+
+    if(.not. myGeom%scratchReady) then
+      allocate(myGeom%meshToModel)
+      call myGeom%meshToModel%Init(nGeo, &
+                                   quadrature, &
+                                   myGeom%x%interp%N, &
+                                   myGeom%x%interp%controlNodeType)
+      call myGeom%xMesh%Init(myGeom%meshToModel,1,nElem)
+      myGeom%scratchReady = .true.
+      myGeom%scratchNGeo = nGeo
+    elseif(myGeom%xMesh%nElem /= nElem) then
+      call myGeom%xMesh%Resize(myGeom%meshToModel,1,nElem)
+    endif
+
+  endsubroutine EnsureScratch_SEMHex
 
   subroutine CalculateContravariantBasis_SEMHex(myGeom)
     implicit none

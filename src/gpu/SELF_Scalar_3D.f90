@@ -41,10 +41,17 @@ module SELF_Scalar_3D
     type(c_ptr) :: boundarynormal_gpu
     type(c_ptr) :: extBoundary_gpu
     type(c_ptr) :: avgBoundary_gpu
+    !! Bytes currently allocated for each device buffer, so Resize can reuse them (Stage 6b).
+    integer(c_size_t) :: alloc_interior = 0
+    integer(c_size_t) :: alloc_boundary = 0
+    integer(c_size_t) :: alloc_extBoundary = 0
+    integer(c_size_t) :: alloc_avgBoundary = 0
+    integer(c_size_t) :: alloc_boundarynormal = 0
 
   contains
 
     procedure,public :: Init => Init_Scalar3D
+    procedure,public :: Resize => Resize_Scalar3D
     procedure,public :: Free => Free_Scalar3D
 
     procedure,public :: UpdateHost => UpdateHost_Scalar3D
@@ -74,11 +81,10 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%boundarynormal(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:3*nvar))
+    call this%MapArrays(interp%N+1,nVar,nElem)
+
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:nVar))
 
     this%interior = 0.0_prec
     this%boundary = 0.0_prec
@@ -86,39 +92,68 @@ contains
     this%avgBoundary = 0.0_prec
     this%boundarynormal = 0.0_prec
 
-    allocate(this%meta(1:nVar))
-    allocate(this%eqn(1:nVar))
-
-    call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
-    call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
-    call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
-    call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
-    call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
+    call EnsureDeviceBuffers_Scalar3D(this)
 
     call this%UpdateDevice()
 
   endsubroutine Init_Scalar3D
 
+  subroutine EnsureDeviceBuffers_Scalar3D(this)
+    !! Grow each device buffer to hold the current logical array, reusing the existing allocation
+    !! when the bytes already fit (AMR Stage 6b). A device pointer carries no shape, so unlike the
+    !! host side no remapping is needed - only a byte-capacity check.
+    implicit none
+    class(Scalar3D),intent(inout) :: this
+
+    call EnsureDeviceBuffer(this%interior_gpu,this%alloc_interior,sizeof(this%interior))
+    call EnsureDeviceBuffer(this%boundary_gpu,this%alloc_boundary,sizeof(this%boundary))
+    call EnsureDeviceBuffer(this%extBoundary_gpu,this%alloc_extBoundary, &
+                            sizeof(this%extBoundary))
+    call EnsureDeviceBuffer(this%avgBoundary_gpu,this%alloc_avgBoundary, &
+                            sizeof(this%avgBoundary))
+    call EnsureDeviceBuffer(this%boundarynormal_gpu,this%alloc_boundarynormal, &
+                            sizeof(this%boundarynormal))
+
+  endsubroutine EnsureDeviceBuffers_Scalar3D
+
+  subroutine Resize_Scalar3D(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing host pools and device buffers where they fit.
+    !! Deliberately does NOT call UpdateDevice: Init uploads freshly zeroed arrays, which in the
+    !! adaptive loop is pure waste because the solution transfer overwrites them immediately.
+    implicit none
+    class(Scalar3D),intent(inout) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_Scalar3D_t(this,interp,nVar,nElem)
+    call EnsureDeviceBuffers_Scalar3D(this)
+
+  endsubroutine Resize_Scalar3D
+
   subroutine Free_Scalar3D(this)
     implicit none
     class(Scalar3D),intent(inout) :: this
 
-    this%nVar = 0
-    this%nElem = 0
-    this%interp => null()
-    deallocate(this%interior)
-    deallocate(this%boundary)
-    deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-    deallocate(this%boundarynormal)
-    deallocate(this%meta)
-    deallocate(this%eqn)
+    ! Host storage is owned by the pools in the parent type, not by these pointers (Stage 6b),
+    ! so the parent Free is what releases it.
+    call Free_Scalar3D_t(this)
 
     call gpuCheck(hipFree(this%interior_gpu))
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
     call gpuCheck(hipFree(this%boundarynormal_gpu))
+    this%interior_gpu = c_null_ptr
+    this%boundary_gpu = c_null_ptr
+    this%extBoundary_gpu = c_null_ptr
+    this%avgBoundary_gpu = c_null_ptr
+    this%boundarynormal_gpu = c_null_ptr
+    this%alloc_interior = 0
+    this%alloc_boundary = 0
+    this%alloc_extBoundary = 0
+    this%alloc_avgBoundary = 0
+    this%alloc_boundarynormal = 0
 
   endsubroutine Free_Scalar3D
 

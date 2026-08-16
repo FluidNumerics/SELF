@@ -37,6 +37,13 @@ module SELF_MappedVector_3D_t
   implicit none
 
   type,extends(Vector3D),public :: MappedVector3D_t
+
+    ! Mortar exchange work array, allocated on first use for meshes with 2:1
+    ! nonconforming interfaces; same slot layout as MappedScalar3D_t%mortarBuff with a
+    ! trailing direction index. MortarFluxCollect stages the boundaryNormal integrand
+    ! in direction slot 1.
+    real(prec),allocatable,dimension(:,:,:,:,:,:) :: mortarBuff
+
     logical :: geometry_associated = .false.
     type(SEMHex),pointer :: geometry => null()
   contains
@@ -45,6 +52,10 @@ module SELF_MappedVector_3D_t
     procedure,public :: DissociateGeometry => DissociateGeometry_MappedVector3D_t
 
     procedure,public :: SideExchange => SideExchange_MappedVector3D_t
+    procedure,public :: MortarExchange => MortarExchange_MappedVector3D_t
+    procedure,private :: MPIMortarExchangeAsync => MPIMortarExchangeAsync_MappedVector3D_t
+    procedure,public :: MortarFluxCollect => MortarFluxCollect_MappedVector3D_t
+    procedure,private :: MPIMortarFluxAsync => MPIMortarFluxAsync_MappedVector3D_t
 
     generic,public :: MappedDivergence => MappedDivergence_MappedVector3D_t
     procedure,private :: MappedDivergence_MappedVector3D_t
@@ -55,6 +66,8 @@ module SELF_MappedVector_3D_t
     procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector3D_t
     procedure,private :: ApplyFlip => ApplyFlip_MappedVector3D_t
 
+    procedure,public :: Resize => Resize_MappedVector3D_t
+
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector3D_t
 
     !procedure,public :: WriteTecplot => WriteTecplot_MappedVector3D_t
@@ -62,6 +75,28 @@ module SELF_MappedVector_3D_t
   endtype MappedVector3D_t
 
 contains
+
+  subroutine Resize_MappedVector3D_t(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing storage where it fits (AMR Stage 6b). See
+    !! Resize_MappedScalar3D_t for why the mortar staging buffer is invalidated rather than resized.
+    implicit none
+    class(MappedVector3D_t),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_Vector3D_t(this,interp,nVar,nElem)
+    if(allocated(this%mortarBuff)) deallocate(this%mortarBuff)
+
+    ! The geometry binding refers to the PREVIOUS mesh's geometry, which the caller is
+    ! about to destroy. It must be dropped here so the AssociateGeometry that follows a
+    ! regrid actually rebinds: AssociateGeometry is a no-op when a geometry is already
+    ! associated, so leaving the stale one in place silently kept every mapped operation
+    ! reading freed metric terms - observed as NaN entropy on the first step after an
+    ! adaptation. Free + Init used to hide this by nulling the pointer.
+    call this%DissociateGeometry()
+
+  endsubroutine Resize_MappedVector3D_t
 
   subroutine AssociateGeometry_MappedVector3D_t(this,geometry)
     implicit none
@@ -433,6 +468,469 @@ contains
     endif
 
   endsubroutine SideExchange_MappedVector3D_t
+
+  subroutine MPIMortarExchangeAsync_MappedVector3D_t(this,mesh)
+    !! Posts the point-to-point messages required for mortar interfaces whose big and
+    !! small elements reside on different ranks; vector analogue of the scalar
+    !! MPIMortarExchangeAsync with one message per direction component.
+    implicit none
+    class(MappedVector3D_t),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar,idir
+    integer :: eB,sB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    do idir = 1,3
+      do ivar = 1,this%nvar
+        do m = 1,mesh%nMortars
+
+          eB = mesh%mortarInfo(1,m)
+          sB = mesh%mortarInfo(2,m)
+          rB = mesh%decomp%elemToRank(eB)
+
+          do q = 1,4
+
+            eS = mesh%mortarInfo(2*q+1,m)
+            sS = mesh%mortarInfo(2*q+2,m)/10
+            rS = mesh%decomp%elemToRank(eS)
+            globalSideId = mesh%mortarInfo(10+q,m)
+            tag = globalSideId+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
+
+            if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(this%mortarBuff(:,:,4+q,m,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(this%boundary(:,:,sB,eB-offset,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(this%mortarBuff(:,:,q,m,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(this%boundary(:,:,sS,eS-offset,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarExchangeAsync_MappedVector3D_t
+
+  subroutine MortarExchange_MappedVector3D_t(this,mesh)
+    !! Fills the extBoundary attribute on all faces participating in a 2:1
+    !! nonconforming (mortar) interface; vector analogue of the scalar MortarExchange
+    !! (see MappedScalar3D_t for the algorithm description).
+    implicit none
+    class(MappedVector3D_t),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar,idir,i,j,i2,j2
+    integer :: eB,eS,sS,flip
+    integer :: rankId,offset,N
+    integer,pointer :: elemtorank(:)
+    real(prec) :: extBuff(1:this%interp%N+1,1:this%interp%N+1)
+
+    ! See https://github.com/FluidNumerics/SELF/issues/54 for the reason behind
+    ! this pointer alias
+    elemtorank => mesh%decomp%elemToRank(:)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
+    N = this%interp%N
+
+    if(.not. allocated(this%mortarBuff)) then
+      allocate(this%mortarBuff(1:N+1,1:N+1,1:8,1:mesh%nMortars,1:this%nvar,1:3))
+      this%mortarBuff = 0.0_prec
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarExchangeAsync(mesh)
+    endif
+
+    ! Stage rank-local traces in the big face's coordinates
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar,idir=1:3)
+      block
+        integer :: i,j,i2,j2,q
+        integer :: eB,sB,eS,sS,flip
+
+        eB = mesh%mortarInfo(1,m)
+        if(elemtorank(eB) == rankId) then
+          sB = mesh%mortarInfo(2,m)
+          do q = 1,4
+            do j = 1,N+1
+              do i = 1,N+1
+                this%mortarBuff(i,j,q,m,ivar,idir) = &
+                  this%boundary(i,j,sB,eB-offset,ivar,idir)
+              enddo
+            enddo
+          enddo
+        endif
+
+        do q = 1,4
+          eS = mesh%mortarInfo(2*q+1,m)
+          if(elemtorank(eS) == rankId) then
+            sS = mesh%mortarInfo(2*q+2,m)/10
+            flip = mesh%mortarInfo(2*q+2,m)-10*sS
+            do j = 1,N+1
+              do i = 1,N+1
+                call MortarFaceMap(i,j,N,flip,i2,j2)
+                this%mortarBuff(i,j,4+q,m,ivar,idir) = &
+                  this%boundary(i2,j2,sS,eS-offset,ivar,idir)
+              enddo
+            enddo
+          endif
+        enddo
+      endblock
+    enddo
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+
+      ! Reorient small-face traces received over MPI into the big face's coordinates
+      do idir = 1,3
+        do ivar = 1,this%nvar
+          do m = 1,mesh%nMortars
+            eB = mesh%mortarInfo(1,m)
+            if(elemtorank(eB) == rankId) then
+              do q = 1,4
+                eS = mesh%mortarInfo(2*q+1,m)
+                sS = mesh%mortarInfo(2*q+2,m)/10
+                flip = mesh%mortarInfo(2*q+2,m)-10*sS
+                if(elemtorank(eS) /= rankId .and. flip /= 0) then
+                  do j = 1,N+1
+                    do i = 1,N+1
+                      call MortarFaceMap(i,j,N,flip,i2,j2)
+                      extBuff(i,j) = this%mortarBuff(i2,j2,4+q,m,ivar,idir)
+                    enddo
+                  enddo
+                  do j = 1,N+1
+                    do i = 1,N+1
+                      this%mortarBuff(i,j,4+q,m,ivar,idir) = extBuff(i,j)
+                    enddo
+                  enddo
+                endif
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+    endif
+
+    ! Compute external states :
+    !  small faces get the restricted big-face trace (exact),
+    !  the big face gets the L2 projection of the small-face traces
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar,idir=1:3)
+      block
+        integer :: i,j,ii,jj,i2,j2,kx,ky,q
+        integer :: eB,sB,eS,sS,flip
+        real(prec) :: fm
+        real(prec) :: tmp(1:N+1,1:N+1)
+        real(prec) :: acc(1:N+1,1:N+1)
+
+        do q = 1,4
+          eS = mesh%mortarInfo(2*q+1,m)
+          if(elemtorank(eS) == rankId) then
+            sS = mesh%mortarInfo(2*q+2,m)/10
+            flip = mesh%mortarInfo(2*q+2,m)-10*sS
+            kx = mortarQuadKx(q)
+            ky = mortarQuadKy(q)
+            do jj = 1,N+1
+              do i = 1,N+1
+                fm = 0.0_prec
+                do ii = 1,N+1
+                  fm = fm+this%interp%mortarR(ii,i,kx)* &
+                       this%mortarBuff(ii,jj,q,m,ivar,idir)
+                enddo
+                tmp(i,jj) = fm
+              enddo
+            enddo
+            do j = 1,N+1
+              do i = 1,N+1
+                fm = 0.0_prec
+                do jj = 1,N+1
+                  fm = fm+this%interp%mortarR(jj,j,ky)*tmp(i,jj)
+                enddo
+                call MortarFaceMap(i,j,N,flip,i2,j2)
+                this%extBoundary(i2,j2,sS,eS-offset,ivar,idir) = fm
+              enddo
+            enddo
+          endif
+        enddo
+
+        eB = mesh%mortarInfo(1,m)
+        if(elemtorank(eB) == rankId) then
+          sB = mesh%mortarInfo(2,m)
+          acc = 0.0_prec
+          do q = 1,4
+            kx = mortarQuadKx(q)
+            ky = mortarQuadKy(q)
+            do jj = 1,N+1
+              do i = 1,N+1
+                fm = 0.0_prec
+                do ii = 1,N+1
+                  fm = fm+this%interp%mortarP(ii,i,kx)* &
+                       this%mortarBuff(ii,jj,4+q,m,ivar,idir)
+                enddo
+                tmp(i,jj) = fm
+              enddo
+            enddo
+            do j = 1,N+1
+              do i = 1,N+1
+                fm = 0.0_prec
+                do jj = 1,N+1
+                  fm = fm+this%interp%mortarP(jj,j,ky)*tmp(i,jj)
+                enddo
+                acc(i,j) = acc(i,j)+fm
+              enddo
+            enddo
+          enddo
+          do j = 1,N+1
+            do i = 1,N+1
+              this%extBoundary(i,j,sB,eB-offset,ivar,idir) = acc(i,j)
+            enddo
+          enddo
+        endif
+      endblock
+    enddo
+
+  endsubroutine MortarExchange_MappedVector3D_t
+
+  subroutine MPIMortarFluxAsync_MappedVector3D_t(this,mesh)
+    !! Posts the one-directional messages for MortarFluxCollect : each remote small
+    !! face sends its boundaryNormal trace to the big face's rank.
+    implicit none
+    class(MappedVector3D_t),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar
+    integer :: eB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    do ivar = 1,this%nvar
+      do m = 1,mesh%nMortars
+
+        eB = mesh%mortarInfo(1,m)
+        rB = mesh%decomp%elemToRank(eB)
+
+        do q = 1,4
+
+          eS = mesh%mortarInfo(2*q+1,m)
+          sS = mesh%mortarInfo(2*q+2,m)/10
+          rS = mesh%decomp%elemToRank(eS)
+          globalSideId = mesh%mortarInfo(10+q,m)
+          tag = globalSideId+mesh%nUniqueSides*(ivar-1)
+
+          if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(this%mortarBuff(:,:,4+q,m,ivar,1), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_ISEND(this%boundaryNormal(:,:,sS,eS-offset,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          endif
+
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarFluxAsync_MappedVector3D_t
+
+  subroutine MortarFluxCollect_MappedVector3D_t(this,mesh)
+    !! Replaces the big-face boundaryNormal trace on each mortar interface with the L2
+    !! projection of the four small faces' boundaryNormal traces.
+    !!
+    !! boundaryNormal holds the Riemann-solved surface-flux integrand f* . nHat * nScale
+    !! (see BoundaryFlux in the DG models). Because the small faces' nScale is one
+    !! quarter of the big face's and the sub-face coordinate Jacobian is 1/4, the
+    !! projected big-face integrand is -4 * sum_q (P_kx x P_ky) g_q, where g_q are the
+    !! small-face integrands and the sign accounts for the opposing outward normals.
+    !! With this choice, the discrete surface integral of the big face equals minus the
+    !! sum of the small faces' discrete surface integrals to roundoff, so the mortar
+    !! interface is discretely conservative. Must be called after the model's
+    !! BoundaryFlux and before the flux divergence is computed.
+    implicit none
+    class(MappedVector3D_t),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar,i,j,i2,j2
+    integer :: eB,eS,sS,flip
+    integer :: rankId,offset,N
+    integer,pointer :: elemtorank(:)
+    real(prec) :: extBuff(1:this%interp%N+1,1:this%interp%N+1)
+
+    ! See https://github.com/FluidNumerics/SELF/issues/54 for the reason behind
+    ! this pointer alias
+    elemtorank => mesh%decomp%elemToRank(:)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
+    N = this%interp%N
+
+    if(.not. allocated(this%mortarBuff)) then
+      allocate(this%mortarBuff(1:N+1,1:N+1,1:8,1:mesh%nMortars,1:this%nvar,1:3))
+      this%mortarBuff = 0.0_prec
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarFluxAsync(mesh)
+    endif
+
+    ! Stage rank-local small-face integrands in the big face's coordinates
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar)
+      block
+        integer :: i,j,i2,j2,q
+        integer :: eS,sS,flip
+
+        do q = 1,4
+          eS = mesh%mortarInfo(2*q+1,m)
+          if(elemtorank(eS) == rankId) then
+            sS = mesh%mortarInfo(2*q+2,m)/10
+            flip = mesh%mortarInfo(2*q+2,m)-10*sS
+            do j = 1,N+1
+              do i = 1,N+1
+                call MortarFaceMap(i,j,N,flip,i2,j2)
+                this%mortarBuff(i,j,4+q,m,ivar,1) = &
+                  this%boundaryNormal(i2,j2,sS,eS-offset,ivar)
+              enddo
+            enddo
+          endif
+        enddo
+      endblock
+    enddo
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+
+      ! Reorient small-face integrands received over MPI into the big face's coordinates
+      do ivar = 1,this%nvar
+        do m = 1,mesh%nMortars
+          eB = mesh%mortarInfo(1,m)
+          if(elemtorank(eB) == rankId) then
+            do q = 1,4
+              eS = mesh%mortarInfo(2*q+1,m)
+              sS = mesh%mortarInfo(2*q+2,m)/10
+              flip = mesh%mortarInfo(2*q+2,m)-10*sS
+              if(elemtorank(eS) /= rankId .and. flip /= 0) then
+                do j = 1,N+1
+                  do i = 1,N+1
+                    call MortarFaceMap(i,j,N,flip,i2,j2)
+                    extBuff(i,j) = this%mortarBuff(i2,j2,4+q,m,ivar,1)
+                  enddo
+                enddo
+                do j = 1,N+1
+                  do i = 1,N+1
+                    this%mortarBuff(i,j,4+q,m,ivar,1) = extBuff(i,j)
+                  enddo
+                enddo
+              endif
+            enddo
+          endif
+        enddo
+      enddo
+    endif
+
+    ! Project the small-face integrands onto the big face's trace space. The factor of
+    ! four converts the solution-space projection (the tensor-product mortarP carries
+    ! the 1/4 sub-face Jacobian) into the integrand-space projection; the sign accounts
+    ! for the opposing outward normals.
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar)
+      block
+        integer :: i,j,ii,jj,kx,ky,q
+        integer :: eB,sB
+        real(prec) :: fm
+        real(prec) :: tmp(1:N+1,1:N+1)
+        real(prec) :: acc(1:N+1,1:N+1)
+
+        eB = mesh%mortarInfo(1,m)
+        if(elemtorank(eB) == rankId) then
+          sB = mesh%mortarInfo(2,m)
+          acc = 0.0_prec
+          do q = 1,4
+            kx = mortarQuadKx(q)
+            ky = mortarQuadKy(q)
+            do jj = 1,N+1
+              do i = 1,N+1
+                fm = 0.0_prec
+                do ii = 1,N+1
+                  fm = fm+this%interp%mortarP(ii,i,kx)* &
+                       this%mortarBuff(ii,jj,4+q,m,ivar,1)
+                enddo
+                tmp(i,jj) = fm
+              enddo
+            enddo
+            do j = 1,N+1
+              do i = 1,N+1
+                fm = 0.0_prec
+                do jj = 1,N+1
+                  fm = fm+this%interp%mortarP(jj,j,ky)*tmp(i,jj)
+                enddo
+                acc(i,j) = acc(i,j)+fm
+              enddo
+            enddo
+          enddo
+          do j = 1,N+1
+            do i = 1,N+1
+              this%boundaryNormal(i,j,sB,eB-offset,ivar) = -4.0_prec*acc(i,j)
+            enddo
+          enddo
+        endif
+      endblock
+    enddo
+
+  endsubroutine MortarFluxCollect_MappedVector3D_t
 
   subroutine MappedDivergence_MappedVector3D_t(this,df)
     ! Strong Form Operator

@@ -41,12 +41,18 @@ module SELF_MappedVector_3D
     ! components are exchanged) and allocated lazily on the first exchange.
     type(c_ptr) :: halo_sendbuf_gpu = c_null_ptr ! packed device send buffer
     type(c_ptr) :: halo_recvbuf_gpu = c_null_ptr ! packed device receive buffer
+    type(c_ptr) :: mortarBuff_gpu = c_null_ptr ! mortar trace staging (lazy allocation)
 
   contains
 
+    procedure,public :: Resize => Resize_MappedVector3D
     procedure,public :: Free => Free_MappedVector3D
     procedure,public :: SideExchange => SideExchange_MappedVector3D
     procedure,public :: MPIExchangeAsync => MPIExchangeAsync_MappedVector3D
+    procedure,public :: MortarExchange => MortarExchange_MappedVector3D
+    procedure,private :: MPIMortarExchangeAsync => MPIMortarExchangeAsync_MappedVector3D
+    procedure,public :: MortarFluxCollect => MortarFluxCollect_MappedVector3D
+    procedure,private :: MPIMortarFluxAsync => MPIMortarFluxAsync_MappedVector3D
 
     generic,public :: MappedDivergence => MappedDivergence_MappedVector3D
     procedure,private :: MappedDivergence_MappedVector3D
@@ -60,6 +66,36 @@ module SELF_MappedVector_3D
 
 contains
 
+  subroutine Resize_MappedVector3D(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing host pools and device buffers where they fit (AMR
+    !! Stage 6b). Inherits the Vector3D resize (host pools plus the five device buffers) and adds
+    !! this class's mortar buffers, which are sized by mesh%nMortars rather than nElem: nMortars
+    !! changes with the mesh independently of the element count, so a stale buffer would silently
+    !! under-size the next mortar exchange. They are invalidated here and lazily re-created at
+    !! the correct size on next use.
+    implicit none
+    class(MappedVector3D),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_MappedVector3D_t(this,interp,nVar,nElem)
+    call EnsureDeviceBuffers_Vector3D(this)
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
+
+    ! The packed halo-exchange buffers are sized by the mesh/partition's shared-side
+    ! count, which changes with a regrid; free them so the next exchange rebuilds
+    ! against the new mesh (see Resize_MappedScalar3D for the failure this prevents).
+    if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
+    if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
+    this%halo_sendbuf_gpu = c_null_ptr
+    this%halo_recvbuf_gpu = c_null_ptr
+
+  endsubroutine Resize_MappedVector3D
+
   subroutine Free_MappedVector3D(this)
     implicit none
     class(MappedVector3D),intent(inout) :: this
@@ -70,6 +106,11 @@ contains
     if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
     this%halo_sendbuf_gpu = c_null_ptr
     this%halo_recvbuf_gpu = c_null_ptr
+
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
 
   endsubroutine Free_MappedVector3D
 
@@ -212,6 +253,258 @@ contains
     endif
 
   endsubroutine SideExchange_MappedVector3D
+
+  subroutine MPIMortarExchangeAsync_MappedVector3D(this,mesh)
+    !! GPU-resident analogue of the base-class vector mortar message posting;
+    !! messages are posted on device memory (GPU-aware MPI).
+    implicit none
+    class(MappedVector3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar,idir
+    integer :: eB,sB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+    real(prec),pointer :: boundary(:,:,:,:,:,:)
+    real(prec),pointer :: mortarBuff(:,:,:,:,:,:)
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+    call c_f_pointer(this%boundary_gpu,boundary, &
+                     [this%interp%N+1,this%interp%N+1,6,this%nelem,this%nvar,3])
+    call c_f_pointer(this%mortarBuff_gpu,mortarBuff, &
+                     [this%interp%N+1,this%interp%N+1,8,mesh%nMortars,this%nvar,3])
+
+    do idir = 1,3
+      do ivar = 1,this%nvar
+        do m = 1,mesh%nMortars
+
+          eB = mesh%mortarInfo(1,m)
+          sB = mesh%mortarInfo(2,m)
+          rB = mesh%decomp%elemToRank(eB)
+
+          do q = 1,4
+
+            eS = mesh%mortarInfo(2*q+1,m)
+            sS = mesh%mortarInfo(2*q+2,m)/10
+            rS = mesh%decomp%elemToRank(eS)
+            globalSideId = mesh%mortarInfo(10+q,m)
+            tag = globalSideId+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
+
+            if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(mortarBuff(:,:,4+q,m,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(boundary(:,:,sB,eB-offset,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(mortarBuff(:,:,q,m,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(boundary(:,:,sS,eS-offset,ivar,idir), &
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarExchangeAsync_MappedVector3D
+
+  subroutine MortarExchange_MappedVector3D(this,mesh)
+    !! GPU implementation of the vector mortar exchange; the kernels treat the
+    !! (variable, direction) pairs as 3*nvar independent trace lines.
+    implicit none
+    class(MappedVector3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: offset
+    integer(c_size_t) :: buffSize
+
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    if(.not. c_associated(this%mortarBuff_gpu)) then
+      ! The MortarFlip_3D kernel stages one face through shared memory
+      ! (MORTAR3D_MAXNP in SELF_Mortar.cpp bounds the block size).
+      if(this%interp%N+1 > 16) then
+        print*,__FILE__,' : Error : 3D mortar kernels support N+1 <= 16.'
+        stop 1
+      endif
+      buffSize = int(this%interp%N+1,c_size_t)*(this%interp%N+1)*8* &
+                 mesh%nMortars*this%nvar*3*prec
+      call gpuCheck(hipMalloc(this%mortarBuff_gpu,buffSize))
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarExchangeAsync(mesh)
+    endif
+
+    call MortarGather_3D_gpu(this%mortarBuff_gpu,this%boundary_gpu, &
+                             mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankId,offset,this%interp%N,3*this%nvar, &
+                             mesh%nMortars,this%nelem)
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      call MortarFlip_3D_gpu(this%mortarBuff_gpu,mesh%mortarInfo_gpu, &
+                             mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
+                             this%interp%N,3*this%nvar,mesh%nMortars)
+    endif
+
+    call MortarScatter_3D_gpu(this%extBoundary_gpu,this%mortarBuff_gpu, &
+                              this%interp%mortarR_gpu,this%interp%mortarP_gpu, &
+                              mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                              mesh%decomp%rankId,offset,this%interp%N,3*this%nvar, &
+                              mesh%nMortars,this%nelem)
+
+  endsubroutine MortarExchange_MappedVector3D
+
+  subroutine MPIMortarFluxAsync_MappedVector3D(this,mesh)
+    !! Posts the one-directional messages for MortarFluxCollect on device memory :
+    !! each remote small face sends its boundaryNormal trace to the big face's rank.
+    implicit none
+    class(MappedVector3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar
+    integer :: eB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+    real(prec),pointer :: boundaryNormal(:,:,:,:,:)
+    real(prec),pointer :: mortarBuff(:,:,:,:,:,:)
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+    call c_f_pointer(this%boundaryNormal_gpu,boundaryNormal, &
+                     [this%interp%N+1,this%interp%N+1,6,this%nelem,this%nvar])
+    call c_f_pointer(this%mortarBuff_gpu,mortarBuff, &
+                     [this%interp%N+1,this%interp%N+1,8,mesh%nMortars,this%nvar,3])
+
+    do ivar = 1,this%nvar
+      do m = 1,mesh%nMortars
+
+        eB = mesh%mortarInfo(1,m)
+        rB = mesh%decomp%elemToRank(eB)
+
+        do q = 1,4
+
+          eS = mesh%mortarInfo(2*q+1,m)
+          sS = mesh%mortarInfo(2*q+2,m)/10
+          rS = mesh%decomp%elemToRank(eS)
+          globalSideId = mesh%mortarInfo(10+q,m)
+          tag = globalSideId+mesh%nUniqueSides*(ivar-1)
+
+          if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(mortarBuff(:,:,4+q,m,ivar,1), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_ISEND(boundaryNormal(:,:,sS,eS-offset,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          endif
+
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarFluxAsync_MappedVector3D
+
+  subroutine MortarFluxCollect_MappedVector3D(this,mesh)
+    !! GPU implementation of MortarFluxCollect (see the base class for the algorithm
+    !! and conservation statement). Stages the small faces' boundaryNormal traces in
+    !! the mortar buffer, then overwrites the big face's integrand on device.
+    implicit none
+    class(MappedVector3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: offset
+    integer(c_size_t) :: buffSize
+
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    if(.not. c_associated(this%mortarBuff_gpu)) then
+      ! The MortarFlip_3D kernel stages one face through shared memory
+      ! (MORTAR3D_MAXNP in SELF_Mortar.cpp bounds the block size).
+      if(this%interp%N+1 > 16) then
+        print*,__FILE__,' : Error : 3D mortar kernels support N+1 <= 16.'
+        stop 1
+      endif
+      buffSize = int(this%interp%N+1,c_size_t)*(this%interp%N+1)*8* &
+                 mesh%nMortars*this%nvar*3*prec
+      call gpuCheck(hipMalloc(this%mortarBuff_gpu,buffSize))
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarFluxAsync(mesh)
+    endif
+
+    ! Stage rank-local small-face integrands (the big-face slots are gathered too
+    ! but unused by the flux scatter)
+    call MortarGather_3D_gpu(this%mortarBuff_gpu,this%boundarynormal_gpu, &
+                             mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                             mesh%nMortars,this%nelem)
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      call MortarFlip_3D_gpu(this%mortarBuff_gpu,mesh%mortarInfo_gpu, &
+                             mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
+                             this%interp%N,this%nvar,mesh%nMortars)
+    endif
+
+    call MortarFluxScatter_3D_gpu(this%boundarynormal_gpu,this%mortarBuff_gpu, &
+                                  this%interp%mortarP_gpu, &
+                                  mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                                  mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                                  mesh%nMortars,this%nelem)
+
+  endsubroutine MortarFluxCollect_MappedVector3D
 
   subroutine MappedDivergence_MappedVector3D(this,df)
     ! Strong Form Operator
