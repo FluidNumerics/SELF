@@ -447,8 +447,12 @@ one can fail for a different reason:
   *tightness* (both ends are actually referenced, so nothing surplus moves), and
   that the windowed apply is bit-identical to the whole-field apply. It fails if
   the table stops reaching those configurations.
-- `transfer_plan_3d_guard_window` (`WILL_FAIL`): a window that does not cover a
-  referenced source must `stop 1` rather than read outside the array.
+- Three `WILL_FAIL` guards on the windowed apply, one per way a wrong window
+  fails: `transfer_plan_3d_guard_window` (the window misses a referenced
+  `sourceElem`), `..._guard_windowfamily` (it misses one of the eight children of
+  a coarsened family - the case that arises when a family straddled a rank
+  boundary), and `..._guard_windowbounds` (the window is not inside `1..nOld` at
+  all). Each must `stop 1` rather than read outside the array.
 - `amr_migrate_3d_window_mpi` (2 and 4 ranks): the real `ExchangeOldWindow`, on
   a deliberately ASYMMETRIC adaptation so old elements genuinely change rank.
   The old field is analytic and encodes each element's global index in its

@@ -102,6 +102,10 @@ add_fortran_tests (
     "transfer_plan_3d_window.f90"
     "transfer_plan_2d_guard_window.f90"
     "transfer_plan_3d_guard_window.f90"
+    "transfer_plan_2d_guard_windowbounds.f90"
+    "transfer_plan_3d_guard_windowbounds.f90"
+    "transfer_plan_2d_guard_windowfamily.f90"
+    "transfer_plan_3d_guard_windowfamily.f90"
     "amr_controller_2d_guard_decomp.f90"
     "amr_controller_3d_guard_decomp.f90"
     "lineareuler2d_amr_soundwave.f90"
@@ -329,6 +333,10 @@ set_tests_properties(
     transfer_plan_3d_guard_range
     transfer_plan_2d_guard_window
     transfer_plan_3d_guard_window
+    transfer_plan_2d_guard_windowbounds
+    transfer_plan_3d_guard_windowbounds
+    transfer_plan_2d_guard_windowfamily
+    transfer_plan_3d_guard_windowfamily
     amr_controller_2d_guard_decomp
     amr_controller_3d_guard_decomp
     dgmodel2d_regrid_guard_uninit
