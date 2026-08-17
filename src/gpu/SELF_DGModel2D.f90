@@ -532,7 +532,13 @@ contains
       return
     endif
 
-    if(.not. c_associated(this%xferOld_gpu)) then
+    ! The guard is on xferNOld, not on c_associated(xferOld_gpu). The staging buffer is a
+    ! persistent capacity buffer and stays allocated after use, so testing the pointer would only
+    ! catch a missing stage before the FIRST epoch; from the second on, an unpaired call would
+    ! silently transfer the previous epoch's field. xferNOld is set by StageSolutionForTransfer
+    ! and cleared below, so it tracks the stage/apply pairing the way the base implementation's
+    ! allocatable transferStage does. (Fixed alongside the 3-D port, which found it.)
+    if(this%xferNOld <= 0) then
       print*,__FILE__,':',__LINE__, &
         ' : Error : ApplyTransferPlan called without a staged solution.'
       stop 1
@@ -586,6 +592,10 @@ contains
                                  interp%mortarR_gpu,interp%mortarP_gpu, &
                                  pathStride,eFirst-1,interp%N,this%nvar, &
                                  this%xferNOld,this%solution%nElem,nLocal)
+
+    ! The staged field has been consumed. The buffer itself is kept (it is the capacity that
+    ! makes a settled run allocation-free); only the pairing marker is cleared.
+    this%xferNOld = 0
 
   endsubroutine ApplyTransferPlan_DGModel2D
 

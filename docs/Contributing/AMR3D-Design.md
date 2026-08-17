@@ -1,6 +1,11 @@
 # Design: Adaptive Mesh Refinement (AMR) for 3D Models — Octrees + Face Mortars
 
-**Status:** Implementation plan — mirrors the implemented 2D design.
+**Status:** Implemented (Stages 1–6a) — mirrors the implemented 2D design.
+Stages 1–5 landed with #164; the device-resident solution transfer (Stage 6a's
+3D analogue) landed with #165. What is still outstanding from §6 is noted in
+that table. Sections written in the future tense below have been updated where
+the delivered code differs from the plan; where it does not, the plan text is
+the record of what was built.
 **Scope:** 3D hexahedral meshes, octree (2:1) h-refinement built on new 3D
 2:1 face-mortar interface support, spectral (Legendre modal) refinement
 indicator, CPU and GPU backends, MPI-parallel. Pilot model: `LinearEuler3D`.
@@ -163,11 +168,54 @@ guards `MaxLevelJump() <= 1` as in 2D.
 
 ### 2.8 Solution transfer
 
-Prolongation: `U_child = (R_kx ⊗ R_ky ⊗ R_kz) U_parent` (exact),
+**Operators.** Prolongation: `U_child = (R_kx ⊗ R_ky ⊗ R_kz) U_parent` (exact),
 `(kx,ky,kz) = (axc(c)+1, ayc(c)+1, azc(c)+1)`. Restriction:
 `U_parent = Σ_c (P_kx ⊗ P_ky ⊗ P_kz) U_child(c)` — conservative, and
 `Restrict(Prolong(u)) = u` to roundoff via `Σ_k P_k R_k = I` per direction.
-Reference-cell conservation: `Σ w³ u_parent = (1/8) Σ_c Σ w³ u_child`.
+Reference-cell conservation: `Σ w³ u_parent = (1/8) Σ_c Σ w³ u_child`. Each 1D
+`P_k` carries the half-interval Jacobian, so the triple product carries 1/8.
+Implemented in `SELF_SolutionTransfer_3D.f90` as three sequential directional
+contractions; the loop order there is normative, since CLAUDE.md forbids
+reordering floating-point reductions.
+
+**Epoch protocol.** The plan (`SELF_TransferPlan_3D`) is built on the host after
+the last forest mutation and classifies every new leaf as `COPY`, `PROLONG` or
+`RESTRICT`, plus a `depth` and an octant `path` for any further descent. It is
+applied around the regrid as a three-step, type-bound protocol on the model, so
+the backend split that already selects `Regrid` selects the transfer too:
+
+```fortran
+call model%StageSolutionForTransfer()   ! preserve the field; Regrid may then free it
+call model%Regrid(newMesh,newGeom)
+call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+```
+
+`StageSolutionForTransfer` exists because `Regrid` reallocates (or resizes) the
+storage the solution lives in, so the pre-regrid field must be preserved first.
+The portable implementation stages into `DGModel3D_t%transferStage`, a host
+array whose lifetime is exactly stage-to-apply — it is allocated by the first
+call, consumed and deallocated by the second, and released in `Free`. Calling
+`ApplyTransferPlan` without a preceding stage is a hard error (`stop 1`), pinned
+by `test/dgmodel3d_guard_transfer_unstaged.f90`, because the alternative is
+reading unallocated storage and failing somewhere less obvious.
+
+`ApplyTransferPlan` takes an optional `uGlobal` argument: the **multi-rank
+escape hatch**. The forest is rank-replicated and migration is gather-then-slice
+(2D Stage-5 v1), so on more than one rank the controller allgathers the old
+field on the host and passes it through `uGlobal`; each rank then fills exactly
+its own new contiguous element range and elements that changed ranks are
+migrated by construction. Because the allgather is inherently a host operation,
+that branch stays on the portable host transfer on every backend.
+
+**Device path.** On a single-rank GPU build both steps are overridden
+(`src/gpu/SELF_DGModel3D.f90`): staging is a device-to-device copy into a
+model-owned buffer, and the plan is applied by `TransferSolution_3D_gpu`, so an
+adapting run moves no solution data across the host link at all. Consequence
+worth knowing: the transferred solution is then left on the device and
+`solution%interior` (the host mirror) is **stale** after `Adapt`. That matches
+the rest of the time loop, where the device is authoritative, but it is a
+behaviour change from the host-only implementation, where the mirror happened to
+be fresh. See §4 for the kernel, and the Learning page for the measurements.
 
 ### 2.9 Indicator
 
@@ -215,13 +263,39 @@ its 2D counterpart.
 ## 4. GPU strategy
 
 Same division of labor as 2D: numerics on device, adaptation logic on host.
-New kernels in the existing files' pattern: 3D mortar gather/scatter and
-flux-scatter kernels (in `SELF_Mortar.cpp`), a 3D indicator kernel (one
-thread per element, `AMR3D_MAXNP` bound), and a 3D transfer kernel. The 2D
-transfer kernel's one-block-per-element with `Np²` threads becomes
-one-block-per-element with `Np²` threads looping over the k-slab (a `Np³`
-thread block with three shared `Np³` buffers would exceed practical shared
-memory at N=7/fp64).
+Kernels follow the existing files' pattern: 3D mortar gather/scatter and
+flux-scatter kernels (`SELF_Mortar.cpp`), a 3D indicator kernel
+(`SELF_Refinement.cpp`, `AMR3D_MAXNP` bound), and the 3D transfer kernel
+(`SELF_SolutionTransfer.cpp`). All are implemented.
+
+The transfer kernel is `TransferSolution_3D_gpu`. As planned, the 2D kernel's
+one-block-per-element with `Np²` threads and one thread per node becomes
+one-block-per-element with `Np²` threads where thread `(a,b)` owns one `(a,b)`
+pencil and loops the free index through each of the three directional passes — the
+same decomposition `RefinementIndicator_3D_gpukernel` uses. A `Np³` thread block
+is not an option: it is 4096 threads at N=15, past the block limit, and it would
+push the working buffers into per-thread scratch.
+
+Three `Np³` `__shared__` buffers do fit, at a bound: `AMR3D_MAXNP` is 12, giving
+3·12³·8 B = 41,472 B, inside both the 48 KB CUDA static shared-memory limit and
+the 64 KB gfx90a/gfx942 LDS budget. The allocation is static, so it is 41,472 B
+at every degree, not `(N+1)³`; a dynamic-shared variant sized to the degree in
+use measured 1-3% slower on a B300 and was not adopted (see the Learning page's
+§6.4). The Fortran caller guards `interp%N+1 <= 12` so a larger degree fails
+loudly rather than overrunning.
+
+One deliberate divergence from the host reference, inherited from 2D: the host
+descent calls `ProlongToChildren`, which forms all eight children and discards
+seven, whereas the kernel applies only the operator triple of the child actually
+on the recorded path — an eighth of the work per descent step. What is dropped is
+the seven discarded children, not any part of the retained value: each contraction
+sums the same terms against the same mortar column in the same ascending index
+order as the host loop, so the reduction order CLAUDE.md protects is preserved.
+Device and host nonetheless agree only to round-off rather than bitwise, because
+the device compiler contracts these multiply-accumulates into FMAs.
+`test/solution_transfer_3d_device.f90` pins the kernel's output against the host
+reference value by value; the AMR regressions assert the invariants (conservation,
+entropy non-growth), which conservation arguments make exact either way.
 
 ---
 
@@ -269,6 +343,18 @@ CPU/GPU flag and post-adapt solution agreement enforced by construction
 | 4 | `lineareuler3d_amr_soundwave` (+ coarsen-wake) integration tests, example | #156/#162 |
 | 5 | MPI: forest-from-decomposed-mesh, flag allgather, gather-then-slice migration, 2-rank tests | Stage 5 |
 | 6 | GPU: mortar/indicator/transfer kernels, device staging, geometry upload paths | Stage 6 |
+
+Delivery status: stages 1–3 and 5 landed with #164, together with the
+`lineareuler3d_amr_soundwave` serial and 2-rank integration tests of stage 4.
+Stage 6's mortar and indicator kernels landed with #164; the device-resident
+solution transfer and its staging landed with #165 (`TransferSolution_3D_gpu`,
+`StageSolutionForTransfer_DGModel3D`, `ApplyTransferPlan_DGModel3D`), which also
+delivered stage 4's example, `linear_euler3d_amr_spherical_soundwave`.
+
+Still outstanding: the 3D `coarsen-wake` regression (the analogue of
+`lineareuler2d_amr_coarsen_wake`), and the 3D analogues of 2D Stages 6b/6c
+(amortized high-water-mark storage and geometry reuse) to the extent they are
+not already inherited from the shared data classes.
 
 Stages are landed as separate reviewable commits on one PR (or stacked PRs
 at maintainer preference), each leaving the suite green.

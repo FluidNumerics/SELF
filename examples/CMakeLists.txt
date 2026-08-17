@@ -77,6 +77,7 @@ add_fortran_tests (
   "linear_shallow_water2d_planetaryrossby_wave.f90"
   "linear_shallow_water2d_kelvinwaves.f90"
   "linear_euler3d_spherical_soundwave_radiation.f90"
+  "linear_euler3d_amr_spherical_soundwave.f90"
   "esatmo3d_thermal_bubble.f90"
   "esatmo3d_abc_flow.f90"
   "esatmo2d_thermal_bubble.f90"

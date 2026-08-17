@@ -60,8 +60,14 @@ module SELF_SolutionTransfer_3D
 !!
 !! The routines are element-local and portable (host `do concurrent` over children/variables);
 !! the AMR driver maps forest parent/child relationships onto the element index ranges it passes
-!! in. Transfer runs between time steps, so it is not a per-step hot path; on GPU backends the
-!! transferred field is re-uploaded as part of the Stage-6 device re-allocation.
+!! in. Transfer runs between time steps, so it is not a per-step hot path.
+!!
+!! These routines remain the reference implementation and are what the CPU backend and the
+!! multi-rank migration path execute, and they are what the transfer tests pin. On a single-rank
+!! GPU build the same mathematics run in TransferSolution_3D_gpu
+!! (src/gpu/SELF_SolutionTransfer.cpp), so the contractions below are performed on the device
+!! rather than on one CPU core and the transferred field never crosses the host link; see
+!! ApplyTransferPlan_DGModel3D.
 
   use SELF_Constants
   use SELF_Lagrange

@@ -244,8 +244,10 @@ tree level per cycle.
 
 A `MeshTransfer2D` object encapsulates old→new leaf correspondence; it is
 built on the host during adaptation and applied as batched tensor-product
-operations (host first; device application is a Phase-5 optimization, and the
-operator matrices are already resident on the GPU).
+operations. Host application landed first; device application was the deferred
+Phase-5 optimization and **has since shipped as Stage 6a** (`TransferSolution_2D_gpu`,
+with the 3D analogue `TransferSolution_3D_gpu`), using the operator matrices that
+were already resident on the GPU. The plan itself is still built on the host.
 
 **Numerical-correctness note (CLAUDE.md §3):** transfer is an
 approximation-theoretic operation (interpolation/L2 projection), not a change
@@ -346,8 +348,9 @@ Runs on device:
 - All existing solver machinery on the adapted mesh (RHS, conforming and
   mortar exchanges, RK updates) — unchanged; this is already exercised by the
   mortar GPU tests.
-- Solution transfer apply (Phase 5): batched tensor-product kernels using the
-  device-resident `mortarR_gpu`/`mortarP_gpu`.
+- Solution transfer apply (**implemented**, Stage 6a; was deferred as "Phase 5"):
+  batched tensor-product kernels using the device-resident `mortarR_gpu`/`mortarP_gpu`,
+  so a single-GPU adapting run moves no solution data across the host link.
 
 Runs on host:
 - Tree updates, flag balancing, leaf emission, corner hashing,
@@ -355,9 +358,13 @@ Runs on host:
 
 **Memory churn:** each adaptation frees and re-allocates every field's device
 mirrors plus the lazily-built exchange buffers (existing `Init`/`Free`/
-`UpdateDevice` machinery). v1 accepts this (adaptation is infrequent). Phase-5
-optimization: capacity-based allocation (`nElemCapacity = growthFactor*nElem`)
-inside the data-object `Init`s so most adaptations skip reallocation.
+`UpdateDevice` machinery). v1 accepted this (adaptation is infrequent). The
+deferred "Phase 5" optimization — capacity-based allocation so most adaptations
+skip reallocation — **has since shipped as Stage 6b**, as amortized
+high-water-mark storage with pointer remapping (`src/SELF_DataPool.f90`).
+Profiling contradicted the expectation recorded here: the free/re-initialize
+cycle was the single largest component of an adaptation, not a minor one. See
+the Learning page's Stage 6 section for the measurements.
 
 One environment constraint to respect (and a reason to land issue #151
 first if convenient): device selection currently happens in the mesh's
