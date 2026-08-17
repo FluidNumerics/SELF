@@ -1,8 +1,10 @@
 # Design: Adaptive Mesh Refinement (AMR) for 3D Models — Octrees + Face Mortars
 
-**Status:** Implemented (Stages 1–6a) — mirrors the implemented 2D design.
-Stages 1–5 landed with #164; the device-resident solution transfer (Stage 6a's
-3D analogue) landed with #165. What is still outstanding from §6 is noted in
+**Status:** Implemented (Stages 1–6a, plus Stage-5 v2 point-to-point solution
+migration) — mirrors the implemented 2D design. Stages 1–5 landed with #164; the
+device-resident solution transfer (Stage 6a's 3D analogue) landed with #165;
+point-to-point migration, replacing the allgather-based redistribution in both
+2D and 3D, landed with #167. What is still outstanding from §7 is noted in
 that table. Sections written in the future tense below have been updated where
 the delivered code differs from the plan; where it does not, the plan text is
 the record of what was built.
@@ -199,13 +201,18 @@ call, consumed and deallocated by the second, and released in `Free`. Calling
 by `test/dgmodel3d_guard_transfer_unstaged.f90`, because the alternative is
 reading unallocated storage and failing somewhere less obvious.
 
-`ApplyTransferPlan` takes an optional `uGlobal` argument: the **multi-rank
-escape hatch**. The forest is rank-replicated and migration is gather-then-slice
-(2D Stage-5 v1), so on more than one rank the controller allgathers the old
-field on the host and passes it through `uGlobal`; each rank then fills exactly
-its own new contiguous element range and elements that changed ranks are
-migrated by construction. Because the allgather is inherently a host operation,
-that branch stays on the portable host transfer on every backend.
+`ApplyTransferPlan` takes an optional `uGlobal` argument, plus an optional
+`oldFirst`: the **multi-rank path**. On more than one rank the controller hands
+in host-side old-field data and each rank fills exactly its own new contiguous
+element range. Two forms exist. By default (Stage-5 v2, §4) `uGlobal` is the
+rank's *window* of the old field — the contiguous run of old elements its new
+range references — and `oldFirst` is that window's first global old element
+index, so the plan's global `sourceElem`/`family` indices still resolve
+correctly. Under `SELF_AMR_MIGRATE_GATHER=1` (Stage-5 v1) it is the whole
+allgathered global old field and `oldFirst` is absent, which is the same call
+with `oldFirst = 1`. Either way migration is a host operation, so that branch
+stays on the portable host transfer on every backend; serving the device
+transfer from a migrated window is the named follow-up to #167.
 
 **Device path.** On a single-rank GPU build both steps are overridden
 (`src/gpu/SELF_DGModel3D.f90`): staging is a device-to-device copy into a
@@ -215,7 +222,7 @@ worth knowing: the transferred solution is then left on the device and
 `solution%interior` (the host mirror) is **stale** after `Adapt`. That matches
 the rest of the time loop, where the device is authoritative, but it is a
 behaviour change from the host-only implementation, where the mirror happened to
-be fresh. See §4 for the kernel, and the Learning page for the measurements.
+be fresh. See §5 for the kernel, and the Learning page for the measurements.
 
 ### 2.9 Indicator
 
@@ -244,9 +251,10 @@ two-phase (device/host) split that keeps CPU and GPU flags identical.
   `BuildTransferPlan` walk over stable node ids, `EmitMesh` regeneration,
   geometry double-buffering with `CopyElements` reuse
   (`sourceKind == COPY` ⇒ same forest node ⇒ bit-identical coordinates),
-  `Regrid` via `Resize` (not Free+Init), Stage-5 v1 gather-then-slice
-  migration, `RecommendedTimeStep = dtBase/2**MaxLevel`, and the
-  `SELF_AMR_GEOM_{FULL,VERIFY,NO_REUSE}` diagnostics.
+  `Regrid` via `Resize` (not Free+Init), Stage-5 v2 point-to-point solution
+  migration (§4), `RecommendedTimeStep = dtBase/2**MaxLevel`, and the
+  `SELF_AMR_GEOM_{FULL,VERIFY,NO_REUSE}` and
+  `SELF_AMR_MIGRATE_{GATHER,VERIFY}` diagnostics.
 
 New 3D-side prerequisites (absent today, required by the controller):
 `Resize` on `Scalar3D`/`Vector3D`/`Tensor3D`/mapped variants,
@@ -260,7 +268,109 @@ its 2D counterpart.
 
 ---
 
-## 4. GPU strategy
+## 4. MPI strategy
+
+The 2D document's §7 sketched this; what follows is the record of what was built,
+for both dimensions, and it supersedes that sketch (see the note at the end).
+
+**Ordering and partition.** The global leaf order is base-mesh root order with
+Morton order inside each tree — deterministic and locality preserving. `EmitMesh`
+re-runs `GenerateDecomposition` over the new leaf count every epoch, so each rank
+owns the contiguous range `offsetElem(rank+1)+1 … offsetElem(rank+2)`. Equal
+element counts are a valid balance measure because every element carries the same
+polynomial degree. Repartitioning is therefore implicit in every epoch, and both
+the old and the new partition are contiguous ranges of *the same* leaf order —
+the fact everything below rests on.
+
+**Replicated state.** The forest is rank-replicated. At `Init`,
+`InitForestFromDecomposedMesh` allgathers the global base-mesh node coordinates,
+side table and material ids (once, at startup). Each epoch the rank-local
+indicator flags are allgathered (one `int` per element) and the indicator's
+amplitude gate is reduced with `MPI_MAX`, so every rank applies identical
+mutations and computes an identical transfer plan. Forest memory is therefore
+O(global elements) per rank; making the forest distributed is the p4est-style
+Stage-2 follow-up in #167 and is deliberately not attempted here.
+
+**Solution migration (Stage-5 v2, #167).** Migration moves only what changes
+rank:
+
+- *The window.* For a rank's new element range `[eFirst,eLast]`, the old
+  elements its plan entries read — `sourceElem`, or all eight `family` members
+  for a coarsened family — lie in a contiguous window `[wFirst,wLast]` of the old
+  element list. `PlanWindows` computes the min/max hull of those indices for
+  every rank in one pass over the plan. Correctness does not depend on the leaf
+  ordering being monotone: a non-monotone ordering only widens the hull, the worst
+  case being the whole old list, which is exactly what v1 moved. Locality, not
+  correctness, is what the space-filling curve buys.
+- *Routing needs no communication.* Because the plan and both `offsetElem` tables
+  are replicated, a rank computes its own window **and every peer's window**
+  locally. The run it must send to peer `r` is the intersection of its own old
+  range with peer `r`'s window; the run it must receive from peer `r` is the
+  intersection of its window with peer `r`'s old range. Both ends of a pair
+  evaluate the same `max`/`min` on the same integers, so the schedules match by
+  construction — there is no count exchange, no handshake, and no collective.
+- *The exchange.* `ExchangeOldWindow` posts all `MPI_Irecv`s before the matching
+  `MPI_Isend`s and closes with one `MPI_Waitall`, the same shape as every other
+  point-to-point exchange in SELF. Nothing is packed: a run of elements at a fixed
+  variable is contiguous in both `solution%interior` and the window buffer, so
+  each message reads and writes the real storage. That is one message per
+  (peer, variable) — a handful of peers for a balanced repartition, and bounded by
+  the rank count in the worst case — and it removes the pack buffer, the unpack loop and two whole-field copies.
+- *Tags.* The tag is the variable index. Ambiguity would require two messages
+  between the same ordered rank pair carrying the same variable in one exchange,
+  and each pair exchanges exactly one run per variable. The exchange is drained
+  before `Regrid`, so migration traffic never coexists with the side, mortar or
+  halo exchanges (which use `globalSideId + nUniqueSides*(ivar-1)`, or tag 0 for
+  the aggregated form) even though all of them share the mesh communicator.
+- *Sequencing.* The exchange runs **before** `model%Regrid`: `EmitMesh` has
+  already decomposed the new mesh, so both partitions are known, and the sends can
+  read the still-live pre-regrid solution. It also means no traffic is in flight
+  across `Regrid`, which rebuilds mesh and decomposition state on the same
+  communicator. Overlapping the two is a possible future optimization and would
+  need a tag space of its own.
+- *Coarsened families.* A family's eight children may be owned by different old
+  ranks. The window hull covers all eight, each child arrives from whichever rank
+  owned it, and `RestrictFromChildren` runs on the receiving rank in child-octant
+  order — so the projection's operand order, and therefore its result, is
+  independent of the partition.
+- *Degenerate cases.* A rank owning no new elements gets an empty window
+  (normalized to `wFirst=1, wLast=0`), posts no receives, skips the apply, and
+  still posts its sends, because peers may need old elements it owns. An empty
+  peer overlap is skipped identically on both sides.
+- *Memory.* The per-rank migration footprint is the window — local elements plus
+  the overhang past the rank's own old range — instead of a full global field. The
+  window buffer is a controller component, persistent and grow-only, so a settled
+  adapting run performs no allocation in this path.
+- *Bit-identity.* The two migrations are bit-identical, not merely close:
+  `ApplyTransferPlanRange` (v1) is `ApplyTransferPlanWindow` (v2) over the whole
+  old field, so both feed the same operands to the same operators in the same
+  order, and no reduction order changes. `SELF_AMR_MIGRATE_VERIFY=1` runs both in
+  one process and compares the window against the allgathered field value by
+  value; `SELF_AMR_MIGRATE_GATHER=1` selects v1 outright, keeping the retained
+  fallback exercised.
+
+**Exchange-table rebuild.** The aggregated halo tables (`decomp%halo_*`) and each
+field's persistent halo requests are partition-specific and are torn down on
+`Resize`, so `Regrid` invalidates them and the next exchange rebuilds them. The
+sub-face global side ids in the regenerated `mortarInfo` keep the tag convention
+valid with no new machinery.
+
+**Constraint compliance.** Every collective and every message lives in the
+adaptation epoch, between time steps — never in `CalculateTendency` or an RK
+stage (CLAUDE.md §5). The communicator is unchanged, no reduction is reordered,
+and the v1 collective path is retained behind an environment switch rather than
+deleted (CLAUDE.md §10).
+
+*Supersedes:* [AMR2D-Design.md](AMR2D-Design.md) §7 specified `MPI_Alltoallv` for
+redistribution. Replicated routing removes the count exchange that motivates
+`Alltoallv`, and the pattern is sparse for a balanced repartition — a rank talks to
+a couple of neighbours in leaf order rather than to everyone, with the worst case
+bounded by the rank count and handled — so matched `Isend`/`Irecv` pairs are both
+cheaper and free of an all-ranks synchronization point.
+
+---
+
+## 5. GPU strategy
 
 Same division of labor as 2D: numerics on device, adaptation logic on host.
 Kernels follow the existing files' pattern: 3D mortar gather/scatter and
@@ -299,7 +409,7 @@ entropy non-growth), which conservation arguments make exact either way.
 
 ---
 
-## 5. Testing & validation plan
+## 6. Testing & validation plan
 
 Serial/CPU (mirroring the 2D suite):
 - `mappedscalarmortarexchange_3d_linear`: linear field reproduced exactly
@@ -323,9 +433,37 @@ Serial/CPU (mirroring the 2D suite):
   guard-test inventory (controller decomp/maxlevel/wrongmesh, unbalanced
   emit, transfer-plan misuse, indicator argument guards, EC mortar guard).
 
-MPI (2 ranks): `mappedscalarmortarexchange_3d_linear_mpi`,
+MPI: `mappedscalarmortarexchange_3d_linear_mpi`,
 `lineareuler3d_mortar_soundwave_mpi`, `lineareuler3d_amr_soundwave_mpi`
 (partition-changing adaptation), `geometry_3d_reuse_mpi` + env-gated verify.
+
+Solution migration (§4, #167) is covered by four additions, chosen so that each
+one can fail for a different reason:
+
+- `transfer_plan_3d_window` (serial): drives `PlanWindows` and `OwnedRun` over a
+  table of hand-written (old, new) partition pairs a 2-rank run could never
+  produce - empty new ranges, empty old ranges, a window spanning four peers, a
+  window that is entirely remote - and checks window coverage, window
+  *tightness* (both ends are actually referenced, so nothing surplus moves), and
+  that the windowed apply is bit-identical to the whole-field apply. It fails if
+  the table stops reaching those configurations.
+- `transfer_plan_3d_guard_window` (`WILL_FAIL`): a window that does not cover a
+  referenced source must `stop 1` rather than read outside the array.
+- `amr_migrate_3d_window_mpi` (2 and 4 ranks): the real `ExchangeOldWindow`, on
+  a deliberately ASYMMETRIC adaptation so old elements genuinely change rank.
+  The old field is analytic and encodes each element's global index in its
+  values, so a misrouted element names itself. It asserts that at least one rank
+  received something from a peer - without that, a symmetric refinement can
+  leave every window local, the exchange a no-op, and a passing verify run
+  meaningless.
+- `SELF_AMR_MIGRATE_VERIFY=1` / `SELF_AMR_MIGRATE_GATHER=1` re-runs of the
+  existing AMR MPI regressions at 2 and 4 ranks: the first asserts v1 and v2
+  agree value for value in-process on real physics, the second keeps the
+  retained v1 path exercised.
+
+Two ranks are not enough on their own: with one peer the send and receive runs
+are forced and no window can straddle more than one peer, which is why the
+4-rank entries exist (`SELF_MPIEXEC_NUMPROCS_MANY`, default 4).
 
 GPU: the same integration tests through the Buildkite MI210/V100 pipelines;
 CPU/GPU flag and post-adapt solution agreement enforced by construction
@@ -333,7 +471,7 @@ CPU/GPU flag and post-adapt solution agreement enforced by construction
 
 ---
 
-## 6. Work breakdown & phasing
+## 7. Work breakdown & phasing
 
 | Stage | Content | Mirrors |
 |---|---|---|
@@ -341,7 +479,8 @@ CPU/GPU flag and post-adapt solution agreement enforced by construction
 | 2 | Octree forest, refinement primitives, uniform refine, `EmitMesh`, validity tests | AMR Stages 2/4a/4b |
 | 3 | Indicator 3D, transfer plan/solution transfer, `Resize`/geometry infrastructure, `Regrid`, controller, unit tests | AMR Stages 1/3/4 |
 | 4 | `lineareuler3d_amr_soundwave` (+ coarsen-wake) integration tests, example | #156/#162 |
-| 5 | MPI: forest-from-decomposed-mesh, flag allgather, gather-then-slice migration, 2-rank tests | Stage 5 |
+| 5 | MPI v1: forest-from-decomposed-mesh, flag allgather, gather-then-slice migration, 2-rank tests | Stage 5 |
+| 5b | MPI v2: point-to-point migration - windowed apply, `PlanWindows`/`OwnedRun`/`ExchangeOldWindow`, `MIGRATE_GATHER` fallback and `MIGRATE_VERIFY` diagnostic, 2- and 4-rank tests | Stage-5 v2 / #167 |
 | 6 | GPU: mortar/indicator/transfer kernels, device staging, geometry upload paths | Stage 6 |
 
 Delivery status: stages 1–3 and 5 landed with #164, together with the
@@ -351,17 +490,23 @@ solution transfer and its staging landed with #165 (`TransferSolution_3D_gpu`,
 `StageSolutionForTransfer_DGModel3D`, `ApplyTransferPlan_DGModel3D`), which also
 delivered stage 4's example, `linear_euler3d_amr_spherical_soundwave`.
 
+Stage 5b landed with #167, in both dimensions.
+
 Still outstanding: the 3D `coarsen-wake` regression (the analogue of
-`lineareuler2d_amr_coarsen_wake`), and the 3D analogues of 2D Stages 6b/6c
+`lineareuler2d_amr_coarsen_wake`); the 3D analogues of 2D Stages 6b/6c
 (amortized high-water-mark storage and geometry reuse) to the extent they are
-not already inherited from the shared data classes.
+not already inherited from the shared data classes; the device transfer on more
+than one rank (the migrated window lands in host memory, so a device-side window
+buffer and an old-element offset in the kernel are what remain); and the
+distributed forest, which is #167's Stage 2 and is deliberately deferred until
+measurement justifies it.
 
 Stages are landed as separate reviewable commits on one PR (or stacked PRs
 at maintainer preference), each leaving the suite green.
 
 ---
 
-## 7. Compliance with repository constraints (CLAUDE.md)
+## 8. Compliance with repository constraints (CLAUDE.md)
 
 Identical posture to the 2D work, which established the precedents:
 - The mortar interface discretization is the same formulation extension

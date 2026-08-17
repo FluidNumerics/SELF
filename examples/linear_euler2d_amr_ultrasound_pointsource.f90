@@ -125,6 +125,7 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   integer :: nEpochs,epoch,i,envstat
   integer :: maxLevel
   logical :: adapted
+  integer :: nAdaptEpochs = 0 !! epochs that actually changed the mesh
   real(prec) :: e0,ef,dt
   real(prec) :: Lr,LrRamp,epochLength,hFinest,lambda,f0,ppw
   real(prec) :: relativeEnergyFloor,significantEnergyFloor
@@ -304,6 +305,7 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
     tFwd = tFwd+real(c1clk-c0clk,real64)/real(crate,real64)
     tAdapt = tAdapt+real(c2clk-c1clk,real64)/real(crate,real64)
     nStepsTotal = nStepsTotal+int(epochLength/dt,int64)
+    if(adapted) nAdaptEpochs = nAdaptEpochs+1
     print*,"epoch",epoch,": t =",modelobj%t,", dt =",dt, &
       ", nElem =",modelobj%mesh%nElem,", adapted =",adapted
   enddo
@@ -322,6 +324,23 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   write(output_unit,'(A,ES16.7E3)') "BENCH_wallPerSimTime = ",tFwd/tSim
   write(output_unit,'(A,ES16.7E3)') "BENCH_wallPerSimTimeIncAMR = ",(tFwd+tAdapt)/tSim
   write(output_unit,'(A,ES16.7E3)') "BENCH_amrFraction = ",tAdapt/(tFwd+tAdapt)
+  ! An epoch whose leaf set is unchanged costs only an indicator pass, so the total above mixes
+  ! two very different quantities; the per-adaptation figure is the one to compare between builds
+  ! or between migration paths (the 3-D example reports the same key).
+  write(output_unit,'(A,I0)') "BENCH_nAdaptEpochs = ",nAdaptEpochs
+  if(nAdaptEpochs > 0) then
+    write(output_unit,'(A,ES16.7E3)') "BENCH_tAdaptPerAdaptation_s = ", &
+      tAdapt/real(nAdaptEpochs,real64)
+  endif
+  ! Migration volume (issue #167). These are per-RANK totals over the whole run, and they are the
+  ! primary comparison between the point-to-point migration and SELF_AMR_MIGRATE_GATHER=1: the
+  ! gather path receives every element the rank does not own on every adapting epoch, the
+  ! point-to-point path only the old elements its new range actually reads from a peer. Both
+  ! paths count, so the two runs are directly comparable. Zero on a single rank, where nothing
+  ! migrates at all.
+  write(output_unit,'(A,I0)') "BENCH_migrateBytesRecv = ",controller%nMigrateBytesRecv
+  write(output_unit,'(A,I0)') "BENCH_migrateBytesSent = ",controller%nMigrateBytesSent
+  write(output_unit,'(A,I0)') "BENCH_migrateElemRemote = ",controller%nMigrateElemRemote
   ! Geometry reuse (AMR Stage 6c): the share of elements whose geometry was carried forward from
   ! the previous epoch instead of being regenerated. This is what the incremental path buys.
   write(output_unit,'(A,I0)') "BENCH_geomReused = ",controller%nGeomReused

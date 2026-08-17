@@ -317,18 +317,31 @@ can reconstruct geometry per snapshot. Static-mesh outputs are untouched.
   element count is a valid balance measure because all elements share one
   polynomial degree.
 - **Consistent flags:** refine/coarsen flags for ghost-adjacent elements must
-  agree across ranks before 2:1 balancing. v1: `MPI_Allgatherv` of flags (one
-  int per element) so every rank runs identical balancing — deterministic and
-  simple; tree metadata is tiny compared to field data. Rank-local balancing
-  with ghost-layer exchange is a scalability follow-up.
+  agree across ranks before 2:1 balancing. `MPI_Allgatherv` of flags (one int
+  per element) so every rank runs identical balancing — deterministic and
+  simple; tree metadata is tiny compared to field data. *As built, unchanged in
+  v2.* Rank-local balancing with ghost-layer exchange is a scalability
+  follow-up.
 - **Redistribution:** old and new partitions are both contiguous over the same
-  deterministic ordering, so each rank computes exact send/recv ranges
-  (`MPI_Alltoallv` on packed solution payloads). Coarsening groups are applied
-  on the receiving side after redistribution so all four siblings are
-  resident.
+  deterministic ordering, so each rank computes exact send/recv ranges. This
+  plan called for `MPI_Alltoallv` on packed payloads. **As built:** v1 was
+  gather-then-slice (allgather the global old field, slice the new local range),
+  and v2 (#167) is matched nonblocking `MPI_Isend`/`MPI_Irecv` pairs — not
+  `Alltoallv`, for two reasons. Because the forest and the transfer plan are
+  replicated, every rank already knows exactly which peers it needs and how
+  much, so the count exchange that motivates `Alltoallv` is unnecessary; and
+  the pattern is sparse for a balanced repartition — a rank talks to a couple of
+  neighbours in leaf order rather than to everyone (a heavily skewed repartition
+  can reach every peer, which the implementation handles) — so a collective would
+  impose an all-ranks synchronization point on a mostly-zero schedule. Nothing is packed either: a run of elements
+  at a fixed variable is already contiguous in both the source and the
+  destination. Coarsening groups are still applied on the receiving side after
+  redistribution so all four siblings are resident. The normative description
+  is [AMR3D-Design.md](AMR3D-Design.md) §4, which covers both dimensions.
 - **Exchange table rebuild:** the aggregated halo tables (`decomp%halo_*`) and
-  every field's persistent halo requests are partition-specific and are
-  rebuilt lazily after step 4/6 above. The mortar sub-edge global side ids in
+  every field's persistent halo requests are partition-specific. As built, they
+  are torn down on `Resize`, so `Regrid` invalidates them and the next exchange
+  rebuilds them. The mortar sub-edge global side ids in
   the regenerated `mortarInfo` keep the MPI tag convention valid without any
   new machinery.
 - **Constraint compliance:** all collectives happen inside the adaptation
@@ -413,7 +426,7 @@ indicator, transfer, and re-initialization plumbing.
 | 0. Modal infrastructure | `pMatrix` in `Lagrange_t` + device mirrors, indicator math + unit tests | ~600 LOC |
 | 1. Quadtree mesh core | forest, 2:1 balancing, leaf + `sideInfo`/`mortarInfo` emission, `AMRMesh2D_t`, transfer operators (tensor products of mortar matrices), validity/transfer tests | ~1,500 LOC |
 | 2. Model integration (CPU) | `AMRController2D`, field re-init + BC/cache rebuild path, `amr_advection_diffusion_2d`, `AMRLinearEuler2D`, integration tests, examples | ~1,200 LOC |
-| 3. MPI | flag allgather, repartition + `Alltoallv` redistribution, halo/persistent-request invalidation, 2-rank tests | ~800 LOC |
+| 3. MPI | flag allgather, repartition + point-to-point redistribution (v1 gather-then-slice, v2 `Isend`/`Irecv`; §7), halo/persistent-request invalidation, 2- and 4-rank tests | ~800 LOC |
 | 4. GPU | indicator kernels + interfaces, device transfer apply, GPU CI tests | ~800 LOC |
 | 5. Hardening/perf | capacity-based device allocation, adaptation-cost profiling, threshold calibration docs, user docs | ~500 LOC |
 

@@ -98,6 +98,10 @@ add_fortran_tests (
     "transfer_plan_3d_guard_unbuilt.f90"
     "transfer_plan_2d_guard_range.f90"
     "transfer_plan_3d_guard_range.f90"
+    "transfer_plan_2d_window.f90"
+    "transfer_plan_3d_window.f90"
+    "transfer_plan_2d_guard_window.f90"
+    "transfer_plan_3d_guard_window.f90"
     "amr_controller_2d_guard_decomp.f90"
     "amr_controller_3d_guard_decomp.f90"
     "lineareuler2d_amr_soundwave.f90"
@@ -323,6 +327,8 @@ set_tests_properties(
     transfer_plan_3d_guard_unbuilt
     transfer_plan_2d_guard_range
     transfer_plan_3d_guard_range
+    transfer_plan_2d_guard_window
+    transfer_plan_3d_guard_window
     amr_controller_2d_guard_decomp
     amr_controller_3d_guard_decomp
     dgmodel2d_regrid_guard_uninit
@@ -360,6 +366,8 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "lineareuler3d_mortar_soundwave_mpi.f90"
                        "lineareuler2d_amr_soundwave_mpi.f90"
                        "lineareuler3d_amr_soundwave_mpi.f90"
+                       "amr_migrate_2d_window_mpi.f90"
+                       "amr_migrate_3d_window_mpi.f90"
                        "geometry_2d_reuse_mpi.f90"
                        "advection_diffusion_2d_mortar_mpi.f90"
                        "advection_diffusion_2d_rk3_mpi.f90"
@@ -409,3 +417,77 @@ set_tests_properties(lineareuler3d_amr_soundwave_geom_full PROPERTIES
 add_test(NAME lineareuler3d_amr_soundwave_geom_noreuse COMMAND lineareuler3d_amr_soundwave)
 set_tests_properties(lineareuler3d_amr_soundwave_geom_noreuse PROPERTIES
                      LABELS "serial" ENVIRONMENT "SELF_AMR_GEOM_NO_REUSE=1")
+
+# Multi-rank solution migration (issue #167). The default path is now the point-to-point window
+# exchange, so the MPI AMR tests above already cover it. These re-runs cover the two things the
+# default run cannot show, again with no new sources:
+#
+#  - MIGRATE_VERIFY  runs BOTH migrations in one process and compares the received window against
+#                    the allgathered global old field bit for bit. This is the assertion that the
+#                    point-to-point routing is right, not merely self-consistent.
+#  - MIGRATE_GATHER  keeps the retained v1 allgather path exercised, so the documented fallback
+#                    cannot rot.
+add_test(NAME lineareuler2d_amr_soundwave_mpi_migrate_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_migrate_verify PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_MIGRATE_VERIFY=1")
+
+add_test(NAME lineareuler3d_amr_soundwave_mpi_migrate_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
+set_tests_properties(lineareuler3d_amr_soundwave_mpi_migrate_verify PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_MIGRATE_VERIFY=1")
+
+add_test(NAME lineareuler2d_amr_soundwave_mpi_migrate_gather
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_migrate_gather PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_MIGRATE_GATHER=1")
+
+add_test(NAME lineareuler3d_amr_soundwave_mpi_migrate_gather
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
+set_tests_properties(lineareuler3d_amr_soundwave_mpi_migrate_gather PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_MIGRATE_GATHER=1")
+
+# Two ranks cannot distinguish gather-then-slice from a point-to-point routing bug: with one peer
+# the send and receive runs are forced, and no rank's window can span more than one peer. These
+# entries re-launch the SAME executables on SELF_MPIEXEC_NUMPROCS_MANY ranks, where a window can
+# straddle several peers and a rank can end up with nothing to own.
+add_test(NAME lineareuler2d_amr_soundwave_mpi_np_many
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS_MANY}
+                 ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
+                 lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_np_many PROPERTIES
+                     LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY})
+
+add_test(NAME lineareuler2d_amr_soundwave_mpi_np_many_migrate_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS_MANY}
+                 ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
+                 lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_np_many_migrate_verify PROPERTIES
+                     LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY}
+                     ENVIRONMENT "SELF_AMR_MIGRATE_VERIFY=1")
+
+add_test(NAME amr_migrate_2d_window_mpi_np_many
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS_MANY}
+                 ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
+                 amr_migrate_2d_window_mpi)
+set_tests_properties(amr_migrate_2d_window_mpi_np_many PROPERTIES
+                     LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY})
+
+add_test(NAME amr_migrate_3d_window_mpi_np_many
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS_MANY}
+                 ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
+                 amr_migrate_3d_window_mpi)
+set_tests_properties(amr_migrate_3d_window_mpi_np_many PROPERTIES
+                     LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY})
+
+add_test(NAME lineareuler3d_amr_soundwave_mpi_np_many_migrate_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS_MANY}
+                 ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
+                 lineareuler3d_amr_soundwave_mpi)
+set_tests_properties(lineareuler3d_amr_soundwave_mpi_np_many_migrate_verify PROPERTIES
+                     LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY}
+                     ENVIRONMENT "SELF_AMR_MIGRATE_VERIFY=1")

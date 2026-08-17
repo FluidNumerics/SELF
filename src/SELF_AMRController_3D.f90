@@ -62,11 +62,20 @@ module SELF_AMRController_3D
 !! allgathered (one small collective) so every rank applies identical mutations and computes
 !! identical transfer plans and global connectivity. EmitMesh re-decomposes the new leaf
 !! list into contiguous (space-filling-curve) ranges, so repartitioning and load balance are
-!! implicit in every epoch. Solution migration gathers the old rank-local solutions into a
-!! global field and applies the plan to the new rank-local range only - simple and correct
-!! at single-node scale; a point-to-point exchange is a drop-in replacement behind the same
-!! interface. All collectives run between time steps at the adaptation cadence; nothing is
-!! added to the time-stepping loop.
+!! implicit in every epoch.
+!!
+!! Solution migration is point-to-point (Stage-5 v2). The old elements a rank's new element
+!! range reads through the plan form a contiguous WINDOW of the old element list, because both
+!! partitions are contiguous ranges of the same leaf order; and because the plan is replicated,
+!! every rank derives its own window and each peer's window locally - PlanWindows - with no
+!! communication at all. ExchangeOldWindow then moves exactly the runs that cross ranks with
+!! matched MPI_Isend/MPI_Irecv, so per-rank traffic and memory scale with what actually moves
+!! rather than with the global field. SELF_AMR_MIGRATE_GATHER=1 restores the v1 gather-then-
+!! slice migration (an allgathered global old field, sliced to the new rank-local range); the
+!! two are bit-identical, and SELF_AMR_MIGRATE_VERIFY=1 asserts that in-process.
+!!
+!! All communication runs between time steps at the adaptation cadence; nothing is added to the
+!! time-stepping loop.
 !!
 !! Because refinement halves the element scale per level, an explicit-stability time step
 !! chosen for the base mesh must shrink with the finest active level;
@@ -99,6 +108,15 @@ module SELF_AMRController_3D
   logical,save :: geomVerify = .false.
   logical,save :: geomFull = .false. !! SELF_AMR_GEOM_FULL=1: bypass the incremental path
 
+  !! Debug switches for the multi-rank solution migration, resolved in the same place:
+  !!
+  !!   SELF_AMR_MIGRATE_GATHER=1  migrate through the Stage-5 v1 allgather instead of the
+  !!                              point-to-point window exchange
+  !!   SELF_AMR_MIGRATE_VERIFY=1  run BOTH migrations and compare the received window against
+  !!                              the allgathered global field, bit for bit
+  logical,save :: migrateGather = .false.
+  logical,save :: migrateVerify = .false.
+
   type :: AMRController3D
     type(OctreeMesh3D) :: forest
     type(RefinementIndicator3D) :: indicator
@@ -123,6 +141,21 @@ module SELF_AMRController_3D
     !! avoided regeneration rather than leaving the payoff to be estimated.
     integer(int64) :: nGeomReused = 0
     integer(int64) :: nGeomGenerated = 0
+    !! Point-to-point solution migration state. xferWin holds this rank's window of the OLD
+    !! field - the contiguous run of old elements its new element range references - and is
+    !! persistent and grow-only, so a settled adapting run performs no allocation in the
+    !! migration path. It is flat because it is viewed through a rank-remapped pointer whose
+    !! element lower bound is the window's first GLOBAL old element index, which is the
+    !! numbering the transfer plan uses. winFirst/winLast hold that window for every rank.
+    real(prec),allocatable :: xferWin(:)
+    integer,allocatable :: winFirst(:)
+    integer,allocatable :: winLast(:)
+    !! Cumulative migration accounting, so the communication volume a repartition actually
+    !! costs is measured rather than estimated. Both migration paths count, so the two are
+    !! directly comparable in one binary.
+    integer(int64) :: nMigrateBytesRecv = 0
+    integer(int64) :: nMigrateBytesSent = 0
+    integer(int64) :: nMigrateElemRemote = 0 !! old elements received from other ranks
     integer :: ivar = SELF_AMR_ALLVARS !! driving variable for the indicator
     integer :: maxLevel = 1 !! refinement-level cap
     integer :: nHalo = 1 !! refine-flag halo-expansion passes
@@ -329,6 +362,231 @@ contains
 
   endsubroutine AllgatherPerElemReals
 
+  subroutine OwnedRun(offsetElem,r,first,last,a,b)
+    !! The run of elements that rank r-1 owns and that also lies in [first,last]: a..b, empty when
+    !! b < a. offsetElem is a decomposition's contiguous ownership table, so rank r-1 owns
+    !! offsetElem(r)+1 .. offsetElem(r+1).
+    !!
+    !! Both halves of the migration schedule are this one intersection, evaluated from replicated
+    !! tables: my receive run from peer r-1 is (my window) n (r-1's old range), and my send run to
+    !! peer r-1 is (r-1's window) n (my old range). Factored out so that the sender and the
+    !! receiver cannot drift apart, and so a serial test can exercise the arithmetic the exchange
+    !! actually uses rather than a copy of it.
+    implicit none
+    integer,intent(in) :: offsetElem(:)
+    integer,intent(in) :: r !! 1-based table index; the rank is r-1
+    integer,intent(in) :: first
+    integer,intent(in) :: last
+    integer,intent(out) :: a
+    integer,intent(out) :: b
+
+    a = max(first,offsetElem(r)+1)
+    b = min(last,offsetElem(r+1))
+
+  endsubroutine OwnedRun
+
+  subroutine PlanWindows(plan,nRanks,newOffset,winFirst,winLast)
+    !! For every rank r, the contiguous window [winFirst(r),winLast(r)] of GLOBAL old element
+    !! indices that rank r's new element range references through the transfer plan. The plan is
+    !! rank-replicated, so this is a purely local computation: no communication is needed to
+    !! learn what a peer wants, which is what makes the point-to-point migration cheap here.
+    !!
+    !! A rank owning no new elements gets the empty sentinel winFirst > winLast.
+    !!
+    !! Correctness does not depend on the leaf ordering being monotone in the old ordering: the
+    !! window is the min/max hull of the referenced indices, so a non-monotone ordering only
+    !! widens it, the worst case being the whole old element list - i.e. exactly what the v1
+    !! gather-then-slice migration moves. Efficiency, not correctness, rests on the
+    !! space-filling-curve locality.
+    !!
+    !! Cost is ONE pass over the plan, not nRanks x nNew: the rank loop partitions 1..nNew.
+    implicit none
+    type(TransferPlan3D),intent(in) :: plan
+    integer,intent(in) :: nRanks
+    integer,intent(in) :: newOffset(1:nRanks+1)
+    integer,intent(out) :: winFirst(1:nRanks)
+    integer,intent(out) :: winLast(1:nRanks)
+    ! Local
+    integer :: r,li,c,src
+
+    do r = 1,nRanks
+      winFirst(r) = plan%nOld+1
+      winLast(r) = 0
+      do li = newOffset(r)+1,newOffset(r+1)
+        if(plan%sourceKind(li) == SELF_TRANSFER_RESTRICT) then
+          do c = 1,8
+            src = plan%family(c,li)
+            winFirst(r) = min(winFirst(r),src)
+            winLast(r) = max(winLast(r),src)
+          enddo
+        else
+          src = plan%sourceElem(li)
+          winFirst(r) = min(winFirst(r),src)
+          winLast(r) = max(winLast(r),src)
+        endif
+      enddo
+    enddo
+
+  endsubroutine PlanWindows
+
+  subroutine ExchangeOldWindow(decomp,Np,nvar,nLocalOld,uLocal,winFirst,winLast, &
+                               wFirst,wLast,uWin,nBytesRecv,nBytesSent,nElemRemote)
+    !! Migrate the pre-regrid solution into this rank's old-element window with point-to-point
+    !! messages: the Stage-5 v2 replacement for allgathering the whole old field onto every rank.
+    !!
+    !! Each peer contributes exactly one contiguous run of old elements - the intersection of the
+    !! range it owned before the epoch with this rank's window - because both partitions are
+    !! contiguous ranges of the same leaf order. Both ends of a pair derive that run from the
+    !! same replicated offsetElem and window tables with the same integer arithmetic, so the
+    !! send and receive lists match by construction: no handshake, no collective, and nothing to
+    !! agree on at run time.
+    !!
+    !! Nothing is packed. A run of elements at a fixed variable is contiguous in both the source
+    !! (%interior) and the destination (the window), so each message reads and writes the real
+    !! storage directly; that costs one message per (peer,variable) instead of one per peer. For
+    !! a balanced repartition the peer count is a small handful; nothing bounds it to that, so the
+    !! request arrays are sized for the worst case of every rank.
+    !!
+    !! The whole window is written every epoch, not just the elements the plan reads: the local
+    !! part plus the per-peer runs tile [wFirst,wLast] exactly once, because the old partition
+    !! tiles the old element list. So uWin carries nothing stale from a previous epoch even
+    !! though the buffer is reused, and the verification path may compare all of it.
+    !!
+    !! Runs once per adapting epoch, between time steps - never inside the time-stepping loop.
+    implicit none
+    type(DomainDecomposition),intent(in) :: decomp
+    integer,intent(in) :: Np !! nodes per direction (N+1)
+    integer,intent(in) :: nvar
+    integer,intent(in) :: nLocalOld !! elements this rank owned before the epoch
+    real(prec),intent(in) :: uLocal(1:Np,1:Np,1:Np,1:nLocalOld,1:nvar)
+    integer,intent(in) :: winFirst(1:decomp%nRanks)
+    integer,intent(in) :: winLast(1:decomp%nRanks)
+    integer,intent(in) :: wFirst !! this rank's window, normalized (wFirst > wLast if empty)
+    integer,intent(in) :: wLast
+    real(prec),intent(inout) :: uWin(1:Np,1:Np,1:Np,wFirst:wLast,1:nvar)
+    !! intent(inout), not out: the receives write it through MPI rather than through the dummy,
+    !! and an intent(out) dummy would license a compiler to treat it as undefined on entry.
+    integer(int64),intent(inout) :: nBytesRecv
+    integer(int64),intent(inout) :: nBytesSent
+    integer(int64),intent(inout) :: nElemRemote
+    ! Local
+    integer :: r,iv,a,b,cnt,e,msgCount,ierror
+    integer :: myFirst,perElem,nbyte
+    integer,allocatable :: requests(:),stats(:,:)
+
+    myFirst = decomp%offsetElem(decomp%rankId+1)+1
+    ! storage_size, not the kind value prec: the two coincide for the kinds SELF uses, but only
+    ! the intrinsic actually reports a width, and these counters are quoted as bytes.
+    nbyte = storage_size(1.0_prec)/8
+    perElem = Np*Np*Np
+
+    allocate(requests(1:2*nvar*decomp%nRanks))
+    allocate(stats(MPI_STATUS_SIZE,1:2*nvar*decomp%nRanks))
+    msgCount = 0
+
+    ! Receives first, as everywhere else in SELF: the runs of my window that other ranks own.
+    do r = 1,decomp%nRanks
+      if(r-1 == decomp%rankId) cycle
+      call OwnedRun(decomp%offsetElem,r,wFirst,wLast,a,b)
+      if(b < a) cycle
+      cnt = perElem*(b-a+1)
+      nBytesRecv = nBytesRecv+int(cnt,int64)*nvar*nbyte
+      nElemRemote = nElemRemote+int(b-a+1,int64)
+      do iv = 1,nvar
+        msgCount = msgCount+1
+        call MPI_IRECV(uWin(1,1,1,a,iv),cnt,decomp%mpiPrec, &
+                       r-1,iv,decomp%mpiComm,requests(msgCount),ierror)
+      enddo
+    enddo
+
+    ! Sends: the runs of my old range that other ranks' windows need.
+    do r = 1,decomp%nRanks
+      if(r-1 == decomp%rankId) cycle
+      call OwnedRun(decomp%offsetElem,decomp%rankId+1,winFirst(r),winLast(r),a,b)
+      if(b < a) cycle
+      cnt = perElem*(b-a+1)
+      nBytesSent = nBytesSent+int(cnt,int64)*nvar*nbyte
+      do iv = 1,nvar
+        msgCount = msgCount+1
+        call MPI_ISEND(uLocal(1,1,1,a-myFirst+1,iv),cnt,decomp%mpiPrec, &
+                       r-1,iv,decomp%mpiComm,requests(msgCount),ierror)
+      enddo
+    enddo
+
+    ! The part of my window I already own, copied while the messages are in flight.
+    call OwnedRun(decomp%offsetElem,decomp%rankId+1,wFirst,wLast,a,b)
+    do iv = 1,nvar
+      do e = a,b
+        uWin(1:Np,1:Np,1:Np,e,iv) = uLocal(1:Np,1:Np,1:Np,e-myFirst+1,iv)
+      enddo
+    enddo
+
+    if(msgCount > 0) then
+      call MPI_WAITALL(msgCount,requests(1:msgCount), &
+                       stats(1:MPI_STATUS_SIZE,1:msgCount),ierror)
+    endif
+
+    deallocate(requests,stats)
+
+  endsubroutine ExchangeOldWindow
+
+  subroutine VerifyMigration(decomp,Np,nvar,nOld,nLocalOld,uLocal,wFirst,wLast,uWin)
+    !! Cross-check a migrated window against the v1 allgathered global old field, bit for bit,
+    !! over the whole window. Diagnostic only; gated by SELF_AMR_MIGRATE_VERIFY. Bit-identity is
+    !! the design guarantee (the same numbers routed differently, then fed to the same operators
+    !! in the same order), so any difference at all is a routing defect and stops the run.
+    implicit none
+    type(DomainDecomposition),intent(in) :: decomp
+    integer,intent(in) :: Np
+    integer,intent(in) :: nvar
+    integer,intent(in) :: nOld
+    integer,intent(in) :: nLocalOld
+    real(prec),intent(in) :: uLocal(1:Np,1:Np,1:Np,1:nLocalOld,1:nvar)
+    integer,intent(in) :: wFirst
+    integer,intent(in) :: wLast
+    real(prec),intent(in) :: uWin(1:Np,1:Np,1:Np,wFirst:wLast,1:nvar)
+    ! Local
+    integer :: iv,e,i,j,k,nbad
+    real(prec),allocatable :: uRef(:,:,:,:,:)
+
+    allocate(uRef(1:Np,1:Np,1:Np,1:nOld,1:nvar))
+    do iv = 1,nvar
+      call AllgatherPerElemReals(decomp,Np*Np*Np,uLocal(:,:,:,:,iv),uRef(:,:,:,:,iv))
+    enddo
+
+    nbad = 0
+    do iv = 1,nvar
+      do e = wFirst,wLast
+        do k = 1,Np
+          do j = 1,Np
+            do i = 1,Np
+              if(uWin(i,j,k,e,iv) /= uRef(i,j,k,e,iv)) then
+                if(nbad == 0) then
+                  print*,"MIGRATE_VERIFY mismatch on rank",decomp%rankId, &
+                    " old element",e," variable",iv," node",i,j,k, &
+                    " window value",uWin(i,j,k,e,iv)," gathered value",uRef(i,j,k,e,iv)
+                endif
+                nbad = nbad+1
+              endif
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+    deallocate(uRef)
+
+    if(nbad > 0) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : the migrated window differs from the allgathered old field in ',nbad, &
+        ' values.'
+      stop 1
+    endif
+
+    print*,"MIGRATE_VERIFY rank",decomp%rankId," window",wFirst,wLast," matches the gather"
+
+  endsubroutine VerifyMigration
+
   subroutine BuildGeometry_AMRController3D(this,newMesh,plan,newGeom,nReused)
     !! Fill newGeom for the emitted mesh, reusing the previous epoch's geometry for every
     !! element that did not change and generating only the rest. nReused reports how many
@@ -440,7 +698,9 @@ contains
   endsubroutine BuildGeometry_AMRController3D
 
   subroutine ResolveGeomDebug()
-    !! Read the incremental-geometry debug switches once.
+    !! Read the incremental-geometry and solution-migration debug switches once. Idempotent, so
+    !! it is safe (and intended) to call from every path that consults a switch rather than
+    !! relying on one caller having run first.
     implicit none
     character(8) :: envstr
     integer :: envstat
@@ -454,10 +714,16 @@ contains
     if(envstat == 0) geomVerify = (trim(envstr) == "1")
     call get_environment_variable("SELF_AMR_GEOM_FULL",envstr,status=envstat)
     if(envstat == 0) geomFull = (trim(envstr) == "1")
+    call get_environment_variable("SELF_AMR_MIGRATE_GATHER",envstr,status=envstat)
+    if(envstat == 0) migrateGather = (trim(envstr) == "1")
+    call get_environment_variable("SELF_AMR_MIGRATE_VERIFY",envstr,status=envstat)
+    if(envstat == 0) migrateVerify = (trim(envstr) == "1")
 
     if(geomNoReuse) print*,"SELF_AMR_GEOM_NO_REUSE: geometry reuse disabled"
     if(geomVerify) print*,"SELF_AMR_GEOM_VERIFY: cross-checking incremental geometry"
     if(geomFull) print*,"SELF_AMR_GEOM_FULL: incremental geometry bypassed"
+    if(migrateGather) print*,"SELF_AMR_MIGRATE_GATHER: migrating through the v1 allgather"
+    if(migrateVerify) print*,"SELF_AMR_MIGRATE_VERIFY: cross-checking the migrated window"
 
   endsubroutine ResolveGeomDebug
 
@@ -574,6 +840,12 @@ contains
     this%interp => null()
     this%ownsActive = .false.
     if(allocated(this%energyWeights)) deallocate(this%energyWeights)
+    if(allocated(this%xferWin)) deallocate(this%xferWin)
+    if(allocated(this%winFirst)) deallocate(this%winFirst)
+    if(allocated(this%winLast)) deallocate(this%winLast)
+    this%nMigrateBytesRecv = 0
+    this%nMigrateBytesSent = 0
+    this%nMigrateElemRemote = 0
 
   endsubroutine Free_AMRController3D
 
@@ -594,11 +866,15 @@ contains
     !! the question does not arise. The multi-rank path still transfers on the host (see step 6),
     !! so both mirrors are fresh there.
     implicit none
-    class(AMRController3D),intent(inout) :: this
+    ! target: the migration window buffer is a component of this, and the windowed apply is fed
+    ! through a pointer remapped onto it (see step 6), which requires the target attribute here.
+    class(AMRController3D),intent(inout),target :: this
     class(DGModel3D_t),intent(inout) :: model
     logical,intent(out) :: adapted
     ! Local
     integer :: li,s,pass,node,nbr,ns,nf,nOld,Np,changed,eFirst,eLast,iv
+    integer :: nR,nWin,wFirst,wLast
+    real(prec),pointer :: uWin(:,:,:,:,:)
     integer,allocatable :: flag(:),spread(:)
     integer,allocatable :: oldLeaf(:)
     integer,allocatable :: leafIdx(:)
@@ -722,20 +998,87 @@ contains
     ! per-element tensor-product interpolation onto the device - which is where the measured
     ! saving comes from - and incidentally leaves no solution data crossing the host link.
     !
-    ! On several ranks the old field must first be assembled globally, because each rank then
-    ! fills exactly its new contiguous element range and elements that changed ranks are
-    ! migrated by construction (the 2-D Stage-5 v1 migration). That allgather is a host
-    ! operation, so the multi-rank path stays on the portable host transfer: a device transfer
-    ! only pays off there once migration is point-to-point (Stage-5 v2).
+    ! On several ranks the rank that will own a new element and the rank that owned its old
+    ! source need not be the same, so old-field data has to move. Both partitions are contiguous
+    ! ranges of the same leaf order and the plan is rank-replicated, so each rank computes the
+    ! contiguous WINDOW of old elements its own new range references (PlanWindows) and receives
+    ! exactly that window point-to-point (ExchangeOldWindow) - Stage-5 v2. Per-rank traffic and
+    ! memory are then set by what actually moves rather than by the size of the global field.
+    ! SELF_AMR_MIGRATE_GATHER=1 selects the v1 allgather instead; the two are bit-identical, and
+    ! SELF_AMR_MIGRATE_VERIFY=1 asserts that in-process.
+    !
+    ! The exchange runs BEFORE Regrid: EmitMesh has already decomposed the new mesh, so both
+    ! partitions are known, the sends can read the still-live pre-regrid solution, and no
+    ! point-to-point traffic is left in flight across Regrid - which works on the same
+    ! communicator with its own tag conventions.
+    !
+    ! Either way migration is a host operation, so the multi-rank path stays on the portable
+    ! host transfer; serving the device transfer from a migrated window is the follow-up to #167.
+    call ResolveGeomDebug()
     eFirst = -1 ! set below, once newMesh's decomposition is known
-    if(model%mesh%decomp%nRanks > 1) then
+    if(model%mesh%decomp%nRanks > 1 .and. .not. migrateGather) then
       Np = this%interp%N+1
+      nR = model%mesh%decomp%nRanks
+      if(.not. allocated(this%winFirst)) allocate(this%winFirst(1:nR),this%winLast(1:nR))
+
+      call PlanWindows(plan,nR,newMesh%decomp%offsetElem,this%winFirst,this%winLast)
+
+      eFirst = newMesh%decomp%offsetElem(newMesh%decomp%rankId+1)+1
+      eLast = newMesh%decomp%offsetElem(newMesh%decomp%rankId+2)
+      wFirst = this%winFirst(newMesh%decomp%rankId+1)
+      wLast = this%winLast(newMesh%decomp%rankId+1)
+      if(eLast < eFirst) then ! this rank owns no new elements: empty window
+        wFirst = 1
+        wLast = 0
+      endif
+
+      ! Persistent, grow-only window buffer, viewed through a pointer whose element lower bound
+      ! is the window's first global old element index. Remapping (rather than passing a section
+      ! of a rank-5 capacity array) keeps the actual argument exactly shaped and contiguous, so
+      ! no compiler temporary of the capacity array can appear.
+      nWin = Np*Np*Np*max(wLast-wFirst+1,0)*model%nvar
+      if(.not. allocated(this%xferWin)) allocate(this%xferWin(1:max(nWin,1)))
+      if(nWin > size(this%xferWin)) then
+        deallocate(this%xferWin)
+        allocate(this%xferWin(1:nWin))
+      endif
+      uWin(1:Np,1:Np,1:Np,wFirst:wLast,1:model%nvar) => this%xferWin(1:nWin)
+
+      call model%solution%UpdateHost()
+      call ExchangeOldWindow(model%mesh%decomp,Np,model%nvar,model%solution%nElem, &
+                             model%solution%interior,this%winFirst,this%winLast, &
+                             wFirst,wLast,uWin,this%nMigrateBytesRecv, &
+                             this%nMigrateBytesSent,this%nMigrateElemRemote)
+      if(migrateVerify) then
+        call VerifyMigration(model%mesh%decomp,Np,model%nvar,nOld,model%solution%nElem, &
+                             model%solution%interior,wFirst,wLast,uWin)
+      endif
+
+      call model%Regrid(newMesh,newGeom)
+
+      ! A rank that owns no new elements has nothing to fill; it still took part in the
+      ! exchange above, because peers may need old elements it owns.
+      if(eLast >= eFirst) then
+        call model%ApplyTransferPlan(plan,this%interp,eFirst,eLast,uWin,wFirst)
+      endif
+      uWin => null()
+    elseif(model%mesh%decomp%nRanks > 1) then
+      Np = this%interp%N+1
+      nR = model%mesh%decomp%nRanks
       allocate(uOld(1:Np,1:Np,1:Np,1:nOld,1:model%nvar))
       call model%solution%UpdateHost()
       do iv = 1,model%nvar
         call AllgatherPerElemReals(model%mesh%decomp,Np*Np*Np, &
                                    model%solution%interior(:,:,:,:,iv),uOld(:,:,:,:,iv))
       enddo
+      ! v1 volume, counted the same way as v2 so the two are directly comparable: every rank
+      ! receives every element it does not own, and sends its own elements to every other rank.
+      this%nMigrateElemRemote = this%nMigrateElemRemote+ &
+                                int(nOld-model%solution%nElem,int64)
+      this%nMigrateBytesRecv = this%nMigrateBytesRecv+int(nOld-model%solution%nElem,int64)* &
+                               Np*Np*Np*model%nvar*(storage_size(1.0_prec)/8)
+      this%nMigrateBytesSent = this%nMigrateBytesSent+int(model%solution%nElem,int64)*(nR-1)* &
+                               Np*Np*Np*model%nvar*(storage_size(1.0_prec)/8)
 
       call model%Regrid(newMesh,newGeom)
 

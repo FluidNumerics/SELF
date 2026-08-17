@@ -46,6 +46,8 @@ option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for float
 
 set(SELF_MPIEXEC_NUMPROCS "2" CACHE STRING "The number of MPI ranks to use to launch MPI tests. Only used when launching test programs via ctest.")
 set(SELF_MPIEXEC_OPTIONS "" CACHE STRING "Any additional options, such as binding options, to use for MPI tests.Only used when launching test programs via ctest. Defaults to nothing")
+set(SELF_MPIEXEC_NUMPROCS_MANY "4" CACHE STRING "The number of MPI ranks to use for the tests that need more than two ranks, such as the AMR point-to-point solution migration (two ranks cannot distinguish a routing bug there). Only used when launching test programs via ctest.")
+set(SELF_MPIEXEC_OPTIONS_MANY "" CACHE STRING "Additional options for the >2-rank MPI tests only, appended after SELF_MPIEXEC_OPTIONS. Defaults to --oversubscribe under Open MPI, whose default slot count on a small CI runner is often below SELF_MPIEXEC_NUMPROCS_MANY.")
 
 if(SELF_ENABLE_MULTITHREADING)
     set(SELF_MULITHREADING_NTHREADS "4" CACHE STRING "Number of threads to use for `do concurrent` loop blocks. This option is only used with GNU compilers. Other compilers use OMP_NUM_THREADS environment variable at runtime.")
@@ -132,6 +134,26 @@ endif()
 
 # MPI
 find_package(MPI COMPONENTS Fortran C REQUIRED)
+
+# The >2-rank MPI tests can ask for more ranks than a small CI machine has cores. Open MPI treats
+# cores as slots and refuses to launch in that case, so add --oversubscribe for it (only for those
+# tests, and only when the user has not set the option themselves). MPICH has no such flag and
+# needs none.
+#
+# The launcher is asked directly rather than trusting a FindMPI variable: MPI_Fortran_LIBRARY_-
+# VERSION_STRING is not populated for every MPI/CMake combination (it is absent for the Open MPI
+# builds used here), which would leave the check silently always-false.
+if(SELF_MPIEXEC_OPTIONS_MANY STREQUAL "" AND MPIEXEC_EXECUTABLE)
+    execute_process(COMMAND ${MPIEXEC_EXECUTABLE} --version
+                    OUTPUT_VARIABLE SELF_MPIEXEC_VERSION_OUT
+                    ERROR_VARIABLE SELF_MPIEXEC_VERSION_OUT
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    TIMEOUT 30)
+    if(SELF_MPIEXEC_VERSION_OUT MATCHES "Open MPI|OpenRTE|open-mpi")
+        set(SELF_MPIEXEC_OPTIONS_MANY "--oversubscribe" CACHE STRING "" FORCE)
+        message(STATUS "SELF Build System : Open MPI launcher detected; using --oversubscribe for the >2-rank tests")
+    endif()
+endif()
 
 # HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
 find_package(HDF5 REQUIRED Fortran)

@@ -30,7 +30,7 @@ layer that adaptive refinement needs is already in place and tested.
 | Adaptation-epoch transfer plan (old-leaf → new-leaf mapping) | **Implemented** |
 | Model regrid (`DGModel2D%Regrid`) + AMR controller (serial, CPU/GPU) | **Implemented** |
 | Ultrasound point-source example + AMR visualization script | **Implemented** |
-| MPI dynamic re-partitioning / load balancing (v1: replicated forest, allgathered migration) | **Implemented** |
+| MPI dynamic re-partitioning / load balancing (v2: replicated forest, point-to-point migration) | **Implemented** |
 | GPU device re-allocation for a changing element count | **Implemented** (amortized high-water-mark storage, Stage 6b) |
 | Device-side solution transfer (no host round trip on one GPU) | **Implemented** (Stage 6a) |
 | Geometry reuse for unchanged elements across an epoch | **Implemented** (Stage 6c) |
@@ -578,18 +578,22 @@ Implemented in `SELF_SolutionTransfer_2D` (see §2.7):
 - **(next)** Optional **neighbour smoothing** of the trigger flags (avoid isolated refined
   elements), on top of the balance pass.
 
-### Stage 5 — MPI dynamic re-partitioning — **implemented (v1)**
+### Stage 5 — MPI dynamic re-partitioning — **implemented (v2)**
 
 *Status: implemented. `QuadTreeMesh2D%InitGlobal` builds the rank-replicated forest from
 allgathered global base tables; `EmitMesh` builds the global connectivity/mortar tables on
 every rank and stores only its contiguous slice of a freshly generated decomposition
 (`sideInfo(3)` global ids, global `nUniqueSides`, fully replicated `mortarInfo`, exactly the
 invariants `SideExchange`/`MortarExchange` require); the controller allgathers the indicator
-flags per epoch and migrates the solution through an allgathered global old field applied to
-the rank-local range (`ApplyTransferPlanRange`). Validated by
-`test/lineareuler2d_amr_soundwave_mpi.f90` (2 ranks): the global element trajectory and
+flags per epoch, and migration is point-to-point: each rank receives only the window of the old
+field its own new element range reads (5d below). Validated by
+`test/lineareuler2d_amr_soundwave_mpi.f90` at 2 and 4 ranks: the global element trajectory and
 entropy history match the serial run, transfers conserve globally, and a leaf-list checksum
-confirms forest replication. The point-to-point migration upgrade remains open (v2).*
+confirms forest replication — plus `SELF_AMR_MIGRATE_VERIFY=1` re-runs, which assert the
+migrated window matches the v1 allgathered field value for value, and the serial
+`test/transfer_plan_{2,3}d_window.f90` routing tables. The v1 gather-then-slice path is retained
+behind `SELF_AMR_MIGRATE_GATHER=1`. What remains open is the distributed forest, whose memory is
+still O(global elements) per rank (issue #167 Stage 2).*
 
 Two observations make a correct first version tractable:
 
@@ -613,11 +617,47 @@ Sub-stages:
   constructors do for `nRanks > 1`, so `SideExchange`/`MortarExchange` consume the result
   unchanged. Repartitioning is implicit: each epoch's emitted mesh is re-decomposed over the
   new leaf list, so equal-count SFC arcs move with the refinement.
-- **(5c) Solution migration.** v1: allgatherv the old rank-local solutions into a global old
-  field, then `ApplyTransferPlan` only for the new rank-local elements. Correct and simple;
-  memory is one global solution copy per rank (fine at single-node scale). The point-to-point
-  upgrade (send exactly the source elements each rank's plan references) is a drop-in
-  replacement behind the same interface.
+- **(5c) Solution migration, v1 — gather-then-slice, retained as a fallback.** Allgatherv the
+  old rank-local solutions into a global old field, then `ApplyTransferPlan` only for the new
+  rank-local elements. Correct and simple; memory and per-rank traffic are one global solution
+  copy per adapting epoch, which is fine at single-node scale and prohibitive beyond it. Still
+  reachable with `SELF_AMR_MIGRATE_GATHER=1`, and exercised in CI so it cannot rot.
+- **(5d) Solution migration, v2 — point-to-point windows (issue #167).** The default. Four
+  things make it simple:
+
+    1. *The window.* The old elements a rank's new range `[eFirst,eLast]` reads through the plan
+       — `sourceElem`, or all four (2-D) / eight (3-D) `family` members of a coarsened family —
+       lie in a contiguous window `[wFirst,wLast]` of the old element list, because both
+       partitions are contiguous ranges of the same leaf order. `PlanWindows` takes the min/max
+       hull of those indices in one pass over the plan. Correctness does not depend on the
+       ordering being monotone: a non-monotone ordering only widens the hull, and the worst case
+       is the whole old list — exactly what v1 moves. Locality, not correctness, is what the
+       space-filling curve buys.
+    2. *Routing needs no communication.* The plan and both `offsetElem` tables are replicated,
+       so a rank computes its own window **and every peer's**, and derives its send runs
+       (its old range ∩ a peer's window) and receive runs (its window ∩ a peer's old range)
+       locally. Both ends of a pair evaluate the same `max`/`min` on the same integers, so the
+       schedules match by construction — no count exchange, no handshake, no collective.
+    3. *Nothing is packed.* A run of elements at a fixed variable is contiguous in both
+       `solution%interior` and the window buffer, so each `MPI_Isend`/`MPI_Irecv` reads and
+       writes the real storage: one message per (peer, variable), a handful of peers, no pack
+       buffer and no unpack loop. (A rank talks to a couple of peers for a balanced repartition;
+       nothing bounds it to that, and a pathological repartition simply produces more, smaller
+       messages.) Receives are posted first and the exchange closes with one
+       `MPI_Waitall`, the shape every other SELF exchange uses. It runs *before* `Regrid`, so
+       the sends read the still-live pre-regrid solution and no traffic is in flight while
+       `Regrid` rebuilds mesh state on the same communicator.
+    4. *`ApplyTransferPlanWindow`* is what consumes it: `ApplyTransferPlanRange` (v1) is that
+       routine over the whole old field, so the two paths share one body and are **bit-identical**
+       — the same operands, the same operators, the same order, no reductions. That is a
+       guarantee, not a tolerance, and `SELF_AMR_MIGRATE_VERIFY=1` asserts it in-process.
+
+  A rank owning no new elements gets an empty window, posts no receives, and skips the apply,
+  but still serves its peers. A coarsened family whose children were owned by different ranks is
+  fully covered by the hull and projected on the receiving rank in child-octant order, so the
+  result does not depend on the partition. The per-rank migration footprint becomes the window —
+  local elements plus the overhang — instead of a full global field, in a controller-owned
+  grow-only buffer, so a settled adapting run allocates nothing here.
 - Tests on ≥ 2 ranks: forest determinism across ranks (identical leaf checksums after an
   epoch), global conservation of the transferred solution (mpi_allreduce), and the AMR
   soundwave regression run distributed.
@@ -712,7 +752,8 @@ between allocate/zero/free churn (`Init_SEMQuad` + `Free_SEMQuad`, 21.6%) and re
 - **Multi-rank.** `sourceElem` indexes the global old element list while a rank holds only its slice,
   so reuse additionally requires the source to be locally owned - a range test against the previous
   decomposition. On one rank that is always true; on several, migrated elements are regenerated. No
-  communication is added.
+  communication is added. (Geometry is therefore still *regenerated* rather than migrated when an
+  element changes rank, even though its solution now migrates point-to-point.)
 
 Measured: 72.8% of elements reused per epoch at maxLevel 3, rising to 76.5% at maxLevel 8. Adaptation
 cost 0.616 s -> 0.585 s, and the bone-and-marrow case 14.2% -> 10.7% AMR share.
@@ -724,7 +765,9 @@ test. `test/geometry_2d_reuse_mpi.f90` covers the multi-rank branch, asserting b
 regeneration actually fire and that the resulting mixed assembly equals a from-scratch generation
 exactly. Three env-gated switches (`SELF_AMR_GEOM_NO_REUSE`, `SELF_AMR_GEOM_FULL`,
 `SELF_AMR_GEOM_VERIFY`) allow a suspected geometry problem to be localized in one run without a
-rebuild.
+rebuild. Two more do the same for multi-rank solution migration: `SELF_AMR_MIGRATE_GATHER=1`
+selects the v1 allgather path, and `SELF_AMR_MIGRATE_VERIFY=1` runs both migrations and compares
+them value for value (§ Stage 5, 5d).
 
 ### A correctness bug the amortized scheme introduced
 
@@ -937,7 +980,8 @@ rationale.
 | Nonconforming mesh emission | Implemented | Implemented (face mortars) |
 | Transfer plan + solution transfer | Implemented | Implemented (`SELF_TransferPlan_3D`) |
 | Model regrid + AMR controller | Implemented | Implemented (`SELF_AMRController_3D`) |
-| MPI re-partitioning (replicated forest, allgathered migration) | Implemented (v1) | Implemented (v1) |
+| MPI re-partitioning (replicated forest, point-to-point migration) | Implemented (v2) | Implemented (v2) |
+| Migration diagnostics (`SELF_AMR_MIGRATE_*`) | Implemented | Implemented |
 | Device-side solution transfer | Implemented (Stage 6a) | **Implemented** (§6.4) |
 | Amortized high-water-mark storage | Implemented (Stage 6b) | Inherited via the shared data classes |
 | Geometry reuse across an epoch | Implemented (Stage 6c) | Implemented (`SELF_AMR_GEOM_*` switches) |
@@ -987,12 +1031,14 @@ portable implementation stages into a host array whose lifetime is exactly stage
 applying without a preceding stage is a hard error, pinned by
 `test/dgmodel3d_guard_transfer_unstaged.f90`.
 
-`ApplyTransferPlan` takes an optional `uGlobal`, the **multi-rank escape hatch**. The forest is
-rank-replicated and migration is gather-then-slice, so on more than one rank the controller
-allgathers the old field on the host and passes it through `uGlobal`; each rank then fills exactly
-its own new element range and elements that changed ranks are migrated by construction. That
-allgather is inherently a host operation, so the multi-rank branch stays on the portable host
-transfer on every backend, exactly as in 2-D.
+`ApplyTransferPlan` takes an optional `uGlobal` plus an optional `oldFirst`: the **multi-rank
+path**. On more than one rank the controller hands in host-side old-field data and each rank fills
+exactly its own new element range. By default `uGlobal` is the rank's *window* of the old field
+and `oldFirst` is that window's first global old element index, so the plan's global
+`sourceElem`/`family` indices still resolve (Stage-5 v2, § Stage 5); under
+`SELF_AMR_MIGRATE_GATHER=1` it is the whole allgathered global old field, which is the same call
+with `oldFirst = 1`. Either way migration lands in host memory, so the multi-rank branch stays on
+the portable host transfer on every backend, exactly as in 2-D.
 
 **Where the solution lives after `Adapt`.** On a single-rank GPU build the transferred solution is
 left on the **device**, so `solution%interior` (the host mirror) is **stale**. This matches the
@@ -1079,12 +1125,109 @@ by this change, and where the next 3-D optimization work belongs.
   gate's ability to release the mesh behind a passing front (§2.1.1). There is no 3-D analogue, so
   3-D coarsening is exercised only incidentally, by the soundwave regression and by the transfer
   tests' hand-built epochs.
-- **Point-to-point migration (Stage-5 v2).** Multi-rank runs still allgather the old field on the
-  host. Until that changes, the device transfer cannot be used on more than one rank, because the
-  migration it would have to feed from is a host operation.
+- **The device transfer on more than one rank.** Since #167 the old field reaches a rank
+  point-to-point rather than through an allgather, but it lands in host memory, so the multi-rank
+  branch still applies the plan on the host. Feeding the kernel instead needs a device-side window
+  buffer (the local part device-to-device, the received runs host-to-device) and one extra
+  old-element offset argument in `TransferSolution_3D_gpu`. That is the direct follow-up.
+- **A distributed forest.** The forest and the transfer plan are still replicated on every rank,
+  so forest memory is O(global elements) per rank and the per-epoch flag allgather remains. This is
+  issue #167's Stage 2 (the p4est-style design), deliberately deferred until measurement justifies
+  the much larger change: 2:1 balancing becomes a neighbourhood iteration, and the routing argument
+  that makes migration free of handshakes depends on the plan being replicated.
+- **Weighted partitioning.** The repartition is equal element count per rank, which is the right
+  balance measure only because every element carries the same degree.
 - **A 3-D visualization script.** 2-D ships `examples/linear_euler2d_amr_plot.py`. The 3-D
   example writes the same self-describing HDF5 snapshots (solution + geometry per file, so the
   changing mesh needs no special handling downstream) but no renderer is provided.
+
+### 6.6 Multi-rank migration in 3-D
+
+The mechanism is dimension-independent (§ Stage 5, 5d); what differs in 3-D is the price of getting
+it wrong. An element's payload is `(N+1)^3 * nvar` reals rather than `(N+1)^2 * nvar`, so a full
+field is large: at `maxLevel = 3` the example reaches 20,784 elements, which at 125 nodes and 6
+variables in double precision is **125 MB**. Under the v1 gather every rank received every element
+it did not own, once per adapting epoch, and allocated a second full field alongside the live one.
+Under v2 a rank receives only the old elements its new range reads from a peer, which for a
+balanced repartition is the load-imbalance slack at the ends of its range.
+
+The examples report this directly. `BENCH_migrateBytesRecv`, `BENCH_migrateBytesSent` and
+`BENCH_migrateElemRemote` are per-rank run totals, and both migration paths count them, so one
+binary measures both sides:
+
+```shell
+# after (default) vs before (v1), same binary, same mesh trajectory
+mpirun -n 4 ./examples/linear_euler3d_amr_spherical_soundwave
+SELF_AMR_MIGRATE_GATHER=1 mpirun -n 4 ./examples/linear_euler3d_amr_spherical_soundwave
+```
+
+Compare `BENCH_tAdapt_s / BENCH_nAdaptEpochs` - the cost of an *adapting* epoch - rather than the
+whole-epoch figure, which is diluted by indicator-only no-op epochs; and treat the comparison as
+void unless `BENCH_nAdaptEpochs` and `BENCH_nElemFinal` agree between the two runs, since
+otherwise the two took different mesh trajectories. `BENCH_tForwardStep_s` is the control: nothing
+was added to the time-stepping loop.
+
+#### What was measured
+
+**Communication volume**, from the 3-D spherical soundwave and the 2-D ultrasound point source at
+`maxLevel = 2` / `maxLevel = 4`, six epochs (five adapting), on a 12-thread CPU box. Per-rank
+totals over the run; both runs of a pair have identical `nAdaptEpochs` and `nElemFinal`, and the
+final pressure extrema agree to every printed digit. Note this is a *smaller* mesh than the 125 MB
+example above, which is an illustration of the full-field size at a deeper level, not a measurement
+of these runs.
+
+| case | ranks | received per rank, v1 | received per rank, v2 | remote elements v1 -> v2 |
+|---|---|---|---|---|
+| 3-D | 2 | 35.9 MB | **0** | 5988 -> 0 |
+| 3-D | 4 | 53.9 MB | **0.95 MB** | 8982 -> 159 |
+| 3-D | 8 | 62.9 MB | **1.80 MB** | 10479 -> 300 |
+| 2-D | 2 | 10.9 MB | **0** | 4242 -> 0 |
+| 2-D | 4 | 16.3 MB | **0.55 MB** | 6363 -> 215 |
+| 2-D | 8 | 19.0 MB | **0.28 MB** | 7420 -> 108 |
+
+These count **bytes arriving in a rank's own memory** - the quantity that sets the migration
+footprint - not total network traffic: what a collective moves internally depends on the algorithm
+the MPI implementation selects, which is not something to model from the outside. Read two things
+from the table. First, v1's received volume grows with rank count in both dimensions (each rank
+approaches "everyone else's whole field"), while v2's is set by how far the partition boundary
+actually moves. Second, at 2 ranks v2's traffic is exactly **zero**: a contiguous
+space-filling-curve repartition of a symmetric refinement leaves each rank's new range sourced
+entirely from its own old range - the windows printed under `SELF_AMR_MIGRATE_VERIFY=1` are
+`[1,256]` and `[257,512]`, precisely the two old ranges. That is a property of the refinement
+pattern, not of the mechanism: `test/amr_migrate_{2,3}d_window_mpi.f90` refines asymmetrically on
+purpose and asserts that elements do cross ranks (17 of them at 2 ranks, and at 4 ranks one rank's
+window is entirely remote while another's spans three peers), so a regression that silently made
+the exchange a no-op would fail there.
+
+Peak RSS is **not** a usable signal at this problem size: the deltas (16 MB at 2 ranks, 1 MB at 4,
+7 MB at 8) are smaller than and not proportional to the buffer removed, because the footprint is
+dominated by the replicated forest, the geometry double-buffers and the halo tables. The buffer
+that went away matters at scale, where it is O(global field) per rank; here it is not what sets the
+peak.
+
+**Adaptation time**, on one B300 node with four GPUs (CUDA sm_103, one rank per GPU), `maxLevel = 3`,
+ten adapting epochs, four repetitions per configuration with the two migration paths interleaved
+per repetition so warm-up cannot land preferentially on one of them. Median seconds per adapting
+epoch, with the observed range:
+
+| ranks | v1 gather | v2 point-to-point | received per rank, v1 -> v2 |
+|---|---|---|---|
+| 1 | 0.982 [0.914, 0.985] | 0.965 [0.961, 0.988] | 0 -> 0 (nothing migrates) |
+| 2 | 0.538 [0.525, 0.558] | 0.553 [0.528, 0.558] | 123.5 MB -> **0** |
+| 4 | 0.332 [0.296, 0.340] | 0.287 [0.286, 0.302] | 185.2 MB -> **1.5 MB** |
+
+At one rank the two are the same code path, and they measure the same - which is the check that
+the windowed apply and its bounds guard cost nothing on the path that does not migrate. At two
+ranks eliminating 123 MB per rank of host collective buys no measurable time: an allgather within
+one node is fast, and adaptation is dominated by geometry and the indicator. At four ranks the
+ranges no longer overlap and the point-to-point path is about 13% faster per adapting epoch. The
+volume reduction is the durable result; the time saved is what that volume happened to cost on this
+machine at this scale.
+
+`BENCH_tForwardStep_s` is unchanged between the two paths at every rank count, as it must be.
+(It does grow steeply with rank count on this node - 1.2 s, 4.7 s, 23.8 s - because the halo
+exchange runs through host memory in this container configuration. That is a pre-existing property
+of multi-rank GPU runs, identical in both paths, and unrelated to migration.)
 
 ---
 

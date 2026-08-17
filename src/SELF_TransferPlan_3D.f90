@@ -236,14 +236,48 @@ contains
   subroutine ApplyTransferPlanRange(plan,interp,nVar,uOld,eFirst,eLast,uNew)
     !! Execute the contiguous sub-range eFirst..eLast of a transfer plan: uNew(:,:,:,k,:)
     !! receives the data of new element eFirst+k-1. uOld is the full (global) old field; the
-    !! output is only the requested slice. This is the decomposed-mesh (AMR Stage 5) entry
-    !! point: each rank passes its own contiguous range of the new element ordering and a
-    !! gathered global old solution, and fills exactly its rank-local storage.
+    !! output is only the requested slice. This is the gather-then-slice (AMR Stage-5 v1)
+    !! decomposed-mesh entry point: each rank passes its own contiguous range of the new
+    !! element ordering and a gathered global old solution, and fills exactly its rank-local
+    !! storage. ApplyTransferPlanWindow is the point-to-point (v2) entry point, which needs
+    !! only the sub-range of the old field the requested new range actually references; this
+    !! routine is that one over the whole old field, so the two are bit-identical by
+    !! construction rather than by inspection.
     implicit none
     type(TransferPlan3D),intent(in) :: plan
     type(Lagrange),intent(in) :: interp
     integer,intent(in) :: nVar
     real(prec),intent(in) :: uOld(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:plan%nOld,1:nVar)
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    real(prec),intent(out) :: uNew(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:eLast-eFirst+1,1:nVar)
+
+    call ApplyTransferPlanWindow(plan,interp,nVar,uOld,1,plan%nOld,eFirst,eLast,uNew)
+
+  endsubroutine ApplyTransferPlanRange
+
+  subroutine ApplyTransferPlanWindow(plan,interp,nVar,uOld,oldFirst,oldLast,eFirst,eLast,uNew)
+    !! Execute the contiguous sub-range eFirst..eLast of a transfer plan against a WINDOW of
+    !! the old field: uOld holds old elements oldFirst..oldLast only, indexed in the global old
+    !! element numbering that plan%sourceElem and plan%family use, rather than the whole global
+    !! field. uNew(:,:,:,k,:) receives the data of new element eFirst+k-1.
+    !!
+    !! This is the point-to-point migration (AMR Stage-5 v2) entry point. Because both the old
+    !! and the new partition are contiguous ranges of the same space-filling-curve leaf order,
+    !! the old elements a rank's new range references form a contiguous window that a rank
+    !! computes locally from the (rank-replicated) plan - see PlanWindows in the AMR
+    !! controllers - and receives point-to-point instead of allgathering the global field.
+    !!
+    !! Units and layout are those of MappedScalar3D %interior. The transfer operators are
+    !! unchanged, so the operator identities hold as documented in the module header: exact
+    !! prolongation, conservative L2 restriction.
+    implicit none
+    type(TransferPlan3D),intent(in) :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: oldFirst
+    integer,intent(in) :: oldLast
+    real(prec),intent(in) :: uOld(1:interp%N+1,1:interp%N+1,1:interp%N+1,oldFirst:oldLast,1:nVar)
     integer,intent(in) :: eFirst
     integer,intent(in) :: eLast
     real(prec),intent(out) :: uNew(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:eLast-eFirst+1,1:nVar)
@@ -261,6 +295,12 @@ contains
         ' : Error : ApplyTransferPlanRange called with a range outside 1..nNew.'
       stop 1
     endif
+    if(oldFirst < 1 .or. oldLast > plan%nOld .or. oldLast < oldFirst) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : ApplyTransferPlanWindow called with an old-element window outside'// &
+        ' 1..nOld.'
+      stop 1
+    endif
 
     Np = interp%N+1
     allocate(buf(1:Np,1:Np,1:Np,1:nVar))
@@ -269,6 +309,27 @@ contains
 
     do li = eFirst,eLast
       lo = li-eFirst+1
+
+      ! Every old element this entry reads must lie inside the supplied window. A window that
+      ! does not cover the entry is a routing error (the window was computed from a different
+      ! plan or a different partition), so report it rather than read outside the array. On the
+      ! whole-field path the condition can never fire; the cost is a handful of integer
+      ! comparisons per element, once per adaptation epoch.
+      if(plan%sourceKind(li) == SELF_TRANSFER_RESTRICT) then
+        do c = 1,8
+          if(plan%family(c,li) < oldFirst .or. plan%family(c,li) > oldLast) then
+            print*,__FILE__,':',__LINE__, &
+              ' : Error : new element',li,' restricts from old element',plan%family(c,li), &
+              ' outside the supplied old-element window',oldFirst,oldLast
+            stop 1
+          endif
+        enddo
+      elseif(plan%sourceElem(li) < oldFirst .or. plan%sourceElem(li) > oldLast) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : new element',li,' sources old element',plan%sourceElem(li), &
+          ' outside the supplied old-element window',oldFirst,oldLast
+        stop 1
+      endif
 
       if(plan%sourceKind(li) == SELF_TRANSFER_COPY) then
         uNew(1:Np,1:Np,1:Np,lo,1:nVar) = uOld(1:Np,1:Np,1:Np,plan%sourceElem(li),1:nVar)
@@ -295,6 +356,6 @@ contains
 
     deallocate(buf,kids,fam)
 
-  endsubroutine ApplyTransferPlanRange
+  endsubroutine ApplyTransferPlanWindow
 
 endmodule SELF_TransferPlan_3D
