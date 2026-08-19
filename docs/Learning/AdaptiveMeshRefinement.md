@@ -1310,11 +1310,11 @@ own tolerance. Merging the two would force the strict one down to the loose bar,
 separately is the defence against someone later doing precisely that.
 
 **`SELF_AMR_TRANSFER_HOST=1`** routes a GPU build back through the portable windowed path. It is
-both an escape hatch and the A/B switch the measurements below were taken with, so that before and
+both an escape hatch and the A/B switch this path is timed with, so that before and
 after share one binary, one build and one mesh trajectory — the condition an earlier #165 baseline
 violated by changing the example between runs.
 
-**Coverage, and one thing that cannot be tested serially.** `test/amr_migrate_{2,3}d_device_apply_mpi`
+**Coverage, in two layers that fail for different reasons.** `test/amr_migrate_{2,3}d_device_apply_mpi`
 drives the whole path through the model at 2 and 4 ranks against an independently built whole-field
 reference. It uses ASYMMETRIC refinement, and must: under a symmetric refinement the contiguous
 space-filling-curve repartition leaves every rank's new range sourced from its own old range, so not

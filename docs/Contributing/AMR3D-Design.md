@@ -505,7 +505,7 @@ one can fail for a different reason:
   error from a migration error. GPU-gated, unavoidably - it is the one gated test
   in that change, because the kernel is the subject and a CPU build has no second
   implementation to compare against.
-- `SELF_AMR_MIGRATE_VERIFY=1` / `SELF_AMR_GATHER=1` / `SELF_AMR_TRANSFER_HOST=1` /
+- `SELF_AMR_MIGRATE_VERIFY=1` / `SELF_AMR_MIGRATE_GATHER=1` / `SELF_AMR_TRANSFER_HOST=1` /
   `SELF_AMR_TRANSFER_VERIFY=1` re-runs. Note the last two check DIFFERENT things
   at different bars, and must stay separate: `MIGRATE_VERIFY` asserts the window
   arrived intact and is BITWISE, because migration is byte movement;

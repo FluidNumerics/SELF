@@ -359,7 +359,7 @@ contains
     implicit none
     integer,intent(in) :: eGlobal,i,j,iv
 
-    OldValue = real(1000*iv+100*eGlobal+10*i+j,prec)/1024.0_prec
+    OldValue = real(1000000*iv+1000*eGlobal+10*i+j,prec)/1024.0_prec
 
   endfunction OldValue
 

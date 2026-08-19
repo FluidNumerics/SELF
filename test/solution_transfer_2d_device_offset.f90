@@ -172,13 +172,17 @@ contains
     endif
     if(r /= 0) return
 
-    ! ---- A window of old-field values, distinct per (element,node,variable) ----
+    ! ---- A window of old-field values ----
+    ! One decimal place per index, so the map from (element,node,variable) to value is a
+    ! BIJECTION: a wrong source element cannot coincide with a legitimate value. Divided by a
+    ! power of two so every value is exactly representable and the difference below reflects
+    ! only the operators, not the encoding.
     allocate(uWin(1:Np,1:Np,1:nWinElem,1:nvar))
     do iv = 1,nvar
       do e = 1,nWinElem
         do j = 1,Np
           do i = 1,Np
-            uWin(i,j,e,iv) = real(1000*iv+100*(e+wFirst-1)+10*i+j,prec)/1024.0_prec
+            uWin(i,j,e,iv) = real(1000000*iv+1000*(e+wFirst-1)+10*i+j,prec)/1024.0_prec
           enddo
         enddo
       enddo
