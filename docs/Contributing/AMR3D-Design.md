@@ -423,13 +423,13 @@ against `solution%interior_gpu`; making that contingent on there being something
 to copy would strand a rank whose local run is empty. `HaloPack_3D_gpu`
 synchronizes before its own MPI for the same reason.
 
-**A normative rule this change follows.** No CI job compiles the CUDA/HIP path —
-every workflow in `.github/workflows/` is CPU-only, and the nvfortran one even
-exports `OMP_TARGET_OFFLOAD=DISABLED`. So new index and byte arithmetic belongs in
-`src/`, shared with the host path, where one CPU test covers both; and the guard
-that the kernel cannot perform (every source inside the window) lives in the
-Fortran caller, not the kernel, where it would be neither reportable nor
-block-uniform.
+**A convention this change follows.** New index and byte arithmetic belongs in
+`src/`, shared with the host path, so that every CI job checks it rather than only
+the two Buildkite GPU pipelines (see §6) - and so that a CPU build can fail for a
+logic error rather than deferring it to hardware. The guard the kernel cannot
+perform (every source inside the window) likewise lives in the Fortran caller,
+where it can report; inside the kernel an early return would be neither reportable
+nor block-uniform, and would strand the `__syncthreads()` calls.
 
 ---
 
@@ -516,12 +516,25 @@ Two ranks are not enough on their own: with one peer the send and receive runs
 are forced and no window can straddle more than one peer, which is why the
 4-rank entries exist (`SELF_MPIEXEC_NUMPROCS_MANY`, default 4).
 
-GPU coverage, stated accurately because it constrains everything above: **no CI
-job builds or runs the CUDA/HIP path.** Every workflow in `.github/workflows/` is
-CPU-only. Device coverage comes from manual runs on a dedicated GPU node (a B300,
-CUDA sm_103, for #165/#167/#172), so a device code path that a CPU build cannot
-exercise has no automated coverage at all - which is why the tests above are
-deliberately NOT GPU-gated, and why new index arithmetic is kept in `src/`.
+GPU coverage comes from two places, and it is worth being precise about which:
+GitHub Actions (`.github/workflows/`) is entirely CPU-only - the nvfortran job even
+exports `OMP_TARGET_OFFLOAD=DISABLED` - so nothing there compiles a device kernel.
+Buildkite (`.buildkite/pipeline.yml`) does: on every non-`main` branch it uploads
+on-hardware coverage pipelines for AMD MI210 (HIP, gfx90a) and NVIDIA V100 (CUDA,
+sm_70), each configuring `SELF_ENABLE_GPU=ON` and running the full `ctest`, plus an
+x86 CPU pipeline. So a pull request does build and run both device backends, and
+`src/gpu/` coverage is uploaded from there.
+
+Two consequences for the tests above. A GPU-gated test is not dead weight - it runs
+on both backends per PR - but it is invisible to the much faster and more numerous
+GitHub Actions jobs, so the default remains NOT to gate: a test that can assert
+something real on a CPU build should. And keeping new index arithmetic in `src/`
+rather than `src/gpu/` still earns its keep, not because the device path is
+uncompiled, but because arithmetic shared with the host path is checked by every
+job rather than only by the two GPU ones. Deeper GPU work still wants a dedicated
+node for measurement (a B300, CUDA sm_103, for #165/#167/#172), since the Buildkite
+pipelines are correctness gates and not a benchmarking environment.
+
 CPU/GPU flag agreement is enforced by construction (shared host
 `FinalizeIndicator`); post-adapt solution agreement by tolerance.
 
