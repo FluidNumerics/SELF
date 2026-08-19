@@ -1336,7 +1336,8 @@ testing what it exists for. The direct tests are the one GPU-gated pair in this 
 print SKIP on a CPU build, because there the kernel is absent and there is nothing to compare. They
 are not thereby untested: Buildkite runs on-hardware coverage pipelines for MI210 (HIP) and V100
 (CUDA) on every pull-request branch, so both device backends build and run the full suite per PR.
-GitHub Actions is the CPU-only half of the estate.
+GitHub Actions is the CPU-only half of the estate. Note that every job in both halves uses
+gfortran - see `AMR3D-Design.md` §6 - so CI says nothing about ifx, nvfortran or amdflang.
 
 On the host side `transfer_plan_{2,3}d_window` already pins the offset arithmetic bitwise over five
 partition tables, including offset, all-remote and empty windows. And
