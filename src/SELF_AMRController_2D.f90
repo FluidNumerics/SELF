@@ -91,6 +91,7 @@ module SELF_AMRController_2D
   use SELF_RefinementIndicator_2D
   use SELF_TransferPlan_2D
   use SELF_DomainDecomposition
+  use SELF_SolutionMigration
   use mpi
 
   implicit none
@@ -360,29 +361,6 @@ contains
 
   endsubroutine AllgatherPerElemReals
 
-  subroutine OwnedRun(offsetElem,r,first,last,a,b)
-    !! The run of elements that rank r-1 owns and that also lies in [first,last]: a..b, empty when
-    !! b < a. offsetElem is a decomposition's contiguous ownership table, so rank r-1 owns
-    !! offsetElem(r)+1 .. offsetElem(r+1).
-    !!
-    !! Both halves of the migration schedule are this one intersection, evaluated from replicated
-    !! tables: my receive run from peer r-1 is (my window) n (r-1's old range), and my send run to
-    !! peer r-1 is (r-1's window) n (my old range). Factored out so that the sender and the
-    !! receiver cannot drift apart, and so a serial test can exercise the arithmetic the exchange
-    !! actually uses rather than a copy of it.
-    implicit none
-    integer,intent(in) :: offsetElem(:)
-    integer,intent(in) :: r !! 1-based table index; the rank is r-1
-    integer,intent(in) :: first
-    integer,intent(in) :: last
-    integer,intent(out) :: a
-    integer,intent(out) :: b
-
-    a = max(first,offsetElem(r)+1)
-    b = min(last,offsetElem(r+1))
-
-  endsubroutine OwnedRun
-
   subroutine PlanWindows(plan,nRanks,newOffset,winFirst,winLast)
     !! For every rank r, the contiguous window [winFirst(r),winLast(r)] of GLOBAL old element
     !! indices that rank r's new element range references through the transfer plan. The plan is
@@ -432,23 +410,12 @@ contains
     !! Migrate the pre-regrid solution into this rank's old-element window with point-to-point
     !! messages: the Stage-5 v2 replacement for allgathering the whole old field onto every rank.
     !!
-    !! Each peer contributes exactly one contiguous run of old elements - the intersection of the
-    !! range it owned before the epoch with this rank's window - because both partitions are
-    !! contiguous ranges of the same leaf order. Both ends of a pair derive that run from the
-    !! same replicated offsetElem and window tables with the same integer arithmetic, so the
-    !! send and receive lists match by construction: no handshake, no collective, and nothing to
-    !! agree on at run time.
-    !!
-    !! Nothing is packed. A run of elements at a fixed variable is contiguous in both the source
-    !! (%interior) and the destination (the window), so each message reads and writes the real
-    !! storage directly; that costs one message per (peer,variable) instead of one per peer. For
-    !! a balanced repartition the peer count is a small handful; nothing bounds it to that, so the
-    !! request arrays are sized for the worst case of every rank.
-    !!
-    !! The whole window is written every epoch, not just the elements the plan reads: the local
-    !! part plus the per-peer runs tile [wFirst,wLast] exactly once, because the old partition
-    !! tiles the old element list. So uWin carries nothing stale from a previous epoch even
-    !! though the buffer is reused, and the verification path may compare all of it.
+    !! The schedule itself lives in SELF_SolutionMigration, on flat buffers, so that one copy of it
+    !! serves both dimensions and every backend - in particular so that the GPU backend can run
+    !! the same message set with the window in device memory. This wrapper is the 2-D host form:
+    !! it exists because the plan-window tests and the portable path read and write the solution as
+    !! a rank-4 array, and passing the whole array to the flat routine's assumed-size dummy is
+    !! sequence association over storage that is contiguous in every case SELF constructs.
     !!
     !! Runs once per adapting epoch, between time steps - never inside the time-stepping loop.
     implicit none
@@ -467,64 +434,13 @@ contains
     integer(int64),intent(inout) :: nBytesRecv
     integer(int64),intent(inout) :: nBytesSent
     integer(int64),intent(inout) :: nElemRemote
-    ! Local
-    integer :: r,iv,a,b,cnt,e,msgCount,ierror
-    integer :: myFirst,perElem,nbyte
-    integer,allocatable :: requests(:),stats(:,:)
 
-    myFirst = decomp%offsetElem(decomp%rankId+1)+1
-    ! storage_size, not the kind value prec: the two coincide for the kinds SELF uses, but only
-    ! the intrinsic actually reports a width, and these counters are quoted as bytes.
-    nbyte = storage_size(1.0_prec)/8
-    perElem = Np*Np
-
-    allocate(requests(1:2*nvar*decomp%nRanks))
-    allocate(stats(MPI_STATUS_SIZE,1:2*nvar*decomp%nRanks))
-    msgCount = 0
-
-    ! Receives first, as everywhere else in SELF: the runs of my window that other ranks own.
-    do r = 1,decomp%nRanks
-      if(r-1 == decomp%rankId) cycle
-      call OwnedRun(decomp%offsetElem,r,wFirst,wLast,a,b)
-      if(b < a) cycle
-      cnt = perElem*(b-a+1)
-      nBytesRecv = nBytesRecv+int(cnt,int64)*nvar*nbyte
-      nElemRemote = nElemRemote+int(b-a+1,int64)
-      do iv = 1,nvar
-        msgCount = msgCount+1
-        call MPI_IRECV(uWin(1,1,a,iv),cnt,decomp%mpiPrec, &
-                       r-1,iv,decomp%mpiComm,requests(msgCount),ierror)
-      enddo
-    enddo
-
-    ! Sends: the runs of my old range that other ranks' windows need.
-    do r = 1,decomp%nRanks
-      if(r-1 == decomp%rankId) cycle
-      call OwnedRun(decomp%offsetElem,decomp%rankId+1,winFirst(r),winLast(r),a,b)
-      if(b < a) cycle
-      cnt = perElem*(b-a+1)
-      nBytesSent = nBytesSent+int(cnt,int64)*nvar*nbyte
-      do iv = 1,nvar
-        msgCount = msgCount+1
-        call MPI_ISEND(uLocal(1,1,a-myFirst+1,iv),cnt,decomp%mpiPrec, &
-                       r-1,iv,decomp%mpiComm,requests(msgCount),ierror)
-      enddo
-    enddo
-
-    ! The part of my window I already own, copied while the messages are in flight.
-    call OwnedRun(decomp%offsetElem,decomp%rankId+1,wFirst,wLast,a,b)
-    do iv = 1,nvar
-      do e = a,b
-        uWin(1:Np,1:Np,e,iv) = uLocal(1:Np,1:Np,e-myFirst+1,iv)
-      enddo
-    enddo
-
-    if(msgCount > 0) then
-      call MPI_WAITALL(msgCount,requests(1:msgCount), &
-                       stats(1:MPI_STATUS_SIZE,1:msgCount),ierror)
-    endif
-
-    deallocate(requests,stats)
+    ! Whole arrays, not first elements: either may be zero-sized (an empty window on a rank that
+    ! owns no new elements; no old elements on a rank the previous partition left empty), and a
+    ! zero-sized whole array is a legal actual argument for an assumed-size dummy where the
+    ! element reference uWin(1,1,wFirst,1) would be out of bounds.
+    call ExchangeOldWindowFlat(decomp,Np*Np,nvar,nLocalOld,uLocal,winFirst,winLast, &
+                               wFirst,wLast,uWin,nBytesRecv,nBytesSent,nElemRemote)
 
   endsubroutine ExchangeOldWindow
 
