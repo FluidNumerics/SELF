@@ -1341,6 +1341,62 @@ partition tables, including offset, all-remote and empty windows. And
 value-level test at all, only 3-D did.
 
 
+**Measurements.** B300 (CUDA sm_103), one dedicated node, 4 GPUs, 4 repetitions with the two modes
+interleaved WITHIN each repetition. `SELF_AMR_TRANSFER_HOST=1` selects the host side, so both sides
+are one binary, one build and one mesh trajectory. Figures are seconds per ADAPTING epoch
+(`BENCH_tAdapt_s / BENCH_nAdaptEpochs`), taken as the max over ranks — an adaptation is collective,
+so its slowest rank gates it — then the median over repetitions. The percentage is the median of the
+PAIRED per-repetition ratios, not the ratio of the medians: interleaving exists to make each
+repetition a matched pair, and comparing medians throws that away. On 2-D at 4 ranks the two
+differ by 13 points, which is how much the pairing is worth.
+
+3-D, `linear_euler3d_amr_spherical_soundwave` at `maxLevel = 3`, 20 epochs, 20,784 elements — the
+same configuration §6.4 measured, so the rows are directly comparable to it:
+
+| ranks | elem/rank | host | device | paired median | per rep | recv/rank |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 20,784 | 2.006 s | 2.003 s | **-0.5%** | +0/-1/-1/-0% | 0 |
+| 2 | 10,392 | 1.112 s | 1.003 s | **-10.3%** | -12/-11/-10/-9% | 0 |
+| 4 | 5,196 | 0.601 s | 0.537 s | **-10.3%** | -10/-10/-10/-11% | 8.9 MB |
+
+**One rank is a control, not a datapoint.** The branch is gated on `nRanks > 1`, so the two labels
+execute identical code there and must agree; -0.5% is the harness reporting that it is measuring
+what it claims to. A #167 sweep that looped the mode OUTER and repetitions inner put the whole
+warm-up penalty on whichever mode ran first and manufactured a 1.7x difference at one rank, which is
+why the control is kept and why the loop order is what it is.
+
+**The 2-rank row is the interesting one.** It migrates ZERO bytes — under a symmetric refinement the
+contiguous space-filling-curve repartition leaves every rank's new range sourced from its own old
+range — and still gains 10.3%. So the saving cannot be the eliminated host copies; it is the
+per-element tensor-product interpolation leaving the CPU, exactly as §6.4 concluded for one rank.
+The 4-rank row does move 8.9 MB per rank, directly into device memory, and gains the same 10.3%.
+The figure tracks rank-local element count rather than communication volume.
+
+`BENCH_tForwardStep_s` is the control on everything else, and its paired drift is within ±0.3% at
+every rank count. Watch the per-repetition values rather than a magnitude, though: at 2 ranks they
+run -9/+36/+1/-1%, which CHANGES SIGN and is therefore run-to-run variance in the halo exchange
+(which goes through host memory in this container configuration, per §6.6) rather than an effect of
+the switch. Reported as magnitudes it would have looked like a consistent 12% regression.
+
+2-D, `linear_euler2d_amr_ultrasound_pointsource` at `maxLevel = 6`, 20 epochs, 1,648 elements. The
+gains are larger in relative terms and **should not be quoted precisely**: a 2-D adaptation here is
+15-25 ms, small enough that the per-repetition spread swamps the effect. The direction is
+consistent with 3-D; the magnitude is not measurable on this node at this scale.
+
+| ranks | elem/rank | host | device | paired median | per rep |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 1,648 | 0.0231 s | 0.0231 s | **+1.0%** (control) | -1/+1/+1/+3% |
+| 2 | 824 | 0.0212 s | 0.0148 s | -28% | -34/-50/-23/**+9**% |
+| 4 | 412 | 0.0146 s | 0.0117 s | -15% | -2/-16/-15/-37% |
+
+The `+9%` repetition at 2 ranks is left in the table deliberately. A summary statistic that hid it
+would imply a reliability the measurement does not have at this problem size.
+
+Validity gates, all of which held: `BENCH_nAdaptEpochs`, `BENCH_nElemFinal` and `BENCH_nSteps`
+identical between modes at every rank count, and `BENCH_migrateBytesRecv` identical too - this
+change moves where bytes land, not how many, so a difference there would have meant the routing had
+changed and voided the comparison.
+
 ---
 
 ## 7. References
