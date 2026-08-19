@@ -505,12 +505,25 @@ one can fail for a different reason:
   error from a migration error. GPU-gated, unavoidably - it is the one gated test
   in that change, because the kernel is the subject and a CPU build has no second
   implementation to compare against.
-- `SELF_AMR_MIGRATE_VERIFY=1` / `SELF_AMR_MIGRATE_GATHER=1` / `SELF_AMR_TRANSFER_HOST=1` /
-  `SELF_AMR_TRANSFER_VERIFY=1` re-runs. Note the last two check DIFFERENT things
-  at different bars, and must stay separate: `MIGRATE_VERIFY` asserts the window
-  arrived intact and is BITWISE, because migration is byte movement;
-  `TRANSFER_VERIFY` asserts the two applies agree and is tolerance-based, because
-  the device compiler contracts the kernel's multiply-accumulates into FMAs.
+- `SELF_AMR_MIGRATE_VERIFY=1` / `SELF_AMR_MIGRATE_GATHER=1` re-runs, plus
+  `SELF_AMR_TRANSFER_VERIFY=1` in 2-D. These check DIFFERENT things at different
+  bars and must stay separate: `MIGRATE_VERIFY` asserts the window arrived intact
+  and is BITWISE, because migration is byte movement; `TRANSFER_VERIFY` asserts the
+  two applies agree and is tolerance-based, because the device compiler contracts
+  the kernel's multiply-accumulates into FMAs.
+  `SELF_AMR_TRANSFER_HOST=1` is deliberately NOT registered as a GitHub Actions
+  re-run: on a CPU build it selects the same code the default takes, so it would
+  cost 33 s across both dimensions for a few lines of branch coverage in a job that
+  already runs within minutes of its 90-minute ceiling. It is exercised where it
+  selects different code - the Buildkite GPU pipelines, and the B300 verification
+  runs, which do an explicit `TRANSFER_HOST=1` pass over the whole set.
+
+Test cost is a real constraint here, not a footnote. The `gfortran-12 coverage` job
+runs at roughly 85-90 minutes against a hard `timeout-minutes: 90`, with enough
+runner-to-runner variance to cancel on a bad draw; commit `d88910d4` trimmed the
+3-D AMR soundwave family for exactly this reason. Anything added to the AMR MPI
+family should be costed (`Testing/Temporary/CTestCostData.txt`) before it is
+registered.
 
 Two ranks are not enough on their own: with one peer the send and receive runs
 are forced and no window can straddle more than one peer, which is why the

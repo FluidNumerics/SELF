@@ -464,38 +464,28 @@ add_test(NAME lineareuler3d_amr_soundwave_mpi_migrate_gather
 set_tests_properties(lineareuler3d_amr_soundwave_mpi_migrate_gather PROPERTIES
                      LABELS "parallel" ENVIRONMENT "SELF_AMR_MIGRATE_GATHER=1")
 
-# Two more re-runs of the same sources, for the windowed transfer (#172):
-#  - TRANSFER_HOST    forces the portable host migration and windowed apply even on a GPU build.
-#                     It is the A/B switch the timings are taken with, so it must not rot; on a CPU
-#                     build it selects the same code the default path already takes, and the value
-#                     is then that the branch itself stays exercised.
-#  - TRANSFER_VERIFY  applies the plan BOTH ways from the same migrated window and compares. To a
-#                     TOLERANCE, and only because the device compiler contracts the kernel's
-#                     multiply-accumulates into FMAs - deliberately a different switch from
-#                     MIGRATE_VERIFY, which checks that the window ARRIVED intact and is exact.
-#                     Merging the two would drag the strict one down to the loose bar.
-add_test(NAME lineareuler2d_amr_soundwave_mpi_transfer_host
-         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
-                 ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
-set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_host PROPERTIES
-                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1")
-
-add_test(NAME lineareuler3d_amr_soundwave_mpi_transfer_host
-         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
-                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
-set_tests_properties(lineareuler3d_amr_soundwave_mpi_transfer_host PROPERTIES
-                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1")
-
+# One re-run of an existing source for the windowed transfer (#172), chosen against the coverage
+# job's 90-minute ceiling rather than for symmetry. Measured costs of the candidates were 10.8 s
+# (2-D) and 22.6 s (3-D) EACH, and this job already runs within a few minutes of that ceiling -
+# the 3-D AMR family was trimmed once before for the same reason (see the note above). So:
+#
+#  - TRANSFER_VERIFY is registered, in 2-D only. It applies the plan BOTH ways from the same
+#    migrated window and compares, which on a CPU build exercises VerifyWindowedApply, the window
+#    download, and the double-apply sequencing - all genuinely new code. The comparison is to a
+#    TOLERANCE, and only because the device compiler contracts the kernel's multiply-accumulates
+#    into FMAs; it is deliberately a DIFFERENT switch from MIGRATE_VERIFY, which asserts the window
+#    ARRIVED intact and is exact. Merging them would drag the strict one down to the loose bar.
+#
+#  - TRANSFER_HOST is NOT registered here. On a CPU build it selects the same code the default path
+#    already takes - only static instead of dynamic dispatch - so it would buy a few lines of
+#    branch coverage for 33 s across the two dimensions. Where it selects genuinely different code
+#    is a GPU build, and there it IS exercised: the Buildkite MI210/V100 pipelines run the suite
+#    with the device backend, and the B300 verification runs an explicit SELF_AMR_TRANSFER_HOST=1
+#    pass over the whole AMR/transfer set.
 add_test(NAME lineareuler2d_amr_soundwave_mpi_transfer_verify
          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
                  ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
 set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_verify PROPERTIES
-                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_VERIFY=1")
-
-add_test(NAME lineareuler3d_amr_soundwave_mpi_transfer_verify
-         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
-                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
-set_tests_properties(lineareuler3d_amr_soundwave_mpi_transfer_verify PROPERTIES
                      LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_VERIFY=1")
 
 # Two ranks cannot distinguish gather-then-slice from a point-to-point routing bug: with one peer
