@@ -706,6 +706,7 @@ contains
     ! Local
     integer :: perElem,nWinElem,nLocalOld,myFirst,a,b,msgCount
     integer(c_size_t) :: nbytes
+    integer(int64) :: nWinReals,nLocReals
     integer,allocatable :: requests(:)
     real(prec),pointer,contiguous :: win(:),uloc(:)
 
@@ -724,13 +725,23 @@ contains
       this%xferWinBytes = nbytes
     endif
 
+    ! A flat descriptor cannot span more reals than a default integer can index, and the products
+    ! below are what would silently wrap: perElem*nWinElem*nvar is the whole buffer. Fail loudly
+    ! instead. The same ceiling already binds the exchange, whose MPI counts are default integers.
+    nWinReals = int(perElem,int64)*int(max(nWinElem,1),int64)*int(this%nvar,int64)
+    nLocReals = int(perElem,int64)*int(max(nLocalOld,1),int64)*int(this%nvar,int64)
+    if(max(nWinReals,nLocReals) > int(huge(1),int64)) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : the migration window exceeds what a default integer can index.'
+      stop 1
+    endif
+
     ! Device allocations viewed as flat Fortran arrays, so the migration schedule can index them
     ! and MPI can be handed their addresses: the idiom SideExchangeStart already uses for the
     ! packed halo buffers.
-    call c_f_pointer(this%xferWin_gpu,win, &
-                     [perElem*max(nWinElem,1)*this%nvar])
+    call c_f_pointer(this%xferWin_gpu,win,[int(nWinReals)])
     if(nLocalOld > 0) then
-      call c_f_pointer(this%solution%interior_gpu,uloc,[perElem*nLocalOld*this%nvar])
+      call c_f_pointer(this%solution%interior_gpu,uloc,[int(nLocReals)])
     else
       ! This rank owned no old elements, so interior_gpu need not be a valid allocation. It posts
       ! no sends either (its old range intersects nobody's window), so uloc is never dereferenced;

@@ -407,6 +407,30 @@ the device compiler contracts these multiply-accumulates into FMAs.
 reference value by value; the AMR regressions assert the invariants (conservation,
 entropy non-growth), which conservation arguments make exact either way.
 
+**The window form (#172).** `TransferSolution_3D_gpu` takes an `oldFirst0`
+argument and `nOld` means `uOld`'s per-variable element STRIDE, not the global
+old-leaf count; a plan's global source index is rebased as `src - oldFirst0`. The
+whole-field case is exactly `oldFirst0 = 0`, so the single-rank path is unchanged
+arithmetic. This is what lets a multi-rank adaptation use the kernel at all: the
+window of old elements a rank reads is migrated to it point-to-point and, on a GPU
+build, assembled in device memory — its own run device-to-device, the peers' runs
+`MPI_Irecv`'d straight into device memory. That requires a GPU-aware MPI, which is
+not a new dependency: the per-step aggregated halo exchange has always posted on
+device allocations with no fallback, and `SELF_REQUIRE_GPU_AWARE_MPI` is fatal by
+default. The local run is copied by `MigrateWindowLocal_gpu`, which synchronizes
+the device UNCONDITIONALLY before returning, because the caller then posts MPI
+against `solution%interior_gpu`; making that contingent on there being something
+to copy would strand a rank whose local run is empty. `HaloPack_3D_gpu`
+synchronizes before its own MPI for the same reason.
+
+**A normative rule this change follows.** No CI job compiles the CUDA/HIP path —
+every workflow in `.github/workflows/` is CPU-only, and the nvfortran one even
+exports `OMP_TARGET_OFFLOAD=DISABLED`. So new index and byte arithmetic belongs in
+`src/`, shared with the host path, where one CPU test covers both; and the guard
+that the kernel cannot perform (every source inside the window) lives in the
+Fortran caller, not the kernel, where it would be neither reportable nor
+block-uniform.
+
 ---
 
 ## 6. Testing & validation plan
@@ -465,13 +489,41 @@ one can fail for a different reason:
   agree value for value in-process on real physics, the second keeps the
   retained v1 path exercised.
 
+- `amr_migrate_3d_device_apply_mpi` (2 and 4 ranks, #172): the same asymmetric
+  epoch, but driven through the MODEL - migrate, regrid, apply - so that on a GPU
+  build it exercises the device window assembly, the receive into device memory
+  and the kernel's `oldFirst0`, none of which `amr_migrate_3d_window_mpi` reaches
+  (that one calls `ExchangeOldWindow` directly, always in host memory). It fails
+  unless some rank received elements from a peer AND some rank's window base is
+  both past 1 and away from that rank's own first old element - the second
+  condition because a window beginning exactly where the rank's old range begins
+  cannot distinguish a correct rebase from a dropped one. Values are checked
+  against `ApplyTransferPlanRange` over an independently built analytic field:
+  bitwise on a CPU build, to a tolerance on GPU.
+- `solution_transfer_3d_device_offset` (#172): calls the launcher DIRECTLY with a
+  synthetic window and a nonzero `oldFirst0`, which separates a kernel indexing
+  error from a migration error. GPU-gated, unavoidably - it is the one gated test
+  in that change, because the kernel is the subject and a CPU build has no second
+  implementation to compare against.
+- `SELF_AMR_MIGRATE_VERIFY=1` / `SELF_AMR_GATHER=1` / `SELF_AMR_TRANSFER_HOST=1` /
+  `SELF_AMR_TRANSFER_VERIFY=1` re-runs. Note the last two check DIFFERENT things
+  at different bars, and must stay separate: `MIGRATE_VERIFY` asserts the window
+  arrived intact and is BITWISE, because migration is byte movement;
+  `TRANSFER_VERIFY` asserts the two applies agree and is tolerance-based, because
+  the device compiler contracts the kernel's multiply-accumulates into FMAs.
+
 Two ranks are not enough on their own: with one peer the send and receive runs
 are forced and no window can straddle more than one peer, which is why the
 4-rank entries exist (`SELF_MPIEXEC_NUMPROCS_MANY`, default 4).
 
-GPU: the same integration tests through the Buildkite MI210/V100 pipelines;
-CPU/GPU flag and post-adapt solution agreement enforced by construction
-(shared host `FinalizeIndicator`) and by tolerance respectively.
+GPU coverage, stated accurately because it constrains everything above: **no CI
+job builds or runs the CUDA/HIP path.** Every workflow in `.github/workflows/` is
+CPU-only. Device coverage comes from manual runs on a dedicated GPU node (a B300,
+CUDA sm_103, for #165/#167/#172), so a device code path that a CPU build cannot
+exercise has no automated coverage at all - which is why the tests above are
+deliberately NOT GPU-gated, and why new index arithmetic is kept in `src/`.
+CPU/GPU flag agreement is enforced by construction (shared host
+`FinalizeIndicator`); post-adapt solution agreement by tolerance.
 
 ---
 

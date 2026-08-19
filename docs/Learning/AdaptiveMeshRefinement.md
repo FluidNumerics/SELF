@@ -32,7 +32,7 @@ layer that adaptive refinement needs is already in place and tested.
 | Ultrasound point-source example + AMR visualization script | **Implemented** |
 | MPI dynamic re-partitioning / load balancing (v2: replicated forest, point-to-point migration) | **Implemented** |
 | GPU device re-allocation for a changing element count | **Implemented** (amortized high-water-mark storage, Stage 6b) |
-| Device-side solution transfer (no host round trip on one GPU) | **Implemented** (Stage 6a) |
+| Device-side solution transfer (no host round trip, any rank count) | **Implemented** (Stage 6a; multi-rank in §6.7) |
 | Geometry reuse for unchanged elements across an epoch | **Implemented** (Stage 6c) |
 
 The full **serial** adaptive-refinement loop is wired into the library today: flag with the
@@ -650,7 +650,14 @@ Sub-stages:
     4. *`ApplyTransferPlanWindow`* is what consumes it: `ApplyTransferPlanRange` (v1) is that
        routine over the whole old field, so the two paths share one body and are **bit-identical**
        — the same operands, the same operators, the same order, no reductions. That is a
-       guarantee, not a tolerance, and `SELF_AMR_MIGRATE_VERIFY=1` asserts it in-process.
+       guarantee, not a tolerance, and `SELF_AMR_MIGRATE_VERIFY=1` asserts it in-process. On a GPU
+       build the consumer is the kernel instead, reading a device-resident window with an
+       `oldFirst` offset (§6.7); keep the two questions apart when reading a verification failure.
+       **Migration** is byte movement — device-to-device copies, MPI transfers — so it stays exact
+       and `MIGRATE_VERIFY` stays bitwise. The **apply** is arithmetic, and on the device agrees
+       with the host only to round-off, because the compiler contracts its multiply-accumulates
+       into FMAs; that has its own switch, `SELF_AMR_TRANSFER_VERIFY`, and its own tolerance.
+       Do not merge them — a single switch would have to take the looser bar.
 
   A rank owning no new elements gets an empty window, posts no receives, and skips the apply,
   but still serves its peers. A coarsened family whose children were owned by different ranks is
@@ -685,8 +692,9 @@ share falls from 19.7% to 14.2%.
   `TransferSolution_2D_gpu` (`src/gpu/SELF_SolutionTransfer.cpp`), so a single-GPU adapting run
   moves no solution data across the host link. The kernel applies only the mortar operator pair
   of the child on the recorded path rather than prolonging to all four and discarding three, so
-  device and host agree to round-off while conservation stays exact. Multi-rank runs keep the
-  host allgather path, as the sequencing note below anticipated.
+  device and host agree to round-off while conservation stays exact. Multi-rank runs took the
+  host path until #172, which assembles the migrated window in device memory and gives the kernel a
+  window offset, so the device transfer now serves any rank count (§6.7).
 - **(6b) Amortized capacity — implemented.** The prediction recorded here previously was that
   "at typical cadences allocation cost is expected to be far below the re-upload and
   geometry-generation cost". **The measurement contradicted it:** the free/re-initialize cycle
@@ -983,6 +991,7 @@ rationale.
 | MPI re-partitioning (replicated forest, point-to-point migration) | Implemented (v2) | Implemented (v2) |
 | Migration diagnostics (`SELF_AMR_MIGRATE_*`) | Implemented | Implemented |
 | Device-side solution transfer | Implemented (Stage 6a) | **Implemented** (§6.4) |
+| Device-side transfer on more than one rank | Implemented (§6.7) | Implemented (§6.7) |
 | Amortized high-water-mark storage | Implemented (Stage 6b) | Inherited via the shared data classes |
 | Geometry reuse across an epoch | Implemented (Stage 6c) | Implemented (`SELF_AMR_GEOM_*` switches) |
 | Example | ultrasound point source | `linear_euler3d_amr_spherical_soundwave` |
@@ -1037,11 +1046,20 @@ exactly its own new element range. By default `uGlobal` is the rank's *window* o
 and `oldFirst` is that window's first global old element index, so the plan's global
 `sourceElem`/`family` indices still resolve (Stage-5 v2, § Stage 5); under
 `SELF_AMR_MIGRATE_GATHER=1` it is the whole allgathered global old field, which is the same call
-with `oldFirst = 1`. Either way migration lands in host memory, so the multi-rank branch stays on
-the portable host transfer on every backend, exactly as in 2-D.
+with `oldFirst = 1`.
 
-**Where the solution lives after `Adapt`.** On a single-rank GPU build the transferred solution is
-left on the **device**, so `solution%interior` (the host mirror) is **stale**. This matches the
+Since #172 the default multi-rank path no longer uses `uGlobal` at all: the window is migrated into
+model state by `MigrateOldWindow` and `ApplyTransferPlan` reads it from there, which is what lets the
+GPU backend hold it in device memory and apply the plan with a kernel on any rank count (§6.7).
+`uGlobal` remains for the retained `SELF_AMR_MIGRATE_GATHER=1` path and for external callers.
+
+`[eFirst,eLast]` must be the rank's WHOLE new element range on both backends. The portable apply
+writes an exactly-shaped `uNew`, so a sub-range of a larger field would place every variable after
+the first at the wrong stride; the kernel is indifferent because it is told the field's element
+stride separately. Do not rely on that difference.
+
+**Where the solution lives after `Adapt`.** On a GPU build the transferred solution is left on the
+**device** — at any rank count since #172 — so `solution%interior` (the host mirror) is **stale**. This matches the
 rest of the time loop, where the device is authoritative and a caller wanting host data calls
 `UpdateHost()` first, as `Write_DGModel3D_t` does. Before the device transfer existed the mirror
 happened to be fresh; do not rely on that. On CPU builds the two are the same storage.
@@ -1125,11 +1143,15 @@ by this change, and where the next 3-D optimization work belongs.
   gate's ability to release the mesh behind a passing front (§2.1.1). There is no 3-D analogue, so
   3-D coarsening is exercised only incidentally, by the soundwave regression and by the transfer
   tests' hand-built epochs.
-- **The device transfer on more than one rank.** Since #167 the old field reaches a rank
-  point-to-point rather than through an allgather, but it lands in host memory, so the multi-rank
-  branch still applies the plan on the host. Feeding the kernel instead needs a device-side window
-  buffer (the local part device-to-device, the received runs host-to-device) and one extra
-  old-element offset argument in `TransferSolution_3D_gpu`. That is the direct follow-up.
+- **A host-staged fallback for the migration.** The multi-rank device transfer (#172, §6.7) posts
+  its sends and receives on device pointers, so it requires a GPU-aware MPI and there is no
+  host-staged path behind it. That is not new — the per-step aggregated halo exchange has always
+  done the same, with no fallback either, and `SELF_REQUIRE_GPU_AWARE_MPI` makes the configure-time
+  check fatal by default — but it does mean a site without it has no degraded mode to fall back to,
+  only `SELF_AMR_TRANSFER_HOST=1`, which gives up the device apply as well as the device receive.
+- **A cheaper `SELF_AMR_MIGRATE_VERIFY` on the device path.** The diagnostic still downloads the
+  whole window to run its bitwise comparison on the host, which is exactly the traffic §6.7 exists
+  to remove. It is off by default and out of the time loop, so this is a cost only under the switch.
 - **A distributed forest.** The forest and the transfer plan are still replicated on every rank,
   so forest memory is O(global elements) per rank and the per-epoch flag allgather remains. This is
   issue #167's Stage 2 (the p4est-style design), deliberately deferred until measurement justifies
@@ -1228,6 +1250,96 @@ machine at this scale.
 (It does grow steeply with rank count on this node - 1.2 s, 4.7 s, 23.8 s - because the halo
 exchange runs through host memory in this container configuration. That is a pre-existing property
 of multi-rank GPU runs, identical in both paths, and unrelated to migration.)
+
+### 6.7 The device-resident multi-rank transfer
+
+§6.4 moved the transfer onto the device on ONE rank. On several it stayed on the host for a reason
+that had nothing to do with the kernel: `ApplyTransferPlan_DGModel{2,3}D` fell back to the portable
+path whenever a caller supplied host old-field data, and after #167 a multi-rank caller always did,
+because the migrated window was received into host memory. So multi-rank GPU adaptation ran the
+tensor-product interpolation on one CPU core and pushed the field across the host link twice per
+adapting epoch. #172 closes that, in both dimensions.
+
+**The kernel contract.** `TransferSolution_{2,3}D_gpu` takes an `oldFirst0` argument, and `nOld`
+now means `uOld`'s per-variable element STRIDE rather than the global old-leaf count. A plan's
+global source index is rebased as `src - oldFirst0` at the four places the kernel reads `uOld`.
+The whole-field case is exactly `oldFirst0 = 0`, which is what the single-rank path passes, so its
+indexing is unchanged arithmetic and the §6.4 measurements still describe it. This is stated as a
+contract because it is what the tests pin, not an implementation detail.
+
+**Where the window lives.** It became model state (`MigrateOldWindow` / `DownloadOldWindow` on
+`DGModel{2,3}D_t`) rather than controller state, which is what lets each backend supply it its own
+way while the controller stays portable. The portable implementation migrates into a flat host
+buffer; the GPU override assembles the window in device memory — its own run by a device-to-device
+copy out of the live pre-regrid solution, the peers' runs `MPI_Irecv`'d straight into device memory.
+The schedule itself is shared: it moved into `SELF_SolutionMigration`, on flat
+`(perElem, nElem, nvar)` buffers, which is also why one copy now serves both dimensions where there
+were two.
+
+**Device pointers into MPI is not a new dependency.** `SideExchangeStart` has always handed
+`halo_sendbuf_gpu`/`halo_recvbuf_gpu` to `MPI_SEND_INIT`/`MPI_RECV_INIT`, with no host-staged
+fallback anywhere, and `SELF_REQUIRE_GPU_AWARE_MPI` is a fatal configure-time check by default. A
+multi-rank GPU run without a GPU-aware MPI could never have taken a time step, so the migration
+requires nothing the time loop did not already require.
+
+**The synchronization, which is easy to get wrong.** The local run is copied by a C++ launcher,
+`MigrateWindowLocal_gpu`, not by a loop of Fortran `hipMemcpy` calls, because it also has to
+synchronize the device before the caller posts MPI against `solution%interior_gpu` — and it does so
+UNCONDITIONALLY, outside the "is there anything to copy" guard. Letting the copies carry the
+synchronization implicitly fails twice: a rank whose local run is empty, every old element it owned
+claimed by peers, would post MPI against unsynchronized device state; and it would rest on an
+unstated assumption that every kernel writing the solution shares the copies' stream.
+`HaloPack_{2,3}D_gpu` calls `hipDeviceSynchronize` before its own MPI for exactly this reason, and
+that is the precedent followed here.
+
+**What the kernel cannot check, the caller does.** On the host, `ApplyTransferPlanWindow` verifies
+that every element's sources lie inside the window and stops if not. A kernel cannot: it has no way
+to report, and an out-of-window index is a silent out-of-bounds device read rather than a visibly
+wrong answer. So `ApplyTransferPlan` scans the plan over its own element range before launching.
+Integer comparisons, once per adapting epoch.
+
+**Two verification bars, kept apart deliberately.** `SELF_AMR_MIGRATE_VERIFY` compares the migrated
+window against an allgathered reference BIT FOR BIT, and `VerifyMigration` is unchanged — on the
+device path the window is downloaded and the same exact check runs. Everything that touched those
+values is data movement (a device-to-device copy, MPI byte transfers, the download), so no
+arithmetic has been applied and exactness is available, therefore it is demanded. The transfer
+APPLY is a different question: it agrees between host and device only to round-off, because the
+device compiler contracts the multiply-accumulates into FMAs and the kernel's descent prolongs only
+onto the child on the recorded path. That gets its own switch, `SELF_AMR_TRANSFER_VERIFY`, and its
+own tolerance. Merging the two would force the strict one down to the loose bar, and naming them
+separately is the defence against someone later doing precisely that.
+
+**`SELF_AMR_TRANSFER_HOST=1`** routes a GPU build back through the portable windowed path. It is
+both an escape hatch and the A/B switch the measurements below were taken with, so that before and
+after share one binary, one build and one mesh trajectory — the condition an earlier #165 baseline
+violated by changing the example between runs.
+
+**Coverage, and one thing that cannot be tested serially.** `test/amr_migrate_{2,3}d_device_apply_mpi`
+drives the whole path through the model at 2 and 4 ranks against an independently built whole-field
+reference. It uses ASYMMETRIC refinement, and must: under a symmetric refinement the contiguous
+space-filling-curve repartition leaves every rank's new range sourced from its own old range, so not
+a single byte moves and only the local copy runs — the AMR soundwave MPI regressions pass without
+ever exercising a message. The test also asserts its own premise, that some rank's window begins
+past 1 AND away from that rank's own first old element, because a window beginning exactly where the
+rank's old range begins cannot distinguish a correct `oldFirst0` from a dropped one.
+
+The offset is ALSO covered serially, at a lower level, by
+`test/solution_transfer_{2,3}d_device_offset`, which calls `TransferSolution_{2,3}D_gpu` directly
+with a synthetic window and a nonzero `oldFirst0`. Going under the model is what makes that
+possible: through the model the offset is inherently multi-rank, because a rank's window base is
+nonzero only when some other rank owned the elements it reads, and at one rank the hull of all new
+elements is always `[1, nOld]`. The launcher takes `oldFirst0` as an ordinary argument, so it is not
+bound by the model's whole-range contract. The value of having both is separation — the direct test
+fails only for a kernel indexing error, the MPI test only for a migration or routing error, and each
+asserts its own premise (`wFirst > 1`, `nWinElem < nOld`, `nWinElem >= 2`) so it cannot quietly stop
+testing what it exists for. The direct tests are the one GPU-gated pair in this change, and they
+print SKIP on a CPU build, because there the kernel is absent and there is nothing to compare.
+
+On the host side `transfer_plan_{2,3}d_window` already pins the offset arithmetic bitwise over five
+partition tables, including offset, all-remote and empty windows. And
+`test/solution_transfer_2d_device` closes a separate pre-existing gap: the 2-D kernel had no
+value-level test at all, only 3-D did.
+
 
 ---
 

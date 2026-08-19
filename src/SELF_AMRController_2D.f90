@@ -458,11 +458,11 @@ contains
 
     err = maxval(abs(model%solution%interior(1:Np,1:Np,1:nLocal,1:model%nvar)-uRef))
     fieldScale = maxval(abs(uRef))
-    if(kind(1.0_prec) == 8) then
-      tol = 1.0e-10_prec
-    else
-      tol = 1.0e-3_prec
-    endif
+    ! Derived from epsilon rather than written as a literal, which is both the convention in
+    ! SELF_Constants and the portable way to say it: kind VALUES are processor-dependent. The
+    ! slack over sqrt(epsilon) is for FMA contraction accumulated through a tensor-product
+    ! restrict or prolong, which is the only reason host and device differ here at all.
+    tol = 100.0_prec*sqrt(epsilon(1.0_prec))
 
     if(err > tol*max(fieldScale,1.0_prec)) then
       print*,__FILE__,':',__LINE__, &

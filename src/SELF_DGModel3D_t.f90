@@ -321,6 +321,14 @@ contains
       call ApplyTransferPlanWindow(plan,interp,this%nvar,uGlobal,o1,o2,eFirst,eLast, &
                                    this%solution%interior)
     elseif(this%winStageN > 0) then
+      if(allocated(this%transferStage)) then
+        ! Two sources for one apply. The GPU override rejects the same combination; keeping the
+        ! guard rails symmetric between the backends is the point, not the reachability - the
+        ! controller never stages and migrates in the same epoch.
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : ApplyTransferPlan has both a staged local field and a migrated window.'
+        stop 1
+      endif
       ! The multi-rank path: MigrateOldWindow left this rank's window of the old field in
       ! winStage. This is the same windowed apply as the uGlobal branch above, reading model
       ! state rather than a caller-supplied array, which is what lets the GPU backend hold the
