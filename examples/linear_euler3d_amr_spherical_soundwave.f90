@@ -362,6 +362,15 @@ program LinearEuler3D_AMR_SphericalSoundWave
     write(output_unit,'(A,ES16.7E3)') "BENCH_tAdaptPerAdaptation_s = ", &
       tAdapt/real(nAdaptEpochs,real64)
   endif
+  ! Migration volume (issue #167). These are per-RANK totals over the whole run, and they are the
+  ! primary comparison between the point-to-point migration and SELF_AMR_MIGRATE_GATHER=1: the
+  ! gather path receives every element the rank does not own on every adapting epoch, the
+  ! point-to-point path only the old elements its new range actually reads from a peer. Both
+  ! paths count, so the two runs are directly comparable. Zero on a single rank, where nothing
+  ! migrates at all.
+  write(output_unit,'(A,I0)') "BENCH_migrateBytesRecv = ",controller%nMigrateBytesRecv
+  write(output_unit,'(A,I0)') "BENCH_migrateBytesSent = ",controller%nMigrateBytesSent
+  write(output_unit,'(A,I0)') "BENCH_migrateElemRemote = ",controller%nMigrateElemRemote
   ! Geometry reuse (AMR Stage 6c): the share of elements whose geometry was carried forward from
   ! the previous epoch instead of being regenerated.
   write(output_unit,'(A,I0)') "BENCH_geomReused = ",controller%nGeomReused

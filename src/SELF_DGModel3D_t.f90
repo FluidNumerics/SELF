@@ -262,13 +262,16 @@ contains
 
   endsubroutine StageSolutionForTransfer_DGModel3D_t
 
-  subroutine ApplyTransferPlan_DGModel3D_t(this,plan,interp,eFirst,eLast,uGlobal)
+  subroutine ApplyTransferPlan_DGModel3D_t(this,plan,interp,eFirst,eLast,uGlobal,oldFirst)
     !! Transfer the staged pre-regrid solution onto the regridded mesh through plan, filling the
     !! rank-local element range [eFirst,eLast] of the new solution.
     !!
-    !! uGlobal is optional and supplies the GLOBAL old field when the caller has already
-    !! assembled one (the multi-rank allgather path); when absent the locally staged copy from
-    !! StageSolutionForTransfer is used, which is the whole field on a single rank.
+    !! uGlobal is optional and supplies old-field data the caller has already assembled; when
+    !! absent the locally staged copy from StageSolutionForTransfer is used, which is the whole
+    !! field on a single rank. oldFirst is the global old element index of uGlobal's first
+    !! element: absent (or 1) means uGlobal is the whole global old field (the Stage-5 v1
+    !! allgather path), while the point-to-point migration (v2) passes the window it received
+    !! together with the window's first global old element index.
     !!
     !! This base implementation runs the portable host transfer and uploads the result; a
     !! device-resident transfer override is the 3-D analogue of the 2-D Stage 6a optimization.
@@ -280,11 +283,17 @@ contains
     type(Lagrange),intent(in) :: interp
     integer,intent(in) :: eFirst
     integer,intent(in) :: eLast
-    real(prec),intent(in),optional :: uGlobal(:,:,:,:,:)
+    real(prec),intent(in),optional,contiguous :: uGlobal(:,:,:,:,:)
+    integer,intent(in),optional :: oldFirst
+    ! Local
+    integer :: o1,o2
 
     if(present(uGlobal)) then
-      call ApplyTransferPlanRange(plan,interp,this%nvar,uGlobal,eFirst,eLast, &
-                                  this%solution%interior)
+      o1 = 1
+      if(present(oldFirst)) o1 = oldFirst
+      o2 = o1+size(uGlobal,4)-1
+      call ApplyTransferPlanWindow(plan,interp,this%nvar,uGlobal,o1,o2,eFirst,eLast, &
+                                   this%solution%interior)
     else
       if(.not. allocated(this%transferStage)) then
         print*,__FILE__,':',__LINE__, &

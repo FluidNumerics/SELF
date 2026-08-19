@@ -470,28 +470,31 @@ contains
 
   endsubroutine StageSolutionForTransfer_DGModel3D
 
-  subroutine ApplyTransferPlan_DGModel3D(this,plan,interp,eFirst,eLast,uGlobal)
+  subroutine ApplyTransferPlan_DGModel3D(this,plan,interp,eFirst,eLast,uGlobal,oldFirst)
     !! Apply the transfer plan on the device, writing solution%interior_gpu directly and moving
     !! no solution data across the PCIe/xGMI link.
     !!
-    !! uGlobal is the multi-rank escape hatch: when the caller has assembled a global old field
-    !! on the host (the Stage-5 v1 allgather migration), this falls back to the portable host
-    !! path. A device transfer only pays off on several ranks together with a point-to-point
-    !! (Stage-5 v2) migration; on a single rank it stands alone, which is the case optimized
-    !! here.
+    !! uGlobal is the multi-rank escape hatch: when the caller supplies host-side old-field data
+    !! - the whole global field under the Stage-5 v1 allgather migration, or the rank's window
+    !! under the point-to-point (v2) migration - this falls back to the portable host path,
+    !! forwarding oldFirst so the window is indexed correctly. Serving the device transfer from a
+    !! migrated window (a device-side window buffer plus an oldFirst offset in the kernel) is the
+    !! named follow-up to #167; on a single rank the device transfer stands alone, which is the
+    !! case optimized here.
     implicit none
     class(DGModel3D),intent(inout) :: this
     type(TransferPlan3D),intent(in),target :: plan
     type(Lagrange),intent(in) :: interp
     integer,intent(in) :: eFirst
     integer,intent(in) :: eLast
-    real(prec),intent(in),optional :: uGlobal(:,:,:,:,:)
+    real(prec),intent(in),optional,contiguous :: uGlobal(:,:,:,:,:)
+    integer,intent(in),optional :: oldFirst
     ! Local
     integer :: nLocal,pathStride
     integer(c_size_t) :: nb
 
     if(present(uGlobal)) then
-      call ApplyTransferPlan_DGModel3D_t(this,plan,interp,eFirst,eLast,uGlobal)
+      call ApplyTransferPlan_DGModel3D_t(this,plan,interp,eFirst,eLast,uGlobal,oldFirst)
       return
     endif
 
