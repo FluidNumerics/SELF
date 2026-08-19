@@ -127,6 +127,8 @@ add_fortran_tests (
     "tensor_3d_guard_resize_nvar.f90"
     "dgmodel2d_guard_transfer_unstaged.f90"
     "dgmodel3d_guard_transfer_unstaged.f90"
+    "dgmodel2d_guard_window_and_stage.f90"
+    "dgmodel3d_guard_window_and_stage.f90"
     "dgmodel3d_guard_transfer_reapply.f90"
     "amr_controller_2d_guard_maxlevel.f90"
     "amr_controller_3d_guard_maxlevel.f90"
@@ -356,6 +358,8 @@ set_tests_properties(
     tensor_3d_guard_resize_nvar
     dgmodel2d_guard_transfer_unstaged
     dgmodel3d_guard_transfer_unstaged
+    dgmodel2d_guard_window_and_stage
+    dgmodel3d_guard_window_and_stage
     dgmodel3d_guard_transfer_reapply
     mesh3d_read_guard_missingfile
     mesh3d_read_guard_badconnectivity
@@ -487,6 +491,25 @@ add_test(NAME lineareuler2d_amr_soundwave_mpi_transfer_verify
                  ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
 set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_verify PROPERTIES
                      LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_VERIFY=1")
+
+# 3-D too, at 22.6 s, because VerifyWindowedApply is a per-dimension routine: without this it is
+# ~20 lines that never execute anywhere on a CPU build. The 2-D twin covering the same logic is not
+# a substitute for running it.
+add_test(NAME lineareuler3d_amr_soundwave_mpi_transfer_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
+set_tests_properties(lineareuler3d_amr_soundwave_mpi_transfer_verify PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_VERIFY=1")
+
+# TRANSFER_HOST in 2-D only (10.8 s). On a CPU build this selects the same code the default path
+# takes, so the coverage it buys is the branch selection itself - but that branch is what routes a
+# GPU build back to the portable path, and leaving it unexecuted anywhere means a typo in it would
+# only surface on hardware. Once is enough; the 3-D twin is the same three lines.
+add_test(NAME lineareuler2d_amr_soundwave_mpi_transfer_host
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_host PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1")
 
 # Two ranks cannot distinguish gather-then-slice from a point-to-point routing bug: with one peer
 # the send and receive runs are forced, and no rank's window can span more than one peer. These
