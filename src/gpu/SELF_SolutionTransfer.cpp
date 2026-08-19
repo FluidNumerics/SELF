@@ -196,6 +196,53 @@ extern "C"
   }
 }
 
+extern "C"
+{
+  // Fill the LOCAL run of a migrated old-element window on the device, then synchronize.
+  //
+  // On more than one rank the window a rank's new elements read from is tiled by one run per peer
+  // plus the run the rank already owned: the peers' runs arrive by MPI directly into device
+  // memory, and this serves the remaining one without a host round trip. dstElem0 and srcElem0
+  // are 0-based element offsets of that run within the window and within the local old field.
+  //
+  // One copy per variable, not one copy: a variable's run is contiguous in both buffers, but the
+  // per-variable element stride differs between the source (nLocalOld) and the destination
+  // (nWinElem), so the run is not contiguous across variables. nvar is a small handful, so the
+  // launch cost of a few copies is immaterial once per adapting epoch.
+  //
+  // The synchronize is why this lives here rather than in a Fortran loop of hipMemcpy calls, and
+  // it is deliberately UNCONDITIONAL. The caller posts, immediately afterwards, MPI sends that
+  // read uLocal and receives that write uWin - both device pointers - and MPI has no visibility
+  // of device work still in flight. HaloPack_{2,3}D_gpu synchronizes before its own MPI for
+  // exactly this reason. Letting the copies themselves carry the synchronization would leave a
+  // rank whose local run is EMPTY - every old element it owned claimed by peers - posting MPI
+  // against unsynchronized device state, and would also rest on an unstated assumption that
+  // every kernel writing the solution shares the copies' stream.
+  void MigrateWindowLocal_gpu(real *uLocal, real *uWin,
+                              int perElem, int nvar,
+                              int nLocalOld, int nWinElem,
+                              int dstElem0, int srcElem0, int nElemRun)
+  {
+    if( nElemRun > 0 ){
+      size_t nbytes = (size_t)perElem*(size_t)nElemRun*sizeof(real);
+      for(int v=0; v<nvar; v++){
+        size_t dst = (size_t)perElem*((size_t)dstElem0 + (size_t)nWinElem*(size_t)v);
+        size_t src = (size_t)perElem*((size_t)srcElem0 + (size_t)nLocalOld*(size_t)v);
+#ifdef __HIP_PLATFORM_AMD__
+        CHECK(hipMemcpy(uWin+dst, uLocal+src, nbytes, hipMemcpyDeviceToDevice));
+#else
+        CHECK(cudaMemcpy(uWin+dst, uLocal+src, nbytes, cudaMemcpyDeviceToDevice));
+#endif
+      }
+    }
+#ifdef __HIP_PLATFORM_AMD__
+    CHECK(hipDeviceSynchronize());
+#else
+    CHECK(cudaDeviceSynchronize());
+#endif
+  }
+}
+
 // ------------------------------------------------------------------------------------------- //
 // 3-D device-side AMR solution transfer.
 //

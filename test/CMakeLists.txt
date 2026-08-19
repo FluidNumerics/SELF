@@ -83,6 +83,7 @@ add_fortran_tests (
     "mesh3d_uniform_refine.f90"
     "solution_transfer_2d.f90"
     "solution_transfer_3d.f90"
+    "solution_transfer_2d_device.f90"
     "solution_transfer_3d_device.f90"
     "quadtree_balance_2d.f90"
     "octree_balance_3d.f90"

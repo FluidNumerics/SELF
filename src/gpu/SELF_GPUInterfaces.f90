@@ -212,6 +212,17 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
+    subroutine MigrateWindowLocal_gpu(ulocal,uwin,perelem,nvar,nlocalold,nwinelem, &
+                                      dstelem0,srcelem0,nelemrun) &
+      bind(c,name="MigrateWindowLocal_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: ulocal,uwin
+      integer(c_int),value :: perElem,nvar,nLocalOld,nWinElem,dstElem0,srcElem0,nElemRun
+    endsubroutine MigrateWindowLocal_gpu
+  endinterface
+
+  interface
     subroutine TransferSolution_3D_gpu(uold,unew,sourcekind,sourceelem,family,depth,path, &
                                        mortarR,mortarP,pathstride,efirst0,oldfirst0, &
                                        n,nvar,nold,nnew, &

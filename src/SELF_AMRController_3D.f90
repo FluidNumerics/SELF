@@ -115,8 +115,22 @@ module SELF_AMRController_3D
   !!                              point-to-point window exchange
   !!   SELF_AMR_MIGRATE_VERIFY=1  run BOTH migrations and compare the received window against
   !!                              the allgathered global field, bit for bit
+  !!   SELF_AMR_TRANSFER_HOST=1   migrate and apply on the HOST even on a GPU build, i.e.
+  !!                              the portable windowed path. Both an escape hatch and the
+  !!                              way the device path is timed against it in one binary,
+  !!                              which is what keeps the mesh trajectory identical on
+  !!                              both sides of the comparison.
+  !!   SELF_AMR_TRANSFER_VERIFY=1 apply the plan BOTH ways from the same migrated window
+  !!                              and compare, to a TOLERANCE. Deliberately a separate
+  !!                              switch from MIGRATE_VERIFY and deliberately not exact:
+  !!                              migration is byte movement and is checked bitwise, while
+  !!                              the device apply contracts its multiply-accumulates into
+  !!                              FMAs and agrees with the host only to round-off. Merging
+  !!                              the two would force the strict one down to the loose bar.
   logical,save :: migrateGather = .false.
   logical,save :: migrateVerify = .false.
+  logical,save :: transferHost = .false.
+  logical,save :: transferVerify = .false.
 
   type :: AMRController3D
     type(OctreeMesh3D) :: forest
@@ -407,6 +421,65 @@ contains
 
   endsubroutine PlanWindows
 
+  subroutine VerifyWindowedApply(model,plan,interp,eFirst,eLast,wFirst,wLast,uWin)
+    !! Apply the transfer plan a second time on the HOST, from the same migrated window the
+    !! backend just used, and compare. SELF_AMR_TRANSFER_VERIFY=1.
+    !!
+    !! The comparison is to a TOLERANCE, and that is not a weakening of anything: the device
+    !! kernel's contractions are compiled to FMAs and its descent prolongs only onto the child on
+    !! the recorded path, so it agrees with the portable reference to round-off rather than
+    !! bitwise. This is a different question from whether the window ARRIVED intact, which is
+    !! byte movement, is checked by SELF_AMR_MIGRATE_VERIFY, and is exact. Keeping them as two
+    !! switches is what stops the strict one being relaxed to match the loose one.
+    !!
+    !! On a CPU build both applies are the same code and the difference is identically zero, which
+    !! is a cheap check that the harness itself is wired up.
+    !!
+    !! Diagnostic only: it costs a whole second apply plus a device-to-host copy of the new field,
+    !! and it refreshes the host mirror that the default path deliberately leaves stale.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: model
+    type(TransferPlan3D),intent(in) :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    integer,intent(in) :: wFirst
+    integer,intent(in) :: wLast
+    real(prec),intent(in) :: uWin(1:interp%N+1,1:interp%N+1,1:interp%N+1,wFirst:wLast,1:model%nvar)
+    ! Local
+    real(prec),allocatable :: uRef(:,:,:,:,:)
+    integer :: Np,nLocal
+    real(prec) :: err,fieldScale,tol
+
+    Np = interp%N+1
+    nLocal = eLast-eFirst+1
+    allocate(uRef(1:Np,1:Np,1:Np,1:nLocal,1:model%nvar))
+
+    call ApplyTransferPlanWindow(plan,interp,model%nvar,uWin,wFirst,wLast,eFirst,eLast,uRef)
+    call model%solution%UpdateHost()
+
+    err = maxval(abs(model%solution%interior(1:Np,1:Np,1:Np,1:nLocal,1:model%nvar)-uRef))
+    fieldScale = maxval(abs(uRef))
+    if(kind(1.0_prec) == 8) then
+      tol = 1.0e-10_prec
+    else
+      tol = 1.0e-3_prec
+    endif
+
+    if(err > tol*max(fieldScale,1.0_prec)) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : TRANSFER_VERIFY rank ',model%mesh%decomp%rankId, &
+        ' the windowed apply disagrees with the host reference: max|diff| = ',err, &
+        ' field scale ',fieldScale
+      stop 1
+    endif
+    print*,"TRANSFER_VERIFY rank ",model%mesh%decomp%rankId, &
+      " windowed apply agrees, max|diff| = ",err
+
+    deallocate(uRef)
+
+  endsubroutine VerifyWindowedApply
+
   subroutine ExchangeOldWindow(decomp,Np,nvar,nLocalOld,uLocal,winFirst,winLast, &
                                wFirst,wLast,uWin,nBytesRecv,nBytesSent,nElemRemote)
     !! Migrate the pre-regrid solution into this rank's old-element window with point-to-point
@@ -635,10 +708,18 @@ contains
     call get_environment_variable("SELF_AMR_MIGRATE_VERIFY",envstr,status=envstat)
     if(envstat == 0) migrateVerify = (trim(envstr) == "1")
 
+    call get_environment_variable("SELF_AMR_TRANSFER_HOST",envstr,status=envstat)
+    if(envstat == 0) transferHost = (trim(envstr) == "1")
+
+    call get_environment_variable("SELF_AMR_TRANSFER_VERIFY",envstr,status=envstat)
+    if(envstat == 0) transferVerify = (trim(envstr) == "1")
+
     if(geomNoReuse) print*,"SELF_AMR_GEOM_NO_REUSE: geometry reuse disabled"
     if(geomVerify) print*,"SELF_AMR_GEOM_VERIFY: cross-checking incremental geometry"
     if(geomFull) print*,"SELF_AMR_GEOM_FULL: incremental geometry bypassed"
     if(migrateGather) print*,"SELF_AMR_MIGRATE_GATHER: migrating through the v1 allgather"
+    if(transferHost) print*,"SELF_AMR_TRANSFER_HOST: migrating and applying on the host"
+    if(transferVerify) print*,"SELF_AMR_TRANSFER_VERIFY: cross-checking the windowed apply"
     if(migrateVerify) print*,"SELF_AMR_MIGRATE_VERIFY: cross-checking the migrated window"
 
   endsubroutine ResolveGeomDebug
@@ -923,13 +1004,11 @@ contains
     ! SELF_AMR_MIGRATE_GATHER=1 selects the v1 allgather instead; the two are bit-identical, and
     ! SELF_AMR_MIGRATE_VERIFY=1 asserts that in-process.
     !
-    ! The exchange runs BEFORE Regrid: EmitMesh has already decomposed the new mesh, so both
-    ! partitions are known, the sends can read the still-live pre-regrid solution, and no
-    ! point-to-point traffic is left in flight across Regrid - which works on the same
-    ! communicator with its own tag conventions.
-    !
-    ! Either way migration is a host operation, so the multi-rank path stays on the portable
-    ! host transfer; serving the device transfer from a migrated window is the follow-up to #167.
+    ! The migration is device-resident on a GPU build (#172): the window is assembled in device
+    ! memory and the plan applied to it by the kernel, so the multi-rank path moves no solution
+    ! data across the host link either, and the per-element interpolation never runs on a CPU
+    ! core. That rests on GPU-aware MPI, which the per-step halo exchange has always required.
+    ! SELF_AMR_TRANSFER_HOST=1 forces the portable windowed path back on.
     call ResolveGeomDebug()
     eFirst = -1 ! set below, once newMesh's decomposition is known
     if(model%mesh%decomp%nRanks > 1 .and. .not. migrateGather) then
@@ -948,24 +1027,52 @@ contains
         wLast = 0
       endif
 
-      ! Persistent, grow-only window buffer, viewed through a pointer whose element lower bound
-      ! is the window's first global old element index. Remapping (rather than passing a section
-      ! of a rank-5 capacity array) keeps the actual argument exactly shaped and contiguous, so
-      ! no compiler temporary of the capacity array can appear.
-      nWin = Np*Np*Np*max(wLast-wFirst+1,0)*model%nvar
-      if(.not. allocated(this%xferWin)) allocate(this%xferWin(1:max(nWin,1)))
-      if(nWin > size(this%xferWin)) then
-        deallocate(this%xferWin)
-        allocate(this%xferWin(1:nWin))
+      ! Migrate the window, then apply the plan from it. Both steps are type-bound and
+      ! backend-specific, and that is the whole point: the portable implementation migrates into
+      ! host memory and runs the windowed apply on the host, while the GPU backend assembles the
+      ! window in DEVICE memory - its own run device-to-device, the peers' runs received straight
+      ! into it - and applies the plan as a kernel. So on a GPU build the per-element
+      ! tensor-product interpolation runs on the device on any number of ranks, and no solution
+      ! data crosses the host link. SELF_AMR_TRANSFER_HOST=1 forces the portable path back on,
+      ! which is how the two are timed against each other in one binary.
+      !
+      ! The migration runs BEFORE Regrid: EmitMesh has already decomposed the new mesh, so both
+      ! partitions are known, the sends can read the still-live pre-regrid solution, and no
+      ! point-to-point traffic is left in flight across Regrid - which works on the same
+      ! communicator with its own tag conventions.
+      if(transferHost) then
+        call MigrateOldWindow_DGModel3D_t(model,this%winFirst,this%winLast, &
+                                          wFirst,wLast,this%nMigrateBytesRecv, &
+                                          this%nMigrateBytesSent,this%nMigrateElemRemote)
+      else
+        call model%MigrateOldWindow(this%winFirst,this%winLast,wFirst,wLast, &
+                                    this%nMigrateBytesRecv,this%nMigrateBytesSent, &
+                                    this%nMigrateElemRemote)
       endif
-      uWin(1:Np,1:Np,1:Np,wFirst:wLast,1:model%nvar) => this%xferWin(1:nWin)
 
-      call model%solution%UpdateHost()
-      call ExchangeOldWindow(model%mesh%decomp,Np,model%nvar,model%solution%nElem, &
-                             model%solution%interior,this%winFirst,this%winLast, &
-                             wFirst,wLast,uWin,this%nMigrateBytesRecv, &
-                             this%nMigrateBytesSent,this%nMigrateElemRemote)
+      ! Either diagnostic needs the window on the host, and needs it BEFORE the apply, which
+      ! consumes the migration marker. One download serves both.
+      if(migrateVerify .or. transferVerify) then
+        nWin = Np*Np*Np*max(wLast-wFirst+1,0)*model%nvar
+        if(.not. allocated(this%xferWin)) allocate(this%xferWin(1:max(nWin,1)))
+        if(nWin > size(this%xferWin)) then
+          deallocate(this%xferWin)
+          allocate(this%xferWin(1:nWin))
+        endif
+        uWin(1:Np,1:Np,1:Np,wFirst:wLast,1:model%nvar) => this%xferWin(1:nWin)
+        if(transferHost) then
+          call DownloadOldWindow_DGModel3D_t(model,wFirst,wLast,uWin)
+        else
+          call model%DownloadOldWindow(wFirst,wLast,uWin)
+        endif
+      endif
+
       if(migrateVerify) then
+        ! Cross-check the migrated window against an allgathered reference, BIT FOR BIT. The
+        ! window is model state now and may live in device memory, hence the download above; the
+        ! comparison itself is unchanged and stays exact, because migration is pure data
+        ! movement. Reads the pre-regrid old field, so it must run before Regrid.
+        call model%solution%UpdateHost()
         call VerifyMigration(model%mesh%decomp,Np,model%nvar,nOld,model%solution%nElem, &
                              model%solution%interior,wFirst,wLast,uWin)
       endif
@@ -973,11 +1080,19 @@ contains
       call model%Regrid(newMesh,newGeom)
 
       ! A rank that owns no new elements has nothing to fill; it still took part in the
-      ! exchange above, because peers may need old elements it owns.
+      ! migration above, because peers may need old elements it owns.
       if(eLast >= eFirst) then
-        call model%ApplyTransferPlan(plan,this%interp,eFirst,eLast,uWin,wFirst)
+        if(transferHost) then
+          call ApplyTransferPlan_DGModel3D_t(model,plan,this%interp,eFirst,eLast)
+        else
+          call model%ApplyTransferPlan(plan,this%interp,eFirst,eLast)
+        endif
       endif
-      uWin => null()
+
+      if(transferVerify .and. eLast >= eFirst) then
+        call VerifyWindowedApply(model,plan,this%interp,eFirst,eLast,wFirst,wLast,uWin)
+      endif
+      if(migrateVerify .or. transferVerify) uWin => null()
     elseif(model%mesh%decomp%nRanks > 1) then
       Np = this%interp%N+1
       nR = model%mesh%decomp%nRanks

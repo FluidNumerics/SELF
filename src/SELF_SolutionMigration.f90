@@ -132,7 +132,12 @@ contains
     integer(int64),intent(inout) :: nElemRemote
     ! Local
     integer :: r,iv,a,b,cnt,ierror
-    integer :: myFirst,nWinElem,nbyte,off
+    integer :: myFirst,nWinElem,nbyte
+    ! int64: off spans the whole buffer in reals (perElem*nWinElem*nvar), which a
+    ! high-order 3-D window can push past the 32-bit range even though each message's cnt
+    ! stays small. Fortran's own subscript arithmetic used to carry this at pointer width;
+    ! computing it explicitly is what makes the kind matter.
+    integer(int64) :: off
 
     myFirst = decomp%offsetElem(decomp%rankId+1)+1
     nWinElem = max(wLast-wFirst+1,0)
@@ -149,7 +154,7 @@ contains
       nBytesRecv = nBytesRecv+int(cnt,int64)*nvar*nbyte
       nElemRemote = nElemRemote+int(b-a+1,int64)
       do iv = 1,nvar
-        off = perElem*((a-wFirst)+nWinElem*(iv-1))
+        off = int(perElem,int64)*(int(a-wFirst,int64)+int(nWinElem,int64)*(iv-1))
         msgCount = msgCount+1
         call MPI_IRECV(uWin(off+1),cnt,decomp%mpiPrec, &
                        r-1,iv,decomp%mpiComm,requests(msgCount),ierror)
@@ -165,7 +170,7 @@ contains
       cnt = perElem*(b-a+1)
       nBytesSent = nBytesSent+int(cnt,int64)*nvar*nbyte
       do iv = 1,nvar
-        off = perElem*((a-myFirst)+nLocalOld*(iv-1))
+        off = int(perElem,int64)*(int(a-myFirst,int64)+int(nLocalOld,int64)*(iv-1))
         msgCount = msgCount+1
         call MPI_ISEND(uLocal(off+1),cnt,decomp%mpiPrec, &
                        r-1,iv,decomp%mpiComm,requests(msgCount),ierror)
@@ -217,7 +222,8 @@ contains
     integer(int64),intent(inout) :: nElemRemote
     ! Local
     integer :: a,b,e,iv,p,msgCount
-    integer :: myFirst,nWinElem,dst,src
+    integer :: myFirst,nWinElem
+    integer(int64) :: dst,src !! int64 for the reason given in PostOldWindowExchange
     integer,allocatable :: requests(:)
 
     myFirst = decomp%offsetElem(decomp%rankId+1)+1
@@ -235,8 +241,8 @@ contains
     call OwnedRun(decomp%offsetElem,decomp%rankId+1,wFirst,wLast,a,b)
     do iv = 1,nvar
       do e = a,b
-        dst = perElem*((e-wFirst)+nWinElem*(iv-1))
-        src = perElem*((e-myFirst)+nLocalOld*(iv-1))
+        dst = int(perElem,int64)*(int(e-wFirst,int64)+int(nWinElem,int64)*(iv-1))
+        src = int(perElem,int64)*(int(e-myFirst,int64)+int(nLocalOld,int64)*(iv-1))
         do p = 1,perElem
           uWin(dst+p) = uLocal(src+p)
         enddo
