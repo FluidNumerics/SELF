@@ -518,6 +518,19 @@ set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_host_verify PROPER
                      LABELS "parallel"
                      ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1;SELF_AMR_TRANSFER_VERIFY=1")
 
+# The 3-D twin of the combined case, and the only 3-D entry needed: TRANSFER_HOST routes the
+# migration, the window download and the apply through the portable implementations, and
+# TRANSFER_VERIFY is what makes the download happen at all - so one run reaches all three of the
+# 3-D transferHost branches. Registered for the same reason the 3-D TRANSFER_VERIFY entry is: these
+# are per-dimension routines, and a 2-D twin covering the same logic is not a substitute for
+# running the 3-D one.
+add_test(NAME lineareuler3d_amr_soundwave_mpi_transfer_host_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
+set_tests_properties(lineareuler3d_amr_soundwave_mpi_transfer_host_verify PROPERTIES
+                     LABELS "parallel"
+                     ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1;SELF_AMR_TRANSFER_VERIFY=1")
+
 # Two ranks cannot distinguish gather-then-slice from a point-to-point routing bug: with one peer
 # the send and receive runs are forced, and no rank's window can span more than one peer. These
 # entries re-launch the SAME executables on SELF_MPIEXEC_NUMPROCS_MANY ranks, where a window can
