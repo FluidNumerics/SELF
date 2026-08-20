@@ -518,12 +518,32 @@ one can fail for a different reason:
   selects different code - the Buildkite GPU pipelines, and the B300 verification
   runs, which do an explicit `TRANSFER_HOST=1` pass over the whole set.
 
-Test cost is a real constraint here, not a footnote. The `gfortran-12 coverage` job
-runs at roughly 85-90 minutes against a hard `timeout-minutes: 90`, with enough
-runner-to-runner variance to cancel on a bad draw; commit `d88910d4` trimmed the
-3-D AMR soundwave family for exactly this reason. Anything added to the AMR MPI
-family should be costed (`Testing/Temporary/CTestCostData.txt`) before it is
-registered.
+**On patch-coverage numbers for this area.** Codecov's default patch target is the
+project's own coverage (~93%), and AMR transfer changes will tend to miss it for a
+structural reason worth knowing before chasing it. The uncovered remainder is
+dominated by three things that no reasonable test reaches: guard paths that end in
+`stop 1`, which a WILL_FAIL test executes but whose abort limits what the coverage
+run records; assertion branches such as `VerifyWindowedApply`'s mismatch report,
+reachable only by deliberately corrupting data; and continuation lines of multi-line
+calls, which gcov attributes to the statement's first line and reports as never
+executed regardless. `MPI_IRECV`/`ISEND`/`WAITALL` inside a multi-rank test add
+another: ranks share one `.gcda` path and can clobber each other's data. For #172
+that accounted for about 25 of 31 uncovered lines. Cover what a test can genuinely
+reach, say which lines are deliberately left, and do not delete an assertion to
+move the number.
+
+Test cost is a real constraint here, but runner speed is the larger term and the
+two are easy to confuse. Observed `gfortran-12 coverage` durations on one branch,
+against a hard `timeout-minutes: 90`: 85 min, 90 min (cancelled), 82 min, and
+43 min - where the 43-minute run carried MORE tests than the 82-minute one. So the
+job sits near its ceiling and a slow runner, rather than a few added seconds of
+tests, is what decides whether it gets cancelled. Commit `d88910d4` trimmed the 3-D
+AMR soundwave family for this reason and the constraint clearly recurs, so anything
+added to the AMR MPI family is still worth costing
+(`Testing/Temporary/CTestCostData.txt`) before it is registered. But a trim should
+not be expected to fix a cancellation on its own, and coverage should not be traded
+away for seconds a fast runner would have absorbed - #172 did that once and had to
+put them back.
 
 Two ranks are not enough on their own: with one peer the send and receive runs
 are forced and no window can straddle more than one peer, which is why the
