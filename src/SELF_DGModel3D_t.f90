@@ -38,6 +38,8 @@ module SELF_DGModel3D_t
   use SELF_Model
   use SELF_BoundaryConditions
   use SELF_TransferPlan_3D
+  use SELF_SolutionMigration
+  use iso_fortran_env,only:int64
 
   implicit none
 
@@ -51,6 +53,16 @@ module SELF_DGModel3D_t
     type(MappedScalar3D)   :: workSol
     ! Host staging for the pre-regrid solution (see StageSolutionForTransfer)
     real(prec),allocatable :: transferStage(:,:,:,:,:)
+    !! Migrated old-element window, held between MigrateOldWindow and ApplyTransferPlan on the
+    !! multi-rank path: the contiguous run of OLD elements this rank's new element range
+    !! references. Flat, because it is viewed through a rank-remapped pointer whose element lower
+    !! bound is the window's first GLOBAL old element index - the numbering the transfer plan
+    !! uses. Persistent and grow-only, so a settled adapting run allocates nothing here. The GPU
+    !! backend overrides the migration and keeps the window in device memory instead, leaving
+    !! this unallocated.
+    real(prec),allocatable :: winStage(:)
+    integer :: winStageFirst = 0 !! global old index of winStage's first element
+    integer :: winStageN = 0 !! window element count; 0 means no window is migrated
     type(Mesh3D),pointer   :: mesh
     type(SEMHex),pointer  :: geometry
     type(BoundaryConditionList) :: hyperbolicBCs
@@ -64,6 +76,8 @@ module SELF_DGModel3D_t
     procedure :: Regrid => Regrid_DGModel3D_t
     procedure :: StageSolutionForTransfer => StageSolutionForTransfer_DGModel3D_t
     procedure :: ApplyTransferPlan => ApplyTransferPlan_DGModel3D_t
+    procedure :: MigrateOldWindow => MigrateOldWindow_DGModel3D_t
+    procedure :: DownloadOldWindow => DownloadOldWindow_DGModel3D_t
     procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel3D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel3D_t
@@ -167,6 +181,9 @@ contains
     call this%parabolicBCs%Free()
     call this%AdditionalFree()
     if(allocated(this%transferStage)) deallocate(this%transferStage)
+    if(allocated(this%winStage)) deallocate(this%winStage)
+    this%winStageFirst = 0
+    this%winStageN = 0
 
   endsubroutine Free_DGModel3D_t
 
@@ -273,10 +290,18 @@ contains
     !! allgather path), while the point-to-point migration (v2) passes the window it received
     !! together with the window's first global old element index.
     !!
+    !! [eFirst,eLast] must be this rank's WHOLE new element range, so that eLast-eFirst+1 equals
+    !! solution%nElem. The portable apply below writes uNew as an exactly-shaped array, so a
+    !! sub-range of a larger field would place every variable after the first at the wrong stride;
+    !! the device kernel is indifferent, because it is told the field's element stride separately.
+    !! Do not rely on that difference - the contract is the whole range on both backends.
+    !!
     !! This base implementation runs the portable host transfer and uploads the result; a
     !! device-resident transfer override is the 3-D analogue of the 2-D Stage 6a optimization.
     implicit none
-    class(DGModel3D_t),intent(inout) :: this
+    ! target on this: the migrated window is a flat component and the windowed apply is fed
+    ! through a pointer remapped onto it (below), which requires the target attribute here.
+    class(DGModel3D_t),intent(inout),target :: this
     ! target: a device override takes c_loc of the plan's arrays to upload them, which requires
     ! the POINTER or TARGET attribute. Declared here too so any override's characteristics match.
     type(TransferPlan3D),intent(in),target :: plan
@@ -286,7 +311,8 @@ contains
     real(prec),intent(in),optional,contiguous :: uGlobal(:,:,:,:,:)
     integer,intent(in),optional :: oldFirst
     ! Local
-    integer :: o1,o2
+    integer :: o1,o2,Np,perElem
+    real(prec),pointer :: uWin(:,:,:,:,:)
 
     if(present(uGlobal)) then
       o1 = 1
@@ -294,10 +320,31 @@ contains
       o2 = o1+size(uGlobal,4)-1
       call ApplyTransferPlanWindow(plan,interp,this%nvar,uGlobal,o1,o2,eFirst,eLast, &
                                    this%solution%interior)
+    elseif(this%winStageN > 0) then
+      if(allocated(this%transferStage)) then
+        ! Two sources for one apply. The GPU override rejects the same combination; keeping the
+        ! guard rails symmetric between the backends is the point, not the reachability - the
+        ! controller never stages and migrates in the same epoch.
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : ApplyTransferPlan has both a staged local field and a migrated window.'
+        stop 1
+      endif
+      ! The multi-rank path: MigrateOldWindow left this rank's window of the old field in
+      ! winStage. This is the same windowed apply as the uGlobal branch above, reading model
+      ! state rather than a caller-supplied array, which is what lets the GPU backend hold the
+      ! window in device memory and override only the migration and the apply.
+      Np = interp%N+1
+      perElem = Np*Np*Np
+      o1 = this%winStageFirst
+      o2 = o1+this%winStageN-1
+      uWin(1:Np,1:Np,1:Np,o1:o2,1:this%nvar) => this%winStage(1:perElem*this%winStageN*this%nvar)
+      call ApplyTransferPlanWindow(plan,interp,this%nvar,uWin,o1,o2,eFirst,eLast, &
+                                   this%solution%interior)
+      uWin => null()
     else
       if(.not. allocated(this%transferStage)) then
         print*,__FILE__,':',__LINE__, &
-          ' : Error : ApplyTransferPlan called without a staged solution.'
+          ' : Error : ApplyTransferPlan called without a staged solution or a migrated window.'
         stop 1
       endif
       call ApplyTransferPlanRange(plan,interp,this%nvar,this%transferStage,eFirst,eLast, &
@@ -307,8 +354,114 @@ contains
     call this%solution%UpdateDevice()
 
     if(allocated(this%transferStage)) deallocate(this%transferStage)
+    ! The window buffer is retained (grow-only) but its marker is cleared, so a second apply
+    ! without a fresh migration fails the guard rather than reusing a stale window.
+    this%winStageN = 0
 
   endsubroutine ApplyTransferPlan_DGModel3D_t
+
+  subroutine MigrateOldWindow_DGModel3D_t(this,winFirst,winLast,wFirst,wLast, &
+                                          nBytesRecv,nBytesSent,nElemRemote)
+    !! Migrate the pre-regrid solution into this rank's old-element window, ready for a windowed
+    !! ApplyTransferPlan. Call it BEFORE Regrid, which releases the storage the sends read:
+    !!
+    !!     call model%MigrateOldWindow(winFirst,winLast,wFirst,wLast,...)
+    !!     call model%Regrid(newMesh,newGeom)
+    !!     call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+    !!
+    !! [wFirst,wLast] is this rank's window of GLOBAL old element indices, normalized so that
+    !! wFirst > wLast means empty; winFirst/winLast are the same for every rank, which is what
+    !! lets each end of a pair derive the shared schedule without communicating (see
+    !! SELF_SolutionMigration). A rank with an empty window must still call this, because its
+    !! peers may need old elements it owns.
+    !!
+    !! This base implementation migrates into host memory, which on a GPU build means a
+    !! device-to-host copy of the local field first; the GPU backend overrides it to assemble the
+    !! window in device memory and receive into it directly.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    integer,intent(in) :: winFirst(:) !! (1:nRanks) window lower bounds, from PlanWindows
+    integer,intent(in) :: winLast(:) !! (1:nRanks) window upper bounds
+    integer,intent(in) :: wFirst !! this rank's window (wFirst > wLast if empty)
+    integer,intent(in) :: wLast
+    integer(int64),intent(inout) :: nBytesRecv
+    integer(int64),intent(inout) :: nBytesSent
+    integer(int64),intent(inout) :: nElemRemote
+    ! Local
+    integer :: perElem,nWinElem,nWin
+
+    perElem = (this%solution%interp%N+1)*(this%solution%interp%N+1)*(this%solution%interp%N+1)
+    nWinElem = max(wLast-wFirst+1,0)
+
+    ! Grow-only, and never zero-sized: a one-element floor keeps the actual argument below valid
+    ! even for an empty window, which is the case for a rank that owns no new elements.
+    nWin = perElem*max(nWinElem,1)*this%nvar
+    if(allocated(this%winStage)) then
+      if(size(this%winStage) < nWin) deallocate(this%winStage)
+    endif
+    if(.not. allocated(this%winStage)) allocate(this%winStage(1:nWin))
+
+    call this%solution%UpdateHost()
+    call ExchangeOldWindowFlat(this%mesh%decomp,perElem,this%nvar,this%solution%nElem, &
+                               this%solution%interior,winFirst,winLast,wFirst,wLast, &
+                               this%winStage,nBytesRecv,nBytesSent,nElemRemote)
+
+    this%winStageFirst = wFirst
+    this%winStageN = nWinElem
+
+  endsubroutine MigrateOldWindow_DGModel3D_t
+
+  subroutine DownloadOldWindow_DGModel3D_t(this,wFirst,wLast,uWin)
+    !! Copy the migrated window into a host array, for the SELF_AMR_MIGRATE_VERIFY diagnostic.
+    !! Diagnostic-only and off the default path: on a GPU build the override is a device-to-host
+    !! transfer of the whole window, which is exactly the traffic the device path exists to avoid.
+    !!
+    !! The comparison this feeds is BITWISE, and must stay that way. Migration is pure data
+    !! movement - host and device copies, MPI byte transfers - so no arithmetic touches these
+    !! values and exactness is available. That is unlike the transfer APPLY, which agrees between
+    !! host and device only to round-off because the device compiler contracts its
+    !! multiply-accumulates into FMAs. The two are checked by different switches for that reason.
+    implicit none
+    class(DGModel3D_t),intent(in) :: this
+    integer,intent(in) :: wFirst
+    integer,intent(in) :: wLast
+    ! target: the GPU override takes c_loc of this to download the window in one memcpy.
+    real(prec),intent(out),target,contiguous :: uWin(:,:,:,:,:) !! (Np,Np,Np,nWinElem,nvar)
+    ! Local
+    integer :: Np,perElem,nWinElem,i,j,k,e,iv,p,off
+
+    nWinElem = max(wLast-wFirst+1,0)
+    if(nWinElem == 0) return
+
+    Np = this%solution%interp%N+1
+    perElem = Np*Np*Np
+    if(size(uWin,4) /= nWinElem .or. size(uWin,5) /= this%nvar) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : DownloadOldWindow given a buffer that does not match the window.'
+      stop 1
+    endif
+    if(this%winStageN /= nWinElem .or. this%winStageFirst /= wFirst) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : DownloadOldWindow called without a matching migrated window.'
+      stop 1
+    endif
+
+    do iv = 1,this%nvar
+      do e = 1,nWinElem
+        off = perElem*((e-1)+nWinElem*(iv-1))
+        p = 0
+        do k = 1,Np
+          do j = 1,Np
+            do i = 1,Np
+              p = p+1
+              uWin(i,j,k,e,iv) = this%winStage(off+p)
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+  endsubroutine DownloadOldWindow_DGModel3D_t
 
   subroutine ReportMetrics_DGModel3D_t(this)
     !! Base method for reporting the entropy of a model

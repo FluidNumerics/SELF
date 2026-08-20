@@ -42,6 +42,22 @@
 // instead of per-thread scratch, which a thread-per-element mapping would spill to scratch
 // memory at realistic degree and variable counts.
 
+// The uOld contract, shared by both kernels: uOld holds a contiguous WINDOW of old elements,
+// laid out (node, element, variable) with `nOld` as its per-variable element stride. `oldFirst0`
+// is the 0-based global old index of the window's first element, so a plan's global source index
+// is rebased as `src - oldFirst0`. The whole-field case is exactly oldFirst0 == 0 with nOld the
+// global old count, which is what the single-rank path passes, so its indexing is unchanged.
+//
+// The window form is what lets a multi-rank adaptation run this kernel at all: the old elements a
+// rank's new range reads are migrated to it point-to-point (SELF_SolutionMigration.f90) rather
+// than allgathered, and on a GPU build they are received directly into device memory.
+//
+// The caller guarantees oldFirst0 <= src < oldFirst0 + nOld for every element it launches, by
+// scanning the plan over [eFirst,eLast] before the launch (ApplyTransferPlan_DGModel{2,3}D) - the
+// same three conditions ApplyTransferPlanWindow enforces on the host. That check is deliberately
+// NOT repeated here: an out-of-range early return would not be block-uniform and would strand the
+// __syncthreads() calls below.
+
 // Maximum supported (N+1). Sizes the shared working buffers below; the Fortran caller guards
 // the degree so an unsupported N fails loudly rather than overrunning (the same literal appears
 // in ApplyTransferPlan_DGModel2D and its error message - keep the three in step). Matches the
@@ -64,7 +80,7 @@ __global__ void TransferSolution_2D_gpukernel(real *uOld, real *uNew,
                                              int *sourceKind, int *sourceElem, int *family,
                                              int *depth, int *path,
                                              real *mortarR, real *mortarP,
-                                             int pathStride, int eFirst0,
+                                             int pathStride, int eFirst0, int oldFirst0,
                                              int N, int nvar, int nOld, int nNew){
 
   // One block per new (rank-local) element.
@@ -92,7 +108,9 @@ __global__ void TransferSolution_2D_gpukernel(real *uOld, real *uNew,
       __syncthreads();
 
       for(int c=0; c<4; c++){
-        int src = family[c + 4*gi] - 1;   // Fortran 1-based element index
+        // Fortran 1-based global old index, rebased onto uOld's window (oldFirst0 == 0 for a
+        // whole-field uOld, so the single-rank case is unchanged arithmetic).
+        int src = family[c + 4*gi] - 1 - oldFirst0;
         int kx = d_transferAxc[c];
         int ky = d_transferAyc[c];
 
@@ -122,7 +140,7 @@ __global__ void TransferSolution_2D_gpukernel(real *uOld, real *uNew,
     } else {
 
       // COPY (d == 0) and PROLONG (d > 0) both start from a single surviving old element.
-      int src = sourceElem[gi] - 1;
+      int src = sourceElem[gi] - 1 - oldFirst0;
       buf[i + Np*j] = uOld[SC_2D_INDEX(i,j,src,v,N,nOld)];
       __syncthreads();
 
@@ -167,14 +185,61 @@ extern "C"
                                int *sourceKind, int *sourceElem, int *family,
                                int *depth, int *path,
                                real *mortarR, real *mortarP,
-                               int pathStride, int eFirst0,
+                               int pathStride, int eFirst0, int oldFirst0,
                                int N, int nvar, int nOld, int nNew, int nLocal)
   {
     if( nLocal <= 0 ){ return; }
     int Np = N+1;
     TransferSolution_2D_gpukernel<<<dim3(nLocal,1,1), dim3(Np*Np,1,1), 0, 0>>>(
       uOld, uNew, sourceKind, sourceElem, family, depth, path,
-      mortarR, mortarP, pathStride, eFirst0, N, nvar, nOld, nNew);
+      mortarR, mortarP, pathStride, eFirst0, oldFirst0, N, nvar, nOld, nNew);
+  }
+}
+
+extern "C"
+{
+  // Fill the LOCAL run of a migrated old-element window on the device, then synchronize.
+  //
+  // On more than one rank the window a rank's new elements read from is tiled by one run per peer
+  // plus the run the rank already owned: the peers' runs arrive by MPI directly into device
+  // memory, and this serves the remaining one without a host round trip. dstElem0 and srcElem0
+  // are 0-based element offsets of that run within the window and within the local old field.
+  //
+  // One copy per variable, not one copy: a variable's run is contiguous in both buffers, but the
+  // per-variable element stride differs between the source (nLocalOld) and the destination
+  // (nWinElem), so the run is not contiguous across variables. nvar is a small handful, so the
+  // launch cost of a few copies is immaterial once per adapting epoch.
+  //
+  // The synchronize is why this lives here rather than in a Fortran loop of hipMemcpy calls, and
+  // it is deliberately UNCONDITIONAL. The caller posts, immediately afterwards, MPI sends that
+  // read uLocal and receives that write uWin - both device pointers - and MPI has no visibility
+  // of device work still in flight. HaloPack_{2,3}D_gpu synchronizes before its own MPI for
+  // exactly this reason. Letting the copies themselves carry the synchronization would leave a
+  // rank whose local run is EMPTY - every old element it owned claimed by peers - posting MPI
+  // against unsynchronized device state, and would also rest on an unstated assumption that
+  // every kernel writing the solution shares the copies' stream.
+  void MigrateWindowLocal_gpu(real *uLocal, real *uWin,
+                              int perElem, int nvar,
+                              int nLocalOld, int nWinElem,
+                              int dstElem0, int srcElem0, int nElemRun)
+  {
+    if( nElemRun > 0 ){
+      size_t nbytes = (size_t)perElem*(size_t)nElemRun*sizeof(real);
+      for(int v=0; v<nvar; v++){
+        size_t dst = (size_t)perElem*((size_t)dstElem0 + (size_t)nWinElem*(size_t)v);
+        size_t src = (size_t)perElem*((size_t)srcElem0 + (size_t)nLocalOld*(size_t)v);
+#ifdef __HIP_PLATFORM_AMD__
+        CHECK(hipMemcpy(uWin+dst, uLocal+src, nbytes, hipMemcpyDeviceToDevice));
+#else
+        CHECK(cudaMemcpy(uWin+dst, uLocal+src, nbytes, cudaMemcpyDeviceToDevice));
+#endif
+      }
+    }
+#ifdef __HIP_PLATFORM_AMD__
+    CHECK(hipDeviceSynchronize());
+#else
+    CHECK(cudaDeviceSynchronize());
+#endif
   }
 }
 
@@ -255,7 +320,7 @@ __global__ void TransferSolution_3D_gpukernel(real *uOld, real *uNew,
                                               int *sourceKind, int *sourceElem, int *family,
                                               int *depth, int *path,
                                               real *mortarR, real *mortarP,
-                                              int pathStride, int eFirst0,
+                                              int pathStride, int eFirst0, int oldFirst0,
                                               int N, int nvar, int nOld, int nNew){
 
   // One block per new (rank-local) element.
@@ -285,7 +350,9 @@ __global__ void TransferSolution_3D_gpukernel(real *uOld, real *uNew,
       __syncthreads();
 
       for(int c=0; c<8; c++){
-        int src = family[c + 8*gi] - 1;   // Fortran 1-based element index
+        // Fortran 1-based global old index, rebased onto uOld's window (oldFirst0 == 0 for a
+        // whole-field uOld, so the single-rank case is unchanged arithmetic).
+        int src = family[c + 8*gi] - 1 - oldFirst0;
         int kx = d_transferAxc3D[c];
         int ky = d_transferAyc3D[c];
         int kz = d_transferAzc3D[c];
@@ -343,7 +410,7 @@ __global__ void TransferSolution_3D_gpukernel(real *uOld, real *uNew,
     } else {
 
       // COPY (d == 0) and PROLONG (d > 0) both start from a single surviving old element.
-      int src = sourceElem[gi] - 1;
+      int src = sourceElem[gi] - 1 - oldFirst0;
       for(int k=0; k<Np; k++){
         buf[a + Np*(b + Np*k)] = uOld[SC_3D_INDEX(a,b,k,src,v,N,nOld)];
       }
@@ -413,13 +480,13 @@ extern "C"
                                int *sourceKind, int *sourceElem, int *family,
                                int *depth, int *path,
                                real *mortarR, real *mortarP,
-                               int pathStride, int eFirst0,
+                               int pathStride, int eFirst0, int oldFirst0,
                                int N, int nvar, int nOld, int nNew, int nLocal)
   {
     if( nLocal <= 0 ){ return; }
     int Np = N+1;
     TransferSolution_3D_gpukernel<<<dim3(nLocal,1,1), dim3(Np*Np,1,1), 0, 0>>>(
       uOld, uNew, sourceKind, sourceElem, family, depth, path,
-      mortarR, mortarP, pathStride, eFirst0, N, nvar, nOld, nNew);
+      mortarR, mortarP, pathStride, eFirst0, oldFirst0, N, nvar, nOld, nNew);
   }
 }

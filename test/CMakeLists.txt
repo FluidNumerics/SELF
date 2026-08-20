@@ -83,7 +83,10 @@ add_fortran_tests (
     "mesh3d_uniform_refine.f90"
     "solution_transfer_2d.f90"
     "solution_transfer_3d.f90"
+    "solution_transfer_2d_device.f90"
     "solution_transfer_3d_device.f90"
+    "solution_transfer_2d_device_offset.f90"
+    "solution_transfer_3d_device_offset.f90"
     "quadtree_balance_2d.f90"
     "octree_balance_3d.f90"
     "adaptive_mortar_2d.f90"
@@ -124,6 +127,12 @@ add_fortran_tests (
     "tensor_3d_guard_resize_nvar.f90"
     "dgmodel2d_guard_transfer_unstaged.f90"
     "dgmodel3d_guard_transfer_unstaged.f90"
+    "dgmodel2d_guard_window_and_stage.f90"
+    "dgmodel3d_guard_window_and_stage.f90"
+    "dgmodel2d_guard_download_nowindow.f90"
+    "dgmodel3d_guard_download_nowindow.f90"
+    "dgmodel2d_guard_download_badbuffer.f90"
+    "dgmodel3d_guard_download_badbuffer.f90"
     "dgmodel3d_guard_transfer_reapply.f90"
     "amr_controller_2d_guard_maxlevel.f90"
     "amr_controller_3d_guard_maxlevel.f90"
@@ -353,6 +362,12 @@ set_tests_properties(
     tensor_3d_guard_resize_nvar
     dgmodel2d_guard_transfer_unstaged
     dgmodel3d_guard_transfer_unstaged
+    dgmodel2d_guard_window_and_stage
+    dgmodel3d_guard_window_and_stage
+    dgmodel2d_guard_download_nowindow
+    dgmodel3d_guard_download_nowindow
+    dgmodel2d_guard_download_badbuffer
+    dgmodel3d_guard_download_badbuffer
     dgmodel3d_guard_transfer_reapply
     mesh3d_read_guard_missingfile
     mesh3d_read_guard_badconnectivity
@@ -375,7 +390,9 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "lineareuler2d_amr_soundwave_mpi.f90"
                        "lineareuler3d_amr_soundwave_mpi.f90"
                        "amr_migrate_2d_window_mpi.f90"
+    "amr_migrate_2d_device_apply_mpi.f90"
                        "amr_migrate_3d_window_mpi.f90"
+    "amr_migrate_3d_device_apply_mpi.f90"
                        "geometry_2d_reuse_mpi.f90"
                        "advection_diffusion_2d_mortar_mpi.f90"
                        "advection_diffusion_2d_rk3_mpi.f90"
@@ -459,6 +476,61 @@ add_test(NAME lineareuler3d_amr_soundwave_mpi_migrate_gather
 set_tests_properties(lineareuler3d_amr_soundwave_mpi_migrate_gather PROPERTIES
                      LABELS "parallel" ENVIRONMENT "SELF_AMR_MIGRATE_GATHER=1")
 
+# Re-runs of the same sources for the windowed transfer (#172). TRANSFER_VERIFY applies the plan
+# BOTH ways from the same migrated window and compares - to a TOLERANCE, and only because the device
+# compiler contracts the kernel's multiply-accumulates into FMAs. It is deliberately a DIFFERENT
+# switch from MIGRATE_VERIFY, which asserts the window ARRIVED intact and is exact; merging them
+# would drag the strict one down to the loose bar. Registered in both dimensions because
+# VerifyWindowedApply is a per-dimension routine, and a twin covering the same logic is not a
+# substitute for running it.
+add_test(NAME lineareuler2d_amr_soundwave_mpi_transfer_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_verify PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_VERIFY=1")
+
+add_test(NAME lineareuler3d_amr_soundwave_mpi_transfer_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
+set_tests_properties(lineareuler3d_amr_soundwave_mpi_transfer_verify PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_VERIFY=1")
+
+# TRANSFER_HOST forces the portable host migration and windowed apply even on a GPU build. On a CPU
+# build it selects the same code the default path already takes, so what it covers here is the branch
+# selection itself - but that branch is what routes a GPU build back to the portable path, and
+# leaving it unexecuted anywhere means a typo in it would only surface on hardware. 2-D only; the
+# 3-D twin is the same three lines.
+add_test(NAME lineareuler2d_amr_soundwave_mpi_transfer_host
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_host PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1")
+
+# Both switches together, which is not redundant with either alone: it is the only thing that
+# reaches the transferHost branch of the WINDOW DOWNLOAD. On a GPU build that branch reads the
+# window out of host memory while the default reads it off the device, so a bug there would
+# silently corrupt what MIGRATE_VERIFY and TRANSFER_VERIFY then compare against - the diagnostics
+# would be lying rather than failing.
+add_test(NAME lineareuler2d_amr_soundwave_mpi_transfer_host_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler2d_amr_soundwave_mpi)
+set_tests_properties(lineareuler2d_amr_soundwave_mpi_transfer_host_verify PROPERTIES
+                     LABELS "parallel"
+                     ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1;SELF_AMR_TRANSFER_VERIFY=1")
+
+# The 3-D twin of the combined case, and the only 3-D entry needed: TRANSFER_HOST routes the
+# migration, the window download and the apply through the portable implementations, and
+# TRANSFER_VERIFY is what makes the download happen at all - so one run reaches all three of the
+# 3-D transferHost branches. Registered for the same reason the 3-D TRANSFER_VERIFY entry is: these
+# are per-dimension routines, and a 2-D twin covering the same logic is not a substitute for
+# running the 3-D one.
+add_test(NAME lineareuler3d_amr_soundwave_mpi_transfer_host_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} lineareuler3d_amr_soundwave_mpi)
+set_tests_properties(lineareuler3d_amr_soundwave_mpi_transfer_host_verify PROPERTIES
+                     LABELS "parallel"
+                     ENVIRONMENT "SELF_AMR_TRANSFER_HOST=1;SELF_AMR_TRANSFER_VERIFY=1")
+
 # Two ranks cannot distinguish gather-then-slice from a point-to-point routing bug: with one peer
 # the send and receive runs are forced, and no rank's window can span more than one peer. These
 # entries re-launch the SAME executables on SELF_MPIEXEC_NUMPROCS_MANY ranks, where a window can
@@ -490,6 +562,23 @@ add_test(NAME amr_migrate_3d_window_mpi_np_many
                  ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
                  amr_migrate_3d_window_mpi)
 set_tests_properties(amr_migrate_3d_window_mpi_np_many PROPERTIES
+                     LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY})
+
+# The model-level device migration and windowed apply, at more than two ranks. Two ranks force every
+# send/receive run and cannot produce a window that straddles more than one peer, so the 4-rank
+# entries are where the routing is actually distinguishable from gather-then-slice.
+add_test(NAME amr_migrate_2d_device_apply_mpi_np_many
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS_MANY}
+                 ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
+                 amr_migrate_2d_device_apply_mpi)
+set_tests_properties(amr_migrate_2d_device_apply_mpi_np_many PROPERTIES
+                     LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY})
+
+add_test(NAME amr_migrate_3d_device_apply_mpi_np_many
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS_MANY}
+                 ${SELF_MPIEXEC_OPTIONS} ${SELF_MPIEXEC_OPTIONS_MANY}
+                 amr_migrate_3d_device_apply_mpi)
+set_tests_properties(amr_migrate_3d_device_apply_mpi_np_many PROPERTIES
                      LABELS "parallel" PROCESSORS ${SELF_MPIEXEC_NUMPROCS_MANY})
 
 add_test(NAME lineareuler3d_amr_soundwave_mpi_np_many_migrate_verify

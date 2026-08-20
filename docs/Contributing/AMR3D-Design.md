@@ -407,6 +407,30 @@ the device compiler contracts these multiply-accumulates into FMAs.
 reference value by value; the AMR regressions assert the invariants (conservation,
 entropy non-growth), which conservation arguments make exact either way.
 
+**The window form (#172).** `TransferSolution_3D_gpu` takes an `oldFirst0`
+argument and `nOld` means `uOld`'s per-variable element STRIDE, not the global
+old-leaf count; a plan's global source index is rebased as `src - oldFirst0`. The
+whole-field case is exactly `oldFirst0 = 0`, so the single-rank path is unchanged
+arithmetic. This is what lets a multi-rank adaptation use the kernel at all: the
+window of old elements a rank reads is migrated to it point-to-point and, on a GPU
+build, assembled in device memory — its own run device-to-device, the peers' runs
+`MPI_Irecv`'d straight into device memory. That requires a GPU-aware MPI, which is
+not a new dependency: the per-step aggregated halo exchange has always posted on
+device allocations with no fallback, and `SELF_REQUIRE_GPU_AWARE_MPI` is fatal by
+default. The local run is copied by `MigrateWindowLocal_gpu`, which synchronizes
+the device UNCONDITIONALLY before returning, because the caller then posts MPI
+against `solution%interior_gpu`; making that contingent on there being something
+to copy would strand a rank whose local run is empty. `HaloPack_3D_gpu`
+synchronizes before its own MPI for the same reason.
+
+**A convention this change follows.** New index and byte arithmetic belongs in
+`src/`, shared with the host path, so that every CI job checks it rather than only
+the two Buildkite GPU pipelines (see §6) - and so that a CPU build can fail for a
+logic error rather than deferring it to hardware. The guard the kernel cannot
+perform (every source inside the window) likewise lives in the Fortran caller,
+where it can report; inside the kernel an early return would be neither reportable
+nor block-uniform, and would strand the `__syncthreads()` calls.
+
 ---
 
 ## 6. Testing & validation plan
@@ -465,13 +489,105 @@ one can fail for a different reason:
   agree value for value in-process on real physics, the second keeps the
   retained v1 path exercised.
 
+- `amr_migrate_3d_device_apply_mpi` (2 and 4 ranks, #172): the same asymmetric
+  epoch, but driven through the MODEL - migrate, regrid, apply - so that on a GPU
+  build it exercises the device window assembly, the receive into device memory
+  and the kernel's `oldFirst0`, none of which `amr_migrate_3d_window_mpi` reaches
+  (that one calls `ExchangeOldWindow` directly, always in host memory). It fails
+  unless some rank received elements from a peer AND some rank's window base is
+  both past 1 and away from that rank's own first old element - the second
+  condition because a window beginning exactly where the rank's old range begins
+  cannot distinguish a correct rebase from a dropped one. Values are checked
+  against `ApplyTransferPlanRange` over an independently built analytic field:
+  bitwise on a CPU build, to a tolerance on GPU.
+- `solution_transfer_3d_device_offset` (#172): calls the launcher DIRECTLY with a
+  synthetic window and a nonzero `oldFirst0`, which separates a kernel indexing
+  error from a migration error. GPU-gated, unavoidably - it is the one gated test
+  in that change, because the kernel is the subject and a CPU build has no second
+  implementation to compare against.
+- `SELF_AMR_MIGRATE_VERIFY=1` / `SELF_AMR_MIGRATE_GATHER=1` re-runs, plus
+  `SELF_AMR_TRANSFER_VERIFY=1` in 2-D. These check DIFFERENT things at different
+  bars and must stay separate: `MIGRATE_VERIFY` asserts the window arrived intact
+  and is BITWISE, because migration is byte movement; `TRANSFER_VERIFY` asserts the
+  two applies agree and is tolerance-based, because the device compiler contracts
+  the kernel's multiply-accumulates into FMAs.
+  `SELF_AMR_TRANSFER_HOST=1` is deliberately NOT registered as a GitHub Actions
+  re-run: on a CPU build it selects the same code the default takes, so it would
+  cost 33 s across both dimensions for a few lines of branch coverage in a job that
+  already runs within minutes of its 90-minute ceiling. It is exercised where it
+  selects different code - the Buildkite GPU pipelines, and the B300 verification
+  runs, which do an explicit `TRANSFER_HOST=1` pass over the whole set.
+
+**On patch coverage, and one thing that is easy to get wrong about it.** A `WILL_FAIL`
+test's `stop 1` DOES produce coverage data - gcov's `atexit` flush runs normally, and
+the guard lines it reaches show real hit counts. So guard paths are ordinarily
+coverable and a `WILL_FAIL` test is the way to cover them; #172 initially assumed
+otherwise and left twelve reachable lines untested on that mistaken basis.
+
+What genuinely does not get covered is narrower. Assertion branches such as
+`VerifyWindowedApply`'s mismatch report fire only when the host and device applies
+disagree beyond tolerance, which needs data corrupted on purpose - leave those, and
+do not delete an assertion to move a number. Continuation lines of multi-line calls
+are reported as never executed no matter what, because gcov attributes a statement
+to its first line. And `MPI_IRECV`/`ISEND`/`WAITALL` inside a multi-rank test are
+unreliable: the ranks share one `.gcda` path and clobber each other, so whichever
+writes last decides which side appears covered.
+
+Codecov's default patch target is the project's own coverage (~93%). Cover what a
+test can genuinely reach - which is more than it first appears - and say which lines
+are deliberately left.
+
+Test cost is a real constraint here, but runner speed is the larger term and the
+two are easy to confuse. Observed `gfortran-12 coverage` durations on one branch,
+against a hard `timeout-minutes: 90`: 85 min, 90 min (cancelled), 82 min, and
+43 min - where the 43-minute run carried MORE tests than the 82-minute one. So the
+job sits near its ceiling and a slow runner, rather than a few added seconds of
+tests, is what decides whether it gets cancelled. Commit `d88910d4` trimmed the 3-D
+AMR soundwave family for this reason and the constraint clearly recurs, so anything
+added to the AMR MPI family is still worth costing
+(`Testing/Temporary/CTestCostData.txt`) before it is registered. But a trim should
+not be expected to fix a cancellation on its own, and coverage should not be traded
+away for seconds a fast runner would have absorbed - #172 did that once and had to
+put them back.
+
 Two ranks are not enough on their own: with one peer the send and receive runs
 are forced and no window can straddle more than one peer, which is why the
 4-rank entries exist (`SELF_MPIEXEC_NUMPROCS_MANY`, default 4).
 
-GPU: the same integration tests through the Buildkite MI210/V100 pipelines;
-CPU/GPU flag and post-adapt solution agreement enforced by construction
-(shared host `FinalizeIndicator`) and by tolerance respectively.
+GPU coverage comes from two places, and it is worth being precise about which:
+GitHub Actions (`.github/workflows/`) is entirely CPU-only, so nothing there
+compiles a device kernel. Buildkite (`.buildkite/pipeline.yml`) does: on every
+non-`main` branch it uploads
+on-hardware coverage pipelines for AMD MI210 (HIP, gfx90a) and NVIDIA V100 (CUDA,
+sm_70), each configuring `SELF_ENABLE_GPU=ON` and running the full `ctest`, plus an
+x86 CPU pipeline. So a pull request does build and run both device backends, and
+`src/gpu/` coverage is uploaded from there.
+
+Two consequences for the tests above. A GPU-gated test is not dead weight - it runs
+on both backends per PR - but it is invisible to the much faster and more numerous
+GitHub Actions jobs, so the default remains NOT to gate: a test that can assert
+something real on a CPU build should. And keeping new index arithmetic in `src/`
+rather than `src/gpu/` still earns its keep, not because the device path is
+uncompiled, but because arithmetic shared with the host path is checked by every
+job rather than only by the two GPU ones. Deeper GPU work still wants a dedicated
+node for measurement (a B300, CUDA sm_103, for #165/#167/#172), since the Buildkite
+pipelines are correctness gates and not a benchmarking environment.
+
+**Which COMPILERS the estate actually exercises, which is narrower than the support
+matrix.** Every job that runs on a pull request uses **gfortran**: the GitHub
+Actions matrices (9/10/11/12, debug/release/coverage) and all three Buildkite
+pipelines, which set `FC=gfortran` and vary only the GPU backend. The
+`linux-amdflang-cmake` and `linux-nvidia-hpc-cmake` workflows exist but are
+currently `disabled_manually` in the repository, and there is no ifx job at all.
+So the compatibility this project asks for in CLAUDE.md - gfortran >= 11, ifx,
+nvfortran, amdflang - is a standing requirement that CI does not verify for three
+of the four. Anything resting on a less common language feature (sequence
+association, non-default integer kinds in unusual positions, type-bound override
+attribute matching) is checked here only against gfortran, and a green PR should
+not be read as more than that.
+
+CPU/GPU flag agreement is enforced by construction (shared host
+`FinalizeIndicator`); post-adapt solution agreement by tolerance.
 
 ---
 

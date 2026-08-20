@@ -27,6 +27,7 @@
 module SELF_DGModel2D
 
   use SELF_DGModel2D_t
+  use iso_fortran_env,only:int64
   use SELF_GPU
   use SELF_GPU_enums
   use SELF_GPUInterfaces
@@ -51,6 +52,16 @@ module SELF_DGModel2D
     integer :: planAllocElem = 0 !! new-element count the plan buffers are sized for
     integer :: planAllocStride = 0 !! plan%path leading dimension they are sized for
     integer :: xferNOld = 0 !! element count of the staged field (its device stride)
+    !! Migrated old-element window, device-resident: the contiguous run of OLD elements this
+    !! rank's new element range references, assembled by MigrateOldWindow and consumed by
+    !! ApplyTransferPlan. Its own capacity and lifecycle, separate from xferOld_gpu, because the
+    !! two have different lifetimes and different sizes - a window is the hull of a rank's new
+    !! range in the OLD numbering and can be larger than the local old field - and because keeping
+    !! them apart is what lets an unpaired stage/migrate be caught rather than silently served.
+    type(c_ptr) :: xferWin_gpu = c_null_ptr
+    integer(c_size_t) :: xferWinBytes = 0 !! current capacity, grown but never shrunk
+    integer :: xferNWin = 0 !! window element count (its device stride); 0 means no window
+    integer :: xferWinFirst = 0 !! global old index of the window's first element
 
   contains
 
@@ -59,6 +70,8 @@ module SELF_DGModel2D
     procedure :: Regrid => Regrid_DGModel2D
     procedure :: StageSolutionForTransfer => StageSolutionForTransfer_DGModel2D
     procedure :: ApplyTransferPlan => ApplyTransferPlan_DGModel2D
+    procedure :: MigrateOldWindow => MigrateOldWindow_DGModel2D
+    procedure :: DownloadOldWindow => DownloadOldWindow_DGModel2D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel2D
 
@@ -392,12 +405,14 @@ contains
     ! StageSolutionForTransfer / ApplyTransferPlan and survive across adaptation epochs, so
     ! they are owned by the model and released only here.
     if(c_associated(this%xferOld_gpu)) call gpuCheck(hipFree(this%xferOld_gpu))
+    if(c_associated(this%xferWin_gpu)) call gpuCheck(hipFree(this%xferWin_gpu))
     if(c_associated(this%xferKind_gpu)) call gpuCheck(hipFree(this%xferKind_gpu))
     if(c_associated(this%xferElem_gpu)) call gpuCheck(hipFree(this%xferElem_gpu))
     if(c_associated(this%xferFamily_gpu)) call gpuCheck(hipFree(this%xferFamily_gpu))
     if(c_associated(this%xferDepth_gpu)) call gpuCheck(hipFree(this%xferDepth_gpu))
     if(c_associated(this%xferPath_gpu)) call gpuCheck(hipFree(this%xferPath_gpu))
     this%xferOld_gpu = c_null_ptr
+    this%xferWin_gpu = c_null_ptr
     this%xferKind_gpu = c_null_ptr
     this%xferElem_gpu = c_null_ptr
     this%xferFamily_gpu = c_null_ptr
@@ -407,6 +422,9 @@ contains
     this%planAllocElem = 0
     this%planAllocStride = 0
     this%xferNOld = 0
+    this%xferWinBytes = 0
+    this%xferNWin = 0
+    this%xferWinFirst = 0
 
     call Free_DGModel2D_t(this)
 
@@ -508,18 +526,21 @@ contains
   endsubroutine StageSolutionForTransfer_DGModel2D
 
   subroutine ApplyTransferPlan_DGModel2D(this,plan,interp,eFirst,eLast,uGlobal,oldFirst)
-    !! Apply the transfer plan on the device (Stage 6a), writing solution%interior_gpu directly
-    !! and moving no solution data across the PCIe/xGMI link.
+    !! Apply the transfer plan on the device, writing solution%interior_gpu directly and moving
+    !! no solution data across the PCIe/xGMI link - on any number of ranks.
     !!
-    !! uGlobal is the multi-rank escape hatch: when the caller supplies host-side old-field data
-    !! - the whole global field under the Stage-5 v1 allgather migration, or the rank's window
-    !! under the point-to-point (v2) migration - this falls back to the portable host path,
-    !! forwarding oldFirst so the window is indexed correctly. Serving the device transfer from a
-    !! migrated window (a device-side window buffer plus an oldFirst offset in the kernel) is the
-    !! named follow-up to #167; on a single rank the device transfer stands alone, which is the
-    !! case optimized here.
+    !! The old field is read from whichever device buffer the pairing routine left it in: the
+    !! whole staged local field on a single rank (StageSolutionForTransfer), or this rank's
+    !! migrated window on several (MigrateOldWindow), in which case the kernel is given the
+    !! window's element stride and the global old index of its first element so it can rebase the
+    !! plan's source indices. The two are mutually exclusive and one of them is required.
+    !!
+    !! uGlobal remains for a caller that supplies host-side old-field data - the Stage-5 v1
+    !! allgather migration, and external callers - and takes the portable host path, forwarding
+    !! oldFirst so the window is indexed correctly.
     implicit none
-    class(DGModel2D),intent(inout) :: this
+    ! target: matches the base declaration, which remaps a pointer onto its window buffer.
+    class(DGModel2D),intent(inout),target :: this
     type(TransferPlan2D),intent(in),target :: plan
     type(Lagrange),intent(in) :: interp
     integer,intent(in) :: eFirst
@@ -527,23 +548,50 @@ contains
     real(prec),intent(in),optional,contiguous :: uGlobal(:,:,:,:)
     integer,intent(in),optional :: oldFirst
     ! Local
-    integer :: nLocal,pathStride
+    integer :: nLocal,pathStride,li,c,src,o1,o2
+    integer :: nOldStride,oldFirst0
     integer(c_size_t) :: nb
+    type(c_ptr) :: uOld_gpu
 
     if(present(uGlobal)) then
+      ! Caller-supplied host old field: the Stage-5 v1 allgather migration, and any external
+      ! caller. Never combined with a migrated device window - that would be two sources for one
+      ! apply, so it is a caller bug rather than something to resolve silently.
+      if(this%xferNWin > 0) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : ApplyTransferPlan given both uGlobal and a migrated window.'
+        stop 1
+      endif
       call ApplyTransferPlan_DGModel2D_t(this,plan,interp,eFirst,eLast,uGlobal,oldFirst)
       return
     endif
 
-    ! The guard is on xferNOld, not on c_associated(xferOld_gpu). The staging buffer is a
-    ! persistent capacity buffer and stays allocated after use, so testing the pointer would only
-    ! catch a missing stage before the FIRST epoch; from the second on, an unpaired call would
-    ! silently transfer the previous epoch's field. xferNOld is set by StageSolutionForTransfer
-    ! and cleared below, so it tracks the stage/apply pairing the way the base implementation's
-    ! allocatable transferStage does. (Fixed alongside the 3-D port, which found it.)
-    if(this%xferNOld <= 0) then
+    ! Which device buffer holds the old field, and how the kernel indexes it.
+    !
+    ! The guards are on the element counts, not on c_associated(). Both buffers are persistent
+    ! capacity buffers that stay allocated after use, so testing a pointer would only catch a
+    ! missing stage before the FIRST epoch; from the second on, an unpaired call would silently
+    ! transfer the previous epoch's field. xferNOld and xferNWin are set by
+    ! StageSolutionForTransfer and MigrateOldWindow respectively and both cleared below, so they
+    ! track the pairing the way the base implementation's allocatable transferStage does.
+    if(this%xferNWin > 0 .and. this%xferNOld > 0) then
       print*,__FILE__,':',__LINE__, &
-        ' : Error : ApplyTransferPlan called without a staged solution.'
+        ' : Error : ApplyTransferPlan has both a staged local field and a migrated window.'
+      stop 1
+    elseif(this%xferNWin > 0) then
+      ! Multi-rank: a migrated window of the old field, first element global old xferWinFirst.
+      uOld_gpu = this%xferWin_gpu
+      nOldStride = this%xferNWin
+      oldFirst0 = this%xferWinFirst-1
+    elseif(this%xferNOld > 0) then
+      ! Single rank: the whole local old field, so the window base is zero and the kernel's
+      ! indexing is exactly what it was before the window form existed.
+      uOld_gpu = this%xferOld_gpu
+      nOldStride = this%xferNOld
+      oldFirst0 = 0
+    else
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : ApplyTransferPlan called without a staged solution or a migrated window.'
       stop 1
     endif
 
@@ -557,6 +605,35 @@ contains
 
     nLocal = eLast-eFirst+1
     pathStride = size(plan%path,1)
+
+    ! Window coverage. On the host path ApplyTransferPlanWindow checks every element's sources
+    ! against the window and stops if one falls outside it. The kernel cannot: it has no way to
+    ! report, and an out-of-window index there is a silent out-of-bounds device read rather than a
+    ! wrong answer you can see. The same conditions are checked here instead - integer comparisons
+    ! over this rank's own element range, once per adapting epoch.
+    if(this%xferNWin > 0) then
+      o1 = this%xferWinFirst
+      o2 = o1+this%xferNWin-1
+      do li = eFirst,eLast
+        if(plan%sourceKind(li) == SELF_TRANSFER_RESTRICT) then
+          do c = 1,4
+            src = plan%family(c,li)
+            if(src < o1 .or. src > o2) then
+              print*,__FILE__,':',__LINE__, &
+                ' : Error : a restricted child lies outside the migrated window.'
+              stop 1
+            endif
+          enddo
+        else
+          src = plan%sourceElem(li)
+          if(src < o1 .or. src > o2) then
+            print*,__FILE__,':',__LINE__, &
+              ' : Error : a transfer source lies outside the migrated window.'
+            stop 1
+          endif
+        endif
+      enddo
+    endif
 
     ! (Re)size the device copies of the plan's integer arrays, reusing them across epochs.
     if(plan%nNew > this%planAllocElem .or. pathStride > this%planAllocStride) then
@@ -589,18 +666,153 @@ contains
     call gpuCheck(hipMemcpy(this%xferPath_gpu,c_loc(plan%path), &
                             int(pathStride,c_size_t)*nb,hipMemcpyHostToDevice))
 
-    call TransferSolution_2D_gpu(this%xferOld_gpu,this%solution%interior_gpu, &
+    call TransferSolution_2D_gpu(uOld_gpu,this%solution%interior_gpu, &
                                  this%xferKind_gpu,this%xferElem_gpu,this%xferFamily_gpu, &
                                  this%xferDepth_gpu,this%xferPath_gpu, &
                                  interp%mortarR_gpu,interp%mortarP_gpu, &
-                                 pathStride,eFirst-1,interp%N,this%nvar, &
-                                 this%xferNOld,this%solution%nElem,nLocal)
+                                 pathStride,eFirst-1,oldFirst0,interp%N,this%nvar, &
+                                 nOldStride,this%solution%nElem,nLocal)
 
     ! The staged field has been consumed. The buffer itself is kept (it is the capacity that
     ! makes a settled run allocation-free); only the pairing marker is cleared.
     this%xferNOld = 0
+    this%xferNWin = 0
 
   endsubroutine ApplyTransferPlan_DGModel2D
+
+  subroutine MigrateOldWindow_DGModel2D(this,winFirst,winLast,wFirst,wLast, &
+                                        nBytesRecv,nBytesSent,nElemRemote)
+    !! Assemble this rank's window of the pre-regrid old field IN DEVICE MEMORY, replacing the
+    !! base implementation's host-memory migration. The rank's own run is copied device-to-device
+    !! and the peers' runs are received directly into device memory, so no solution data crosses
+    !! the host link and the windowed ApplyTransferPlan that follows runs as a device kernel.
+    !!
+    !! This hands device pointers to MPI, which requires a GPU-aware MPI. That is not a new
+    !! requirement: the per-step aggregated halo exchange has always posted its sends and receives
+    !! on device allocations (SideExchangeStart in SELF_MappedScalar_2D), with no host-staged
+    !! fallback anywhere, and SELF_REQUIRE_GPU_AWARE_MPI makes the configure-time check fatal by
+    !! default. A multi-rank GPU run that lacked it could never have taken a time step.
+    !!
+    !! Call it BEFORE Regrid, which releases the storage the sends read.
+    implicit none
+    class(DGModel2D),intent(inout) :: this
+    integer,intent(in) :: winFirst(:)
+    integer,intent(in) :: winLast(:)
+    integer,intent(in) :: wFirst
+    integer,intent(in) :: wLast
+    integer(int64),intent(inout) :: nBytesRecv
+    integer(int64),intent(inout) :: nBytesSent
+    integer(int64),intent(inout) :: nElemRemote
+    ! Local
+    integer :: perElem,nWinElem,nLocalOld,myFirst,a,b,msgCount
+    integer(c_size_t) :: nbytes
+    integer(int64) :: nWinReals,nLocReals
+    integer,allocatable :: requests(:)
+    real(prec),pointer,contiguous :: win(:),uloc(:)
+
+    perElem = (this%solution%interp%N+1)*(this%solution%interp%N+1)
+    nWinElem = max(wLast-wFirst+1,0)
+    nLocalOld = this%solution%nElem
+    myFirst = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1)+1
+
+    ! Grow-only capacity, with a one-element floor so the descriptor below always has a target
+    ! even for an empty window (a rank that owns no new elements still takes part, because its
+    ! peers may need old elements it owns).
+    nbytes = int(perElem,c_size_t)*int(max(nWinElem,1),c_size_t)*int(this%nvar,c_size_t)*prec
+    if(nbytes > this%xferWinBytes) then
+      if(c_associated(this%xferWin_gpu)) call gpuCheck(hipFree(this%xferWin_gpu))
+      call gpuCheck(hipMalloc(this%xferWin_gpu,nbytes))
+      this%xferWinBytes = nbytes
+    endif
+
+    ! A flat descriptor cannot span more reals than a default integer can index, and the products
+    ! below are what would silently wrap: perElem*nWinElem*nvar is the whole buffer. Fail loudly
+    ! instead. The same ceiling already binds the exchange, whose MPI counts are default integers.
+    nWinReals = int(perElem,int64)*int(max(nWinElem,1),int64)*int(this%nvar,int64)
+    nLocReals = int(perElem,int64)*int(max(nLocalOld,1),int64)*int(this%nvar,int64)
+    if(max(nWinReals,nLocReals) > int(huge(1),int64)) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : the migration window exceeds what a default integer can index.'
+      stop 1
+    endif
+
+    ! Device allocations viewed as flat Fortran arrays, so the migration schedule can index them
+    ! and MPI can be handed their addresses: the idiom SideExchangeStart already uses for the
+    ! packed halo buffers.
+    call c_f_pointer(this%xferWin_gpu,win,[int(nWinReals)])
+    if(nLocalOld > 0) then
+      call c_f_pointer(this%solution%interior_gpu,uloc,[int(nLocReals)])
+    else
+      ! This rank owned no old elements, so interior_gpu need not be a valid allocation. It posts
+      ! no sends either (its old range intersects nobody's window), so uloc is never dereferenced;
+      ! aim it somewhere valid rather than calling c_f_pointer on a possibly null pointer.
+      uloc => win
+    endif
+
+    ! The run of my window that I already own, device-to-device. This ALSO synchronizes the
+    ! device unconditionally - see MigrateWindowLocal_gpu - which is what makes it safe to post
+    ! MPI against solution%interior_gpu on the next line. Unlike the host path, which overlaps
+    ! its local copy with the messages, the copy happens first: the barrier has to precede the
+    ! sends, and once per adapting epoch the lost overlap is not worth a second synchronization.
+    call OwnedRun(this%mesh%decomp%offsetElem,this%mesh%decomp%rankId+1,wFirst,wLast,a,b)
+    call MigrateWindowLocal_gpu(this%solution%interior_gpu,this%xferWin_gpu, &
+                                perElem,this%nvar,max(nLocalOld,1),max(nWinElem,1), &
+                                a-wFirst,a-myFirst,max(b-a+1,0))
+
+    allocate(requests(1:2*this%nvar*this%mesh%decomp%nRanks))
+    msgCount = 0
+    call PostOldWindowExchange(this%mesh%decomp,perElem,this%nvar,nLocalOld,uloc, &
+                               winFirst,winLast,wFirst,wLast,win,requests,msgCount, &
+                               nBytesRecv,nBytesSent,nElemRemote)
+    call FinishOldWindowExchange(requests,msgCount)
+    deallocate(requests)
+
+    win => null()
+    uloc => null()
+    this%xferWinFirst = wFirst
+    this%xferNWin = nWinElem
+
+  endsubroutine MigrateOldWindow_DGModel2D
+
+  subroutine DownloadOldWindow_DGModel2D(this,wFirst,wLast,uWin)
+    !! Copy the device-resident migrated window to the host, for the SELF_AMR_MIGRATE_VERIFY
+    !! diagnostic only. This is exactly the host traffic the device path exists to avoid, so it
+    !! must never appear on the default path.
+    !!
+    !! The comparison it feeds stays BITWISE. Everything that touched these values is data
+    !! movement - a device-to-device copy, MPI byte transfers, and this download - so no
+    !! arithmetic has been applied and exactness is available. The transfer APPLY is a different
+    !! matter: it agrees between host and device only to round-off, because the device compiler
+    !! contracts its multiply-accumulates into FMAs. The two must not be conflated.
+    implicit none
+    class(DGModel2D),intent(in) :: this
+    integer,intent(in) :: wFirst
+    integer,intent(in) :: wLast
+    ! target: c_loc below requires it, and contiguous keeps the download a single memcpy.
+    real(prec),intent(out),target,contiguous :: uWin(:,:,:,:)
+    ! Local
+    integer :: perElem,nWinElem
+    integer(c_size_t) :: nbytes
+
+    nWinElem = max(wLast-wFirst+1,0)
+    if(nWinElem == 0) return
+
+    perElem = (this%solution%interp%N+1)*(this%solution%interp%N+1)
+    if(size(uWin,3) /= nWinElem .or. size(uWin,4) /= this%nvar) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : DownloadOldWindow given a buffer that does not match the window.'
+      stop 1
+    endif
+    if(this%xferNWin /= nWinElem .or. this%xferWinFirst /= wFirst) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : DownloadOldWindow called without a matching migrated window.'
+      stop 1
+    endif
+
+    nbytes = int(perElem,c_size_t)*int(nWinElem,c_size_t)*int(this%nvar,c_size_t)*prec
+    call gpuCheck(hipMemcpy(c_loc(uWin),this%xferWin_gpu,nbytes,hipMemcpyDeviceToHost))
+
+  endsubroutine DownloadOldWindow_DGModel2D
 
   subroutine CalculateTendency_DGModel2D(this)
     implicit none
