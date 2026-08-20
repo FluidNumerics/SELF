@@ -518,19 +518,24 @@ one can fail for a different reason:
   selects different code - the Buildkite GPU pipelines, and the B300 verification
   runs, which do an explicit `TRANSFER_HOST=1` pass over the whole set.
 
-**On patch-coverage numbers for this area.** Codecov's default patch target is the
-project's own coverage (~93%), and AMR transfer changes will tend to miss it for a
-structural reason worth knowing before chasing it. The uncovered remainder is
-dominated by three things that no reasonable test reaches: guard paths that end in
-`stop 1`, which a WILL_FAIL test executes but whose abort limits what the coverage
-run records; assertion branches such as `VerifyWindowedApply`'s mismatch report,
-reachable only by deliberately corrupting data; and continuation lines of multi-line
-calls, which gcov attributes to the statement's first line and reports as never
-executed regardless. `MPI_IRECV`/`ISEND`/`WAITALL` inside a multi-rank test add
-another: ranks share one `.gcda` path and can clobber each other's data. For #172
-that accounted for about 25 of 31 uncovered lines. Cover what a test can genuinely
-reach, say which lines are deliberately left, and do not delete an assertion to
-move the number.
+**On patch coverage, and one thing that is easy to get wrong about it.** A `WILL_FAIL`
+test's `stop 1` DOES produce coverage data - gcov's `atexit` flush runs normally, and
+the guard lines it reaches show real hit counts. So guard paths are ordinarily
+coverable and a `WILL_FAIL` test is the way to cover them; #172 initially assumed
+otherwise and left twelve reachable lines untested on that mistaken basis.
+
+What genuinely does not get covered is narrower. Assertion branches such as
+`VerifyWindowedApply`'s mismatch report fire only when the host and device applies
+disagree beyond tolerance, which needs data corrupted on purpose - leave those, and
+do not delete an assertion to move a number. Continuation lines of multi-line calls
+are reported as never executed no matter what, because gcov attributes a statement
+to its first line. And `MPI_IRECV`/`ISEND`/`WAITALL` inside a multi-rank test are
+unreliable: the ranks share one `.gcda` path and clobber each other, so whichever
+writes last decides which side appears covered.
+
+Codecov's default patch target is the project's own coverage (~93%). Cover what a
+test can genuinely reach - which is more than it first appears - and say which lines
+are deliberately left.
 
 Test cost is a real constraint here, but runner speed is the larger term and the
 two are easy to confuse. Observed `gfortran-12 coverage` durations on one branch,
