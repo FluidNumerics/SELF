@@ -112,6 +112,7 @@ module SELF_HDF5
   public :: ReadArray_HDF5
   public :: WriteArray_HDF5
   public :: WriteCharacter_HDF5
+  public :: DatasetExists_HDF5
 
 contains
 
@@ -177,6 +178,31 @@ contains
     call h5close_f(error)
 
   endsubroutine Close_HDF5
+
+  function DatasetExists_HDF5(fileId,datasetName) result(exists)
+    !! Report whether a link exists at datasetName in an open file.
+    !!
+    !! ReadArray_HDF5 does not check the status of its h5dopen_f, so asking it
+    !! for an absent dataset reads through an invalid identifier: the target
+    !! array is left as it was and the HDF5 error stack is dumped to stderr.
+    !! Callers that can legitimately meet a file without a given dataset - the
+    !! model pickup readers, reading a file written by an earlier version of a
+    !! model that carried fewer solution variables - use this to ask first and
+    !! report the omission themselves.
+    !!
+    !! A path with missing intermediate groups reports .false. rather than
+    !! failing, as does any error from the link query itself.
+    implicit none
+    integer(HID_T),intent(in) :: fileId
+    character(*),intent(in) :: datasetName
+    logical :: exists
+    ! Local
+    integer :: error
+
+    call h5lexists_f(fileId,trim(datasetName),exists,error)
+    if(error /= 0) exists = .false.
+
+  endfunction DatasetExists_HDF5
 
   subroutine CreateGroup_HDF5(fileId,groupName)
 #undef __FUNC__

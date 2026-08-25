@@ -88,9 +88,11 @@ Because the interface states are resolved with the per-side impedances, material
 ### Boundary conditions
 When initializing the mesh for your Euler 3D equation solver, you can change the boundary conditions to 
 
-* `SELF_BC_Radiation` to set the external state on model boundaries to 0 in the Riemann solver
-* `SELF_BC_NoNormalFlow` to set the external normal velocity to the negative of the interior normal velocity and prolong the pressure, tangential velocity, sound speed, background density, and relaxation rate (free slip). This effectively creates a reflecting boundary condition.
-* `SELF_BC_Prescribed` to set a prescribed external state.
+* `SELF_BC_RADIATION` to set the external acoustic state on model boundaries to 0 in the Riemann solver, prolonging $c$, $\rho_0$ and $\sigma$ from the interior side (open/non-reflecting).
+* `SELF_BC_PRESCRIBED` to set a prescribed external state, via a handler you register yourself.
+
+!!! warning
+    Unlike the [2-D model](linear-euler-2d-model.md), `LinearEuler3D_t` does **not** register a `SELF_BC_NONORMALFLOW` handler — `AdditionalInit` registers radiation only, on both the CPU and the GPU path. A face tagged `SELF_BC_NONORMALFLOW` therefore receives no exterior-state update from this model, and in particular no $\sigma$ prolongation. Use `SELF_BC_PRESCRIBED` with your own reflecting handler until a 3-D no-normal-flow handler is implemented.
 
 
 As an example, when using the built-in structured mesh generator, you can do the following
@@ -101,12 +103,12 @@ type(Mesh3D),target :: mesh
 integer :: bcids(1:6)
 
   bcids(1:6) = (/&
-                  SELF_NONORMALFLOW,& ! Bottom boundary condition
-                  SELF_NONORMALFLOW,& ! South boundary condition
-                  SELF_RADIATION,&    ! East boundary condition
-                  SELF_PRESCRIBED,&   ! North boundary condition
-                  SELF_RADIATION &    ! West boundary condition
-                  SELF_NONORMALFLOW,& ! Top boundary condition
+                  SELF_BC_RADIATION,&   ! Bottom boundary condition
+                  SELF_BC_RADIATION,&   ! South boundary condition
+                  SELF_BC_RADIATION,&   ! East boundary condition
+                  SELF_BC_PRESCRIBED,&  ! North boundary condition
+                  SELF_BC_RADIATION,&   ! West boundary condition
+                  SELF_BC_RADIATION &   ! Top boundary condition
                 /)   
   call mesh%StructuredMesh(nxPerTile=5,nyPerTile=5,nzPerTile=5,&
                             nTileX=2,nTileY=2,nTileZ=2,&
@@ -121,6 +123,9 @@ integer :: bcids(1:6)
     To set a prescribed state as a function of position and time, you can create a type-extension of the `LinearEuler3D` class and override the [`hbc3d_Prescribed`](../ford/proc/hbc3d_prescribed_model.html) 
 
 #### The no-normal-flow boundary condition
+!!! note
+    This section describes the intended formulation. As noted above, `LinearEuler3D_t` does not yet register a handler for it.
+
 To set the no-normal-flow boundary condition in SELF, we set the external state that is used as input to a Riemann solver. To determine the three components of the velocity field, we use the following conditions
 
 * $\vec{u}_{ext}\cdot \hat{n} = -\vec{u}_{in}\cdot \hat{n}$ 
