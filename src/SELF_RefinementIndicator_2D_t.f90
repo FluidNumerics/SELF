@@ -449,10 +449,10 @@ contains
     !! entropy Hessian makes the gate an entropy (energy) measure rather than a raw sum of
     !! squared variables, which is what makes it meaningful for a system whose variables carry
     !! different units and magnitudes. For LinearEuler2D, whose entropy density is
-    !! 0.5*rho0*(u^2 + v^2) + 0.5*P^2/(rho0 c^2) and whose variables 4 and 5 are the
-    !! time-constant background fields c and rho0,
+    !! 0.5*rho0*(u^2 + v^2) + 0.5*P^2/(rho0 c^2) and whose variables 4, 5 and 6 are the
+    !! time-constant background fields c, rho0 and sigma,
     !!
-    !!   w = [ 0.5*rho0, 0.5*rho0, 0.5/(rho0*c0**2), 0.0, 0.0 ]
+    !!   w = [ 0.5*rho0, 0.5*rho0, 0.5/(rho0*c0**2), 0.0, 0.0, 0.0 ]
     !!
     !! is the entropy-weighted gate, and the zero weights keep the (large) background fields from
     !! setting the scale.

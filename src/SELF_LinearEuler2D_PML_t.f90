@@ -115,8 +115,11 @@ contains
     class(LinearEuler2D_PML_t),intent(inout) :: this
 
     ! Reuse parent metadata for the first four variables (u, v, P, c). The
-    ! parent also names variable 5 ("rho0"), which is overwritten below since
-    ! the PML model repurposes that slot for phi_u.
+    ! parent also names variables 5 ("rho0") and 6 ("sigma"), both of which are
+    ! overwritten below since the PML model repurposes those slots for phi_u
+    ! and phi_v. The PML model provides its own absorption mechanism through
+    ! sigma_x/sigma_y, so it does not carry the parent's relaxation-rate
+    ! variable.
     call SetMetadata_LinearEuler2D_t(this)
 
     call this%solution%SetName(5,"phi_u")

@@ -72,6 +72,16 @@ module self_LinearEuler2D
   endinterface
 
   interface
+    subroutine sourcemethod_LinearEuler2D_gpu(solution,source,N,nel,nvar) &
+      bind(c,name="sourcemethod_LinearEuler2D_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: solution,source
+      integer(c_int),value :: N,nel,nvar
+    endsubroutine sourcemethod_LinearEuler2D_gpu
+  endinterface
+
+  interface
     subroutine boundaryflux_LinearEuler2D_gpu(fb,fextb,nhat,nscale,flux,N,nel,nvar) &
       bind(c,name="boundaryflux_LinearEuler2D_gpu")
       use iso_c_binding
@@ -141,10 +151,18 @@ contains
   endsubroutine hbc2d_Radiation_LinearEuler2D_GPU_wrapper
 
   subroutine sourcemethod_LinearEuler2D(this)
+    !! Device-resident spatially-dependent linear relaxation (sponge/damping)
+    !! source term. See sourcemethod_LinearEuler2D_t for the mathematical
+    !! description; the kernel reads the relaxation rate from solution
+    !! variable 6 and never leaves the device.
     implicit none
     class(LinearEuler2D),intent(inout) :: this
 
-    if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
+    call sourcemethod_LinearEuler2D_gpu(this%solution%interior_gpu, &
+                                        this%source%interior_gpu, &
+                                        this%solution%interp%N, &
+                                        this%solution%nelem, &
+                                        this%solution%nvar)
 
   endsubroutine sourcemethod_LinearEuler2D
 

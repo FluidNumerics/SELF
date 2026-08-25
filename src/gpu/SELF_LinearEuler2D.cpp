@@ -38,7 +38,7 @@ __global__ void boundaryflux_LinearEuler2D_kernel(real *fb, real *extfb, real *n
   // at high polynomial order (aliasing instability). The per-side background
   // density rho0 is read from variable 5 (index 4); the impedances use each
   // side's own rho0, and the reconstructed fluxes use the face average.
-  // Variable layout (0-based): 0=u, 1=v, 2=p, 3=c, 4=rho0.
+  // Variable layout (0-based): 0=u, 1=v, 2=p, 3=c, 4=rho0, 5=sigma.
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
@@ -68,6 +68,7 @@ __global__ void boundaryflux_LinearEuler2D_kernel(real *fb, real *extfb, real *n
     flux[idof + 2*ndof] = (rho0_avg*c2_avg*un_star) * nm;   // pressure
     flux[idof + 3*ndof] = 0.0;                              // sound speed
     flux[idof + 4*ndof] = 0.0;                              // background density
+    flux[idof + 5*ndof] = 0.0;                              // relaxation rate
   }
 }
 
@@ -109,6 +110,9 @@ extern "C"
 
     flux[idof + ndof*(4 + nvar*0)] = 0.0; // background density, x flux; 0 (rho0 held fixed in time)
     flux[idof + ndof*(4 + nvar*1)] = 0.0; // background density, y flux; 0 (rho0 held fixed in time)
+
+    flux[idof + ndof*(5 + nvar*0)] = 0.0; // relaxation rate, x flux; 0 (sigma held fixed in time)
+    flux[idof + ndof*(5 + nvar*1)] = 0.0; // relaxation rate, y flux; 0 (sigma held fixed in time)
   }
 
 }
@@ -119,6 +123,47 @@ extern "C"
     int threads_per_block = 256;
     int nblocks_x = ndof/threads_per_block +1;
     fluxmethod_LinearEuler2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,flux,ndof,nvar);
+  }
+
+}
+
+// ============================================================
+// Source-term kernel : spatially-dependent linear relaxation
+// (sponge / damping layer).
+//
+// The relaxation rate sigma is carried as solution variable 6
+// (0-based index 5) in units of inverse seconds, and contributes
+//
+//   q_i = -sigma * s_i ,  i = 0,1,2  (u, v, p)
+//
+// to the source term. The static background variables (c, rho0,
+// sigma) carry no source. With sigma = 0 the source is identically
+// zero and the model reduces to the undamped linear Euler system.
+// This mirrors sourcemethod_LinearEuler2D_t on the CPU side.
+// ============================================================
+__global__ void sourcemethod_LinearEuler2D_gpukernel(real *solution, real *source, int ndof){
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if( idof < ndof ){
+    real sigma = solution[idof + 5*ndof];
+
+    source[idof]          = -solution[idof]*sigma;          // u
+    source[idof + ndof]   = -solution[idof + ndof]*sigma;   // v
+    source[idof + 2*ndof] = -solution[idof + 2*ndof]*sigma; // p
+    source[idof + 3*ndof] = 0.0;                            // sound speed
+    source[idof + 4*ndof] = 0.0;                            // background density
+    source[idof + 5*ndof] = 0.0;                            // relaxation rate
+  }
+
+}
+extern "C"
+{
+  void sourcemethod_LinearEuler2D_gpu(real *solution, real *source, int N, int nel, int nvar){
+    int ndof = (N+1)*(N+1)*nel;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block +1;
+    sourcemethod_LinearEuler2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,source,ndof);
+    (void)nvar; // variable layout is fixed by the model; kept for signature symmetry
   }
 
 }
@@ -150,6 +195,7 @@ __global__ void hbc2d_nonormalflow_lineareuler2d_kernel(
     extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)]; // pressure
     extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // c
     extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)]; // rho0
+    extBoundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)]; // sigma
   }
 }
 
@@ -172,9 +218,10 @@ extern "C"
 // ============================================================
 // Radiation BC kernel for 2D Linear Euler
 // Sets u/v/p extBoundary = 0 on pre-filtered boundary
-// faces. The sound speed (index 3) and background density (index 4)
-// are copied from the interior side so that face Riemann fluxes see
-// a consistent c and rho0.
+// faces. The sound speed (index 3), background density (index 4) and
+// relaxation rate (index 5) are copied from the interior side so that
+// face Riemann fluxes see a consistent c and rho0 and the exterior
+// state stays a faithful mirror of the interior one for diagnostics.
 // ============================================================
 __global__ void hbc2d_radiation_lineareuler2d_kernel(
     real *extBoundary, real *boundary,
@@ -195,6 +242,7 @@ __global__ void hbc2d_radiation_lineareuler2d_kernel(
     extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = 0.0;
     extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // c preserved
     extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)]; // rho0 preserved
+    extBoundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)]; // sigma preserved
   }
 }
 

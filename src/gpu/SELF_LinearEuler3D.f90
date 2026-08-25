@@ -37,6 +37,7 @@ module self_LinearEuler3D
     procedure :: AdditionalInit => AdditionalInit_LinearEuler3D
     procedure :: boundaryflux => boundaryflux_LinearEuler3D
     procedure :: fluxmethod => fluxmethod_LinearEuler3D
+    procedure :: sourcemethod => sourcemethod_LinearEuler3D
 
   endtype LinearEuler3D
 
@@ -58,6 +59,16 @@ module self_LinearEuler3D
       type(c_ptr),value :: solution,flux
       integer(c_int),value :: N,nel,nvar
     endsubroutine fluxmethod_LinearEuler3D_gpu
+  endinterface
+
+  interface
+    subroutine sourcemethod_LinearEuler3D_gpu(solution,source,N,nel,nvar) &
+      bind(c,name="sourcemethod_LinearEuler3D_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: solution,source
+      integer(c_int),value :: N,nel,nvar
+    endsubroutine sourcemethod_LinearEuler3D_gpu
   endinterface
 
   interface
@@ -129,5 +140,21 @@ contains
                                       this%solution%nvar)
 
   endsubroutine fluxmethod_LinearEuler3D
+
+  subroutine sourcemethod_LinearEuler3D(this)
+    !! Device-resident spatially-dependent linear relaxation (sponge/damping)
+    !! source term. See sourcemethod_LinearEuler3D_t for the mathematical
+    !! description; the kernel reads the relaxation rate from solution
+    !! variable 7 and never leaves the device.
+    implicit none
+    class(LinearEuler3D),intent(inout) :: this
+
+    call sourcemethod_LinearEuler3D_gpu(this%solution%interior_gpu, &
+                                        this%source%interior_gpu, &
+                                        this%solution%interp%N, &
+                                        this%solution%nelem, &
+                                        this%solution%nvar)
+
+  endsubroutine sourcemethod_LinearEuler3D
 
 endmodule self_LinearEuler3D
