@@ -27,10 +27,11 @@
 module self_LinearEuler3D_t
 !! This module defines a class that can be used to solve the Linear Euler
 !! equations in 3-D. The Linear Euler Equations, here, are the Euler equations
-!! linearized about a motionless background state. The sound speed and the
-!! background density are carried as solution variables (static in time,
-!! possibly spatially varying) so that heterogeneous media are supported,
-!! mirroring the 2-D model.
+!! linearized about a motionless background state. The sound speed, the
+!! background density, and the relaxation rate are carried as solution
+!! variables (static in time, possibly spatially varying) so that
+!! heterogeneous media and sponge/damping layers are supported, mirroring the
+!! 2-D model.
 !!
 !! The density anomaly is not carried as a solution variable: for a motionless
 !! background state it is slaved to the pressure through \(\rho = p/c^2\) and
@@ -48,7 +49,8 @@ module self_LinearEuler3D_t
 !!      w \\
 !!      p \\
 !!      c \\
-!!      \rho_0
+!!      \rho_0 \\
+!!      \sigma
 !!  \end{pmatrix}
 !! \end{equation}
 !!
@@ -61,13 +63,23 @@ module self_LinearEuler3D_t
 !!      \frac{p}{\rho_0} \hat{z} \\
 !!      c^2 \rho_0 ( u \hat{x} + v \hat{y} + w \hat{z}) \\
 !!      0 \\
+!!      0 \\
 !!      0
 !!  \end{pmatrix}
 !! \end{equation}
 !!
-!! and the source terms are null. The sound speed and background density
-!! variables have zero flux and zero source; they are set by the initial
-!! condition and preserved in time. This is entropy-stable for
+!! and the source term is the linear relaxation ("sponge"/damping) term
+!!
+!! \begin{equation}
+!! \vec{q} = -\sigma ( u, v, w, p, 0, 0, 0 )^T
+!! \end{equation}
+!!
+!! where \(\sigma \ge 0\) [s\(^{-1}\)] is the inverse of a local damping time
+!! scale. With \(\sigma = 0\) everywhere (the default, since the solution array
+!! is zero-initialized) the source vanishes identically and the model reduces
+!! to the undamped linear Euler system. The sound speed, background density
+!! and relaxation rate variables have zero flux and zero source; they are set
+!! by the initial condition and preserved in time. This is entropy-stable for
 !! piecewise-constant material regions aligned with element boundaries.
 !! The Riemann flux is the impedance-matched (characteristic) flux, identical
 !! in form to the 2-D model's; see riemannflux3d_LinearEuler3D_t.
@@ -104,12 +116,13 @@ contains
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
 
-    this%nvar = 6
+    this%nvar = 7
     ! Only the first four variables (u, v, w, P) are advanced in time. The
-    ! fifth and sixth variables, the sound speed c and background density
-    ! rho0, are spatially-varying but time-constant background fields: their
-    ! flux and source are identically zero, so they are excluded from time
-    ! integration rather than stepped to a no-op.
+    ! fifth, sixth and seventh variables - the sound speed c, the background
+    ! density rho0, and the relaxation rate sigma - are spatially-varying but
+    ! time-constant background fields: their flux and source are identically
+    ! zero, so they are excluded from time integration rather than stepped to
+    ! a no-op.
     this%nstepped = 4
 
   endsubroutine SetNumberOfVariables_LinearEuler3D_t
@@ -136,6 +149,9 @@ contains
     call this%solution%SetName(6,"rho0") ! Background density (static; possibly heterogeneous)
     call this%solution%SetUnits(6,"kg⋅m⁻³")
 
+    call this%solution%SetName(7,"sigma") ! Relaxation rate (inverse damping time scale)
+    call this%solution%SetUnits(7,"s⁻¹")
+
   endsubroutine SetMetadata_LinearEuler3D_t
 
   subroutine AdditionalInit_LinearEuler3D_t(this)
@@ -154,9 +170,11 @@ contains
 
   subroutine hbc3d_Radiation_LinearEuler3D(bc,mymodel)
     !! Radiation BC: zero acoustic perturbation in the exterior state; the
-    !! sound speed (variable 5) and background density (variable 6) are copied
-    !! from the interior side so the Riemann solver sees a consistent c and
-    !! rho0.
+    !! sound speed (variable 5), background density (variable 6) and relaxation
+    !! rate (variable 7) are copied from the interior side so the Riemann solver
+    !! sees a consistent c and rho0 and the exterior state stays a faithful
+    !! mirror of the interior one for diagnostics. The relaxation rate carries
+    !! no flux, so its exterior value never enters the tendency.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
     ! Local
@@ -172,6 +190,7 @@ contains
             m%solution%extBoundary(i,j,s,iEl,1:4) = 0.0_prec
             m%solution%extBoundary(i,j,s,iEl,5) = m%solution%boundary(i,j,s,iEl,5) ! c preserved
             m%solution%extBoundary(i,j,s,iEl,6) = m%solution%boundary(i,j,s,iEl,6) ! rho0 preserved
+            m%solution%extBoundary(i,j,s,iEl,7) = m%solution%boundary(i,j,s,iEl,7) ! sigma preserved
           enddo
         enddo
       enddo
@@ -198,10 +217,50 @@ contains
   endfunction entropy_func_LinearEuler3D_t
 
   subroutine sourcemethod_LinearEuler3D_t(this)
+    !! Spatially-dependent linear relaxation (sponge / damping layer) source.
+    !!
+    !! The relaxation rate sigma = s(7), in units of inverse seconds, is the
+    !! reciprocal of a local damping time scale. It contributes
+    !!
+    !!   q_i = -sigma * s_i ,   i = 1,2,3,4   (u, v, w, P)
+    !!
+    !! to the source term of the conservation law s_t + div(f) = q, relaxing
+    !! the acoustic state toward the (motionless, unperturbed) background at
+    !! rate sigma. Because a single rate is applied to the velocity and the
+    !! pressure alike, the acoustic energy density decays as exp(-2*sigma*t)
+    !! wherever sigma is constant, which is exactly the behaviour wanted from
+    !! a sponge layer: no impedance mismatch is introduced between the damped
+    !! and undamped regions by the source term itself.
+    !!
+    !! The static background variables (c, rho0, sigma) carry no source, so
+    !! they are held fixed in time.
+    !!
+    !! Units: sigma [s^-1]; q_1, q_2, q_3 [m⋅s^-2]; q_4 [kg⋅m^-1⋅s^-3].
+    !! Expected input range: sigma >= 0. A negative sigma amplifies the
+    !! solution and is not a supported configuration.
+    !!
+    !! Note: sourcemethod is overridden rather than source3d so that the
+    !! solution gradient - which this model does not use - is never read.
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: sigma
 
-    if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem)
+
+      sigma = this%solution%interior(i,j,k,iel,7)
+
+      this%source%interior(i,j,k,iel,1) = -this%solution%interior(i,j,k,iel,1)*sigma
+      this%source%interior(i,j,k,iel,2) = -this%solution%interior(i,j,k,iel,2)*sigma
+      this%source%interior(i,j,k,iel,3) = -this%solution%interior(i,j,k,iel,3)*sigma
+      this%source%interior(i,j,k,iel,4) = -this%solution%interior(i,j,k,iel,4)*sigma
+      this%source%interior(i,j,k,iel,5) = 0.0_prec ! sound speed; held fixed in time
+      this%source%interior(i,j,k,iel,6) = 0.0_prec ! background density; held fixed in time
+      this%source%interior(i,j,k,iel,7) = 0.0_prec ! relaxation rate; held fixed in time
+
+    enddo
 
   endsubroutine sourcemethod_LinearEuler3D_t
 
@@ -234,6 +293,10 @@ contains
     flux(6,1) = 0.0_prec ! background density, x flux; 0 (rho0 held fixed in time)
     flux(6,2) = 0.0_prec ! background density, y flux; 0
     flux(6,3) = 0.0_prec ! background density, z flux; 0
+
+    flux(7,1) = 0.0_prec ! relaxation rate, x flux; 0 (sigma held fixed in time)
+    flux(7,2) = 0.0_prec ! relaxation rate, y flux; 0
+    flux(7,3) = 0.0_prec ! relaxation rate, z flux; 0
     if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux3D_LinearEuler3D_t
@@ -251,8 +314,8 @@ contains
     !!
     !! The reconstructed momentum/pressure fluxes use the arithmetic
     !! averages rho0_avg and c2_avg at the face (see the 2-D model for the
-    !! rationale). The sound speed and background density variables carry zero
-    !! flux.
+    !! rationale). The sound speed, background density and relaxation rate
+    !! variables carry zero flux.
     class(LinearEuler3D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
@@ -285,6 +348,7 @@ contains
     flux(4) = rho0_avg*c2_avg*un_star
     flux(5) = 0.0_prec
     flux(6) = 0.0_prec
+    flux(7) = 0.0_prec
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux3D_LinearEuler3D_t
@@ -304,7 +368,10 @@ contains
     !!
     !! `rhoprime` is the amplitude of the (diagnostic) density anomaly that the
     !! pressure pulse corresponds to through the acoustic relation p = rho*c^2;
-    !! the density anomaly itself is not a solution variable.
+    !! the density anomaly itself is not a solution variable. The relaxation
+    !! rate (variable 7) is left untouched, so a sponge profile may be
+    !! installed either before or after this initializer is called; it is zero
+    !! by default.
     !!
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this

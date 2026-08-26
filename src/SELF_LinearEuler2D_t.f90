@@ -44,15 +44,17 @@ module self_LinearEuler2D_t
 !!      v \\
 !!      p \\
 !!      c \\
-!!      \rho_0
+!!      \rho_0 \\
+!!      \sigma
 !!  \end{pmatrix}
 !! \end{equation}
 !!
-!! The sound speed \(c\) and the background density \(\rho_0\) are carried as
-!! solution variables so that they can vary in space (heterogeneous media).
-!! Their flux and source are identically zero, so they are held fixed in time
-!! at each spatial location. This is entropy-stable for piecewise-constant
-!! material regions aligned with element boundaries: interiors have
+!! The sound speed \(c\), the background density \(\rho_0\) and the relaxation
+!! rate \(\sigma\) are carried as solution variables so that they can vary in
+!! space (heterogeneous media, sponge/damping layers). Their flux and source
+!! are identically zero, so they are held fixed in time at each spatial
+!! location. This is entropy-stable for piecewise-constant material regions
+!! aligned with element boundaries: interiors have
 !! \(\nabla \rho_0 = \nabla c = 0\) (so the flux-divergence form is exact) and
 !! the impedance-matched Riemann flux handles the jumps at faces.
 !!
@@ -64,11 +66,28 @@ module self_LinearEuler2D_t
 !!      \frac{p}{\rho_0} \hat{y} \\
 !!      c^2 \rho_0 ( u \hat{x} + v \hat{y} ) \\
 !!      \vec{0} \\
+!!      \vec{0} \\
 !!      \vec{0}
 !!  \end{pmatrix}
 !! \end{equation}
 !!
-!! and the source terms are null.
+!! and the source term is the linear relaxation ("sponge"/damping) term
+!!
+!! \begin{equation}
+!! \vec{q} = -\sigma \begin{pmatrix}
+!!      u \\
+!!      v \\
+!!      p \\
+!!      0 \\
+!!      0 \\
+!!      0
+!!  \end{pmatrix}
+!! \end{equation}
+!!
+!! where \(\sigma \ge 0\) [s\(^{-1}\)] is the inverse of a local damping time
+!! scale. With \(\sigma = 0\) everywhere (the default, since the solution array
+!! is zero-initialized) the source vanishes identically and the model reduces
+!! to the undamped linear Euler system.
 !!
 
   use self_model
@@ -90,7 +109,7 @@ module self_LinearEuler2D_t
     procedure :: entropy_func => entropy_func_LinearEuler2D_t
     procedure :: flux2d => flux2d_LinearEuler2D_t
     procedure :: riemannflux2d => riemannflux2d_LinearEuler2D_t
-    !procedure :: source2d => source2d_LinearEuler2D_t
+    procedure :: SourceMethod => sourcemethod_LinearEuler2D_t
     procedure :: SphericalSoundWave => SphericalSoundWave_LinearEuler2D_t
 
   endtype LinearEuler2D_t
@@ -101,12 +120,13 @@ contains
     implicit none
     class(LinearEuler2D_t),intent(inout) :: this
 
-    this%nvar = 5
+    this%nvar = 6
     ! Only the first three variables (u, v, P) are advanced in time. The
-    ! fourth and fifth variables, the sound speed c and background density rho0,
-    ! are spatially-varying but time-constant background fields: their flux and
-    ! source are identically zero, so they are excluded from time integration
-    ! rather than stepped to a no-op.
+    ! fourth, fifth and sixth variables - the sound speed c, the background
+    ! density rho0, and the relaxation rate sigma - are spatially-varying but
+    ! time-constant background fields: their flux and source are identically
+    ! zero, so they are excluded from time integration rather than stepped to
+    ! a no-op.
     this%nstepped = 3
 
   endsubroutine SetNumberOfVariables_LinearEuler2D_t
@@ -129,6 +149,9 @@ contains
 
     call this%solution%SetName(5,"rho0") ! Background density (static; possibly heterogeneous)
     call this%solution%SetUnits(5,"kg⋅m⁻³")
+
+    call this%solution%SetName(6,"sigma") ! Relaxation rate (inverse damping time scale)
+    call this%solution%SetUnits(6,"s⁻¹")
 
   endsubroutine SetMetadata_LinearEuler2D_t
 
@@ -171,9 +194,12 @@ contains
 
   subroutine hbc2d_Radiation_LinearEuler2D(bc,mymodel)
     !! Radiation BC: zero acoustic perturbation in the exterior state; the
-    !! sound speed (variable 4) and background density (variable 5) are copied
-    !! from the interior side so the Riemann solver sees a consistent c and
-    !! rho0 (impedance-matched, non-reflecting outflow).
+    !! sound speed (variable 4), background density (variable 5) and relaxation
+    !! rate (variable 6) are copied from the interior side so the Riemann solver
+    !! sees a consistent c and rho0 (impedance-matched, non-reflecting outflow)
+    !! and the exterior state stays a faithful mirror of the interior one for
+    !! diagnostics. The relaxation rate carries no flux, so its exterior value
+    !! never enters the tendency.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
     ! Local
@@ -188,6 +214,7 @@ contains
           m%solution%extBoundary(i,j,iEl,1:3) = 0.0_prec
           m%solution%extBoundary(i,j,iEl,4) = m%solution%boundary(i,j,iEl,4) ! c preserved
           m%solution%extBoundary(i,j,iEl,5) = m%solution%boundary(i,j,iEl,5) ! rho0 preserved
+          m%solution%extBoundary(i,j,iEl,6) = m%solution%boundary(i,j,iEl,6) ! sigma preserved
         enddo
       enddo
     endselect
@@ -197,12 +224,13 @@ contains
   subroutine hbc2d_NoNormalFlow_LinearEuler2D(bc,mymodel)
     !! No-normal-flow boundary condition for 2D linear Euler equations.
     !! Reflects the velocity vector about the boundary normal while
-    !! preserving pressure, sound speed, and background density.
+    !! preserving pressure, sound speed, background density, and the
+    !! relaxation rate.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
     ! Local
     integer :: n,i,iEl,j
-    real(prec) :: nhat(1:2),s(1:5)
+    real(prec) :: nhat(1:2),s(1:6)
 
     select type(m => mymodel)
     class is(LinearEuler2D_t)
@@ -211,7 +239,7 @@ contains
         j = bc%sides(n)
         do i = 1,m%solution%interp%N+1
           nhat = m%geometry%nhat%boundary(i,j,iEl,1,1:2)
-          s = m%solution%boundary(i,j,iEl,1:5)
+          s = m%solution%boundary(i,j,iEl,1:6)
           m%solution%extBoundary(i,j,iEl,1) = &
             (nhat(2)**2-nhat(1)**2)*s(1)-2.0_prec*nhat(1)*nhat(2)*s(2) ! u
           m%solution%extBoundary(i,j,iEl,2) = &
@@ -219,6 +247,7 @@ contains
           m%solution%extBoundary(i,j,iEl,3) = s(3) ! p
           m%solution%extBoundary(i,j,iEl,4) = s(4) ! c
           m%solution%extBoundary(i,j,iEl,5) = s(5) ! rho0
+          m%solution%extBoundary(i,j,iEl,6) = s(6) ! sigma
         enddo
       enddo
     endselect
@@ -241,6 +270,8 @@ contains
     flux(4,2) = 0.0_prec ! sound speed, y flux; 0 (c is held fixed in time)
     flux(5,1) = 0.0_prec ! background density, x flux; 0 (rho0 is held fixed in time)
     flux(5,2) = 0.0_prec ! background density, y flux; 0 (rho0 is held fixed in time)
+    flux(6,1) = 0.0_prec ! relaxation rate, x flux; 0 (sigma is held fixed in time)
+    flux(6,2) = 0.0_prec ! relaxation rate, y flux; 0 (sigma is held fixed in time)
     if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux2d_LinearEuler2D_t
@@ -308,9 +339,57 @@ contains
     flux(3) = rho0_avg*c2_avg*un_star
     flux(4) = 0.0_prec
     flux(5) = 0.0_prec
+    flux(6) = 0.0_prec
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_LinearEuler2D_t
+
+  subroutine sourcemethod_LinearEuler2D_t(this)
+    !! Spatially-dependent linear relaxation (sponge / damping layer) source.
+    !!
+    !! The relaxation rate sigma = s(6), in units of inverse seconds, is the
+    !! reciprocal of a local damping time scale. It contributes
+    !!
+    !!   q_i = -sigma * s_i ,   i = 1,2,3   (u, v, P)
+    !!
+    !! to the source term of the conservation law s_t + div(f) = q, relaxing
+    !! the acoustic state toward the (motionless, unperturbed) background at
+    !! rate sigma. Because a single rate is applied to the velocity and the
+    !! pressure alike, the acoustic energy density decays as exp(-2*sigma*t)
+    !! wherever sigma is constant, which is exactly the behaviour wanted from
+    !! a sponge layer: no impedance mismatch is introduced between the damped
+    !! and undamped regions by the source term itself.
+    !!
+    !! The static background variables (c, rho0, sigma) carry no source, so
+    !! they are held fixed in time.
+    !!
+    !! Units: sigma [s^-1]; q_1, q_2 [m⋅s^-2]; q_3 [kg⋅m^-1⋅s^-3].
+    !! Expected input range: sigma >= 0. A negative sigma amplifies the
+    !! solution and is not a supported configuration.
+    !!
+    !! Note: sourcemethod is overridden rather than source2d so that the
+    !! solution gradient - which this model does not use - is never read.
+    implicit none
+    class(LinearEuler2D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,iel
+    real(prec) :: sigma
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  iel=1:this%mesh%nElem)
+
+      sigma = this%solution%interior(i,j,iel,6)
+
+      this%source%interior(i,j,iel,1) = -this%solution%interior(i,j,iel,1)*sigma
+      this%source%interior(i,j,iel,2) = -this%solution%interior(i,j,iel,2)*sigma
+      this%source%interior(i,j,iel,3) = -this%solution%interior(i,j,iel,3)*sigma
+      this%source%interior(i,j,iel,4) = 0.0_prec ! sound speed; held fixed in time
+      this%source%interior(i,j,iel,5) = 0.0_prec ! background density; held fixed in time
+      this%source%interior(i,j,iel,6) = 0.0_prec ! relaxation rate; held fixed in time
+
+    enddo
+
+  endsubroutine sourcemethod_LinearEuler2D_t
 
   subroutine SphericalSoundWave_LinearEuler2D_t(this,rhoprime,Lr,x0,y0,c)
     !! This subroutine sets the initial condition for a weak blast wave
@@ -329,7 +408,9 @@ contains
     !! the density anomaly itself is not a solution variable.
     !! The sound speed `c` (passed as an argument since it is not a
     !! scalar model attribute) and the background density `this%rho0` are set
-    !! uniformly across the domain.
+    !! uniformly across the domain. The relaxation rate (variable 6) is left
+    !! untouched, so a sponge profile may be installed either before or after
+    !! this initializer is called; it is zero by default.
     implicit none
     class(LinearEuler2D_t),intent(inout) :: this
     real(prec),intent(in) ::  rhoprime,Lr,x0,y0,c

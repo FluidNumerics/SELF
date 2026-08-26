@@ -997,10 +997,11 @@ rationale.
 | Example | ultrasound point source | `linear_euler3d_amr_spherical_soundwave` |
 | Coarsen-wake regression | Implemented | **Not yet** |
 
-The pilot model is `LinearEuler3D`. Note it carries `nvar = 6`: `u, v, w, P` are advanced in
-time, while `c` and `rho0` are spatially varying but time-constant background fields. They are
-still solution variables, so the transfer must carry all six - a transfer that moved only the
-prognostic variables would silently blank the medium on every newly created element.
+The pilot model is `LinearEuler3D`. Note it carries `nvar = 7`: `u, v, w, P` are advanced in
+time, while `c`, `rho0` and `sigma` (the sponge-layer relaxation rate) are spatially varying but
+time-constant background fields. They are still solution variables, so the transfer must carry all
+seven - a transfer that moved only the prognostic variables would silently blank the medium on
+every newly created element.
 
 ### 6.2 What is genuinely different from 2-D
 

@@ -36,9 +36,9 @@
 // Z = rho0*c (each side using its own rho0 and c):
 //   un* = (ZL*unL + ZR*unR + (pL - pR)) / (ZL + ZR)
 //   p*  = (ZR*pL + ZL*pR + ZL*ZR*(unL - unR)) / (ZL + ZR)
-// Variable layout (0-based): 0=u, 1=v, 2=w, 3=p, 4=c, 5=rho0. The
-// reconstructed fluxes use the face-average rho0. The sound-speed and
-// background-density variables carry zero flux.
+// Variable layout (0-based): 0=u, 1=v, 2=w, 3=p, 4=c, 5=rho0, 6=sigma. The
+// reconstructed fluxes use the face-average rho0. The sound-speed,
+// background-density and relaxation-rate variables carry zero flux.
 __global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, int ndof){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
@@ -72,6 +72,7 @@ __global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *n
     flux[idof+3*ndof] = (rho0_avg*c2_avg*un_star)*nm; // pressure
     flux[idof+4*ndof] = 0.0;                     // sound speed (static)
     flux[idof+5*ndof] = 0.0;                     // background density (static)
+    flux[idof+6*ndof] = 0.0;                     // relaxation rate (static)
   }
 }
 
@@ -124,6 +125,10 @@ extern "C"
     flux[idof + ndof*(5 + nvar*1)] = 0.0; // background density, y flux; 0
     flux[idof + ndof*(5 + nvar*2)] = 0.0; // background density, z flux; 0
 
+    flux[idof + ndof*(6 + nvar*0)] = 0.0; // relaxation rate, x flux; 0 (sigma held fixed in time)
+    flux[idof + ndof*(6 + nvar*1)] = 0.0; // relaxation rate, y flux; 0
+    flux[idof + ndof*(6 + nvar*2)] = 0.0; // relaxation rate, z flux; 0
+
   }
 
 }
@@ -137,11 +142,54 @@ extern "C"
   }
 
 }
+
+// ============================================================
+// Source-term kernel : spatially-dependent linear relaxation
+// (sponge / damping layer).
+//
+// The relaxation rate sigma is carried as solution variable 7
+// (0-based index 6) in units of inverse seconds, and contributes
+//
+//   q_i = -sigma * s_i ,  i = 0,1,2,3  (u, v, w, p)
+//
+// to the source term. The static background variables (c, rho0,
+// sigma) carry no source. With sigma = 0 the source is identically
+// zero and the model reduces to the undamped linear Euler system.
+// This mirrors sourcemethod_LinearEuler3D_t on the CPU side.
+// ============================================================
+__global__ void sourcemethod_LinearEuler3D_gpukernel(real *solution, real *source, int ndof){
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if( idof < ndof ){
+    real sigma = solution[idof + 6*ndof];
+
+    source[idof]          = -solution[idof]*sigma;          // u
+    source[idof + ndof]   = -solution[idof + ndof]*sigma;   // v
+    source[idof + 2*ndof] = -solution[idof + 2*ndof]*sigma; // w
+    source[idof + 3*ndof] = -solution[idof + 3*ndof]*sigma; // p
+    source[idof + 4*ndof] = 0.0;                            // sound speed
+    source[idof + 5*ndof] = 0.0;                            // background density
+    source[idof + 6*ndof] = 0.0;                            // relaxation rate
+  }
+
+}
+extern "C"
+{
+  void sourcemethod_LinearEuler3D_gpu(real *solution, real *source, int N, int nel, int nvar){
+    int ndof = (N+1)*(N+1)*(N+1)*nel;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block +1;
+    sourcemethod_LinearEuler3D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,source,ndof);
+    (void)nvar; // variable layout is fixed by the model; kept for signature symmetry
+  }
+
+}
 // Radiation BC kernel for 3D Linear Euler
 // Zeroes the acoustic perturbation (u,v,w,p) in extBoundary on
-// pre-filtered boundary faces; the sound speed (index 4) and background
-// density (index 5) are copied from the interior side so face Riemann fluxes
-// see a consistent c and rho0.
+// pre-filtered boundary faces; the sound speed (index 4), background
+// density (index 5) and relaxation rate (index 6) are copied from the
+// interior side so face Riemann fluxes see a consistent c and rho0 and the
+// exterior state stays a faithful mirror of the interior one for diagnostics.
 __global__ void hbc3d_radiation_lineareuler3d_kernel(
     real *extBoundary, real *boundary,
     int *elements, int *sides,
@@ -164,6 +212,7 @@ __global__ void hbc3d_radiation_lineareuler3d_kernel(
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,3,N,nel)] = 0.0;
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)]; // c preserved
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)]; // rho0 preserved
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,6,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,6,N,nel)]; // sigma preserved
   }
 }
 

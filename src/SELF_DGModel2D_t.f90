@@ -998,6 +998,7 @@ contains
     integer(HID_T) :: solOffset(1:3)
     integer :: firstElem
     integer :: ivar
+    character(LEN=:),allocatable :: dsetName
 
     if(this%mesh%decomp%mpiEnabled) then
       call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
@@ -1009,20 +1010,43 @@ contains
     if(this%mesh%decomp%mpiEnabled) then
       firstElem = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1)
       solOffset(1:3) = (/0,0,firstElem/)
-      do ivar = 1,this%solution%nvar
-        call ReadArray_HDF5(fileId, &
-                            '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name), &
-                            this%solution%interior(:,:,:,ivar),solOffset)
-      enddo
-    else
-      do ivar = 1,this%solution%nvar
-        call ReadArray_HDF5(fileId, &
-                            '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name), &
-                            this%solution%interior(:,:,:,ivar))
-      enddo
     endif
 
+    ! A variable whose dataset is absent keeps the value it was initialized
+    ! with. This is what lets a pickup file written by an earlier version of a
+    ! model - one that carried fewer solution variables - still be read: the
+    ! variables the file does hold are restored, and a variable it predates
+    ! retains its initial value (zero after Init, or whatever the caller set
+    ! before reading). Without the check ReadArray_HDF5 would read through an
+    ! invalid dataset id and dump the HDF5 error stack instead. Every rank gets
+    ! the same answer for the same file, so the collective reads below stay in
+    ! step.
+    do ivar = 1,this%solution%nvar
+      dsetName = '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name)
+      if(.not. DatasetExists_HDF5(fileId,dsetName)) then
+        print*,__FILE__," : Pickup file holds no ",trim(dsetName), &
+          " - keeping the initialized value for this variable."
+        cycle
+      endif
+      if(this%mesh%decomp%mpiEnabled) then
+        call ReadArray_HDF5(fileId,dsetName, &
+                            this%solution%interior(:,:,:,ivar),solOffset)
+      else
+        call ReadArray_HDF5(fileId,dsetName, &
+                            this%solution%interior(:,:,:,ivar))
+      endif
+    enddo
+
     call Close_HDF5(fileId)
+
+    ! Publish the restored solution to the device. Read_DGModel1D_t has always
+    ! done this; without it a GPU build restarts from whatever the device
+    ! happened to hold (zeros, after Init) and silently discards the pickup
+    ! file - the first device-to-host copy of the run, in CalculateEntropy or
+    ! the first tendency evaluation, overwrites everything just read. This is
+    ! the counterpart of the UpdateHost() that Write_DGModel2D_t performs before
+    ! writing, and is a no-op on a CPU build.
+    call this%solution%UpdateDevice()
 
   endsubroutine Read_DGModel2D_t
 
