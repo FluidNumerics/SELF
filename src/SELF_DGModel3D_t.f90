@@ -1019,6 +1019,15 @@ contains
 
     call Close_HDF5(fileId)
 
+    ! Publish the restored solution to the device. Read_DGModel1D_t has always
+    ! done this; without it a GPU build restarts from whatever the device
+    ! happened to hold (zeros, after Init) and silently discards the pickup
+    ! file - the first device-to-host copy of the run, in CalculateEntropy or
+    ! the first tendency evaluation, overwrites everything just read. This is
+    ! the counterpart of the UpdateHost() that Write_DGModel3D_t performs before
+    ! writing, and is a no-op on a CPU build.
+    call this%solution%UpdateDevice()
+
   endsubroutine Read_DGModel3D_t
 
   subroutine WriteTecplot_DGModel3D_t(this,filename)

@@ -50,7 +50,9 @@ program LinearEuler2D_Pickup_Legacy_Sigma_MPI
 !!  (b) the five variables the file holds are restored bit for bit;
 !!  (c) sigma is left at its pre-read value (zero from Init), which is the
 !!      undamped configuration - a legacy run restarts with the same dynamics
-!!      it was written with.
+!!      it was written with;
+!!  (d) the restored solution reaches the device, checked through the entropy,
+!!      which CalculateEntropy computes from the device copy on a GPU build.
 
   use self_data
   use self_lineareuler2d
@@ -77,7 +79,7 @@ program LinearEuler2D_Pickup_Legacy_Sigma_MPI
   integer :: i,j,iel,ivar
   integer(HID_T) :: fileId
   integer :: hdferr,mpierr
-  real(prec) :: maxdiff,maxsigma
+  real(prec) :: maxdiff,maxsigma,e_written,e_read
   real(prec),allocatable :: expected(:,:,:,:)
 
   bcids(1:4) = SELF_BC_RADIATION
@@ -115,6 +117,12 @@ program LinearEuler2D_Pickup_Legacy_Sigma_MPI
   allocate(expected,mold=modelobj%solution%interior)
   expected = modelobj%solution%interior
 
+  ! Entropy of the state as written. On a GPU build CalculateEntropy copies the
+  ! solution back from the device, so comparing this against the entropy after
+  ! the read is what pins the device copy - see the check below.
+  call modelobj%CalculateEntropy()
+  e_written = modelobj%entropy
+
   call modelobj%WriteModel(pickupFile)
 
   ! Turn the file into one the five-variable model would have written. This is a
@@ -144,7 +152,6 @@ program LinearEuler2D_Pickup_Legacy_Sigma_MPI
   call modelobj%solution%UpdateDevice()
 
   call modelobj%ReadModel(pickupFile)
-  call modelobj%solution%UpdateHost()
 
   ! (b) the five variables present in the file round-trip exactly
   maxdiff = 0.0_prec
@@ -161,12 +168,27 @@ program LinearEuler2D_Pickup_Legacy_Sigma_MPI
   print*,"rank ",mesh%decomp%rankId, &
     " : max |sigma| after reading a file without it :",maxsigma
 
+  ! (d) the device copy agrees with the file as well. CalculateEntropy reads the
+  ! solution back from the device on a GPU build, so a reader that populated
+  ! only host memory shows up here as a mismatch (or as a NaN, the solution on
+  ! the device still being the zeros written above). On a CPU build this
+  ! recomputes from the same host array and is simply a second check. It must
+  ! come after the comparison above, which it would otherwise overwrite.
+  call modelobj%CalculateEntropy()
+  e_read = modelobj%entropy
+  print*,"entropy written, entropy read            :",e_written,e_read
+
   if(maxdiff /= 0.0_prec) then
     print*,"Error: variables present in the legacy pickup file were not restored exactly ",maxdiff
     stop 1
   endif
   if(maxsigma /= 0.0_prec) then
     print*,"Error: sigma was modified by reading a pickup file that has no sigma dataset ",maxsigma
+    stop 1
+  endif
+  if(e_read /= e_written) then
+    print*,"Error: the entropy after the read does not match the entropy written. ", &
+      "The restored solution did not reach the device. ",e_written,e_read
     stop 1
   endif
 
