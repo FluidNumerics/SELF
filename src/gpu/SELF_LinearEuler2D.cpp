@@ -79,10 +79,19 @@ extern "C"
     uint32_t ndof = (N+1)*4*nel;
     int nblocks_x = ndof/threads_per_block +1;
 
-    dim3 nblocks(nblocks_x,nvar,1);
+    // One block row only. This kernel writes every variable's flux slot from a
+    // single thread and never reads blockIdx.y, so a grid of height nvar - as
+    // this launch used to request - ran the whole kernel nvar times over the
+    // same addresses: nvar-1 redundant passes per boundary-flux evaluation, and
+    // hence per Runge-Kutta stage. The duplicate stores are bit-identical
+    // (their inputs are read-only), so the result was correct, but they are
+    // still unsynchronised writes to the same locations. The 3-D wrapper has
+    // always launched a one-dimensional grid here; this matches it.
+    dim3 nblocks(nblocks_x,1,1);
     dim3 nthreads(threads_per_block,1,1);
 
     boundaryflux_LinearEuler2D_kernel<<<nblocks,nthreads>>>(fb,extfb,nhat,nmag,flux,ndof);
+    (void)nvar; // variable layout is fixed by the model; kept for signature symmetry
   }
 }
 

@@ -162,7 +162,14 @@ $\sigma$ is set exactly the way $c$ and $\rho_0$ are set — it is a static, per
 this%solution%interior(i,j,iel,6) = sigma_value_at_this_node
 ```
 
-$\sigma = 0$ (the default from the zero-initialized solution array) recovers the undamped model exactly, so existing setups need no changes.
+$\sigma = 0$ — the default, since the solution array is zero-initialized — recovers the undamped equations exactly, so an existing setup produces the same results as before without being changed.
+
+The *variable count* did change, though, and that is a public-surface change: `nvar` goes from 5 to 6. Two things follow for existing code.
+
+* **A fixed-length array sized to `nvar` needs one more entry.** The in-tree case is `RefinementIndicator2D`'s `SetEnergyWeights`, which validates `size(w) == nVar` when `Estimate` runs, so a 5-element weight vector now fails the check — give $\sigma$ a zero weight, as the background fields already have. The same applies to user code that declares a state vector as `real(prec) :: s(1:5)`.
+* **Pickup files written before $\sigma$ existed still load.** `ReadModel` skips a solution variable whose dataset the file does not hold, leaves it at its initialized value, and reports which variable it skipped — so a legacy restart comes back with $\sigma = 0$, the configuration it was written under.
+
+A prescribed-boundary handler does **not** need updating: $\sigma$ carries no flux, so its exterior state never enters the tendency.
 
 #### Choosing a profile
 
