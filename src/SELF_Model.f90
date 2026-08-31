@@ -717,9 +717,9 @@ contains
       tRemain = tn-this%t
       this%dt = min(dtLim,tRemain)
       do m = 1,2
+        this%t = t0+rk2_b(m)*this%dt
         call this%CalculateTendency()
         call this%UpdateGRK2(m)
-        this%t = t0+rk2_b(m)*this%dt
       enddo
 
       this%t = t0+this%dt
@@ -749,9 +749,9 @@ contains
       tRemain = tn-this%t
       this%dt = min(dtLim,tRemain)
       do m = 1,3
+        this%t = t0+rk3_b(m)*this%dt
         call this%CalculateTendency()
         call this%UpdateGRK3(m)
-        this%t = t0+rk3_b(m)*this%dt
       enddo
 
       this%t = t0+this%dt
@@ -781,9 +781,9 @@ contains
       tRemain = tn-this%t
       this%dt = min(dtLim,tRemain)
       do m = 1,5
+        this%t = t0+rk4_b(m)*this%dt
         call this%CalculateTendency()
         call this%UpdateGRK4(m)
-        this%t = t0+rk4_b(m)*this%dt
       enddo
 
       this%t = t0+this%dt
