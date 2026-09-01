@@ -32,7 +32,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  SELFISH_IMAGE: higherordermethods/selfish:latest-x86-rocm643-gfx90a
+  # Fully qualified: podman has no implicit docker.io the way Docker does, and
+  # resolves an unqualified name only against unqualified-search-registries.
+  SELFISH_IMAGE: docker.io/higherordermethods/selfish:latest-x86-rocm643-gfx90a
 
 jobs:
   build-and-test:
@@ -60,6 +62,20 @@ jobs:
           podman info --format 'rootless={{.Host.Security.Rootless}} runtime={{.Host.OCIRuntime.Name}}'
           ls -l /dev/kfd /dev/dri
 
+          # Reaching /dev/kfd takes different plumbing in the two podman modes,
+          # and asking for the wrong one is an error rather than a no-op, so
+          # settle it once here from what the daemon reports.
+          if [ "$(podman info --format '{{.Host.Security.Rootless}}')" = "true" ]; then
+            # Rootless: the container drops the runner account's supplementary
+            # groups, and without video/render it cannot open /dev/kfd. crun's
+            # keep-groups passes them through.
+            echo "PODMAN_GPU_OPTS=--group-add keep-groups" >> "${GITHUB_ENV}"
+          else
+            # Rootful: the container is real root and needs no group plumbing.
+            # podman rejects keep-groups outside rootless mode.
+            echo "PODMAN_GPU_OPTS=" >> "${GITHUB_ENV}"
+          fi
+
       # A shared runner IP hits Docker Hub's anonymous pull limit sooner than a
       # hosted one would. Log in when the credentials the docker-publish workflow
       # already uses are available, and carry on anonymously when they are not.
@@ -85,7 +101,7 @@ jobs:
           podman run --rm \
             --device /dev/kfd \
             --device /dev/dri \
-            --group-add keep-groups \
+            ${PODMAN_GPU_OPTS} \
             --security-opt seccomp=unconfined \
             --security-opt label=disable \
             "${SELFISH_IMAGE}" \
@@ -93,9 +109,9 @@ jobs:
 
       - name: Build and run the test suite
         run: |
-          # --group-add keep-groups passes the runner account's supplementary
-          #   groups (video, render) through to the container. Without it a
-          #   rootless container cannot open /dev/kfd.
+          # PODMAN_GPU_OPTS carries the group plumbing the preflight step chose
+          #   for this podman mode: --group-add keep-groups when rootless, empty
+          #   when rootful.
           # --cap-add SYS_PTRACE lets Open MPI use CMA for its shared-memory
           #   transport. If a future runtime still blocks process_vm_readv, set
           #   OMPI_MCA_btl_sm_single_copy_mechanism=none below instead.
@@ -108,7 +124,7 @@ jobs:
           podman run --rm -i \
             --device /dev/kfd \
             --device /dev/dri \
-            --group-add keep-groups \
+            ${PODMAN_GPU_OPTS} \
             --cap-add SYS_PTRACE \
             --security-opt seccomp=unconfined \
             --security-opt label=disable \
