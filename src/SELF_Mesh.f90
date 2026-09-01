@@ -84,6 +84,24 @@ module SELF_Mesh
 ! //////////////////////////////////////////////// !
 !   Boundary Condition parameters
 !
+!   DEPRECATED as a fixed enumeration. These are NOT the set of boundary conditions SELF
+!   supports, and a model is not obliged to choose from them.
+!
+!   A boundary condition id is just an integer. It is agreed between two places, and nowhere
+!   else: the value written into the mesh (sideInfo(5,...) in 2-D/3-D, mesh%bcid in 1-D) and
+!   the value passed to hyperbolicBCs%RegisterBoundaryCondition / parabolicBCs%Register-
+!   BoundaryCondition. Any integer works, as long as those two agree. A HOHQMesh boundary
+!   name resolves to a 1-based index into mesh%BCNames, so meshes read from file routinely
+!   carry small ids that match none of the values below.
+!
+!   The five parameters here are simply the ids the built-in models happen to use, kept
+!   because the existing models, tests and examples reference them. New models should define
+!   their own parameters in their own module rather than adding to this list; see
+!   docs/Models/boundary-conditions.md.
+!
+!   A boundary face whose id matches no registration is not applied and is not silently
+!   ignored: MapBoundaryConditions counts those faces and ForwardStep warns about them once.
+!
 
   ! Conditions on the solution
   integer,parameter :: SELF_BC_PRESCRIBED = 100

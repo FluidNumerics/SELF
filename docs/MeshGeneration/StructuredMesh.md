@@ -50,11 +50,18 @@ SELF uses a tiled structured grid. Tiled grids divide the 2-D grid into `nTilex`
 * `Lx = dx*nx` is the domain length in the x-direction
 * `Ly = dy*ny` is the domain length in the y-direction
 
-You can set boundary conditions for each of the four sides of the structured mesh using a 1-D array of integers of length 4. The boundary conditions must be provided in counter-clockwise order, starting with the "south" boundary (south, east, north, west). The following built-in flags are available for setting boundary conditions
+You can set boundary conditions for each of the four sides of the structured mesh using a 1-D array of integers of length 4. The boundary conditions must be provided in counter-clockwise order, starting with the "south" boundary (south, east, north, west).
+
+These integers are boundary condition *ids*, and **any** integer will do. An id is meaningful only because two places agree on it: the value you put in `bcids` here, and the value your model passes to `RegisterBoundaryCondition`. The built-in models happen to use
 
 * `SELF_BC_NONORMALFLOW`
 * `SELF_BC_PRESCRIBED`
 * `SELF_BC_RADIATION`
+
+so those are the ids to use with a built-in model, but they are not a closed list of the boundary conditions SELF supports — your own model can define and register ids of its own. See [Boundary Conditions](../Models/boundary-conditions.md).
+
+!!! warning
+    If you tag a side with an id no boundary condition is registered for, nothing writes the exterior state on those faces. SELF counts them and prints a warning on the first `ForwardStep` naming the count and one of the offending ids — a mistyped `bcids` entry shows up there.
 
 The tiled layout is convenient for domain decomposition, when you are wanting to scale up your application for distributed memory platforms. Domain decomposition is automatically enabled when you launch your application with `mpirun/mpiexec/srun` with more than one rank. In this case, the domain will be automatically divided as evenly as possible across all MPI ranks.
 
@@ -118,11 +125,15 @@ SELF uses a tiled structured grid. Tiled grids divide the 3-D grid into `nTilex`
 * `Ly = dy*ny` is the domain length in the y-direction
 * `Lz = dz*nz` is the domain length in the z-direction
 
-You can set boundary conditions for each of the four sides of the structured mesh using a 1-D array of integers of length 6. The boundary conditions must be provided in CGNS ordering (bottom,south, east, north, west,top). The following built-in flags are available for setting boundary conditions
+You can set boundary conditions for each of the four sides of the structured mesh using a 1-D array of integers of length 6. The boundary conditions must be provided in CGNS ordering (bottom, south, east, north, west, top).
+
+As in 2-D, these are boundary condition *ids* and any integer will do; the ids below are the ones the built-in models register, not a closed list.
 
 * `SELF_BC_NONORMALFLOW`
 * `SELF_BC_PRESCRIBED`
 * `SELF_BC_RADIATION`
+
+An id that no registered boundary condition matches is reported by a warning on the first `ForwardStep`. See [Boundary Conditions](../Models/boundary-conditions.md).
 
 The tiled layout is convenient for domain decomposition, when you are wanting to scale up your application for distributed memory platforms. Domain decomposition is automatically enabled when you launch your application with `mpirun/mpiexec/srun` with more than one rank. In this case, the domain will be automatically divided as evenly as possible across all MPI ranks.
 

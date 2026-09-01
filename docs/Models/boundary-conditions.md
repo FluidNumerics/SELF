@@ -13,9 +13,21 @@ Every DG model in SELF maintains two boundary condition lists:
 
 You populate these lists by overriding the `AdditionalInit` method in your model subclass. SELF then automatically determines which mesh faces match each BC and calls your BC routines during time integration.
 
-## Available BC Types
+## BC identifiers are just integers
 
-SELF provides the following built-in BC identifiers:
+A boundary condition is identified by an integer, the `bcid`. **Any** integer works. A `bcid`
+is meaningful only because two places agree on it:
+
+1. the value stored in the mesh — `sideInfo(5,:,:)` in 2-D and 3-D, `mesh%bcid(1:2)` in 1-D
+2. the value passed to `RegisterBoundaryCondition`
+
+Nothing else interprets it. There is no registry of legal values, no `select case` on it, and
+no requirement to pick from a predefined set.
+
+### The ids the built-in models use
+
+The following constants are defined in `SELF_Mesh`. They exist because the built-in models
+use them, and they are what you tag your mesh with when you use a built-in model:
 
 | Constant | Value | Category | Description |
 |----------|-------|----------|-------------|
@@ -25,7 +37,86 @@ SELF provides the following built-in BC identifiers:
 | `SELF_BC_PRESCRIBED_STRESS` | 200 | Parabolic | Prescribed stress on the gradient |
 | `SELF_BC_NOSTRESS` | 201 | Parabolic | Zero-stress (free-slip) |
 
-These constants are defined in `SELF_Mesh` and are used both for tagging mesh faces and for registering BC implementations.
+!!! warning "These are not an enumeration of what SELF supports"
+    They are being phased out as a fixed list, and no new ones will be added. Do not treat
+    them as the set of boundary conditions available to you, and do not add to them when you
+    need a new condition — define your own, as below.
+
+### Defining your own ids
+
+Declare the ids your model needs in your own module, next to the model that registers them.
+That keeps the id and its implementation together, and does not require touching `SELF_Mesh`:
+
+```fortran
+module my_inflow_model
+  use self_lineareuler2d
+  use SELF_BoundaryConditions
+  implicit none
+
+  ! This model's own boundary condition id. Any integer will do; it only has to match what
+  ! the mesh is tagged with. Every id you tag needs its own registration.
+  integer, parameter :: MYMODEL_BC_INFLOW = 1
+
+  type, extends(LinearEuler2D) :: my_inflow
+  contains
+    procedure :: AdditionalInit => AdditionalInit_my_inflow
+  endtype
+
+contains
+
+  subroutine AdditionalInit_my_inflow(this)
+    class(my_inflow), intent(inout) :: this
+    procedure(SELF_bcMethod), pointer :: bcfunc
+
+    ! Keep the parent's registrations (no_normal_flow, radiation)
+    call AdditionalInit_LinearEuler2D_t(this)
+
+    bcfunc => hbc2d_Inflow_my_inflow
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      MYMODEL_BC_INFLOW, "inflow", bcfunc)
+  endsubroutine
+endmodule
+```
+
+Small ids like `1` and `2` are convenient here for another reason: a mesh read from a
+HOHQMesh `.mesh` file carries a 1-based index into `mesh%BCNames` in `sideInfo(5,...)`, so
+the first boundary name in the file is id `1`, the second is `2`, and so on. Choosing your
+ids to match lets you tag boundaries by name in the mesh generator and register against those
+same ids in Fortran, with no remapping step.
+
+## Diagnosing unhandled boundaries
+
+A boundary face whose `bcid` matches no registered boundary condition is **not** applied.
+Nothing writes `extBoundary` on that face, so the Riemann solver reads whatever is there:
+zero on the first step, and the previous step's values afterwards. For some systems a zero
+exterior state is a meaningful condition (for linear Euler it is effectively radiation), so
+SELF does not treat this as an error — but it does not hide it either.
+
+`MapBoundaryConditions` counts those faces at `Init` and after every `Regrid`, and the first
+`ForwardStep` prints a warning naming the count and one of the unregistered ids:
+
+```
+ src/SELF_DGModel2D_t.f90 : Warning :  40  mesh boundary edges carry a bcid with no registered boundary condition.
+ src/SELF_DGModel2D_t.f90 : Warning : One of the unregistered bcids is  999
+```
+
+The count is summed over all MPI ranks and printed once, by rank 0. It is also readable from
+your own code as `model%nUnmappedBoundaries`, with a representative id in
+`model%unmappedBoundaryID`.
+
+Common causes:
+
+- a typo in a `bcids(:)` entry, or a `bcid` the model does not register (for instance
+  `SELF_BC_NONORMALFLOW` on `LinearEuler3D`, which registers radiation only)
+- a mesh read from a HOHQMesh `.mesh` file, where `sideInfo(5,...)` carries `BCNames`
+  indices, without a `ResetBoundaryConditionType` call or matching registrations
+- registering boundary conditions somewhere other than `AdditionalInit`. `Regrid` frees the
+  BC lists and re-runs `AdditionalInit` on every adaptation epoch, so registrations made
+  elsewhere are lost after the first one.
+
+In 1-D the fallback differs: an unregistered endpoint keeps the periodic default that
+`SetBoundaryCondition` seeds, rather than a zero exterior state. A `bcid` of `0` in 1-D *is*
+the periodic default and is never reported.
 
 ## Workflow
 
@@ -253,6 +344,6 @@ If a BC with a given ID is already registered and you call `RegisterBoundaryCond
 ## Tips
 
 - **One BC per ID per list.** Each `bcid` can appear at most once in the hyperbolic list and once in the parabolic list.
-- **Mesh tagging must match registration.** If you register a BC for `SELF_BC_PRESCRIBED` but no mesh faces carry that ID, the BC will have `nBoundaries = 0` and its subroutine will never be called.
+- **Mesh tagging must match registration.** If you register a BC for `SELF_BC_PRESCRIBED` but no mesh faces carry that ID, the BC will have `nBoundaries = 0` and its subroutine will never be called. The reverse — mesh faces carrying an ID nothing is registered for — is reported by a warning on the first `ForwardStep`; see [Diagnosing unhandled boundaries](#diagnosing-unhandled-boundaries).
 - **Use `select type` in BC routines.** The `SELF_bcMethod` interface receives `class(Model)`, so you must downcast to access your model's fields.
 - **BC routines are called every time step.** Keep them efficient. For GPU models, use device kernels rather than host-side loops.

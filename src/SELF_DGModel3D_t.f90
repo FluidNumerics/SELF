@@ -67,6 +67,14 @@ module SELF_DGModel3D_t
     type(SEMHex),pointer  :: geometry
     type(BoundaryConditionList) :: hyperbolicBCs
     type(BoundaryConditionList) :: parabolicBCs
+    !! Mesh boundary faces whose sideInfo(5) boundary condition id matches no registered
+    !! boundary condition, counted over the whole domain by MapBoundaryConditions and summed
+    !! across ranks. Nothing writes solution%extBoundary on such a face, so the Riemann solver
+    !! reads zeros at t = 0 and stale values afterwards. ReportUnmappedBoundaries warns about
+    !! them once, from the top of ForwardStep.
+    integer :: nUnmappedBoundaries = 0
+    integer :: unmappedBoundaryID = -1 !! one of the unregistered bcids; -1 when there are none
+    logical :: unmappedBoundariesReported = .false.
 
   contains
 
@@ -79,6 +87,7 @@ module SELF_DGModel3D_t
     procedure :: MigrateOldWindow => MigrateOldWindow_DGModel3D_t
     procedure :: DownloadOldWindow => DownloadOldWindow_DGModel3D_t
     procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel3D_t
+    procedure :: ReportUnmappedBoundaries => ReportUnmappedBoundaries_DGModel3D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel3D_t
     procedure :: BoundaryFlux => BoundaryFlux_DGModel3D_t
@@ -760,8 +769,11 @@ contains
     class(DGModel3D_t),intent(inout) :: this
     ! Local
     type(BoundaryCondition),pointer :: bc
+    type(BoundaryCondition),pointer :: bcnode
     integer :: iEl,k,e2,bcid
     integer :: count,n
+    integer :: nUnmapped,idUnmapped,iError
+    logical :: skipMortars
     integer,allocatable :: elems(:),sds(:)
 
     ! Map hyperbolic BCs
@@ -828,7 +840,78 @@ contains
       bc => bc%next
     enddo
 
+    ! Reverse check. Both loops above iterate over registrations, so a boundary face whose
+    ! bcid matches no registration is never enumerated and its exterior state is never
+    ! written. Count those faces here: the sideInfo scan is already what this routine costs,
+    ! and it runs at Init and after every Regrid, never inside the time loop.
+    !
+    ! A face counts as unmapped only when NEITHER list knows its bcid. Requiring both would
+    ! flag every model that registers hyperbolic conditions alone.
+    nUnmapped = 0
+    idUnmapped = -1
+    ! Mortar faces also carry sideInfo(3) = 0, but they are interior faces; sideInfo(1) holds
+    ! the mortar index (see SELF_Mesh_3D_t). The HOPr reader copies sideInfo(1) verbatim from
+    ! the file, where it is the HOPr side type and may be nonzero on an ordinary face, so
+    ! sideInfo(1) is only a mortar marker on a mesh that actually carries mortars.
+    skipMortars = this%mesh%nMortars > 0
+    do iEl = 1,this%mesh%nElem
+      do k = 1,6
+        e2 = this%mesh%sideInfo(3,k,iEl)
+        if(e2 /= 0) cycle ! interior or rank-shared: sideInfo(3) holds a global element id
+        if(skipMortars .and. this%mesh%sideInfo(1,k,iEl) /= 0) cycle
+        bcid = this%mesh%sideInfo(5,k,iEl)
+        bcnode => this%hyperbolicBCs%GetBCForID(bcid)
+        if(associated(bcnode)) cycle
+        bcnode => this%parabolicBCs%GetBCForID(bcid)
+        if(associated(bcnode)) cycle
+        nUnmapped = nUnmapped+1
+        idUnmapped = max(idUnmapped,bcid)
+      enddo
+    enddo
+
+    ! Each rank owns a slice of the mesh, so a bcid that appears nowhere here may still be
+    ! present on another rank. Every rank reaches this routine on both the Init and the Regrid
+    ! path, so the collective is safe.
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(nUnmapped,this%nUnmappedBoundaries,1,MPI_INTEGER, &
+                         MPI_SUM,this%mesh%decomp%mpiComm,iError)
+      call mpi_allreduce(idUnmapped,this%unmappedBoundaryID,1,MPI_INTEGER, &
+                         MPI_MAX,this%mesh%decomp%mpiComm,iError)
+    else
+      this%nUnmappedBoundaries = nUnmapped
+      this%unmappedBoundaryID = idUnmapped
+    endif
+    ! Regrid remaps onto a new mesh, so a mesh that is still mis-tagged warns again.
+    this%unmappedBoundariesReported = .false.
+
   endsubroutine MapBoundaryConditions_DGModel3D_t
+
+  subroutine ReportUnmappedBoundaries_DGModel3D_t(this)
+    !! Warn, once, about mesh boundary faces whose bcid has no registered boundary
+    !! condition. MapBoundaryConditions establishes the count; ForwardStep calls this.
+    !!
+    !! This is deliberately a warning and not an error. An exterior state of zero is a
+    !! meaningful condition for some systems - for linear Euler it is effectively a
+    !! radiation condition - so the run is allowed to continue.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+
+    if(this%nUnmappedBoundaries <= 0) return
+    if(this%unmappedBoundariesReported) return
+    this%unmappedBoundariesReported = .true.
+    ! The count is already global; one rank reports it.
+    if(this%mesh%decomp%rankId /= 0) return
+
+    print*,__FILE__,' : Warning : ',this%nUnmappedBoundaries, &
+      ' mesh boundary faces carry a bcid with no registered boundary condition.'
+    print*,__FILE__,' : Warning : One of the unregistered bcids is ',this%unmappedBoundaryID
+    print*,__FILE__,' : Warning : Nothing writes the exterior state on those faces, so the'// &
+      ' Riemann solver uses solution%extBoundary as it stands - zero on the first step, and'// &
+      ' the previous step values afterwards.'
+    print*,__FILE__,' : Warning : Register a boundary condition for that bcid in'// &
+      ' AdditionalInit, or re-tag the mesh faces (see mesh%ResetBoundaryConditionType).'
+
+  endsubroutine ReportUnmappedBoundaries_DGModel3D_t
 
   subroutine setboundarycondition_DGModel3D_t(this)
     !! Apply registered boundary conditions for the solution.

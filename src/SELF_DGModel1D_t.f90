@@ -50,6 +50,14 @@ module SELF_DGModel1D_t
     type(Geometry1D),pointer :: geometry
     type(BoundaryConditionList) :: hyperbolicBCs
     type(BoundaryConditionList) :: parabolicBCs
+    !! Domain endpoints whose mesh%bcid matches no registered boundary condition, counted by
+    !! MapBoundaryConditions. A bcid of 0 is the deliberate periodic default and never counts.
+    !! Unlike 2D/3D, an unmapped endpoint in 1D keeps the periodic value seeded by
+    !! SetBoundaryCondition rather than a zero exterior state. ReportUnmappedBoundaries warns
+    !! about them once, from the top of ForwardStep.
+    integer :: nUnmappedBoundaries = 0
+    integer :: unmappedBoundaryID = -1 !! one of the unregistered bcids; -1 when there are none
+    logical :: unmappedBoundariesReported = .false.
 
   contains
 
@@ -57,6 +65,7 @@ module SELF_DGModel1D_t
     procedure :: SetMetadata => SetMetadata_DGModel1D_t
     procedure :: Free => Free_DGModel1D_t
     procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel1D_t
+    procedure :: ReportUnmappedBoundaries => ReportUnmappedBoundaries_DGModel1D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel1D_t
     procedure :: BoundaryFlux => BoundaryFlux_DGModel1D_t
@@ -333,7 +342,9 @@ contains
     class(DGModel1D_t),intent(inout) :: this
     ! Local
     type(BoundaryCondition),pointer :: bc
+    type(BoundaryCondition),pointer :: bcnode
     integer :: nelem,count,n
+    integer :: endpoint,bcid
     integer :: elems(2),sds(2)
 
     nelem = this%mesh%nElem
@@ -388,7 +399,55 @@ contains
       bc => bc%next
     enddo
 
+    ! Reverse check. Both loops above iterate over registrations, so an endpoint whose bcid
+    ! matches no registration is never enumerated. A bcid of 0 is the deliberate periodic
+    ! default (Mesh1D initialises bcid to 0), so it is not a fault.
+    !
+    ! An endpoint counts as unmapped only when NEITHER list knows its bcid. Requiring both
+    ! would flag every model that registers hyperbolic conditions alone.
+    !
+    ! Mesh1D is replicated on every rank (nGlobalElem = nElem, no element decomposition), so
+    ! the count is already global and no reduction is needed here.
+    this%nUnmappedBoundaries = 0
+    this%unmappedBoundaryID = -1
+    do endpoint = 1,2
+      bcid = this%mesh%bcid(endpoint)
+      if(bcid == 0) cycle ! periodic by default
+      bcnode => this%hyperbolicBCs%GetBCForID(bcid)
+      if(associated(bcnode)) cycle
+      bcnode => this%parabolicBCs%GetBCForID(bcid)
+      if(associated(bcnode)) cycle
+      this%nUnmappedBoundaries = this%nUnmappedBoundaries+1
+      this%unmappedBoundaryID = max(this%unmappedBoundaryID,bcid)
+    enddo
+    this%unmappedBoundariesReported = .false.
+
   endsubroutine MapBoundaryConditions_DGModel1D_t
+
+  subroutine ReportUnmappedBoundaries_DGModel1D_t(this)
+    !! Warn, once, about domain endpoints whose bcid has no registered boundary condition.
+    !! MapBoundaryConditions establishes the count; ForwardStep calls this.
+    !!
+    !! This is deliberately a warning and not an error: the endpoint still receives the
+    !! periodic default, which may well be what the user wanted.
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+
+    if(this%nUnmappedBoundaries <= 0) return
+    if(this%unmappedBoundariesReported) return
+    this%unmappedBoundariesReported = .true.
+    if(this%mesh%decomp%rankId /= 0) return
+
+    print*,__FILE__,' : Warning : ',this%nUnmappedBoundaries, &
+      ' domain endpoints carry a bcid with no registered boundary condition.'
+    print*,__FILE__,' : Warning : One of the unregistered bcids is ',this%unmappedBoundaryID
+    print*,__FILE__,' : Warning : SetBoundaryCondition leaves those endpoints at the periodic'// &
+      ' default, so the endpoint is wrapped onto the opposite end of the domain rather than'// &
+      ' given the condition the bcid was meant to select.'
+    print*,__FILE__,' : Warning : Register a boundary condition for that bcid in'// &
+      ' AdditionalInit, or re-tag the endpoints (see mesh%ResetBoundaryConditionType).'
+
+  endsubroutine ReportUnmappedBoundaries_DGModel1D_t
 
   subroutine setboundarycondition_DGModel1D_t(this)
     !! Apply boundary conditions for the solution.

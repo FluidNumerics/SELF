@@ -82,9 +82,14 @@ Key methods:
 
 If `RegisterBoundaryCondition` is called with a `bcid` that is already registered, it updates the procedure pointer without creating a new node. This is how GPU model variants override CPU implementations.
 
-## BC Identifier Constants
+## BC Identifiers
 
-BC type identifiers are integer parameters defined in `src/SELF_Mesh.f90`:
+A `bcid` is an arbitrary integer. The system never interprets it: `GetBCForID` compares it for
+equality against the registered nodes, and `MapBoundaryConditions` compares it against
+`sideInfo(5,...)`. Nothing else looks at the value, so any integer is legal as long as the mesh
+tagging and the registration agree.
+
+`src/SELF_Mesh.f90` defines five parameters:
 
 ```fortran
 ! Conditions on the solution
@@ -97,7 +102,15 @@ integer, parameter :: SELF_BC_PRESCRIBED_STRESS = 200
 integer, parameter :: SELF_BC_NOSTRESS = 201
 ```
 
-These constants are used both when tagging mesh faces (in `sideInfo`) and when registering BCs.
+These are **deprecated as a fixed enumeration**. They are the ids the built-in models happen to
+register, retained because the existing models, tests and examples reference them. They are not
+a list of the conditions SELF supports, and no new ones will be added — a model defines the ids
+it needs in its own module.
+
+The same five values are duplicated as `#define`s in `src/gpu/SELF_GPU_Macros.h` for device
+code. Nothing checks that the two lists agree, so they are kept in sync by hand. Device kernels
+dispatch from a per-BC element/side list rather than by comparing against these macros, so a new
+`bcid` does not need an entry there.
 
 ## Initialization Flow
 
@@ -135,6 +148,42 @@ After registration, `MapBoundaryConditions` scans the mesh `sideInfo` array. For
 2. **Collect** the element and side indices into arrays
 
 These arrays are stored in the `BoundaryCondition` node via `PopulateBoundaries`. A boundary face is identified by `sideInfo(3,j,iEl) == 0` (no neighbor element) and `sideInfo(5,j,iEl) == bcid`.
+
+### Step 3: The Reverse Scan
+
+Both mapping loops iterate over *registrations*, not over mesh faces, so a boundary face whose
+`bcid` matches no registration is never enumerated by them. `MapBoundaryConditions` therefore
+finishes with a scan in the opposite direction — over mesh faces, looking each `bcid` up in both
+lists — and records what it finds on the model:
+
+| Field | Meaning |
+|-------|---------|
+| `nUnmappedBoundaries` | boundary faces no registration covers, summed over all ranks |
+| `unmappedBoundaryID` | one of the unregistered `bcid`s (`-1` when there are none) |
+| `unmappedBoundariesReported` | one-shot latch, cleared on every `MapBoundaryConditions` |
+
+A face counts as unmapped only when *neither* list knows its `bcid`; requiring both would flag
+every model that registers hyperbolic conditions alone.
+
+Three details matter in that scan:
+
+- **Mortar sides are excluded.** They carry `sideInfo(3) = 0` exactly like a physical boundary,
+  with `sideInfo(1)` holding the mortar index. The exclusion keys on `sideInfo(1)`, and only on
+  a mesh with `nMortars > 0` — the HOPr readers copy `sideInfo(1)` verbatim from the file, where
+  it is the HOPr side type and may be nonzero on an ordinary face.
+- **The count is reduced across ranks.** Each rank owns a slice of the mesh, so a `bcid` absent
+  locally may be present elsewhere. `MapBoundaryConditions` `mpi_allreduce`s the count
+  (`MPI_SUM`) and the representative id (`MPI_MAX`). Every rank reaches the routine on both the
+  `Init` and the `Regrid` path, so the collective cannot deadlock.
+- **1-D differs.** `Mesh1D` is replicated on every rank, so no reduction is needed, and
+  `SetBoundaryCondition` seeds a periodic default before dispatching, so an unmapped endpoint
+  falls back to periodic rather than to a zero exterior state. A `bcid` of `0` in 1-D is that
+  periodic default and never counts.
+
+`ForwardStep` calls `ReportUnmappedBoundaries` before its first step. The base `Model`
+implementation is a no-op — `Model` is abstract and carries neither a mesh nor the BC lists —
+and each `DGModel{1,2,3}D_t` overrides it to print a warning, once, from rank 0. It is a warning
+and not an error on purpose: a zero exterior state is a meaningful condition for some systems.
 
 ## Runtime Dispatch
 
@@ -228,11 +277,15 @@ Free_ECAdvection2D()
 
 To add a new BC type (e.g., an inflow condition) to an existing model:
 
-1. **Define a BC ID** in `src/SELF_Mesh.f90` if one does not already exist:
+1. **Define a BC ID in the model's own module**, not in `src/SELF_Mesh.f90`:
 
     ```fortran
-    integer, parameter :: SELF_BC_INFLOW = 103
+    integer, parameter :: MYMODEL_BC_INFLOW = 103
     ```
+
+    Keeping the parameter next to the model that registers it is the point: the id is private
+    to the agreement between that model and the meshes it is run on, and adding to the
+    `SELF_BC_*` list would imply a global enumeration that does not exist.
 
 2. **Write the BC implementation** in the model's `_t` source file, matching the `SELF_bcMethod` interface
 
@@ -241,8 +294,12 @@ To add a new BC type (e.g., an inflow condition) to an existing model:
     ```fortran
     bcfunc => hbc2d_Inflow_MyModel
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
-      SELF_BC_INFLOW, "inflow", bcfunc)
+      MYMODEL_BC_INFLOW, "inflow", bcfunc)
     ```
+
+    `AdditionalInit` is the required place: `Regrid` frees both BC lists and re-runs
+    `AdditionalInit` on every adaptation epoch, so a registration made anywhere else is lost
+    after the first regrid.
 
 4. **For GPU models**, write a C++ kernel and Fortran wrapper, then re-register in the GPU class `AdditionalInit`
 
@@ -253,8 +310,8 @@ To add a new BC type (e.g., an inflow condition) to an existing model:
 | File | Contents |
 |------|----------|
 | `src/SELF_BoundaryConditions.f90` | `BoundaryCondition`, `BoundaryConditionList`, `SELF_bcMethod` interface |
-| `src/SELF_Mesh.f90` | BC ID constants (`SELF_BC_PRESCRIBED`, etc.) |
+| `src/SELF_Mesh.f90` | The deprecated built-in BC id parameters (`SELF_BC_PRESCRIBED`, etc.) |
 | `src/SELF_DGModel{1D,2D,3D}_t.f90` | `MapBoundaryConditions`, `SetBoundaryCondition`, `SetGradientBoundaryCondition` |
-| `src/SELF_Model.f90` | Base `AdditionalInit` / `AdditionalFree` stubs |
+| `src/SELF_Model.f90` | Base `AdditionalInit` / `AdditionalFree` / `ReportUnmappedBoundaries` stubs, and `ForwardStep` |
 | `src/gpu/SELF_ECAdvection2D.f90` | Example GPU BC wrapper pattern |
 | `src/gpu/SELF_ECAdvection2D.cpp` | Example GPU BC kernel |
