@@ -282,15 +282,12 @@ program lineareuler2d_planewave45_dtconvergence
 
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 15
-  integer,parameter :: nxPerTile = 4 ! elements per tile in x and y
-  integer,parameter :: nTile = 2 ! tiles in x and y (8x8 elements total)
-  real(prec),parameter :: dx = 0.125_prec ! element size; the domain is the unit square
+  integer,parameter :: nTile = 2 ! tiles in x and y
   real(prec),parameter :: c0 = 1.0_prec ! background sound speed
   real(prec),parameter :: rho0 = 1.0_prec ! background density
   real(prec),parameter :: amp = 1.0_prec*10.0_prec**(-2) ! peak pressure
   real(prec),parameter :: kx = 2.0_prec*pi ! x wave number
   real(prec),parameter :: ky = 2.0_prec*pi ! y wave number
-  real(prec),parameter :: endtime = 0.25_prec
   !! The coarsest level must already be resolved: a run that is unstable, or so far from
   !! the asymptotic regime that the "order" between levels is meaningless, is rejected
   !! outright rather than being allowed to produce a large apparent convergence rate.
@@ -301,7 +298,10 @@ program lineareuler2d_planewave45_dtconvergence
   character(SELF_INTEGRATOR_LENGTH) :: integrator
   character(len=255) :: envval
   integer :: nsteps0,nlev,k,nfit,nsteps
+  integer :: nxPerTile ! elements per tile in x and y
   integer :: bcids(1:4)
+  real(prec) :: dx ! element size; the domain is always the unit square
+  real(prec) :: endtime
   real(prec) :: omega,target_order,order_tol,slope,ordr,refine_factor
   real(prec) :: err(1:maxlev),dtv(1:maxlev)
   type(Lagrange),target :: interp
@@ -317,24 +317,42 @@ program lineareuler2d_planewave45_dtconvergence
     integrator = trim(adjustl(envval))
   endif
 
-  ! nsteps0 sets the coarsest time step, chosen just inside each scheme's stability limit
-  ! for this mesh and degree. Measured limits (unit square, 8x8 elements, N=7, c=1):
-  ! rk2 and rk3 lose stability between dt = 1.95e-3 and 2.6e-3, rk4 between 3.9e-3 and
-  ! 5.2e-3, so these starting steps sit at roughly 75-90% of the limit.
+  ! Each scheme gets the cheapest configuration that still leaves four refinement
+  ! levels clear of the spatial error floor, because this test runs in the debug and
+  ! coverage matrices too, where it costs roughly twenty times what it does here.
+  !
+  ! nsteps0 sets the coarsest time step, chosen just inside the stability limit for
+  ! the mesh in use. Measured on the unit square at N=7 with c=1: at h=0.125 rk2 and
+  ! rk3 lose stability between dt = 1.95e-3 and 2.6e-3 and rk4 between 3.9e-3 and
+  ! 5.2e-3; the limits scale with h.
+  !
+  ! rk2 and rk3 run on 4x4 elements, whose floor near 3.6e-8 they stay well above.
+  ! Fourth order eats four decades in four halvings, so rk4 needs the lower floor of
+  ! an 8x8 mesh; it buys back the cost by integrating over half the time interval,
+  ! which scales every error down together and leaves the observed order unchanged.
   select case(trim(integrator))
   case('rk2')
-    nsteps0 = 128
-    nlev = 5
+    nxPerTile = 2
+    dx = 0.25_prec
+    endtime = 0.25_prec
+    nsteps0 = 64
+    nlev = 4
     target_order = 2.0_prec
     order_tol = 0.4_prec
   case('rk3')
-    nsteps0 = 128
-    nlev = 5
+    nxPerTile = 2
+    dx = 0.25_prec
+    endtime = 0.25_prec
+    nsteps0 = 64
+    nlev = 4
     target_order = 3.0_prec
     order_tol = 0.4_prec
   case('rk4')
-    nsteps0 = 80
-    nlev = 5
+    nxPerTile = 4
+    dx = 0.125_prec
+    endtime = 0.0625_prec
+    nsteps0 = 20
+    nlev = 4
     target_order = 4.0_prec
     order_tol = 0.7_prec
   case default
@@ -395,12 +413,6 @@ program lineareuler2d_planewave45_dtconvergence
       print*,"Error: error norm is not a number at level ",k
       stop 1
     endif
-    if(k > 1) then
-      if(err(k) > err(k-1)) then
-        print*,"Error: error grew under time refinement at level ",k,err(k-1),err(k)
-        stop 1
-      endif
-    endif
   enddo
 
   ! Keep the levels on which the temporal error still dominates. A level is retained only
@@ -420,6 +432,18 @@ program lineareuler2d_planewave45_dtconvergence
   enddo
 
   print*,"Levels above the spatial error floor :",nfit
+
+  ! Below the floor the error stops responding to dt and wanders by a few parts in a
+  ! thousand, so monotonicity is only meaningful on the levels being fitted - where the
+  ! retention test above already enforces it. What the remaining levels must show is
+  ! that refining further settles onto the floor rather than diverging from it.
+  do k = nfit+1,nlev
+    if(err(k) > 2.0_prec*err(nfit)) then
+      print*,"Error: refining past the spatial error floor made the error grow at level ", &
+        k,err(nfit),err(k)
+      stop 1
+    endif
+  enddo
 
   if(nfit < minfit) then
     print*,"Error: only ",nfit," consecutive refinement level(s) reached order ", &
