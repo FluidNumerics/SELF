@@ -54,12 +54,20 @@ jobs:
 
       # A shared runner IP hits Docker Hub's anonymous pull limit sooner than a
       # hosted one would. Log in when the credentials the docker-publish workflow
-      # already uses are available; skip silently when they are not.
+      # already uses are available, and carry on anonymously when they are not.
+      # The check has to happen in the shell: the secrets context is not one of
+      # the contexts a step-level `if` may read.
       - name: Log in to Docker Hub
-        if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" \
-            | podman login docker.io --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          if [ -n "${DOCKERHUB_USERNAME}" ]; then
+            echo "${DOCKERHUB_TOKEN}" \
+              | podman login docker.io --username "${DOCKERHUB_USERNAME}" --password-stdin
+          else
+            echo "No Docker Hub credentials configured; pulling anonymously."
+          fi
 
       - name: Pull the selfish base image
         run: podman pull "${SELFISH_IMAGE}"
