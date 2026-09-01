@@ -64,6 +64,12 @@ function (add_fortran_example_with_gpu_kernel TEST_NAME FSRC CPPSRC)
     endif()
 
     add_executable (${TEST_NAME} ${SRCS})
+    # Adding a HIP source would otherwise make CMake link the target with the
+    # HIP compiler, which does not supply libgcov, so a coverage build fails on
+    # __gcov_* from the Fortran objects. Link with the Fortran driver, as
+    # src/CMakeLists.txt already does for the self library, which mixes the same
+    # two languages.
+    set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE Fortran)
     add_dependencies(${TEST_NAME} self)
     target_link_libraries(${TEST_NAME} self)
     target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include
