@@ -37,6 +37,10 @@ module lineareuler2d_planewave_prop_model
 
   use self_lineareuler2d
   use SELF_BoundaryConditions
+#ifdef ENABLE_GPU
+  use iso_c_binding
+  use SELF_Constants
+#endif
 
   implicit none
 
@@ -56,6 +60,21 @@ module lineareuler2d_planewave_prop_model
 
   endtype lineareuler2d_planewave
 
+#ifdef ENABLE_GPU
+  interface
+    subroutine hbc2d_planewave_gaussian_lineareuler2d_gpu(extboundary,xboundary, &
+                                                          elements,sides,nBoundaries,N,nel, &
+                                                          wx,wy,amp,x0,y0,L,rho0,c,t,reflect) &
+      bind(c,name="hbc2d_planewave_gaussian_lineareuler2d_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: extboundary,xboundary,elements,sides
+      integer(c_int),value :: nBoundaries,N,nel,reflect
+      real(c_prec),value :: wx,wy,amp,x0,y0,L,rho0,c,t
+    endsubroutine hbc2d_planewave_gaussian_lineareuler2d_gpu
+  endinterface
+#endif
+
 contains
 
   subroutine AdditionalInit_lineareuler2d_planewave(this)
@@ -64,11 +83,17 @@ contains
     ! Local
     procedure(SELF_bcMethod),pointer :: bcfunc
 
-    ! Register the parent class NoNormalFlow BC first
-    call AdditionalInit_LinearEuler2D_t(this)
+    ! Register the parent class boundary conditions first. Going through the parent
+    ! component rather than calling AdditionalInit_LinearEuler2D_t directly keeps the
+    ! device-resident BC kernels that the GPU backend registers.
+    call this%lineareuler2d%AdditionalInit()
 
     ! Register the prescribed BC
+#ifdef ENABLE_GPU
+    bcfunc => hbc2d_Prescribed_lineareuler2d_planewave_gpu
+#else
     bcfunc => hbc2d_Prescribed_lineareuler2d_planewave
+#endif
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
       SELF_BC_PRESCRIBED,"prescribed",bcfunc)
 
@@ -133,11 +158,35 @@ contains
           m%solution%extBoundary(i,j,iEl,3) = p*shape ! pressure
           m%solution%extBoundary(i,j,iEl,4) = m%c ! sound speed
           m%solution%extBoundary(i,j,iEl,5) = m%rho0 ! background density
+          m%solution%extBoundary(i,j,iEl,6) = 0.0_prec ! relaxation rate
         enddo
       enddo
     endselect
 
   endsubroutine hbc2d_Prescribed_lineareuler2d_planewave
+
+#ifdef ENABLE_GPU
+  subroutine hbc2d_Prescribed_lineareuler2d_planewave_gpu(bc,mymodel)
+    !! Device implementation of the prescribed plane wave boundary condition. The
+    !! exterior state the Riemann solver reads lives in solution%extBoundary_gpu, so
+    !! writing the host array here would leave the boundary condition with no effect.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    select type(m => mymodel)
+    class is(lineareuler2d_planewave)
+      if(bc%nBoundaries > 0) then
+        call hbc2d_planewave_gaussian_lineareuler2d_gpu( &
+          m%solution%extBoundary_gpu, &
+          m%geometry%x%boundary_gpu, &
+          bc%elements_gpu,bc%sides_gpu, &
+          bc%nBoundaries,m%solution%interp%N,m%solution%nElem, &
+          m%wx,m%wy,m%p,m%x0,m%y0,m%L,m%rho0,m%c,m%t,0_c_int)
+      endif
+    endselect
+
+  endsubroutine hbc2d_Prescribed_lineareuler2d_planewave_gpu
+#endif
 
 endmodule lineareuler2d_planewave_prop_model
 

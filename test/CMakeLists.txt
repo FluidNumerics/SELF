@@ -60,6 +60,37 @@ function (add_mpi_fortran_tests)
 
 endfunction ()
 
+# Build a test executable that carries its own device kernel source. The .cpp is
+# compiled (as HIP or CUDA, matching the backend the library was built with) only
+# when the GPU backend is enabled; on CPU builds it is left out entirely and the
+# Fortran source falls back to its host implementation under #ifdef ENABLE_GPU.
+function (add_fortran_test_with_gpu_kernel TEST_NAME FSRC CPPSRC)
+
+    set(SRCS ${CMAKE_CURRENT_SOURCE_DIR}/${FSRC})
+    if(SELF_ENABLE_GPU)
+        if(SELF_ACTIVE_GPU_BACKEND STREQUAL "HIP")
+          set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${CPPSRC} PROPERTIES LANGUAGE HIP)
+        else()
+          set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${CPPSRC} PROPERTIES LANGUAGE CUDA)
+        endif()
+        list(APPEND SRCS ${CMAKE_CURRENT_SOURCE_DIR}/${CPPSRC})
+    endif()
+
+    add_executable (${TEST_NAME} ${SRCS})
+    # Adding a HIP source would otherwise make CMake link the target with the
+    # HIP compiler, which does not supply libgcov, so a coverage build fails on
+    # __gcov_* from the Fortran objects. Link with the Fortran driver, as
+    # src/CMakeLists.txt already does for the self library, which mixes the same
+    # two languages.
+    set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE Fortran)
+    add_dependencies(${TEST_NAME} self)
+    target_link_libraries(${TEST_NAME} self)
+    target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include
+                                                   ${CMAKE_SOURCE_DIR}/src/gpu)
+    install(TARGETS ${TEST_NAME} DESTINATION test)
+
+endfunction ()
+
 add_fortran_tests (
     "scalargridinterp_1d_constant.f90"
     "scalarderivative_1d_constant.f90"
@@ -409,6 +440,42 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "structuredmesh_external_comm_3d.f90"
                        "structuredmesh_subcomm_2d.f90"
                        "read_hopr_external_comm_2d.f90" )
+
+# Temporal order-of-accuracy test for the low-storage Runge-Kutta integrators. One executable
+# (which carries a device kernel for its time-dependent prescribed boundary condition on GPU
+# builds) is re-run once per integrator through the SELF_RK_CONV_INTEGRATOR switch.
+#
+# With a time-dependent prescribed boundary condition each scheme only reaches its design
+# order (2, 3, 4) if its stage times are consistent with its Butcher tableau; assigning the
+# stage time after the tendency instead of before it drops all three to first order.
+add_fortran_test_with_gpu_kernel(lineareuler2d_planewave45_dtconvergence
+                                 "lineareuler2d_planewave45_dtconvergence.f90"
+                                 "lineareuler2d_planewave45_bc.cpp")
+
+# Every run writes solution.<ioIterate>.h5 into its working directory, and each of the three
+# entries below performs several runs. Give each its own directory so that they collide
+# neither with each other nor with the rest of the suite under `ctest -j`.
+
+add_test(NAME lineareuler2d_planewave45_dtconvergence_rk3
+         COMMAND lineareuler2d_planewave45_dtconvergence)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/planewave45_rk3)
+set_tests_properties(lineareuler2d_planewave45_dtconvergence_rk3 PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_RK_CONV_INTEGRATOR=rk3"
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/planewave45_rk3)
+
+add_test(NAME lineareuler2d_planewave45_dtconvergence_rk4
+         COMMAND lineareuler2d_planewave45_dtconvergence)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/planewave45_rk4)
+set_tests_properties(lineareuler2d_planewave45_dtconvergence_rk4 PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_RK_CONV_INTEGRATOR=rk4"
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/planewave45_rk4)
+
+add_test(NAME lineareuler2d_planewave45_dtconvergence_rk2
+         COMMAND lineareuler2d_planewave45_dtconvergence)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/planewave45_rk2)
+set_tests_properties(lineareuler2d_planewave45_dtconvergence_rk2 PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_RK_CONV_INTEGRATOR=rk2"
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/planewave45_rk2)
 
 # The Stage 6c geometry diagnostics (SELF_AMR_GEOM_*) are env-gated, so ordinary runs never enter
 # them. Re-run existing AMR tests with each switch set: this exercises the verification and bypass

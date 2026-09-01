@@ -18,7 +18,11 @@ on:
 
 jobs:
   linux-tests:
-    timeout-minutes: 90
+    # The debug and coverage entries build at -O0 with bounds checking and then run the
+    # whole suite, and they were already finishing at 83-84 minutes against a 90-minute
+    # ceiling before anything was added to it. That is not enough margin for a suite that
+    # keeps growing, and it is why runs here have been timing out.
+    timeout-minutes: 150
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     name: ${{ matrix.os }} - ${{ matrix.fcompiler }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
