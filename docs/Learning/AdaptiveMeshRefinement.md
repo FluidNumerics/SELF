@@ -1335,9 +1335,9 @@ fails only for a kernel indexing error, the MPI test only for a migration or rou
 asserts its own premise (`wFirst > 1`, `nWinElem < nOld`, `nWinElem >= 2`) so it cannot quietly stop
 testing what it exists for. The direct tests are the one GPU-gated pair in this change, and they
 print SKIP on a CPU build, because there the kernel is absent and there is nothing to compare. They
-are not thereby untested: Buildkite runs on-hardware coverage pipelines for MI210 (HIP) and V100
-(CUDA) on every pull-request branch, so both device backends build and run the full suite per PR.
-GitHub Actions is the CPU-only half of the estate. Note that every job in both halves uses
+are not thereby untested: on-hardware coverage pipelines run for MI210 (HIP, a self-hosted GitHub
+Actions runner) and V100 (CUDA, Buildkite) on every pull-request branch, so both device backends
+build and run the full suite per PR. The rest of the estate is CPU-only. Note that every job in both halves uses
 gfortran - see `AMR3D-Design.md` §6 - so CI says nothing about ifx, nvfortran or amdflang.
 
 On the host side `transfer_plan_{2,3}d_window` already pins the offset arithmetic bitwise over five

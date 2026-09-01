@@ -282,7 +282,7 @@ first either way (Phase 0 of the AMR document).
   order preserved (mortars are known not to degrade order at 2:1).
 - `mortar_*_mpi`: same patches split so mortars straddle 2 ranks; results
   bitwise-match the serial run.
-- GPU parity tests on the Buildkite pipelines, matching CPU to tolerance.
+- GPU parity tests on the on-hardware MI210/V100 pipelines, matching CPU to tolerance.
 - All existing conforming-mesh regression tests must remain bitwise unchanged
   (the `nMortars = 0` gate makes this checkable).
 

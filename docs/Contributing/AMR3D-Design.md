@@ -425,7 +425,7 @@ synchronizes before its own MPI for the same reason.
 
 **A convention this change follows.** New index and byte arithmetic belongs in
 `src/`, shared with the host path, so that every CI job checks it rather than only
-the two Buildkite GPU pipelines (see §6) - and so that a CPU build can fail for a
+the two GPU pipelines (see §6) - and so that a CPU build can fail for a
 logic error rather than deferring it to hardware. The guard the kernel cannot
 perform (every source inside the window) likewise lives in the Fortran caller,
 where it can report; inside the kernel an early return would be neither reportable
@@ -515,7 +515,7 @@ one can fail for a different reason:
   re-run: on a CPU build it selects the same code the default takes, so it would
   cost 33 s across both dimensions for a few lines of branch coverage in a job that
   already runs within minutes of its 90-minute ceiling. It is exercised where it
-  selects different code - the Buildkite GPU pipelines, and the B300 verification
+  selects different code - the on-hardware GPU pipelines, and the B300 verification
   runs, which do an explicit `TRANSFER_HOST=1` pass over the whole set.
 
 **On patch coverage, and one thing that is easy to get wrong about it.** A `WILL_FAIL`
@@ -554,14 +554,16 @@ Two ranks are not enough on their own: with one peer the send and receive runs
 are forced and no window can straddle more than one peer, which is why the
 4-rank entries exist (`SELF_MPIEXEC_NUMPROCS_MANY`, default 4).
 
-GPU coverage comes from two places, and it is worth being precise about which:
-GitHub Actions (`.github/workflows/`) is entirely CPU-only, so nothing there
-compiles a device kernel. Buildkite (`.buildkite/pipeline.yml`) does: on every
-non-`main` branch it uploads
-on-hardware coverage pipelines for AMD MI210 (HIP, gfx90a) and NVIDIA V100 (CUDA,
-sm_70), each configuring `SELF_ENABLE_GPU=ON` and running the full `ctest`, plus an
-x86 CPU pipeline. So a pull request does build and run both device backends, and
-`src/gpu/` coverage is uploaded from there.
+GPU coverage comes from two places, and it is worth being precise about which.
+Most GitHub Actions jobs (`.github/workflows/linux-*`) are CPU-only and compile no
+device kernel, but `amd-mi210-gpu-tests.yml` is the exception: it runs on the
+self-hosted `galapagos-mi210x4` runner, under rootless podman on the `selfish` base
+image, and does an on-hardware AMD MI210 (HIP, gfx90a) coverage build and full
+`ctest`. Buildkite (`.buildkite/pipeline.yml`) supplies the rest: on every non-`main`
+branch it uploads an NVIDIA V100 (CUDA, sm_70) on-hardware coverage pipeline and an
+x86 CPU pipeline. Both GPU pipelines configure `SELF_ENABLE_GPU=ON`. So a pull
+request does build and run both device backends, and `src/gpu/` coverage is uploaded
+from both.
 
 Two consequences for the tests above. A GPU-gated test is not dead weight - it runs
 on both backends per PR - but it is invisible to the much faster and more numerous
@@ -570,13 +572,14 @@ something real on a CPU build should. And keeping new index arithmetic in `src/`
 rather than `src/gpu/` still earns its keep, not because the device path is
 uncompiled, but because arithmetic shared with the host path is checked by every
 job rather than only by the two GPU ones. Deeper GPU work still wants a dedicated
-node for measurement (a B300, CUDA sm_103, for #165/#167/#172), since the Buildkite
+node for measurement (a B300, CUDA sm_103, for #165/#167/#172), since the GPU
 pipelines are correctness gates and not a benchmarking environment.
 
 **Which COMPILERS the estate actually exercises, which is narrower than the support
 matrix.** Every job that runs on a pull request uses **gfortran**: the GitHub
-Actions matrices (9/10/11/12, debug/release/coverage) and all three Buildkite
-pipelines, which set `FC=gfortran` and vary only the GPU backend. The
+Actions matrices (9/10/11/12, debug/release/coverage), the MI210 GitHub Actions job
+and the two remaining Buildkite pipelines, which set `FC=gfortran` and vary only the
+GPU backend. The
 `linux-amdflang-cmake` and `linux-nvidia-hpc-cmake` workflows exist but are
 currently `disabled_manually` in the repository, and there is no ifx job at all.
 So the compatibility this project asks for in CLAUDE.md - gfortran >= 11, ifx,
