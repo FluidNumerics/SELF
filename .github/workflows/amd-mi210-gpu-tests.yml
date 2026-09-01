@@ -39,7 +39,15 @@ jobs:
     name: MI210 (gfx90a) - coverage
     runs-on: galapagos-mi210x4
     timeout-minutes: 120
-    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    # This job puts the pull request's own code on a self-hosted GPU box, and
+    # SELF is a public repository. Skip fork pull requests outright, so that
+    # reaching the MI210 node needs write access to this repository rather than
+    # a maintainer not mis-clicking the fork-workflow approval prompt. Fork pull
+    # requests still get the full CPU matrix.
+    if: >-
+      !contains(github.event.head_commit.message, 'skip ci')
+      && (github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name == github.repository)
 
     steps:
       - name: Checkout repository
