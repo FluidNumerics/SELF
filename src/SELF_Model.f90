@@ -41,7 +41,7 @@ module SELF_Model
 
   ! Runge-Kutta 2nd Order (Low Storage)
   real(prec),parameter :: rk2_a(1:2) = (/0.0_prec,-0.5_prec/)
-  real(prec),parameter :: rk2_b(1:2) = (/0.5_prec,0.5_prec/)
+  real(prec),parameter :: rk2_b(1:2) = (/0.0_prec,0.5_prec/)
   real(prec),parameter :: rk2_g(1:2) = (/0.5_prec,1.0_prec/)
 
   ! Williamson's Runge-Kutta 3rd Order (Low Storage)
@@ -49,35 +49,37 @@ module SELF_Model
   real(prec),parameter :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
   real(prec),parameter :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
 
-  ! Carpenter-Kennedy Runge-Kuttta 4th Order (Low Storage)
-  real(prec),parameter :: rk4_a(1:5) = (/0.0_prec, &
-                                         -1.0_prec, &
-                                         -1.0_prec/3.0_prec+ &
-                                         2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
-                                         -2.0_prec**(1.0_prec/3.0_prec)- &
-                                         2.0_prec**(2.0_prec/3.0_prec)-2.0_prec, &
-                                         -1.0_prec+2.0_prec**(1.0_prec/3.0_prec)/)
+  ! Carpenter-Kennedy Runge-Kutta 4th Order, 5 stages (Low Storage, 2N)
+  !
+  ! M. H. Carpenter and C. A. Kennedy, "Fourth-order 2N-storage Runge-Kutta schemes",
+  ! NASA TM-109112 (1994). The rational coefficients below are the published A_i (rk4_a)
+  ! and B_i (rk4_g); rk4_b holds the stage times c_i, which are the row sums of the
+  ! equivalent Butcher tableau. With these values the amplification factor reproduces
+  ! exp(z) through z^4, as a fourth-order scheme requires.
+  !
+  ! These replace an earlier set of coefficients (written in terms of 2^(1/3)) whose
+  ! amplification factor was 1 + z - 0.4661 z^2 + ..., i.e. first order accurate. See
+  ! test/lineareuler2d_planewave45_dtconvergence.f90, which measures the observed order.
+  real(prec),parameter :: rk4_a(1:5) = (/ &
+                          0.0_prec, &
+                          -567301805773.0_prec/1357537059087.0_prec, &
+                          -2404267990393.0_prec/2016746695238.0_prec, &
+                          -3550918686646.0_prec/2091501179385.0_prec, &
+                          -1275806237668.0_prec/842570457699.0_prec/)
 
   real(prec),parameter :: rk4_b(1:5) = (/ &
                           0.0_prec, &
-                          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+ &
-                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
-                          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+ &
-                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
-                          1.0_prec/3.0_prec-2.0_prec**(1.0_prec/3.0_prec)/3.0_prec- &
-                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
-                          1.0_prec/)
+                          1432997174477.0_prec/9575080441755.0_prec, &
+                          2526269341429.0_prec/6820363962896.0_prec, &
+                          2006345519317.0_prec/3224310063776.0_prec, &
+                          2802321613138.0_prec/2924317926251.0_prec/)
 
   real(prec),parameter :: rk4_g(1:5) = (/ &
-                          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+ &
-                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
-                          -2.0_prec**(2.0_prec/3.0_prec)/6.0_prec+1.0_prec/6.0_prec, &
-                          -1.0_prec/3.0_prec-2.0_prec*2.0_prec**(1.0_prec/3.0_prec)/3.0_prec- &
-                          2.0_prec**(2.0_prec/3.0_prec)/3.0_prec, &
-                          1.0_prec/3.0_prec-2.0_prec**(1.0_prec/3.0_prec)/3.0_prec- &
-                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
-                          1.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/6.0_prec+ &
-                          2.0_prec**(2.0_prec/3.0_prec)/12.0_prec/)
+                          1432997174477.0_prec/9575080441755.0_prec, &
+                          5161836677717.0_prec/13612068292357.0_prec, &
+                          1720146321549.0_prec/2090206949498.0_prec, &
+                          3134564353537.0_prec/4481467310338.0_prec, &
+                          2277821191437.0_prec/14882151754819.0_prec/)
 
 !
   integer,parameter :: SELF_EULER = 100
