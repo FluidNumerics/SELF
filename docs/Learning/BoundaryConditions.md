@@ -162,8 +162,11 @@ lists — and records what it finds on the model:
 | `unmappedBoundaryID` | one of the unregistered `bcid`s (`-1` when there are none) |
 | `unmappedBoundariesReported` | one-shot latch, cleared on every `MapBoundaryConditions` |
 
-A face counts as unmapped only when *neither* list knows its `bcid`; requiring both would flag
-every model that registers hyperbolic conditions alone.
+Only the hyperbolic list decides whether a face is handled. `SetBoundaryCondition` dispatches
+that list alone, and it is what writes `solution%extBoundary` — the trace the Riemann solver
+consumes. The parabolic list writes `solutionGradient%extBoundary` by way of
+`SetGradientBoundaryCondition`, so a `bcid` registered only parabolically still leaves the
+solution trace unwritten, and is reported.
 
 Three details matter in that scan:
 
@@ -178,7 +181,10 @@ Three details matter in that scan:
   HOPr mesh silently tags nothing.
 - **The count is reduced across ranks.** Each rank owns a slice of the mesh, so a `bcid` absent
   locally may be present elsewhere. `MapBoundaryConditions` `mpi_allreduce`s the count
-  (`MPI_SUM`) and the representative id (`MPI_MAX`). Every rank reaches the routine on both the
+  (`MPI_SUM`). The representative id is *not* reduced: a bcid is any integer, so no value can
+  mark "absent". Ranks instead agree by `MPI_MIN` on the lowest-numbered rank that actually
+  holds an offender — a rank without one bids `nRanks` and can never win — and that rank
+  broadcasts its first offending id. Every rank reaches the routine on both the
   `Init` and the `Regrid` path, so the collective cannot deadlock.
 - **1-D differs.** `Mesh1D` is replicated on every rank, so no reduction is needed, and
   `SetBoundaryCondition` seeds a periodic default before dispatching, so an unmapped endpoint

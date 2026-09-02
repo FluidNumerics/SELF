@@ -39,6 +39,10 @@ module dgmodel1d_unmapped_boundary_model
   implicit none
 
   integer,parameter :: MYMODEL_BC_WALL = 4242
+  !! Registered on the PARABOLIC list only. SetBoundaryCondition dispatches the
+  !! hyperbolic list alone, so this id does not write solution%extBoundary and an
+  !! endpoint carrying it is still unhandled.
+  integer,parameter :: MYMODEL_BC_STRESSONLY = 4243
 
   type,extends(burgers1D) :: burgers1d_walled
 
@@ -60,11 +64,19 @@ contains
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
       MYMODEL_BC_WALL,"wall",bcfunc)
 
+    ! Deliberately parabolic-only, to prove the scan does not accept it as handling the
+    ! solution trace.
+    bcfunc => pbc1d_StressOnly_burgers1d_walled
+    call this%parabolicBCs%RegisterBoundaryCondition( &
+      MYMODEL_BC_STRESSONLY,"stress_only",bcfunc)
+
   endsubroutine AdditionalInit_burgers1d_walled
 
   subroutine hbc1d_Wall_burgers1d_walled(bc,mymodel)
-    !! Mirror condition: the exterior state is the interior trace, so no flux crosses the
-    !! endpoint.
+    !! Copies the interior trace to the exterior. This exists so that the bcid it is
+    !! registered against is a REGISTERED one - the test asserts on the mapping counters and
+    !! never steps the model. It is not a wall: for Burgers, u_ext = u_int is extrapolation
+    !! and leaves the physical flux u^2/2 at the endpoint rather than imposing zero flux.
     implicit none
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
@@ -82,6 +94,17 @@ contains
 
   endsubroutine hbc1d_Wall_burgers1d_walled
 
+  subroutine pbc1d_StressOnly_burgers1d_walled(bc,mymodel)
+    !! Parabolic-list counterpart, registered so that MYMODEL_BC_STRESSONLY is a real
+    !! registration on that list and nothing else. Never invoked here: the test does not step.
+    implicit none
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    if(.false.) print*,bc%nBoundaries,mymodel%nvar ! suppress unused-dummy-argument warnings
+
+  endsubroutine pbc1d_StressOnly_burgers1d_walled
+
 endmodule dgmodel1d_unmapped_boundary_model
 
 program DGModel1D_Unmapped_Boundary
@@ -98,6 +121,7 @@ program DGModel1D_Unmapped_Boundary
 !!  (c) the default bcid of 0 (periodic) counts nothing.
 
   use self_data
+  use SELF_BoundaryConditions
   use dgmodel1d_unmapped_boundary_model
 
   implicit none
@@ -111,6 +135,7 @@ program DGModel1D_Unmapped_Boundary
   type(Lagrange),target :: interp
   type(Mesh1D),target :: mesh
   type(Geometry1D),target :: geometry
+  type(BoundaryCondition),pointer :: bcnode
 
   call mesh%StructuredMesh(nElem=nelem,x=(/0.0_prec,1.0_prec/))
   call mesh%ResetBoundaryConditionType(bogusBCID,bogusBCID)
@@ -152,6 +177,31 @@ program DGModel1D_Unmapped_Boundary
   if(modelobj%nUnmappedBoundaries /= 0) then
     print*,"Error: the periodic default (bcid 0) was counted as unmapped ", &
       modelobj%nUnmappedBoundaries," times."
+    stop 1
+  endif
+
+  ! (d) a parabolic-only registration does NOT handle the solution trace, so both endpoints
+  ! are still unmapped. SetBoundaryCondition dispatches the hyperbolic list alone.
+  call mesh%ResetBoundaryConditionType(MYMODEL_BC_STRESSONLY,MYMODEL_BC_STRESSONLY)
+  call modelobj%MapBoundaryConditions()
+  if(modelobj%nUnmappedBoundaries /= 2) then
+    print*,"Error: a parabolic-only bcid was accepted as handling the solution trace; ", &
+      "expected 2 unmapped endpoints, counted ",modelobj%nUnmappedBoundaries
+    stop 1
+  endif
+
+  ! (e) re-tagging away from a mapped bcid must clear that condition's mapping. Otherwise
+  ! SetBoundaryCondition keeps invoking it on endpoints it no longer owns, and the counters
+  ! above would describe something other than what runs. MYMODEL_BC_WALL owned both endpoints
+  ! at (b); after (d) it must own none.
+  bcnode => modelobj%hyperbolicBCs%GetBCForID(MYMODEL_BC_WALL)
+  if(.not. associated(bcnode)) then
+    print*,"Error: MYMODEL_BC_WALL is not registered; (e) is vacuous."
+    stop 1
+  endif
+  if(bcnode%nBoundaries /= 0) then
+    print*,"Error: MYMODEL_BC_WALL still claims ",bcnode%nBoundaries," endpoints after the "// &
+      "mesh was re-tagged away from it - a stale mapping survived the re-map."
     stop 1
   endif
 

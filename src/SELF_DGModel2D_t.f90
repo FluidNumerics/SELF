@@ -826,6 +826,16 @@ contains
         enddo
         call this%hyperbolicBCs%PopulateBoundaries(bc%bcid,count,elems,sds)
         deallocate(elems,sds)
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition and each one loops over its own nBoundaries, so a stale
+        ! element/side list would keep this condition writing faces it no longer owns once
+        ! the mesh is re-tagged - and the unmapped tally below would then describe something
+        ! other than what runs. Clearing nBoundaries also parks the GPU wrappers, which guard
+        ! on the same field, so the device arrays are never read while stale.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
       endif
       bc => bc%next
     enddo
@@ -860,6 +870,16 @@ contains
         enddo
         call this%parabolicBCs%PopulateBoundaries(bc%bcid,count,elems,sds)
         deallocate(elems,sds)
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition and each one loops over its own nBoundaries, so a stale
+        ! element/side list would keep this condition writing faces it no longer owns once
+        ! the mesh is re-tagged - and the unmapped tally below would then describe something
+        ! other than what runs. Clearing nBoundaries also parks the GPU wrappers, which guard
+        ! on the same field, so the device arrays are never read while stale.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
       endif
       bc => bc%next
     enddo
@@ -869,8 +889,6 @@ contains
     ! written. Count those edges here: the sideInfo scan is already what this routine costs,
     ! and it runs at Init and after every Regrid, never inside the time loop.
     !
-    ! An edge counts as unmapped only when NEITHER list knows its bcid. Requiring both would
-    ! flag every model that registers hyperbolic conditions alone.
     nUnmapped = 0
     idUnmapped = -1
     do iEl = 1,this%mesh%nElem
@@ -879,9 +897,12 @@ contains
         if(e2 /= 0) cycle ! interior or rank-shared: sideInfo(3) holds a global element id
         if(skipMortars .and. this%mesh%sideInfo(1,j,iEl) /= 0) cycle
         bcid = this%mesh%sideInfo(5,j,iEl)
+        ! Only the HYPERBOLIC list decides whether the face is handled. SetBoundaryCondition
+        ! dispatches that list alone and it is what writes solution%extBoundary, the trace the
+        ! Riemann solver consumes; the parabolic list writes solutionGradient%extBoundary
+        ! through SetGradientBoundaryCondition. A bcid registered only parabolically therefore
+        ! leaves the solution trace unwritten - exactly the failure this scan exists to catch.
         bcnode => this%hyperbolicBCs%GetBCForID(bcid)
-        if(associated(bcnode)) cycle
-        bcnode => this%parabolicBCs%GetBCForID(bcid)
         if(associated(bcnode)) cycle
         nUnmapped = nUnmapped+1
         ! Keep the FIRST offender, not the largest: a bcid is any integer, so a max()

@@ -68,8 +68,12 @@ contains
     class(my_inflow), intent(inout) :: this
     procedure(SELF_bcMethod), pointer :: bcfunc
 
-    ! Keep the parent's registrations (no_normal_flow, radiation)
-    call AdditionalInit_LinearEuler2D_t(this)
+    ! Keep the parent's registrations (no_normal_flow, radiation). Dispatch through the
+    ! parent COMPONENT rather than naming a routine: the CPU LinearEuler2D inherits
+    ! AdditionalInit_LinearEuler2D_t, while the GPU one overrides it to register device
+    ! kernels. Calling the _t routine by name installs the host handlers on a GPU build and
+    ! the device kernels never replace them, leaving the boundary conditions inert there.
+    call this%LinearEuler2D%AdditionalInit()
 
     bcfunc => hbc2d_Inflow_my_inflow
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
@@ -327,8 +331,10 @@ subroutine AdditionalInit_my_extended_model(this)
   class(my_extended_model), intent(inout) :: this
   procedure(SELF_bcMethod), pointer :: bcfunc
 
-  ! Register parent model's BCs first
-  call AdditionalInit_LinearEuler2D_t(this)
+  ! Register the parent's BCs first, through the parent COMPONENT. Naming
+  ! AdditionalInit_LinearEuler2D_t directly installs the host handlers on a GPU build and
+  ! stops the device kernels from ever replacing them.
+  call this%LinearEuler2D%AdditionalInit()
 
   ! Then register additional BCs
   bcfunc => hbc2d_Prescribed_my_extended_model

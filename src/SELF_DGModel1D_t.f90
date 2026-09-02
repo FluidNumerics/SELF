@@ -372,6 +372,14 @@ contains
         endif
         call this%hyperbolicBCs%PopulateBoundaries(bc%bcid,count, &
                                                    elems(1:count),sds(1:count))
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition over its own nBoundaries, so a stale element/side list would
+        ! keep this condition writing endpoints it no longer owns once the mesh is re-tagged,
+        ! and the tally below would then describe something other than what runs.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
       endif
       bc => bc%next
     enddo
@@ -397,6 +405,14 @@ contains
         endif
         call this%parabolicBCs%PopulateBoundaries(bc%bcid,count, &
                                                   elems(1:count),sds(1:count))
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition over its own nBoundaries, so a stale element/side list would
+        ! keep this condition writing endpoints it no longer owns once the mesh is re-tagged,
+        ! and the tally below would then describe something other than what runs.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
       endif
       bc => bc%next
     enddo
@@ -405,8 +421,6 @@ contains
     ! matches no registration is never enumerated. A bcid of 0 is the deliberate periodic
     ! default (Mesh1D initialises bcid to 0), so it is not a fault.
     !
-    ! An endpoint counts as unmapped only when NEITHER list knows its bcid. Requiring both
-    ! would flag every model that registers hyperbolic conditions alone.
     !
     ! Mesh1D is replicated on every rank (nGlobalElem = nElem, no element decomposition), so
     ! the count is already global and no reduction is needed here.
@@ -415,9 +429,12 @@ contains
     do endpoint = 1,2
       bcid = this%mesh%bcid(endpoint)
       if(bcid == 0) cycle ! periodic by default
+      ! Only the HYPERBOLIC list decides whether the endpoint is handled. SetBoundaryCondition
+      ! dispatches that list alone and it is what writes solution%extBoundary; the parabolic
+      ! list writes solutionGradient%extBoundary through SetGradientBoundaryCondition. A bcid
+      ! registered only parabolically therefore leaves the solution trace on the periodic
+      ! default - exactly the failure this scan exists to catch.
       bcnode => this%hyperbolicBCs%GetBCForID(bcid)
-      if(associated(bcnode)) cycle
-      bcnode => this%parabolicBCs%GetBCForID(bcid)
       if(associated(bcnode)) cycle
       this%nUnmappedBoundaries = this%nUnmappedBoundaries+1
       ! Keep the FIRST offender, not the largest: a bcid is any integer, so a max()
