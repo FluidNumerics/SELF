@@ -110,6 +110,7 @@ add_fortran_tests (
     "vectorboundaryinterp_3d_constant.f90"
     "mesh2d_setup.f90"
     "mesh2d_uniformstructured.f90"
+    "mesh2d_reset_bc_mortar.f90"
     "mesh2d_uniform_refine.f90"
     "mesh3d_uniform_refine.f90"
     "solution_transfer_2d.f90"

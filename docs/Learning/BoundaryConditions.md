@@ -170,7 +170,12 @@ Three details matter in that scan:
 - **Mortar sides are excluded.** They carry `sideInfo(3) = 0` exactly like a physical boundary,
   with `sideInfo(1)` holding the mortar index. The exclusion keys on `sideInfo(1)`, and only on
   a mesh with `nMortars > 0` — the HOPr readers copy `sideInfo(1)` verbatim from the file, where
-  it is the HOPr side type and may be nonzero on an ordinary face.
+  it is the HOPr side type and may be nonzero on an ordinary face. `ResetBoundaryConditionType`
+  in `SELF_Mesh_{2,3}D_t` applies the identical test, for the identical reason: a reset that
+  tagged a mortar side would put an interior face into a boundary condition's element/side
+  list, and that condition would then overwrite the exterior state the mortar exchange had
+  just written. The `nMortars` gate is load-bearing in both places — without it, a reset on a
+  HOPr mesh silently tags nothing.
 - **The count is reduced across ranks.** Each rank owns a slice of the mesh, so a `bcid` absent
   locally may be present elsewhere. `MapBoundaryConditions` `mpi_allreduce`s the count
   (`MPI_SUM`) and the representative id (`MPI_MAX`). Every rank reaches the routine on both the
