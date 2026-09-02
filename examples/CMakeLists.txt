@@ -47,6 +47,40 @@ function (add_fortran_tests)
 
 endfunction ()
 
+# Build an example executable that carries its own device kernel source. The .cpp is
+# compiled (as HIP or CUDA, matching the backend the library was built with) only when the
+# GPU backend is enabled; on CPU builds it is left out and the Fortran source falls back to
+# its host implementation under #ifdef ENABLE_GPU.
+function (add_fortran_example_with_gpu_kernel TEST_NAME FSRC CPPSRC)
+
+    set(SRCS ${CMAKE_CURRENT_SOURCE_DIR}/${FSRC})
+    if(SELF_ENABLE_GPU)
+        if(SELF_ACTIVE_GPU_BACKEND STREQUAL "HIP")
+          set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${CPPSRC} PROPERTIES LANGUAGE HIP)
+        else()
+          set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${CPPSRC} PROPERTIES LANGUAGE CUDA)
+        endif()
+        list(APPEND SRCS ${CMAKE_CURRENT_SOURCE_DIR}/${CPPSRC})
+    endif()
+
+    add_executable (${TEST_NAME} ${SRCS})
+    # Adding a HIP source would otherwise make CMake link the target with the
+    # HIP compiler, which does not supply libgcov, so a coverage build fails on
+    # __gcov_* from the Fortran objects. Link with the Fortran driver, as
+    # src/CMakeLists.txt already does for the self library, which mixes the same
+    # two languages.
+    set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE Fortran)
+    add_dependencies(${TEST_NAME} self)
+    target_link_libraries(${TEST_NAME} self)
+    target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include
+                                                   ${CMAKE_SOURCE_DIR}/src/gpu)
+
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    set_tests_properties(${TEST_NAME} PROPERTIES LABELS "example")
+    install(TARGETS ${TEST_NAME} DESTINATION test)
+
+endfunction ()
+
 function (add_mpi_fortran_tests)
 
     foreach (TFILE ${ARGN})
@@ -64,11 +98,20 @@ function (add_mpi_fortran_tests)
 
 endfunction ()
 
+# The two plane wave examples prescribe a time-dependent exterior state at their
+# boundaries. That state is read from solution%extBoundary_gpu, so each carries a device
+# kernel for it; without one the boundary condition would silently do nothing on a GPU build.
+add_fortran_example_with_gpu_kernel(linear_euler2d_planewave_propagation
+                                    "linear_euler2d_planewave_propagation.f90"
+                                    "linear_euler2d_planewave_bc.cpp")
+
+add_fortran_example_with_gpu_kernel(linear_euler2d_planewave_reflection
+                                    "linear_euler2d_planewave_reflection.f90"
+                                    "linear_euler2d_planewave_bc.cpp")
+
 add_fortran_tests (
   "burgers1d_shock.f90"
   "linear_euler2d_spherical_soundwave_closeddomain.f90"
-  "linear_euler2d_planewave_reflection.f90"
-  "linear_euler2d_planewave_propagation.f90"
   "linear_euler2d_pml_planewave.f90"
   "linear_euler2d_boneandmarrow.f90"
   "linear_euler2d_amr_ultrasound_pointsource.f90"

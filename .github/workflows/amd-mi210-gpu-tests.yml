@@ -1,0 +1,163 @@
+name: amd-mi210-gpu-tests
+
+# On-hardware GPU coverage tests for the HIP backend, ported from the Buildkite
+# pipeline that used to run this under Slurm + pyxis
+# (.buildkite/amd-mi210-debug-tests.yml, removed).
+#
+# The runner is registered directly on the four-way MI210 box, so there is no
+# batch scheduler in the path: the job shells out to rootless podman, using the
+# same `selfish` base image the Buildkite step pulled through pyxis.
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  workflow_dispatch:
+
+# One physical box, and the MPI tests claim every GPU on it. Never let two runs
+# of this workflow overlap on the same ref.
+concurrency:
+  group: mi210-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Fully qualified: podman has no implicit docker.io the way Docker does, and
+  # resolves an unqualified name only against unqualified-search-registries.
+  SELFISH_IMAGE: docker.io/higherordermethods/selfish:latest-x86-rocm643-gfx90a
+
+jobs:
+  build-and-test:
+    name: MI210 (gfx90a) - coverage
+    runs-on: galapagos-mi210x4
+    timeout-minutes: 120
+    # This job puts the pull request's own code on a self-hosted GPU box, and
+    # SELF is a public repository. Skip fork pull requests outright, so that
+    # reaching the MI210 node needs write access to this repository rather than
+    # a maintainer not mis-clicking the fork-workflow approval prompt. Fork pull
+    # requests still get the full CPU matrix.
+    if: >-
+      !contains(github.event.head_commit.message, 'skip ci')
+      && (github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name == github.repository)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show runner and podman configuration
+        run: |
+          id
+          podman --version
+          podman info --format 'rootless={{.Host.Security.Rootless}} runtime={{.Host.OCIRuntime.Name}}'
+          ls -l /dev/kfd /dev/dri
+
+          # Reaching /dev/kfd takes different plumbing in the two podman modes,
+          # and asking for the wrong one is an error rather than a no-op, so
+          # settle it once here from what the daemon reports.
+          if [ "$(podman info --format '{{.Host.Security.Rootless}}')" = "true" ]; then
+            # Rootless: the container drops the runner account's supplementary
+            # groups, and without video/render it cannot open /dev/kfd. crun's
+            # keep-groups passes them through.
+            echo "PODMAN_GPU_OPTS=--group-add keep-groups" >> "${GITHUB_ENV}"
+          else
+            # Rootful: the container is real root and needs no group plumbing.
+            # podman rejects keep-groups outside rootless mode.
+            echo "PODMAN_GPU_OPTS=" >> "${GITHUB_ENV}"
+          fi
+
+      # A shared runner IP hits Docker Hub's anonymous pull limit sooner than a
+      # hosted one would. Log in when the credentials the docker-publish workflow
+      # already uses are available, and carry on anonymously when they are not.
+      # The check has to happen in the shell: the secrets context is not one of
+      # the contexts a step-level `if` may read.
+      - name: Log in to Docker Hub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if [ -n "${DOCKERHUB_USERNAME}" ]; then
+            echo "${DOCKERHUB_TOKEN}" \
+              | podman login docker.io --username "${DOCKERHUB_USERNAME}" --password-stdin
+          else
+            echo "No Docker Hub credentials configured; pulling anonymously."
+          fi
+
+      - name: Pull the selfish base image
+        run: podman pull "${SELFISH_IMAGE}"
+
+      - name: Check the GPUs are visible inside the container
+        run: |
+          podman run --rm \
+            --device /dev/kfd \
+            --device /dev/dri \
+            ${PODMAN_GPU_OPTS} \
+            --security-opt seccomp=unconfined \
+            --security-opt label=disable \
+            "${SELFISH_IMAGE}" \
+            rocm-smi --showid --showproductname
+
+      - name: Build and run the test suite
+        run: |
+          # PODMAN_GPU_OPTS carries the group plumbing the preflight step chose
+          #   for this podman mode: --group-add keep-groups when rootless, empty
+          #   when rootful.
+          # --cap-add SYS_PTRACE lets Open MPI use CMA for its shared-memory
+          #   transport. If a future runtime still blocks process_vm_readv, set
+          #   OMPI_MCA_btl_sm_single_copy_mechanism=none in the script instead.
+          # --security-opt label=disable keeps SELinux from confining the device
+          #   nodes and the bind-mounted workspace on an SELinux host.
+          # --network=host avoids rootless slirp/pasta, which Open MPI's
+          #   interface selection does not need to see.
+          # The script is named by path rather than piped in on stdin: an MPI
+          #   test under ctest would otherwise consume the rest of it. No -i, so
+          #   nothing in the container has a stdin to eat.
+          podman run --rm \
+            --device /dev/kfd \
+            --device /dev/dri \
+            ${PODMAN_GPU_OPTS} \
+            --cap-add SYS_PTRACE \
+            --security-opt seccomp=unconfined \
+            --security-opt label=disable \
+            --ipc=host \
+            --network=host \
+            -v "${GITHUB_WORKSPACE}":/workspace \
+            -w /workspace \
+            "${SELFISH_IMAGE}" \
+            bash /workspace/.github/scripts/mi210-build-test.sh
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ github.workspace }}/coverage.info
+          flags: gha-rocm-mi210
+          fail_ci_if_error: false
+
+      - name: Upload ctest logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: mi210-ctest-logs
+          path: |
+            build/Testing/Temporary/LastTest.log
+            build/CMakeFiles/CMakeError.log
+            build/CMakeFiles/CMakeOutput.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # Re-pulling :latest leaves the previous image untagged. Reap those so the
+      # runner's storage does not grow without bound.
+      - name: Prune dangling images
+        if: ${{ always() }}
+        run: podman image prune -f

@@ -410,7 +410,7 @@ Integration:
   multiple adaptation cycles; refinement follows the wavefront.
 - `amr_*_mpi` variants on 2 ranks, including at least one adaptation that
   changes the partition (elements migrate between ranks).
-- GPU CI: the same integration tests on the Buildkite MI210/V100 pipelines;
+- GPU CI: the same integration tests on the MI210 and V100 pipelines;
   CPU/GPU agreement of indicator flags and post-adapt solutions to tolerance.
 
 The mortar interface itself is already covered by the existing mortar test

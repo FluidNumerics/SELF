@@ -1,9 +1,9 @@
 steps:
   # PR builds: coverage tests + release build/test (no push)
-  - label: ":pipeline: AMD MI210 Coverage Tests"
-    if: build.branch != "main"
-    command: buildkite-agent pipeline upload .buildkite/amd-mi210-debug-tests.yml
-
+  #
+  # MI210/gfx90a coverage has moved to GitHub Actions
+  # (.github/workflows/amd-mi210-gpu-tests.yml), which drives rootless podman on
+  # the galapagos-mi210x4 runner instead of Slurm + pyxis.
   - label: ":pipeline: NVIDIA V100 Coverage Tests"
     if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/nvidia-v100-debug-tests.yml
