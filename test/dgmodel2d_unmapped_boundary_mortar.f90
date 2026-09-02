@@ -88,6 +88,8 @@ program DGModel2D_Unmapped_Boundary_Mortar
   ! consequence of the mortar guard in that routine: if it wrote a bcid onto the mortar
   ! sides, MapBoundaryConditions would hand them to the radiation boundary condition, whose
   ! element/side list would then include interior faces.
+  ! MapBoundaryConditions re-maps on the host only, so on a GPU build the device BC
+  ! arrays are left stale. Nothing steps after this point.
   call mesh%ResetBoundaryConditionType(SELF_BC_RADIATION)
   call modelobj%MapBoundaryConditions()
   call CheckMortarSidesUnclaimed(mesh,modelobj)

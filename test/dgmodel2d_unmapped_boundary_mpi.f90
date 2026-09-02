@@ -84,6 +84,8 @@ program DGModel2D_Unmapped_Boundary_MPI
   endif
 
   ! (b) re-tagging to a registered bcid clears the count everywhere
+  ! As in the serial twin: MapBoundaryConditions re-maps on the host only, so on a GPU
+  ! build the device BC arrays are left stale. Nothing steps after this point.
   call mesh%ResetBoundaryConditionType(SELF_BC_RADIATION)
   call modelobj%MapBoundaryConditions()
   if(modelobj%nUnmappedBoundaries /= 0) then

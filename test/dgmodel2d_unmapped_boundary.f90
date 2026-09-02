@@ -112,6 +112,11 @@ program DGModel2D_Unmapped_Boundary
 
   ! (c) re-tagging to a registered bcid and re-mapping clears the count. This is the path
   ! Regrid takes: Free the lists, AdditionalInit, MapBoundaryConditions.
+  ! NOTE: on a GPU build MapBoundaryConditions is not a re-map entry point. The device
+  ! copies of bc%elements/bc%sides are uploaded only by Init and Regrid (see
+  ! src/gpu/SELF_DGModel2D.f90), so a boundary condition that gains faces here still has
+  ! null device pointers, and the next time step would dispatch its kernel against them.
+  ! Assertions below therefore read the counters only; nothing steps after this point.
   call mesh%ResetBoundaryConditionType(SELF_BC_RADIATION)
   call modelobj%MapBoundaryConditions()
   if(modelobj%nUnmappedBoundaries /= 0) then
@@ -124,7 +129,10 @@ program DGModel2D_Unmapped_Boundary
     stop 1
   endif
 
-  call modelobj%ForwardStep(tn=2.0_prec*endtime,dt=dt,ioInterval=iointerval)
+  ! Report directly rather than through a second ForwardStep, for the reason above.
+  ! ReportUnmappedBoundaries only reads the counters and prints, so it exercises the
+  ! one-shot latch exactly, and on a GPU build it touches no device memory.
+  call modelobj%ReportUnmappedBoundaries()
   if(modelobj%unmappedBoundariesReported) then
     print*,"Error: the warning fired on a mesh with no unmapped boundary edges."
     stop 1
