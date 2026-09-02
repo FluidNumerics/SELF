@@ -61,7 +61,9 @@ module SELF_DGModel2D_t
     !! reads zeros at t = 0 and stale values afterwards. ReportUnmappedBoundaries warns about
     !! them once, from the top of ForwardStep.
     integer :: nUnmappedBoundaries = 0
-    integer :: unmappedBoundaryID = -1 !! one of the unregistered bcids; -1 when there are none
+    !! The first unregistered bcid found, and meaningful only when nUnmappedBoundaries > 0:
+    !! -1 is itself a legal bcid, so it cannot double as an "absent" marker.
+    integer :: unmappedBoundaryID = -1
     logical :: unmappedBoundariesReported = .false.
     !! Pre-regrid copy of the solution, held between StageSolutionForTransfer and
     !! ApplyTransferPlan so that Regrid is free to release the storage it was read from. The
@@ -778,8 +780,19 @@ contains
     integer :: iEl,j,e2,bcid
     integer :: count,n
     integer :: nUnmapped,idUnmapped,iError
+    integer :: idRank,srcRank
     logical :: skipMortars
     integer,allocatable :: elems(:),sds(:)
+
+    ! Mortar sides carry sideInfo(3) = 0 but are interior faces; sideInfo(1) holds the mortar
+    ! index (see SELF_Mesh_2D_t / SELF_Mesh_3D_t). They must be excluded from every pass below,
+    ! forward and reverse alike: a model may legitimately register bcid 0, and a mortar side
+    ! carries sideInfo(5) = 0, so a forward pass matching on sideInfo(5) alone would put
+    ! interior faces into that condition's list and SetBoundaryCondition would then overwrite
+    ! what the mortar exchange had just written. The HOPr reader copies sideInfo(1) verbatim
+    ! from the file, where it is the HOPr side type and may be nonzero on an ordinary face, so
+    ! sideInfo(1) is only a mortar marker on a mesh that actually carries mortars.
+    skipMortars = this%mesh%nMortars > 0
 
     ! Map hyperbolic BCs
     bc => this%hyperbolicBCs%head
@@ -790,6 +803,7 @@ contains
         do j = 1,4
           e2 = this%mesh%sideInfo(3,j,iEl)
           bcid = this%mesh%sideInfo(5,j,iEl)
+          if(skipMortars .and. this%mesh%sideInfo(1,j,iEl) /= 0) cycle
           if(e2 == 0 .and. bcid == bc%bcid) count = count+1
         enddo
       enddo
@@ -802,6 +816,7 @@ contains
           do j = 1,4
             e2 = this%mesh%sideInfo(3,j,iEl)
             bcid = this%mesh%sideInfo(5,j,iEl)
+            if(skipMortars .and. this%mesh%sideInfo(1,j,iEl) /= 0) cycle
             if(e2 == 0 .and. bcid == bc%bcid) then
               n = n+1
               elems(n) = iEl
@@ -823,6 +838,7 @@ contains
         do j = 1,4
           e2 = this%mesh%sideInfo(3,j,iEl)
           bcid = this%mesh%sideInfo(5,j,iEl)
+          if(skipMortars .and. this%mesh%sideInfo(1,j,iEl) /= 0) cycle
           if(e2 == 0 .and. bcid == bc%bcid) count = count+1
         enddo
       enddo
@@ -834,6 +850,7 @@ contains
           do j = 1,4
             e2 = this%mesh%sideInfo(3,j,iEl)
             bcid = this%mesh%sideInfo(5,j,iEl)
+            if(skipMortars .and. this%mesh%sideInfo(1,j,iEl) /= 0) cycle
             if(e2 == 0 .and. bcid == bc%bcid) then
               n = n+1
               elems(n) = iEl
@@ -856,11 +873,6 @@ contains
     ! flag every model that registers hyperbolic conditions alone.
     nUnmapped = 0
     idUnmapped = -1
-    ! Mortar sides also carry sideInfo(3) = 0, but they are interior faces; sideInfo(1) holds
-    ! the mortar index (see SELF_Mesh_2D_t). The HOPr reader copies sideInfo(1) verbatim from
-    ! the file, where it is the HOPr side type and may be nonzero on an ordinary face, so
-    ! sideInfo(1) is only a mortar marker on a mesh that actually carries mortars.
-    skipMortars = this%mesh%nMortars > 0
     do iEl = 1,this%mesh%nElem
       do j = 1,4
         e2 = this%mesh%sideInfo(3,j,iEl)
@@ -872,7 +884,9 @@ contains
         bcnode => this%parabolicBCs%GetBCForID(bcid)
         if(associated(bcnode)) cycle
         nUnmapped = nUnmapped+1
-        idUnmapped = max(idUnmapped,bcid)
+        ! Keep the FIRST offender, not the largest: a bcid is any integer, so a max()
+        ! against a sentinel would never report one that sits below the sentinel.
+        if(nUnmapped == 1) idUnmapped = bcid
       enddo
     enddo
 
@@ -882,8 +896,23 @@ contains
     if(this%mesh%decomp%mpiEnabled) then
       call mpi_allreduce(nUnmapped,this%nUnmappedBoundaries,1,MPI_INTEGER, &
                          MPI_SUM,this%mesh%decomp%mpiComm,iError)
-      call mpi_allreduce(idUnmapped,this%unmappedBoundaryID,1,MPI_INTEGER, &
-                         MPI_MAX,this%mesh%decomp%mpiComm,iError)
+      ! A bcid is any integer, so no value can serve as an "absent" sentinel in a reduction
+      ! over the id itself. Agree on the lowest-numbered rank that actually has an offender
+      ! and take its id from there; a rank with none bids nRanks and so never wins.
+      if(nUnmapped > 0) then
+        idRank = this%mesh%decomp%rankId
+      else
+        idRank = this%mesh%decomp%nRanks
+      endif
+      call mpi_allreduce(idRank,srcRank,1,MPI_INTEGER,MPI_MIN, &
+                         this%mesh%decomp%mpiComm,iError)
+      if(srcRank < this%mesh%decomp%nRanks) then
+        this%unmappedBoundaryID = idUnmapped
+        call mpi_bcast(this%unmappedBoundaryID,1,MPI_INTEGER,srcRank, &
+                       this%mesh%decomp%mpiComm,iError)
+      else
+        this%unmappedBoundaryID = -1
+      endif
     else
       this%nUnmappedBoundaries = nUnmapped
       this%unmappedBoundaryID = idUnmapped

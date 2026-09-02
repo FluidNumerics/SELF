@@ -24,6 +24,62 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
+module dgmodel2d_unmapped_boundary_mortar_model
+!! A LinearEuler2D extension registering bcid 0. Zero is a legal boundary condition id under
+!! the documented contract - a bcid is any integer - and it is also what a mortar side carries
+!! in sideInfo(5). A forward mapping pass keyed on sideInfo(5) alone would therefore hand every
+!! mortar side to this condition, and SetBoundaryCondition would overwrite the state the mortar
+!! exchange had just written. Registering it here is what makes that reachable from a test.
+
+  use self_lineareuler2d
+  use SELF_BoundaryConditions
+
+  implicit none
+
+  integer,parameter :: MORTARTEST_BC_ZERO = 0
+
+  type,extends(LinearEuler2D) :: lineareuler2d_zerobc
+
+  contains
+
+    procedure :: AdditionalInit => AdditionalInit_lineareuler2d_zerobc
+
+  endtype lineareuler2d_zerobc
+
+contains
+
+  subroutine AdditionalInit_lineareuler2d_zerobc(this)
+    implicit none
+    class(lineareuler2d_zerobc),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    ! Keep the parent's registrations (no_normal_flow, radiation). Dispatch through the
+    ! parent component rather than naming a routine: the CPU LinearEuler2D inherits
+    ! AdditionalInit_LinearEuler2D_t while the GPU one overrides it with the device kernels,
+    ! and calling either by name would be wrong on the other backend.
+    call this%LinearEuler2D%AdditionalInit()
+
+    bcfunc => hbc2d_Zero_lineareuler2d_zerobc
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      MORTARTEST_BC_ZERO,"zero",bcfunc)
+
+  endsubroutine AdditionalInit_lineareuler2d_zerobc
+
+  subroutine hbc2d_Zero_lineareuler2d_zerobc(bc,mymodel)
+    !! Never expected to run on this mesh: nothing is tagged 0, and mortar sides must be
+    !! excluded from the mapping. Deliberately does nothing - the assertion is on
+    !! bc%nBoundaries, not on any state this would write.
+    implicit none
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    if(.false.) print*,bc%nBoundaries,mymodel%nvar ! suppress unused-dummy-argument warnings
+
+  endsubroutine hbc2d_Zero_lineareuler2d_zerobc
+
+endmodule dgmodel2d_unmapped_boundary_mortar_model
+
 program DGModel2D_Unmapped_Boundary_Mortar
 !! Guard for the unmapped-boundary scan added for issue #180 on a nonconforming mesh.
 !!
@@ -46,6 +102,7 @@ program DGModel2D_Unmapped_Boundary_Mortar
   use self_lineareuler2d
   use self_mesh_2d
   use SELF_BoundaryConditions
+  use dgmodel2d_unmapped_boundary_mortar_model
 
   implicit none
 
@@ -53,7 +110,7 @@ program DGModel2D_Unmapped_Boundary_Mortar
   integer,parameter :: targetDegree = 6
   real(prec),parameter :: dx = 0.1_prec
 
-  type(LinearEuler2D) :: modelobj
+  type(lineareuler2d_zerobc) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh2D),target :: mesh
   type(SEMQuad),target :: geometry
@@ -102,6 +159,11 @@ program DGModel2D_Unmapped_Boundary_Mortar
     stop 1
   endif
 
+  ! (d) the forward mapping passes must exclude mortar sides too, not only the reverse scan.
+  ! Nothing on this mesh is tagged 0, so the bcid-0 condition must own no faces at all; if the
+  ! forward passes matched on sideInfo(5) alone it would own every mortar side.
+  call CheckZeroBCUnclaimed(modelobj)
+
   print*,"dgmodel2d_unmapped_boundary_mortar : all assertions passed"
 
   call modelobj%Free()
@@ -115,7 +177,7 @@ contains
     !! Assert that no registered boundary condition claims a mortar side.
     implicit none
     type(Mesh2D),intent(in) :: mesh
-    type(LinearEuler2D),intent(in) :: modelobj
+    type(lineareuler2d_zerobc),intent(in) :: modelobj
     ! Local
     type(BoundaryCondition),pointer :: bc
     integer :: m,k,n,e,s
@@ -147,5 +209,25 @@ contains
     enddo
 
   endsubroutine CheckMortarSidesUnclaimed
+
+  subroutine CheckZeroBCUnclaimed(modelobj)
+    !! Assert the bcid-0 boundary condition owns no faces on a mesh where nothing is tagged 0.
+    implicit none
+    type(lineareuler2d_zerobc),intent(in) :: modelobj
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    bc => modelobj%hyperbolicBCs%GetBCForID(MORTARTEST_BC_ZERO)
+    if(.not. associated(bc)) then
+      print*,"Error: the bcid-0 boundary condition was not registered; (d) is vacuous."
+      stop 1
+    endif
+    if(bc%nBoundaries /= 0) then
+      print*,"Error: the bcid-0 boundary condition claimed ",bc%nBoundaries," faces on a mesh"// &
+        " where nothing is tagged 0 - the forward mapping passes are matching mortar sides."
+      stop 1
+    endif
+
+  endsubroutine CheckZeroBCUnclaimed
 
 endprogram DGModel2D_Unmapped_Boundary_Mortar

@@ -125,7 +125,7 @@ SELF uses a tiled structured grid. Tiled grids divide the 3-D grid into `nTilex`
 * `Ly = dy*ny` is the domain length in the y-direction
 * `Lz = dz*nz` is the domain length in the z-direction
 
-You can set boundary conditions for each of the four sides of the structured mesh using a 1-D array of integers of length 6. The boundary conditions must be provided in CGNS ordering (bottom, south, east, north, west, top).
+You can set boundary conditions for each of the six faces of the structured mesh using a 1-D array of integers of length 6. The boundary conditions must be provided in CGNS ordering (bottom, south, east, north, west, top).
 
 As in 2-D, these are boundary condition *ids* and any integer will do; the ids below are the ones the built-in models register, not a closed list.
 

@@ -56,7 +56,9 @@ module SELF_DGModel1D_t
     !! SetBoundaryCondition rather than a zero exterior state. ReportUnmappedBoundaries warns
     !! about them once, from the top of ForwardStep.
     integer :: nUnmappedBoundaries = 0
-    integer :: unmappedBoundaryID = -1 !! one of the unregistered bcids; -1 when there are none
+    !! The first unregistered bcid found, and meaningful only when nUnmappedBoundaries > 0:
+    !! -1 is itself a legal bcid, so it cannot double as an "absent" marker.
+    integer :: unmappedBoundaryID = -1
     logical :: unmappedBoundariesReported = .false.
 
   contains
@@ -418,7 +420,9 @@ contains
       bcnode => this%parabolicBCs%GetBCForID(bcid)
       if(associated(bcnode)) cycle
       this%nUnmappedBoundaries = this%nUnmappedBoundaries+1
-      this%unmappedBoundaryID = max(this%unmappedBoundaryID,bcid)
+      ! Keep the FIRST offender, not the largest: a bcid is any integer, so a max()
+      ! against a sentinel would never report one that sits below the sentinel.
+      if(this%nUnmappedBoundaries == 1) this%unmappedBoundaryID = bcid
     enddo
     this%unmappedBoundariesReported = .false.
 
