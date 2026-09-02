@@ -90,7 +90,10 @@ same ids in Fortran, with no remapping step.
 
 ## Diagnosing unhandled boundaries
 
-A boundary face whose `bcid` matches no registered boundary condition is **not** applied.
+A boundary face whose `bcid` has no boundary condition registered on `hyperbolicBCs` is
+**not** applied. A registration on `parabolicBCs` alone does not count — that list is
+dispatched by `SetGradientBoundaryCondition` and writes `solutionGradient%extBoundary`, not
+the solution trace — so such a face is reported too.
 Nothing writes `extBoundary` on that face, so the Riemann solver reads whatever is there:
 zero on the first step, and the previous step's values afterwards. For some systems a zero
 exterior state is a meaningful condition (for linear Euler it is effectively radiation), so

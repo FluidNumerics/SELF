@@ -460,12 +460,17 @@ contains
     if(this%mesh%decomp%rankId /= 0) return
 
     print*,__FILE__,' : Warning : ',this%nUnmappedBoundaries, &
-      ' domain endpoints carry a bcid with no registered boundary condition.'
-    print*,__FILE__,' : Warning : One of the unregistered bcids is ',this%unmappedBoundaryID
+      ' domain endpoints carry a bcid with no boundary condition registered on'// &
+      ' hyperbolicBCs.'
+    print*,__FILE__,' : Warning : One such bcid is ',this%unmappedBoundaryID
+    print*,__FILE__,' : Warning : A registration on parabolicBCs alone does not count:'// &
+      ' that list is dispatched by SetGradientBoundaryCondition and writes'// &
+      ' solutionGradient%extBoundary, not the solution trace the Riemann solver reads.'
     print*,__FILE__,' : Warning : SetBoundaryCondition leaves those endpoints at the periodic'// &
       ' default, so the endpoint is wrapped onto the opposite end of the domain rather than'// &
       ' given the condition the bcid was meant to select.'
-    print*,__FILE__,' : Warning : Register a boundary condition for that bcid in'// &
+    print*,__FILE__,' : Warning : Register a boundary condition for that bcid on'// &
+      ' hyperbolicBCs in'// &
       ' AdditionalInit, or re-tag the endpoints (see mesh%ResetBoundaryConditionType).'
 
   endsubroutine ReportUnmappedBoundaries_DGModel1D_t

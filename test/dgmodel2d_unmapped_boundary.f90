@@ -56,7 +56,12 @@ program DGModel2D_Unmapped_Boundary
   integer,parameter :: bogusBCID = 999
   real(prec),parameter :: dt = 1.0e-4_prec
   real(prec),parameter :: endtime = 2.5e-3_prec
-  real(prec),parameter :: iointerval = 1.0e-3_prec
+  !! Deliberately larger than the span being stepped, so ForwardStep's IO loop runs zero
+  !! times and no solution.<counter>.h5 is written. Every add_fortran_tests entry shares one
+  !! working directory, and those filenames collide under `ctest -j` - an HDF5 lock failure
+  !! seen in this suite already. ReportUnmappedBoundaries is called before that loop, so the
+  !! hook under test still fires.
+  real(prec),parameter :: iointerval = 10.0_prec*endtime
   real(prec),parameter :: c0 = 1.0_prec
   real(prec),parameter :: rho0 = 1.0_prec
 

@@ -960,12 +960,17 @@ contains
     if(this%mesh%decomp%rankId /= 0) return
 
     print*,__FILE__,' : Warning : ',this%nUnmappedBoundaries, &
-      ' mesh boundary edges carry a bcid with no registered boundary condition.'
-    print*,__FILE__,' : Warning : One of the unregistered bcids is ',this%unmappedBoundaryID
+      ' mesh boundary edges carry a bcid with no boundary condition registered on'// &
+      ' hyperbolicBCs.'
+    print*,__FILE__,' : Warning : One such bcid is ',this%unmappedBoundaryID
+    print*,__FILE__,' : Warning : A registration on parabolicBCs alone does not count:'// &
+      ' that list is dispatched by SetGradientBoundaryCondition and writes'// &
+      ' solutionGradient%extBoundary, not the solution trace the Riemann solver reads.'
     print*,__FILE__,' : Warning : Nothing writes the exterior state on those edges, so the'// &
       ' Riemann solver uses solution%extBoundary as it stands - zero on the first step, and'// &
       ' the previous step values afterwards.'
-    print*,__FILE__,' : Warning : Register a boundary condition for that bcid in'// &
+    print*,__FILE__,' : Warning : Register a boundary condition for that bcid on'// &
+      ' hyperbolicBCs in'// &
       ' AdditionalInit, or re-tag the mesh faces (see mesh%ResetBoundaryConditionType).'
 
   endsubroutine ReportUnmappedBoundaries_DGModel2D_t

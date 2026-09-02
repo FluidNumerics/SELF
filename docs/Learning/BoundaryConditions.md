@@ -153,13 +153,13 @@ These arrays are stored in the `BoundaryCondition` node via `PopulateBoundaries`
 
 Both mapping loops iterate over *registrations*, not over mesh faces, so a boundary face whose
 `bcid` matches no registration is never enumerated by them. `MapBoundaryConditions` therefore
-finishes with a scan in the opposite direction — over mesh faces, looking each `bcid` up in both
-lists — and records what it finds on the model:
+finishes with a scan in the opposite direction — over mesh faces, looking each `bcid` up in the
+**hyperbolic** list — and records what it finds on the model:
 
 | Field | Meaning |
 |-------|---------|
-| `nUnmappedBoundaries` | boundary faces no registration covers, summed over all ranks |
-| `unmappedBoundaryID` | one of the unregistered `bcid`s (`-1` when there are none) |
+| `nUnmappedBoundaries` | boundary faces with no hyperbolic registration, summed over all ranks |
+| `unmappedBoundaryID` | the first such `bcid` found; meaningful only when the count is nonzero, since `-1` is itself a legal `bcid` |
 | `unmappedBoundariesReported` | one-shot latch, cleared on every `MapBoundaryConditions` |
 
 Only the hyperbolic list decides whether a face is handled. `SetBoundaryCondition` dispatches

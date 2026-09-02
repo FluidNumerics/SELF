@@ -297,6 +297,7 @@ add_fortran_tests (
     "dgmodel2d_unmapped_boundary.f90"
     "dgmodel2d_unmapped_boundary_mortar.f90"
     "dgmodel3d_unmapped_boundary.f90"
+    "dgmodel3d_unmapped_boundary_mortar.f90"
     "twopointvectordivergence_2d_constant.f90"
     "twopointvectordivergence_2d_linear.f90"
     "twopointvectordivergence_2d_rotational.f90"
