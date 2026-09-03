@@ -68,13 +68,18 @@ jobs:
                         base=$(git rev-parse HEAD~1)
                     fi
                 fi
+                # Two lists: the content checkers need files that still exist,
+                # so deletions are filtered out for them. Detecting a change to
+                # the navigation must include its deletion, since removing
+                # mkdocs.yml orphans every page at once.
+                touched=$(git diff --name-only "${base}" HEAD)
                 changed=$(git diff --name-only --diff-filter=d "${base}" HEAD)
-                echo "Changed files:"
-                echo "${changed}"
+                echo "Touched files:"
+                echo "${touched}"
 
                 fortran=$(echo "${changed}" | grep -E '^(src|test|examples)/.*\.f90$' || true)
                 markdown=$(echo "${changed}" | grep -E '^(docs/.*|[^/]*)\.md$' || true)
-                nav=$(echo "${changed}" | grep -E '^mkdocs\.yml$' || true)
+                nav=$(echo "${touched}" | grep -E '^mkdocs\.yml$' || true)
 
                 # A heredoc delimiter that a file name could contain would let a
                 # crafted name close the block early and inject further outputs,
@@ -130,5 +135,11 @@ jobs:
                 BASE: ${{ steps.changed.outputs.base }}
               run: |
                 git show "${BASE}:mkdocs.yml" > /tmp/base-mkdocs.yml
+                # A deleted mkdocs.yml leaves nothing to parse, which is the
+                # case this step must fail on rather than skip.
+                if [[ ! -f mkdocs.yml ]]; then
+                    echo "mkdocs.yml has been deleted; every page it listed is"
+                    echo "now unreachable."
+                fi
                 python3 .github/scripts/docs_style_check.py --nav-only \
                     --baseline-mkdocs /tmp/base-mkdocs.yml

@@ -531,6 +531,20 @@ class TestPullRequestBody(unittest.TestCase):
         )
         self.assertEqual(self.problems(body), [])
 
+    def test_issue_reference_inside_a_fence_does_not_satisfy_the_gate(self):
+        body = COMPLETE_BODY.replace("Fixes #185", "```\nFixes #185\n```")
+        self.assertTrue(any("inside a code block" in p for p in self.problems(body)))
+
+    def test_issue_reference_in_inline_code_does_not_satisfy_the_gate(self):
+        body = COMPLETE_BODY.replace("Fixes #185", "`Fixes #185`")
+        self.assertTrue(any("inside a code block" in p for p in self.problems(body)))
+
+    def test_a_real_reference_alongside_a_fenced_example_is_accepted(self):
+        body = COMPLETE_BODY.replace(
+            "Fixes #185", "Fixes #185\n\n```\nFixes #999\n```"
+        )
+        self.assertEqual(self.problems(body), [])
+
     def test_skip_label_bypasses_every_check(self):
         self.assertEqual(self.problems("", labels=("skip-pr-checks",)), [])
 

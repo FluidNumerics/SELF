@@ -59,6 +59,22 @@ def issue_patterns(repository):
     )
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$")
+INLINE_CODE = re.compile(r"`[^`]*`")
+
+
+def strip_code(text):
+    """Return the text with fenced blocks and inline code spans removed.
+
+    GitHub does not act on a closing reference written inside code, so a
+    section is searched for one only in the prose it actually renders.
+    """
+    kept = []
+    tracker = FenceTracker()
+    for line in text.splitlines():
+        if tracker.feed(line) or tracker.inside:
+            continue
+        kept.append(INLINE_CODE.sub(" ", line))
+    return "\n".join(kept)
 
 
 def sections(body):
@@ -139,19 +155,30 @@ def check(body, labels, skip_label, repository=None):
             problems.append("the '## %s' section is empty%s" % (name, hint))
             continue
 
-        if name == "Issues resolved" and not closing_keyword.search(content):
-            if ANY_ISSUE_URL.search(content) and not bare_issue.search(content):
+        if name == "Issues resolved":
+            # The reference must be in rendered prose: GitHub will not close an
+            # issue named inside a code block, so neither does this check.
+            prose = strip_code(content)
+            if closing_keyword.search(prose):
+                continue
+            if ANY_ISSUE_URL.search(prose) and not bare_issue.search(prose):
                 problems.append(
                     "'## Issues resolved' links an issue that is not in %s; a "
                     "pull request resolves an issue filed in this repository, "
                     "so reference it as 'Fixes #123'"
                     % (repository or "this repository")
                 )
-            elif bare_issue.search(content):
+            elif bare_issue.search(prose):
                 problems.append(
                     "'## Issues resolved' references an issue but without a "
                     "closing keyword; write 'Fixes #123' so the issue closes on "
                     "merge"
+                )
+            elif closing_keyword.search(content) or bare_issue.search(content):
+                problems.append(
+                    "'## Issues resolved' references an issue only inside a "
+                    "code block, which GitHub does not act on; write it as "
+                    "ordinary text"
                 )
             else:
                 problems.append(
