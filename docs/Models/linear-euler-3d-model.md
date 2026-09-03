@@ -92,7 +92,7 @@ When initializing the mesh for your Euler 3D equation solver, you can change the
 * `SELF_BC_PRESCRIBED` to set a prescribed external state, via a handler you register yourself.
 
 !!! warning
-    Unlike the [2-D model](linear-euler-2d-model.md), `LinearEuler3D_t` does **not** register a `SELF_BC_NONORMALFLOW` handler — `AdditionalInit` registers radiation only, on both the CPU and the GPU path. A face tagged `SELF_BC_NONORMALFLOW` therefore receives no exterior-state update from this model, and in particular no $\sigma$ prolongation. Use `SELF_BC_PRESCRIBED` with your own reflecting handler until a 3-D no-normal-flow handler is implemented.
+    Unlike the [2-D model](linear-euler-2d-model.md), `LinearEuler3D_t` does **not** register a `SELF_BC_NONORMALFLOW` handler — `AdditionalInit` registers radiation only, on both the CPU and the GPU path. A face tagged `SELF_BC_NONORMALFLOW` therefore receives no exterior-state update from this model, and in particular no $\sigma$ prolongation. Use `SELF_BC_PRESCRIBED` with your own reflecting handler until a 3-D no-normal-flow handler is implemented. This no longer fails quietly: the first `ForwardStep` warns that those faces carry a `bcid` with no registered boundary condition (see [Diagnosing unhandled boundaries](boundary-conditions.md#diagnosing-unhandled-boundaries)).
 
 
 As an example, when using the built-in structured mesh generator, you can do the following

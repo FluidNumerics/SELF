@@ -50,6 +50,16 @@ module SELF_DGModel1D_t
     type(Geometry1D),pointer :: geometry
     type(BoundaryConditionList) :: hyperbolicBCs
     type(BoundaryConditionList) :: parabolicBCs
+    !! Domain endpoints whose mesh%bcid matches no registered boundary condition, counted by
+    !! MapBoundaryConditions. A bcid of 0 is the deliberate periodic default and never counts.
+    !! Unlike 2D/3D, an unmapped endpoint in 1D keeps the periodic value seeded by
+    !! SetBoundaryCondition rather than a zero exterior state. ReportUnmappedBoundaries warns
+    !! about them once, from the top of ForwardStep.
+    integer :: nUnmappedBoundaries = 0
+    !! The first unregistered bcid found, and meaningful only when nUnmappedBoundaries > 0:
+    !! -1 is itself a legal bcid, so it cannot double as an "absent" marker.
+    integer :: unmappedBoundaryID = -1
+    logical :: unmappedBoundariesReported = .false.
 
   contains
 
@@ -57,6 +67,7 @@ module SELF_DGModel1D_t
     procedure :: SetMetadata => SetMetadata_DGModel1D_t
     procedure :: Free => Free_DGModel1D_t
     procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel1D_t
+    procedure :: ReportUnmappedBoundaries => ReportUnmappedBoundaries_DGModel1D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel1D_t
     procedure :: BoundaryFlux => BoundaryFlux_DGModel1D_t
@@ -333,7 +344,9 @@ contains
     class(DGModel1D_t),intent(inout) :: this
     ! Local
     type(BoundaryCondition),pointer :: bc
+    type(BoundaryCondition),pointer :: bcnode
     integer :: nelem,count,n
+    integer :: endpoint,bcid
     integer :: elems(2),sds(2)
 
     nelem = this%mesh%nElem
@@ -359,6 +372,14 @@ contains
         endif
         call this%hyperbolicBCs%PopulateBoundaries(bc%bcid,count, &
                                                    elems(1:count),sds(1:count))
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition over its own nBoundaries, so a stale element/side list would
+        ! keep this condition writing endpoints it no longer owns once the mesh is re-tagged,
+        ! and the tally below would then describe something other than what runs.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
       endif
       bc => bc%next
     enddo
@@ -384,11 +405,75 @@ contains
         endif
         call this%parabolicBCs%PopulateBoundaries(bc%bcid,count, &
                                                   elems(1:count),sds(1:count))
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition over its own nBoundaries, so a stale element/side list would
+        ! keep this condition writing endpoints it no longer owns once the mesh is re-tagged,
+        ! and the tally below would then describe something other than what runs.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
       endif
       bc => bc%next
     enddo
 
+    ! Reverse check. Both loops above iterate over registrations, so an endpoint whose bcid
+    ! matches no registration is never enumerated. A bcid of 0 is the deliberate periodic
+    ! default (Mesh1D initialises bcid to 0), so it is not a fault.
+    !
+    !
+    ! Mesh1D is replicated on every rank (nGlobalElem = nElem, no element decomposition), so
+    ! the count is already global and no reduction is needed here.
+    this%nUnmappedBoundaries = 0
+    this%unmappedBoundaryID = -1
+    do endpoint = 1,2
+      bcid = this%mesh%bcid(endpoint)
+      if(bcid == 0) cycle ! periodic by default
+      ! Only the HYPERBOLIC list decides whether the endpoint is handled. SetBoundaryCondition
+      ! dispatches that list alone and it is what writes solution%extBoundary; the parabolic
+      ! list writes solutionGradient%extBoundary through SetGradientBoundaryCondition. A bcid
+      ! registered only parabolically therefore leaves the solution trace on the periodic
+      ! default - exactly the failure this scan exists to catch.
+      bcnode => this%hyperbolicBCs%GetBCForID(bcid)
+      if(associated(bcnode)) cycle
+      this%nUnmappedBoundaries = this%nUnmappedBoundaries+1
+      ! Keep the FIRST offender, not the largest: a bcid is any integer, so a max()
+      ! against a sentinel would never report one that sits below the sentinel.
+      if(this%nUnmappedBoundaries == 1) this%unmappedBoundaryID = bcid
+    enddo
+    this%unmappedBoundariesReported = .false.
+
   endsubroutine MapBoundaryConditions_DGModel1D_t
+
+  subroutine ReportUnmappedBoundaries_DGModel1D_t(this)
+    !! Warn, once, about domain endpoints whose bcid has no registered boundary condition.
+    !! MapBoundaryConditions establishes the count; ForwardStep calls this.
+    !!
+    !! This is deliberately a warning and not an error: the endpoint still receives the
+    !! periodic default, which may well be what the user wanted.
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+
+    if(this%nUnmappedBoundaries <= 0) return
+    if(this%unmappedBoundariesReported) return
+    this%unmappedBoundariesReported = .true.
+    if(this%mesh%decomp%rankId /= 0) return
+
+    print*,__FILE__,' : Warning : ',this%nUnmappedBoundaries, &
+      ' domain endpoints carry a bcid with no boundary condition registered on'// &
+      ' hyperbolicBCs.'
+    print*,__FILE__,' : Warning : One such bcid is ',this%unmappedBoundaryID
+    print*,__FILE__,' : Warning : A registration on parabolicBCs alone does not count:'// &
+      ' that list is dispatched by SetGradientBoundaryCondition and writes'// &
+      ' solutionGradient%extBoundary, not the solution trace the Riemann solver reads.'
+    print*,__FILE__,' : Warning : SetBoundaryCondition leaves those endpoints at the periodic'// &
+      ' default, so the endpoint is wrapped onto the opposite end of the domain rather than'// &
+      ' given the condition the bcid was meant to select.'
+    print*,__FILE__,' : Warning : Register a boundary condition for that bcid on'// &
+      ' hyperbolicBCs in'// &
+      ' AdditionalInit, or re-tag the endpoints (see mesh%ResetBoundaryConditionType).'
+
+  endsubroutine ReportUnmappedBoundaries_DGModel1D_t
 
   subroutine setboundarycondition_DGModel1D_t(this)
     !! Apply boundary conditions for the solution.
