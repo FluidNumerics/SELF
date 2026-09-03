@@ -85,6 +85,12 @@ static void check(const cudaError_t err, const char *const file, const int line)
 
 // Boundary condition flags //
 //
+// DEPRECATED as a fixed enumeration, and duplicated from src/SELF_Mesh.f90 - nothing checks
+// that the two agree, so keep them in sync by hand. A boundary condition id is any integer
+// agreed between the mesh tagging and the RegisterBoundaryCondition call; these are only the
+// ids the built-in models use. Device kernels are dispatched from a per-bc element/side list
+// rather than by comparing against these values, so a new bcid does not need an entry here.
+//
 //  Conditions on the solution
 #define SELF_BC_PRESCRIBED 100
 #define SELF_BC_RADIATION 101
