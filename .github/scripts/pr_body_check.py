@@ -21,6 +21,10 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from self_style import FenceTracker
+
 REQUIRED_SECTIONS = ("Scope", "Out of scope", "Issues resolved", "Tests introduced")
 
 # Sections whose only legitimate short answer is that there is nothing to say.
@@ -35,7 +39,6 @@ CLOSING_KEYWORD = re.compile(
 BARE_ISSUE = re.compile(r"(?:#\d+|https?://\S+/issues/\d+)")
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$")
-FENCE = re.compile(r"^\s{0,3}(```|~~~)")
 
 
 def sections(body):
@@ -47,16 +50,15 @@ def sections(body):
     text = HTML_COMMENT.sub("", body or "")
     found = {}
     current = None
-    fenced = False
+    tracker = FenceTracker()
     for line in text.splitlines():
-        if FENCE.match(line):
+        if tracker.feed(line):
             # A heading inside a fenced block is sample text, not a section, so
             # a code example cannot stand in for an answer.
-            fenced = not fenced
             if current is not None:
                 found[current].append(line)
             continue
-        match = None if fenced else HEADING.match(line)
+        match = None if tracker.inside else HEADING.match(line)
         if match:
             current = match.group(1).strip()
             found.setdefault(current, [])

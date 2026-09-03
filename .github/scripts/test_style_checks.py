@@ -215,6 +215,21 @@ endsubmodule self_Example_impl
 """
         self.assertNotIn("F007", self.rules_for("src/a.f90", body))
 
+    def test_f007_reports_a_block_data_unit_without_implicit_none(self):
+        body = "\nblock data example\n  integer :: i\nendblockdata example\n"
+        self.assertIn("F007", self.rules_for("src/a.f90", body))
+
+    def test_f001_rejects_a_reflowed_banner(self):
+        lines = LICENSE.splitlines()
+        # Join two body lines: the text is unchanged but the banner is no longer
+        # the canonical 25 line block.
+        reflowed = "\n".join(lines[:6] + [lines[6] + " " + lines[7].lstrip("! ")] + lines[8:])
+        self.assertIn("F001", self.rules_for("src/a.f90", MODULE_BODY, reflowed))
+
+    def test_f001_rejects_changed_indentation(self):
+        reflowed = LICENSE.replace("!    this software without", "!  this software without")
+        self.assertIn("F001", self.rules_for("src/a.f90", MODULE_BODY, reflowed))
+
     def test_f102_reports_a_long_comment_line(self):
         body = MODULE_BODY.replace("    this%n = 0", "    ! " + "x" * 140 + "\n    this%n = 0")
         self.assertIn("F102", self.rules_for("src/a.f90", body))
@@ -277,6 +292,14 @@ class TestDocsRules(unittest.TestCase):
         page = "Some text first.\n\n# Title\n\n" + PROSE + "\n"
         self.assertIn("D003", self.check(page, nav=("Models/page.md",)))
 
+    def test_d003_allows_yaml_front_matter(self):
+        page = '---\napplyTo: "docs/**"\n---\n\n# Title\n\n' + PROSE + "\n"
+        self.assertNotIn("D003", self.check(page, nav=("Models/page.md",)))
+
+    def test_front_matter_is_not_scanned_for_prose_rules(self):
+        page = '---\ntitle: "A \u2014 B"\n---\n\n# Title\n\n' + PROSE + "\n"
+        self.assertNotIn("D002", self.check(page, nav=("Models/page.md",)))
+
     def test_d004_rejects_a_level_five_heading(self):
         page = "# Title\n\n##### Too deep\n\n" + PROSE + "\n"
         self.assertIn("D004", self.check(page, nav=("Models/page.md",)))
@@ -314,6 +337,37 @@ Fixes #185
 ## Tests introduced
 A unit test, because nothing covered this before.
 """
+
+
+class TestFenceTracking(unittest.TestCase):
+    """A fence closes only with a compatible fence, never with any marker."""
+
+    def test_a_tilde_run_does_not_close_a_backtick_block(self):
+        page = "# Title\n\n```\n~~~\nStatus \u2705 inside the block\n```\n\n" + PROSE
+        with tempfile.TemporaryDirectory() as directory:
+            full = os.path.join(directory, "page.md")
+            with open(full, "w", encoding="utf-8") as handle:
+                handle.write(page)
+            page_obj = docs_style_check.MarkdownPage(full)
+        # Every line between the opening and closing backtick fence is fenced.
+        self.assertEqual(sorted(page_obj.fenced), [2, 3, 4, 5])
+
+    def test_a_longer_fence_closes_a_shorter_one(self):
+        with tempfile.TemporaryDirectory() as directory:
+            full = os.path.join(directory, "page.md")
+            with open(full, "w", encoding="utf-8") as handle:
+                handle.write("# T\n\n```\ncode\n````\nafter\n")
+            page_obj = docs_style_check.MarkdownPage(full)
+        self.assertNotIn(5, page_obj.fenced)
+
+    def test_pr_body_tilde_inside_backticks_does_not_expose_headings(self):
+        body = (
+            "## Scope\nReal scope.\n\n## Out of scope\nNone\n\n"
+            "## Issues resolved\nFixes #1\n\n"
+            "Example:\n\n```\n~~~\n## Tests introduced\nnot an answer\n```\n"
+        )
+        problems = pr_body_check.check(body, set(), "skip-pr-checks")
+        self.assertTrue(any("Tests introduced" in p for p in problems))
 
 
 class TestNavRegressions(unittest.TestCase):

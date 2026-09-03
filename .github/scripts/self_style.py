@@ -113,3 +113,45 @@ def comment_marker(line):
     if rest.startswith("!>"):
         return "!>"
     return "!"
+
+
+# A fenced block opens with three or more backticks or tildes and closes only
+# with a fence of the same character, at least as long, and carrying no info
+# string. Toggling on any fence marker instead lets a tilde run inside a
+# backtick block close it, after which sample content is read as live text.
+_FENCE = re.compile(r"^(\s{0,3})(`{3,}|~{3,})\s*(.*)$")
+
+
+class FenceTracker:
+    """Tracks whether a markdown scan is currently inside a fenced block."""
+
+    def __init__(self):
+        self.marker = None
+        self.length = 0
+
+    @property
+    def inside(self):
+        """True when a fenced block is open."""
+        return self.marker is not None
+
+    def feed(self, line):
+        """Consume one line; return True when it is a fence delimiter.
+
+        A line that looks like a fence but cannot close the open block is
+        content, not a delimiter, and is reported as such.
+        """
+        match = _FENCE.match(line)
+        if not match:
+            return False
+        char = match.group(2)[0]
+        length = len(match.group(2))
+        info = match.group(3).strip()
+        if not self.inside:
+            self.marker = char
+            self.length = length
+            return True
+        if char == self.marker and length >= self.length and not info:
+            self.marker = None
+            self.length = 0
+            return True
+        return False

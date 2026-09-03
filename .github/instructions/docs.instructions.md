@@ -23,8 +23,9 @@ each rule and names the check that enforces it.
 ## Mechanics
 
 - ASCII punctuation only. No em dashes, no typographic quotes, no emoji.
-- One level one heading, on the first line of the page. Headings go no deeper
-  than level four; a page that needs more depth should be split.
+- One level one heading, and it is the first content on the page. Leading blank
+  lines are allowed; text before the title is not. Headings go no deeper than
+  level four; a page that needs more depth should be split.
 - Mathematics uses MathJax: `$inline$` and display `$$ ... $$`. The established
   notation is `\vec{s}` for the solution vector, `\overleftrightarrow{f}` for the
   conservative flux, and `\vec{q}` for the source terms.

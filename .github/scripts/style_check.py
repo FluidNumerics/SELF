@@ -47,6 +47,12 @@ PROGRAM = re.compile(r"^\s*program\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECAS
 SUBMODULE = re.compile(
     r"^\s*submodule\s*\([^)]*\)\s*([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE
 )
+# block data is obsolescent and this codebase has none, but it is a program
+# unit with its own implicit part, so the rule covers it rather than claiming
+# a guarantee it does not keep.
+BLOCK_DATA = re.compile(
+    r"^\s*block\s*data(?:\s+([A-Za-z_][A-Za-z0-9_]*))?\s*$", re.IGNORECASE
+)
 CONTAINS = re.compile(r"^\s*contains\s*$", re.IGNORECASE)
 PROGRAM_CLOSE = re.compile(r"^\s*end\s*program\b", re.IGNORECASE)
 PROCEDURE = re.compile(
@@ -173,10 +179,20 @@ def canonical_license():
 
 
 def normalize_license(lines):
-    """Collapse the incidental variation between otherwise identical banners."""
-    text = "\n".join(lines).translate(QUOTES)
-    text = COPYRIGHT_YEAR.sub("Copyright YEAR", text)
-    return re.sub(r"\s+", " ", text).strip()
+    """Apply only the two documented substitutions, preserving line structure.
+
+    Collapsing all whitespace would let a reflowed banner, with lines joined
+    or indentation changed, compare equal to the canonical text, which is the
+    opposite of what this rule is for. Only trailing whitespace is ignored.
+    """
+    normalized = []
+    for line in lines:
+        line = line.translate(QUOTES)
+        line = COPYRIGHT_YEAR.sub("Copyright YEAR", line)
+        normalized.append(line.rstrip())
+    while normalized and not normalized[-1]:
+        normalized.pop()
+    return "\n".join(normalized)
 
 
 def check_license(source, found, canonical):
@@ -355,7 +371,7 @@ def check_implicit_none(source, found):
     """F007: implicit none appears in every program unit.
 
     CLAUDE.md section 2 requires it in all program units, which means modules,
-    submodules, main programs, and every procedure. Parts of the source predate the
+    submodules, main programs, block data units, and every procedure. Parts of the source predate the
     requirement, so this rule reports genuine pre-existing gaps as well as new
     ones.
     """
@@ -366,6 +382,8 @@ def check_implicit_none(source, found):
             (SUBMODULE,
              re.compile(r"^\s*end\s*submodule\b", re.IGNORECASE), "submodule"),
             (PROGRAM, PROGRAM_CLOSE, "program"),
+            (BLOCK_DATA,
+             re.compile(r"^\s*end\s*block\s*data\b", re.IGNORECASE), "block data"),
         ):
             match = pattern.match(code)
             if not match:
@@ -380,7 +398,7 @@ def check_implicit_none(source, found):
                         source.path,
                         index + 1,
                         "%s %r is missing implicit none"
-                        % (kind, match.group(1)),
+                        % (kind, match.group(1) or "(unnamed)"),
                     )
                 )
 

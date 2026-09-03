@@ -24,7 +24,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from self_style import Violation, load_rules, report
+from self_style import FenceTracker, Violation, load_rules, report
 
 # The handbook plus the markdown pages at the repository root. This mirrors the
 # path filter the style-check workflow uses to pick changed files.
@@ -75,18 +75,34 @@ class MarkdownPage:
         self.path = path
         with open(path, "r", encoding="utf-8", errors="replace") as handle:
             self.lines = handle.read().splitlines()
+        self.front_matter = self._front_matter()
         self.fenced = self._fenced()
+
+    def _front_matter(self):
+        """Return the number of leading lines taken by a YAML front matter block.
+
+        mkdocs and the agent instruction files both allow a page to open with a
+        "---" delimited metadata block. It is metadata, not content, so it does
+        not count against the title.
+        """
+        if not self.lines or self.lines[0].strip() != "---":
+            return 0
+        for index in range(1, len(self.lines)):
+            if self.lines[index].strip() in ("---", "..."):
+                return index + 1
+        return 0
 
     def _fenced(self):
         """Return the set of line indices that lie inside a fenced code block."""
-        inside = set()
-        open_fence = False
+        inside = set(range(self.front_matter))
+        tracker = FenceTracker()
         for index, text in enumerate(self.lines):
-            if FENCE.match(text):
-                inside.add(index)
-                open_fence = not open_fence
+            if index < self.front_matter:
                 continue
-            if open_fence:
+            if tracker.feed(text):
+                inside.add(index)
+                continue
+            if tracker.inside:
                 inside.add(index)
         return inside
 
@@ -165,10 +181,15 @@ def check_title(page, found):
                     "second level one heading %r; a page has one title" % text,
                 )
             )
-    # Leading blank lines are harmless, so the title must be the first content
-    # on the page rather than literally line one.
+    # Leading blank lines and a front matter block are harmless, so the title
+    # must be the first content on the page rather than literally line one.
     first = next(
-        (index + 1 for index, text in enumerate(page.lines) if text.strip()), 1
+        (
+            index + 1
+            for index, text in enumerate(page.lines)
+            if index >= page.front_matter and text.strip()
+        ),
+        1,
     )
     if top[0][0] != first:
         found.append(
