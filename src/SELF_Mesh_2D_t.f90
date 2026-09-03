@@ -462,14 +462,14 @@ contains
                 sideinfo(5,4,iel) = bcids(4) ! Boundary condition id; eastern boundary set from the user input
               else ! interior tile, but western most edge of the tile
                 e2 = nxPerTile+nxPerTile*(j-1+nyPerTile*(ti-2+nTilex*(tj-1))) ! Neigbor element, easternnmost element in tile to the west
-                sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+                sideinfo(2,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
                 sideinfo(3,4,iel) = e2
                 sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
                 sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
               endif
             else ! interior to the tile
               e2 = i-1+nxPerTile*(j-1+nyPerTile*(ti-1+nTilex*(tj-1))) ! Neigbor element, inside same tile, to the west
-              sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+              sideinfo(2,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
               sideinfo(3,4,iel) = e2
               sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
               sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
