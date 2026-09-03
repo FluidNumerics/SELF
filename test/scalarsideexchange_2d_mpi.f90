@@ -164,14 +164,21 @@ contains
       print*,"FAIL: no edges were exchanged over MPI on ",mesh%decomp%nRanks," ranks"
       r = 1
     endif
+#ifndef ENABLE_GPU
     ! Keep this a regression test for the request-scratch sizing: the point of the
     ! mesh and nvar above is that the exchange posts more messages than the mesh
     ! alone would have reserved room for.
+    !
+    ! CPU builds only. The GPU exchange packs all of a neighbor's edges into a
+    ! single message and keeps its own persistent request array, so it neither
+    ! fills decomp%msgCount nor has a per-side scratch to overrun; the trace
+    ! assertion above is what covers the exchange there.
     if(mesh%decomp%mpiEnabled .and. mesh%decomp%msgCount <= mesh%nUniqueSides) then
       print*,"FAIL: the exchange posted ",mesh%decomp%msgCount," messages for ", &
         mesh%nUniqueSides," unique edges; it no longer exercises the request scratch"
       r = 1
     endif
+#endif
 
     call f%DissociateGeometry()
     call f%Free()
