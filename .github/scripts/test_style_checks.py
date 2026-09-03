@@ -84,7 +84,7 @@ class TestFortranRules(FortranCase):
         self.assertIn("F001", self.rules_for("src/a.f90", MODULE_BODY, corrupted))
 
     def test_f001_tolerates_the_year_and_quote_variants(self):
-        variant = LICENSE.replace("2024", "2026").replace('"AS IS"', "“AS IS”")
+        variant = LICENSE.replace("2024", "2026").replace("\u201cAS IS\u201d", '"AS IS"')
         self.assertEqual(self.rules_for("src/a.f90", MODULE_BODY, variant), [])
 
     def test_f001_reports_a_missing_banner(self):
@@ -188,6 +188,33 @@ endprogram example
         ) + "endmodule self_Example\n"
         self.assertNotIn("F101", self.rules_for("src/gpu/a.f90", body))
 
+    def test_f007_reports_a_separate_module_procedure_without_implicit_none(self):
+        body = """
+submodule (self_Example) self_Example_impl
+  !! Implementation of the example interface.
+  implicit none
+contains
+  module procedure Init_Example
+    this%n = 0
+  endprocedure Init_Example
+endsubmodule self_Example_impl
+"""
+        self.assertIn("F007", self.rules_for("src/a.f90", body))
+
+    def test_f007_accepts_a_separate_module_procedure_with_implicit_none(self):
+        body = """
+submodule (self_Example) self_Example_impl
+  !! Implementation of the example interface.
+  implicit none
+contains
+  module procedure Init_Example
+    implicit none
+    this%n = 0
+  endprocedure Init_Example
+endsubmodule self_Example_impl
+"""
+        self.assertNotIn("F007", self.rules_for("src/a.f90", body))
+
     def test_f102_reports_a_long_comment_line(self):
         body = MODULE_BODY.replace("    this%n = 0", "    ! " + "x" * 140 + "\n    this%n = 0")
         self.assertIn("F102", self.rules_for("src/a.f90", body))
@@ -287,6 +314,42 @@ Fixes #185
 ## Tests introduced
 A unit test, because nothing covered this before.
 """
+
+
+class TestNavRegressions(unittest.TestCase):
+    """The --nav-only baseline filter, which decides what the gate fails on."""
+
+    def violation(self, page):
+        from self_style import Violation
+
+        return Violation(
+            "D006", "docs/" + page, None,
+            "page is not in the mkdocs.yml nav tree, so it is published but "
+            "unreachable; add an entry for %r" % page,
+        )
+
+    def test_page_orphaned_by_this_change_is_a_regression(self):
+        found = [self.violation("Models/one.md")]
+        regressions, skipped = docs_style_check.nav_regressions(
+            found, {"Models/one.md", "index.md"}
+        )
+        self.assertEqual(len(regressions), 1)
+        self.assertEqual(skipped, 0)
+
+    def test_page_already_orphaned_is_left_to_the_backlog(self):
+        found = [self.violation("Models/one.md")]
+        regressions, skipped = docs_style_check.nav_regressions(found, {"index.md"})
+        self.assertEqual(regressions, [])
+        self.assertEqual(skipped, 1)
+
+    def test_the_two_are_separated_in_one_pass(self):
+        found = [self.violation("Models/one.md"), self.violation("Models/two.md")]
+        regressions, skipped = docs_style_check.nav_regressions(
+            found, {"Models/one.md"}
+        )
+        self.assertEqual([docs_style_check.violation_page(v) for v in regressions],
+                         ["Models/one.md"])
+        self.assertEqual(skipped, 1)
 
 
 class TestNavParsing(unittest.TestCase):

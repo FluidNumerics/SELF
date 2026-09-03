@@ -265,6 +265,23 @@ def check_nav(page, found, nav, docs_dir):
         )
 
 
+def nav_regressions(violations, baseline):
+    """Split D006 violations into the ones this change caused and the backlog.
+
+    A page that the baseline navigation already failed to reach was broken
+    before this change and belongs to the backlog. A page the baseline did
+    reach and this change does not is a regression, and is what the check
+    fails on.
+    """
+    regressions = [v for v in violations if violation_page(v) in baseline]
+    return regressions, len(violations) - len(regressions)
+
+
+def violation_page(violation):
+    """Recover the nav-relative page path a D006 violation names."""
+    return violation.message.rsplit("'", 2)[-2]
+
+
 def measure(page):
     """Return the numeric prose metrics for one page.
 
@@ -417,26 +434,19 @@ def main(argv=None):
     if args.nav_only:
         # A change to the navigation tree can orphan a page it does not touch,
         # so reachability is checked across every page rather than across the
-        # changed ones. When a baseline is given, only pages this change
-        # orphans are reported; pages that were already unreachable belong to
-        # the backlog and are counted but not failed on.
+        # changed ones.
         violations = []
         for path in files:
             check_nav(MarkdownPage(path), violations, nav, docs_dir)
         if args.baseline_mkdocs:
-            before = nav_pages(args.baseline_mkdocs)
-            regressions = []
-            for violation in violations:
-                page = violation.message.rsplit("'", 2)[-2]
-                if page in before:
-                    regressions.append(violation)
-            skipped = len(violations) - len(regressions)
+            violations, skipped = nav_regressions(
+                violations, nav_pages(args.baseline_mkdocs)
+            )
             if skipped:
                 print(
                     "%d page(s) were already unreachable before this change and "
                     "are left to the backlog.\n" % skipped
                 )
-            violations = regressions
         return report(violations)
 
     violations = []

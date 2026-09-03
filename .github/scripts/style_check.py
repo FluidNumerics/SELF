@@ -58,7 +58,15 @@ PROCEDURE = re.compile(
 MODULE = re.compile(r"^\s*module\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE)
 INTERFACE_OPEN = re.compile(r"^\s*(abstract\s+)?interface\b", re.IGNORECASE)
 INTERFACE_CLOSE = re.compile(r"^\s*end\s*interface\b", re.IGNORECASE)
-PROCEDURE_CLOSE = re.compile(r"^\s*end\s*(subroutine|function)\b", re.IGNORECASE)
+# Fortran 2008 separate module procedures are declared "module procedure name"
+# in a submodule and closed with "end procedure". They are program units like
+# any other, so they carry implicit none.
+SEPARATE_PROCEDURE = re.compile(
+    r"^\s*module\s+procedure\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE
+)
+PROCEDURE_CLOSE = re.compile(
+    r"^\s*end\s*(subroutine|function|procedure)\b", re.IGNORECASE
+)
 IMPLICIT_NONE = re.compile(r"^\s*implicit\s+none\b", re.IGNORECASE)
 
 SPLIT_END = re.compile(
@@ -318,6 +326,10 @@ def procedures(source):
             continue
         if depth or PROCEDURE_CLOSE.match(code):
             continue
+        separate = SEPARATE_PROCEDURE.match(code)
+        if separate:
+            yield index, separate.group(1)
+            continue
         match = PROCEDURE.match(code)
         if match:
             yield index, match.group(2)
@@ -358,7 +370,9 @@ def check_implicit_none(source, found):
             match = pattern.match(code)
             if not match:
                 continue
-            body = scope_body(source.lines, index + 1, (closer, PROCEDURE))
+            body = scope_body(
+                source.lines, index + 1, (closer, PROCEDURE, SEPARATE_PROCEDURE)
+            )
             if not any(IMPLICIT_NONE.match(line) for line in body):
                 found.append(
                     Violation(
