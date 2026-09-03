@@ -172,6 +172,9 @@ contains
     integer :: iError
     integer :: msgCount
 
+    ! A send and a receive per rank-remote face, per variable and direction.
+    call mesh%decomp%ReserveMessages(2*6*3*this%nvar*this%nElem)
+
     msgCount = 0
 
     do idir = 1,3
@@ -484,6 +487,9 @@ contains
     integer :: iError
     integer :: msgCount
 
+    ! At most a send and a receive per sub-face (4 per mortar), per variable and direction.
+    call mesh%decomp%ReserveMessages(2*4*3*this%nvar*mesh%nMortars)
+
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 
@@ -741,6 +747,9 @@ contains
     integer :: offset
     integer :: iError
     integer :: msgCount
+
+    ! One message per sub-face (4 per mortar), per variable.
+    call mesh%decomp%ReserveMessages(4*this%nvar*mesh%nMortars)
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)

@@ -168,6 +168,11 @@ contains
     integer :: iError
     integer :: msgCount
 
+    ! A send and a receive per rank-remote edge, per variable. The scratch was sized
+    ! by the mesh, which does not know nvar, so reserve the worst case -- every edge
+    ! remote -- before posting.
+    call mesh%decomp%ReserveMessages(2*4*this%nvar*this%nElem)
+
     msgCount = 0
 
     do ivar = 1,this%nvar
@@ -337,6 +342,9 @@ contains
     integer :: offset
     integer :: iError
     integer :: msgCount
+
+    ! At most a send and a receive per sub-edge (2 per mortar), per variable.
+    call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%nMortars)
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)

@@ -439,6 +439,9 @@ contains
     real(prec),pointer :: boundary(:,:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:,:)
 
+    ! At most a send and a receive per sub-face (4 per mortar), per variable.
+    call mesh%decomp%ReserveMessages(2*4*this%nvar*mesh%nMortars)
+
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
     call c_f_pointer(this%boundary_gpu,boundary, &

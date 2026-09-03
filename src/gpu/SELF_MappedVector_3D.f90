@@ -192,6 +192,9 @@ contains
     call c_f_pointer(this%halo_sendbuf_gpu,sendbuf,[mesh%decomp%halo_nsides*npts])
     call c_f_pointer(this%halo_recvbuf_gpu,recvbuf,[mesh%decomp%halo_nsides*npts])
 
+    ! One aggregated send and receive per neighboring rank.
+    call mesh%decomp%ReserveMessages(2*mesh%decomp%halo_nnbr)
+
     msgCount = 0
     do n = 1,mesh%decomp%halo_nnbr
 
@@ -269,6 +272,9 @@ contains
     integer :: msgCount
     real(prec),pointer :: boundary(:,:,:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:,:,:)
+
+    ! At most a send and a receive per sub-face (4 per mortar), per variable and direction.
+    call mesh%decomp%ReserveMessages(2*4*3*this%nvar*mesh%nMortars)
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
@@ -403,6 +409,9 @@ contains
     integer :: msgCount
     real(prec),pointer :: boundaryNormal(:,:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:,:,:)
+
+    ! One message per sub-face (4 per mortar), per variable.
+    call mesh%decomp%ReserveMessages(4*this%nvar*mesh%nMortars)
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)

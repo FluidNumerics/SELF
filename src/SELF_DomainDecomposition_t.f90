@@ -57,6 +57,7 @@ module SELF_DomainDecomposition_t
 
     procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition_t
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
+    procedure :: ReserveMessages => ReserveMessages_DomainDecomposition_t
 
     procedure,public :: FinalizeMPIExchangeAsync
 
@@ -223,6 +224,37 @@ contains
       this%offSetElem(this%rankId+2)-this%offSetElem(this%rankId+1)
 
   endsubroutine GenerateDecomposition_DomainDecomposition_t
+
+  subroutine ReserveMessages_DomainDecomposition_t(this,nMsg)
+  !! Ensures the non-blocking request and status scratch can hold `nMsg` messages
+  !! in flight, growing it when it cannot.
+  !!
+  !! GenerateDecomposition sizes the scratch from the mesh alone (one entry per
+  !! unique side), but an exchange posts a send and a receive per rank-remote side
+  !! *per variable* -- and, for vectors, per direction. The message count is
+  !! therefore a multiple of the side count that the mesh cannot know, and a
+  !! solution with enough variables overruns the scratch. Each exchange reserves
+  !! its own worst case before posting; the call is a comparison once the scratch
+  !! is large enough.
+  !!
+  !! No message may be in flight when this is called: the scratch is reallocated,
+  !! not grown in place. Every exchange posts and then waits (through
+  !! FinalizeMPIExchangeAsync) before another can start, so a reservation at the
+  !! head of an exchange is safe.
+    implicit none
+    class(DomainDecomposition_t),intent(inout) :: this
+    integer,intent(in) :: nMsg
+
+    if(nMsg <= this%maxMsg) return
+
+    if(allocated(this%requests)) deallocate(this%requests)
+    if(allocated(this%stats)) deallocate(this%stats)
+
+    allocate(this%requests(1:nMsg))
+    allocate(this%stats(MPI_STATUS_SIZE,1:nMsg))
+    this%maxMsg = nMsg
+
+  endsubroutine ReserveMessages_DomainDecomposition_t
 
   subroutine SetElemToRank_DomainDecomposition_t(this,nElem)
     implicit none

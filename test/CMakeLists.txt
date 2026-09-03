@@ -410,7 +410,9 @@ set_tests_properties(
     mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)
 
-add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
+add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
+                       "scalarsideexchange_3d_mpi.f90"
+                       "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_sideexchange_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_structuredmesh_mpi.f90"
                        "mappedscalarbrgradient_2d_linear_mpi.f90"
