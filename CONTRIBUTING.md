@@ -11,6 +11,30 @@ Copyright 2017-2025 Fluid Numerics LLC
 7. You are encouraged to run the SELF tests using `ctest` on your local system before opening a pull request. If you don't have a GPU, that's ok. Your contribution will be fully tested when you open a pull request.
 8. Open a pull request with the upstream SELF repository. In the title, reference the issue number that you worked on. Include a detailed description of the changes you made and why. If you have recommendations for updates to documentation as a result of your changes, please indicate so. If you've added a new routine, you will need to work with the maintainers to develop tests when integrating your new feature in. 
 
+### Opening a pull request
+Pull requests use the template in `.github/PULL_REQUEST_TEMPLATE.md`, and the `pr-template-check` job verifies that you have filled it in. Four sections are required.
+
+1. `## Scope` states what the pull request changes. A reviewer reads this to know what they are being asked to look at, and a change that is not described here does not belong in the pull request.
+2. `## Out of scope` lists problems you found while working and are deliberately not fixing. Reference an issue for each, or say that it is not yet filed. Write "None" if you found nothing. Anything listed here is off limits for review comments, so be specific.
+3. `## Issues resolved` links the issue this pull request closes, with a closing keyword such as `Fixes #123` so that GitHub closes the issue on merge. Every pull request resolves a filed issue; if none exists, open one first.
+4. `## Tests introduced` names the new tests and what each establishes. For a bug fix, name the test that fails against the old code and say why the existing suite did not catch the bug. A bug that reached `main` is evidence of a gap in the tests, and closing that gap is part of the fix.
+
+A maintainer can bypass the check on an urgent fix by applying the `skip-pr-checks` label.
+
+### Coding and documentation style
+Formatting is one thing and style is another. `fprettify` handles indentation, alignment, and keyword case; it cannot see how a comment or a documentation page is written. The `style-check` job covers that, scoring each file a pull request changes.
+
+The rules, and the reasoning behind each one, are in [the style guide](docs/Contributing/StyleGuide.md). To run the checks yourself:
+
+```shell
+python3 .github/scripts/style_check.py       # src/, test/, examples/
+python3 .github/scripts/docs_style_check.py  # docs/ and the root pages
+```
+
+Both accept `--files` for an explicit list and `--stats` to report the measured metrics without failing. The `pre-commit` hooks described below run them on the files each commit touches.
+
+Contributors working with a coding agent should also read `.github/copilot-instructions.md` and the per-directory files under `.github/instructions/`, which carry the same rules in the form the agents read. Claude Code users can select the matching output style with `/output-style self`.
+
 ### Code formatting
 Each pull request is checked for formatting before running other tests. The `self` project uses [`fprettify`](https://pypi.org/project/fprettify/) for formatting fortran source code. We have included a configuration file in the `self` repository (`fprettify.config`) that can be used for ensuring formatting correctness.
 
