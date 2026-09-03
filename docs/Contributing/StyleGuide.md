@@ -38,7 +38,9 @@ because a substring test does not notice a banner that has been truncated or
 corrupted. Ten files in the tree are missing the warranty disclaimer and one has
 a mangled word in it, and none of that was visible before. The copyright year
 and the style of the quotation marks around "AS IS" vary harmlessly across the
-tree and are the only two substitutions applied before the comparison. Line
+tree and are the only two substitutions applied before the comparison, and the year
+substitution replaces the four digits alone rather than the copyright marker
+with them. Line
 structure and indentation are preserved, so a banner whose text is intact but
 whose lines have been rejoined or reindented is still rejected.
 

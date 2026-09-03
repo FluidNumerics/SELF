@@ -15,6 +15,11 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v3
 
+            # GITHUB_REPOSITORY tells the checker which repository an issue URL
+            # must point at; it is set by the runner, but naming it here keeps
+            # the dependency visible.
             - name: Check the pull request description
+              env:
+                GITHUB_REPOSITORY: ${{ github.repository }}
               run: |
                 python3 .github/scripts/pr_body_check.py

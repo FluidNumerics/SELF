@@ -219,6 +219,41 @@ endsubmodule self_Example_impl
         body = "\nblock data example\n  integer :: i\nendblockdata example\n"
         self.assertIn("F007", self.rules_for("src/a.f90", body))
 
+    def test_f001_rejects_a_mutated_copyright_marker(self):
+        mutated = LICENSE.replace("Copyright \u00a9 2024", "Copyright X 2024")
+        self.assertIn("F001", self.rules_for("src/a.f90", MODULE_BODY, mutated))
+
+    def test_f006_names_endblockdata_for_a_split_block_data_terminator(self):
+        body = "\nblock data example\n  implicit none\nend block data example\n"
+        with tempfile.TemporaryDirectory() as directory:
+            full = os.path.join(directory, "src", "a.f90")
+            os.makedirs(os.path.dirname(full))
+            with open(full, "w", encoding="utf-8") as handle:
+                handle.write(LICENSE + "\n" + body)
+            found, _ = style_check.check_file(
+                full, RULES, style_check.canonical_license()
+            )
+        messages = [v.message for v in found if v.rule == "F006"]
+        self.assertTrue(any("endblockdata" in m for m in messages), messages)
+
+    def test_f007_does_not_borrow_implicit_none_from_an_interface_body(self):
+        body = """
+module self_Example
+  !! A module whose procedure declares an interface.
+  implicit none
+contains
+  subroutine Init_Example(f)
+    interface
+      subroutine callback()
+        implicit none
+      endsubroutine callback
+    endinterface
+    call f()
+  endsubroutine Init_Example
+endmodule self_Example
+"""
+        self.assertIn("F007", self.rules_for("src/a.f90", body))
+
     def test_f001_rejects_a_reflowed_banner(self):
         lines = LICENSE.splitlines()
         # Join two body lines: the text is unchanged but the banner is no longer
@@ -436,8 +471,8 @@ class TestNavParsing(unittest.TestCase):
 
 
 class TestPullRequestBody(unittest.TestCase):
-    def problems(self, body, labels=()):
-        return pr_body_check.check(body, set(labels), "skip-pr-checks")
+    def problems(self, body, labels=(), repository="FluidNumerics/SELF"):
+        return pr_body_check.check(body, set(labels), "skip-pr-checks", repository)
 
     def test_complete_body_passes(self):
         self.assertEqual(self.problems(COMPLETE_BODY), [])
@@ -480,11 +515,17 @@ class TestPullRequestBody(unittest.TestCase):
         # Out of scope must still be read from its own heading, not from Detail.
         self.assertEqual(self.problems(body), [])
 
-    def test_foreign_issue_url_is_rejected(self):
+    def test_non_github_issue_url_is_rejected(self):
         body = COMPLETE_BODY.replace("Fixes #185", "Fixes https://example.com/issues/1")
-        self.assertTrue(any("another host" in p for p in self.problems(body)))
+        self.assertTrue(any("not in FluidNumerics/SELF" in p for p in self.problems(body)))
 
-    def test_github_issue_url_is_accepted(self):
+    def test_issue_url_from_another_github_repository_is_rejected(self):
+        body = COMPLETE_BODY.replace(
+            "Fixes #185", "Fixes https://github.com/other/project/issues/1"
+        )
+        self.assertTrue(any("not in FluidNumerics/SELF" in p for p in self.problems(body)))
+
+    def test_issue_url_from_this_repository_is_accepted(self):
         body = COMPLETE_BODY.replace(
             "Fixes #185", "Fixes https://github.com/FluidNumerics/SELF/issues/185"
         )

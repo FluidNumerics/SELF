@@ -37,7 +37,10 @@ CANONICAL_LICENSE = os.path.join(
 # across the tree without changing the licence, so both are normalized away
 # before the comparison. Everything else must match, which is what catches a
 # truncated or corrupted banner.
-COPYRIGHT_YEAR = re.compile(r"Copyright\s+\S+\s+\d{4}", re.IGNORECASE)
+# Only the four year digits are normalized. An earlier form of this pattern
+# also consumed the copyright marker, which meant "Copyright X 2024" normalized
+# to the canonical line and F001 missed the corruption.
+COPYRIGHT_YEAR = re.compile(r"(?<=Copyright \u00a9 )\d{4}")
 QUOTES = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"})
 
 # A procedure definition, as opposed to a type bound procedure declaration or
@@ -75,9 +78,12 @@ PROCEDURE_CLOSE = re.compile(
 )
 IMPLICIT_NONE = re.compile(r"^\s*implicit\s+none\b", re.IGNORECASE)
 
+# block data is matched before block so that "end block data" is reported as
+# endblockdata rather than as endblock, which would name the end of a BLOCK
+# construct instead.
 SPLIT_END = re.compile(
-    r"\bend\s+(module|submodule|subroutine|function|type|do|if|interface|program|"
-    r"select|associate|where|block|forall|enum|procedure)\b",
+    r"\bend\s+(block\s*data|module|submodule|subroutine|function|type|do|if|"
+    r"interface|program|select|associate|where|block|forall|enum|procedure)\b",
     re.IGNORECASE,
 )
 
@@ -188,7 +194,7 @@ def normalize_license(lines):
     normalized = []
     for line in lines:
         line = line.translate(QUOTES)
-        line = COPYRIGHT_YEAR.sub("Copyright YEAR", line)
+        line = COPYRIGHT_YEAR.sub("YEAR", line)
         normalized.append(line.rstrip())
     while normalized and not normalized[-1]:
         normalized.pop()
@@ -320,7 +326,11 @@ def check_end_keywords(source, found):
                     "F006",
                     source.path,
                     number,
-                    "write %r as %r" % (match.group(0), "end" + match.group(1).lower()),
+                    "write %r as %r"
+                    % (
+                        match.group(0),
+                        "end" + re.sub(r"\s+", "", match.group(1).lower()),
+                    ),
                 )
             )
 
@@ -359,8 +369,19 @@ def scope_body(lines, start, closers):
     satisfying the procedure that hosts it.
     """
     body = []
+    depth = 0
     for text in lines[start:]:
         code, _ = split_comment(text)
+        # An interface body declares other procedures, so any implicit none it
+        # carries belongs to them and not to the scope being checked.
+        if INTERFACE_OPEN.match(code):
+            depth += 1
+            continue
+        if INTERFACE_CLOSE.match(code):
+            depth = max(0, depth - 1)
+            continue
+        if depth:
+            continue
         if CONTAINS.match(code) or any(closer.match(code) for closer in closers):
             break
         body.append(code)

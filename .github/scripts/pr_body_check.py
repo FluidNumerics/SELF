@@ -31,16 +31,32 @@ REQUIRED_SECTIONS = ("Scope", "Out of scope", "Issues resolved", "Tests introduc
 ALLOW_EMPTY_ANSWER = {"Out of scope": ("none", "nothing", "n/a")}
 
 PLACEHOLDERS = ("n/a", "na", "none", "tbd", "todo", "-", ".", "xxx")
-# Only a bare "#123" or a github.com issue URL closes an issue. A URL on any
-# other host cannot, so accepting one would pass a description that links
-# nothing GitHub can act on.
-ISSUE_REFERENCE = r"(?:#\d+|https?://(?:www\.)?github\.com/[\w.-]+/[\w.-]+/issues/\d+)"
-CLOSING_KEYWORD = re.compile(
-    r"\b(clos(?:e|es|ed)|fix(?:e[sd])?|resolv(?:e|es|ed))\b\s*:?\s*" + ISSUE_REFERENCE,
-    re.IGNORECASE,
-)
-BARE_ISSUE = re.compile(ISSUE_REFERENCE, re.IGNORECASE)
-FOREIGN_ISSUE_URL = re.compile(r"https?://\S+/issues/\d+", re.IGNORECASE)
+KEYWORD = r"\b(?:clos(?:e|es|ed)|fix(?:e[sd])?|resolv(?:e|es|ed))\b\s*:?\s*"
+ANY_ISSUE_URL = re.compile(r"https?://\S+/issues/\d+", re.IGNORECASE)
+
+
+def issue_patterns(repository):
+    """Build the reference patterns for the repository being checked.
+
+    The policy is that a pull request resolves an issue filed in this
+    repository, so a bare "#123" is accepted and an absolute URL must point at
+    this repository's issues. A URL elsewhere, on GitHub or not, links
+    something this repository cannot close. When the repository is unknown, as
+    when the script is run by hand, any github.com issue URL is accepted.
+    """
+    if repository:
+        owner, _, name = repository.partition("/")
+        host = r"https?://(?:www\.)?github\.com/%s/%s/issues/\d+" % (
+            re.escape(owner),
+            re.escape(name),
+        )
+    else:
+        host = r"https?://(?:www\.)?github\.com/[\w.-]+/[\w.-]+/issues/\d+"
+    reference = r"(?:#\d+|%s)" % host
+    return (
+        re.compile(KEYWORD + reference, re.IGNORECASE),
+        re.compile(reference, re.IGNORECASE),
+    )
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$")
 
@@ -92,10 +108,12 @@ def is_answered(name, content):
     return bool(re.sub(r"^\s*[-*+]\s*\[\s*\]\s*$", "", content, flags=re.M).strip())
 
 
-def check(body, labels, skip_label):
+def check(body, labels, skip_label, repository=None):
     """Return the list of problems with a pull request description."""
     if skip_label and skip_label in labels:
         return []
+
+    closing_keyword, bare_issue = issue_patterns(repository)
 
     problems = []
     present = sections(body)
@@ -121,14 +139,15 @@ def check(body, labels, skip_label):
             problems.append("the '## %s' section is empty%s" % (name, hint))
             continue
 
-        if name == "Issues resolved" and not CLOSING_KEYWORD.search(content):
-            if FOREIGN_ISSUE_URL.search(content) and not BARE_ISSUE.search(content):
+        if name == "Issues resolved" and not closing_keyword.search(content):
+            if ANY_ISSUE_URL.search(content) and not bare_issue.search(content):
                 problems.append(
-                    "'## Issues resolved' links an issue on another host; "
-                    "GitHub can only close an issue in this repository, so "
-                    "reference it as 'Fixes #123'"
+                    "'## Issues resolved' links an issue that is not in %s; a "
+                    "pull request resolves an issue filed in this repository, "
+                    "so reference it as 'Fixes #123'"
+                    % (repository or "this repository")
                 )
-            elif BARE_ISSUE.search(content):
+            elif bare_issue.search(content):
                 problems.append(
                     "'## Issues resolved' references an issue but without a "
                     "closing keyword; write 'Fixes #123' so the issue closes on "
@@ -172,7 +191,9 @@ def main(argv=None):
         print("Label %r is set; skipping the description check." % args.skip_label)
         return 0
 
-    problems = check(body, labels, args.skip_label)
+    problems = check(
+        body, labels, args.skip_label, os.environ.get("GITHUB_REPOSITORY")
+    )
     if not problems:
         print("Pull request description is complete.")
         return 0
