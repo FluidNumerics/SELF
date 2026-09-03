@@ -1,0 +1,2867 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_AMRController_2D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_AMRController_2D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 2.5% of total for modules and submodules.">648 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_AMRController_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_amrcontroller_2d.f90.html'>SELF_AMRController_2D.f90</a></li>
+     <li class="active">SELF_AMRController_2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomdebugresolved~2">geomDebugResolved</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomfull~2">geomFull</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomnoreuse~2">geomNoReuse</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomverify~2">geomVerify</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-migrategather~2">migrateGather</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-migrateverify~2">migrateVerify</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-transferhost~2">transferHost</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-transferverify~2">transferVerify</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#type-amrcontroller2d">AMRController2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-recommendedtimestep_amrcontroller2d">RecommendedTimeStep_AMRController2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-adapt_amrcontroller2d">Adapt_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-allgatherperelemints~2">AllgatherPerElemInts</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-allgatherperelemreals~2">AllgatherPerElemReals</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-applyindicatorsettings_amrcontroller2d">ApplyIndicatorSettings_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-buildgeometry_amrcontroller2d">BuildGeometry_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-exchangeoldwindow~2">ExchangeOldWindow</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-free_amrcontroller2d">Free_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-initforestfromdecomposedmesh~2">InitForestFromDecomposedMesh</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-init_amrcontroller2d">Init_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-nextgeombuffer_amrcontroller2d">NextGeomBuffer_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-planwindows~2">PlanWindows</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-resolvegeomdebug~2">ResolveGeomDebug</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-verifygeometry~2">VerifyGeometry</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-verifymigration~2">VerifyMigration</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-verifywindowedapply~2">VerifyWindowedApply</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>Adaptive-mesh-refinement controller for 2-D DG models: the driver that closes the serial
+AMR loop around a live, time-stepping model. One call to Adapt performs one adaptation
+epoch between time steps:</p>
+<ol>
+<li>estimate  - the Legendre modal-decay indicator flags each element refine/keep/coarsen
+                 from the current solution (driving variable ivar, e.g. pressure);</li>
+<li>cap       - refine flags on leaves already at maxLevel are demoted to keep, bounding
+                 the finest resolution (and the stable time step) a priori;</li>
+<li>halo      - refine flags spread to face neighbours for nHalo passes, so a feature
+                 moving at speed c stays inside the refined band provided the adaptation
+                 cadence satisfies k<em>dt</em>c &lt;= nHalo * h_fine;</li>
+<li>mutate    - AdaptFromFlags + Balance2to1 update the quad-forest; if the leaf set is
+                 unchanged the epoch is a no-op and the model is untouched;</li>
+<li>transfer  - BuildTransferPlan maps old leaves to new (copy / exact prolongation /
+                 conservative restriction), EmitMesh produces the solver-ready
+                 nonconforming mesh, and a new SEMQuad geometry is generated;</li>
+<li>regrid    - model%Regrid rebinds the model's storage and boundary conditions to the
+                 new mesh, preserving its time state and parameters; the transferred
+                 solution is applied and uploaded to the device.</li>
+</ol>
+<p>The controller owns the forest, the indicator, and the meshes/geometries it emits. The mesh
+is rebuilt each epoch and the previous one freed after the model is rebound. Geometry instead
+lives in two long-lived buffers that alternate (AMR Stage 6c), so it is resized rather than
+reallocated and the previous epoch's geometry remains available while the new one is built.
+The base mesh and geometry the model was initialized with belong to the caller and are
+never freed here, but the base mesh must outlive the controller: it supplies the
+boundary-condition metadata and the communicator for every emitted mesh. After
+controller%Free the model's mesh/geometry pointers are dangling, so free or stop using the
+model first.</p>
+<p>MPI (AMR Stage 5): the forest is rank-replicated. At Init the global base-mesh tables are
+allgathered so every rank builds an identical forest; each epoch the rank-local indicator
+flags are allgathered (one small collective) so every rank applies identical mutations and
+computes identical transfer plans and global connectivity. EmitMesh re-decomposes the new
+leaf list into contiguous (space-filling-curve) ranges, so repartitioning and load balance
+are implicit in every epoch.</p>
+<p>Solution migration is point-to-point (Stage-5 v2). The old elements a rank's new element
+range reads through the plan form a contiguous WINDOW of the old element list, because both
+partitions are contiguous ranges of the same leaf order; and because the plan is replicated,
+every rank derives its own window and each peer's window locally - PlanWindows - with no
+communication at all. ExchangeOldWindow then moves exactly the runs that cross ranks with
+matched MPI_Isend/MPI_Irecv, so per-rank traffic and memory scale with what actually moves
+rather than with the global field. SELF_AMR_MIGRATE_GATHER=1 restores the v1 gather-then-
+slice migration (an allgathered global old field, sliced to the new rank-local range); the
+two are bit-identical, and SELF_AMR_MIGRATE_VERIFY=1 asserts that in-process.</p>
+<p>All communication runs between time steps at the adaptation cadence; nothing is added to the
+time-stepping loop.</p>
+<p>Because refinement halves the element scale per level, an explicit-stability time step
+chosen for the base mesh must shrink with the finest active level;
+RecommendedTimeStep(dtBase) = dtBase / 2**MaxLevel gives the level-based bound to pass to
+ForwardStep after each epoch.</p>
+<p>Debug switches for the Stage 6c incremental geometry path, resolved once from the
+environment on first use. Present so that a suspected geometry problem can be split
+between the reuse copy and the compacted generation without rebuilding:</p>
+<p>SELF_AMR_GEOM_NO_REUSE=1  regenerate every element (the reuse predicate never fires)
+  SELF_AMR_GEOM_VERIFY=1    additionally generate the full geometry the old way and compare
+                            element by element, reporting the first quantity that differs</p>
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_dgmodel2d_t.html'>SELF_DGModel2D_t</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a></li>
+    <li><a href='../module/self_domaindecomposition.html'>SELF_DomainDecomposition</a></li>
+    <li><a href='../module/self_mesh_2d.html'>SELF_Mesh_2D</a></li>
+    <li><a href='../module/self_transferplan_2d.html'>SELF_TransferPlan_2D</a></li>
+    <li><a href='../module/self_solutionmigration.html'>SELF_SolutionMigration</a></li>
+    <li><a href='../module/self_quadtreemesh_2d.html'>SELF_QuadTreeMesh_2D</a></li>
+    <li><a href='../module/self_refinementindicator_2d.html'>SELF_RefinementIndicator_2D</a></li>
+    <li><a href='../module/self_geometry_2d.html'>SELF_Geometry_2D</a></li>
+    <li><a href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm">mpi</a></li>
+    <li><a href='../module/self_lagrange~2.html'>SELF_Lagrange</a></li>
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    <li><a href='../module/self_adaptivemesh_2d.html'>SELF_AdaptiveMesh_2D</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_amrcontroller_2d~~UsesGraph Pages: 1 -->
+<svg id="moduleself_amrcontroller_2dUsesGraph" width="641pt" height="534pt"
+ viewBox="0.00 0.00 641.00 534.40" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_amrcontroller_2d~~UsesGraph" class="graph" transform="scale(0.25 0.25) rotate(0) translate(4 2119.43)">
+<title>module~~self_amrcontroller_2d~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-2119.43 2543,-2119.43 2543,4 -4,4"/>
+<!-- module~self_amrcontroller_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node1" class="node">
+<title>module~self_amrcontroller_2d</title>
+<polygon fill="none" stroke="black" points="2539,-786.24 2400,-786.24 2400,-762.24 2539,-762.24 2539,-786.24"/>
+<text text-anchor="middle" x="2469.5" y="-771.84" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_AMRController_2D</text>
+</g>
+<!-- module~self_dgmodel2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node2" class="node">
+<title>module~self_dgmodel2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node2"><a xlink:href=".././module/self_dgmodel2d_t.html" xlink:title="SELF_DGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2364,-786.24 2248,-786.24 2248,-762.24 2364,-762.24 2364,-786.24"/>
+<text text-anchor="middle" x="2306" y="-771.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge1" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2399.54,-774.24C2391.13,-774.24 2382.54,-774.24 2374.16,-774.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2374.06,-770.74 2364.06,-774.24 2374.06,-777.74 2374.06,-770.74"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node3" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node3"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1075,-1323.24 909,-1323.24 909,-1299.24 1075,-1299.24 1075,-1323.24"/>
+<text text-anchor="middle" x="992" y="-1308.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge2" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2305,-1581.24C2262.24,-1639.16 2214.72,-1587.55 2143,-1581.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1581.24C2085.21,-1576.33 1235.21,-1263.26 1180.5,-1275.24"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node4" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node4"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-1513.24 0,-1513.24 0,-1489.24 94,-1489.24 94,-1513.24"/>
+<text text-anchor="middle" x="47" y="-1498.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge3" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1586,-2085.24C1492.54,-2081.06 1468.81,-2078.45 1375.5,-2085.24"/>
+</g>
+<!-- module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node5" class="node">
+<title>module~self_mesh_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node5"><a xlink:href=".././module/self_mesh_2d.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1632.5,-1249.24 1541.5,-1249.24 1541.5,-1225.24 1632.5,-1225.24 1632.5,-1249.24"/>
+<text text-anchor="middle" x="1587" y="-1234.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge4" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2467.48,-786.33C2459.67,-876.63 2406.93,-1445.89 2307,-1581.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2305,-1581.24C2246,-1661.16 2228.72,-1477.45 2143,-1427.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1427.24C2059.78,-1379.66 2052.51,-1340.8 1962.5,-1313.24"/>
+</g>
+<!-- module~self_transferplan_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node6" class="node">
+<title>module~self_transferplan_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node6"><a xlink:href=".././module/self_transferplan_2d.html" xlink:title="SELF_TransferPlan_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2026,-1593.24 1897,-1593.24 1897,-1569.24 2026,-1569.24 2026,-1593.24"/>
+<text text-anchor="middle" x="1961.5" y="-1578.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TransferPlan_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_transferplan_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge5" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_transferplan_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1581.24C2106.9,-1576.78 2068.81,-1576.19 2036.61,-1576.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2036.27,-1573.46 2026.37,-1577.24 2036.47,-1580.45 2036.27,-1573.46"/>
+</g>
+<!-- module~self_solutionmigration -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node7" class="node">
+<title>module~self_solutionmigration</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node7"><a xlink:href=".././module/self_solutionmigration.html" xlink:title="SELF_SolutionMigration">
+<polygon fill="#337ab7" stroke="#337ab7" points="1248,-1975.24 1111,-1975.24 1111,-1951.24 1248,-1951.24 1248,-1975.24"/>
+<text text-anchor="middle" x="1179.5" y="-1960.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SolutionMigration</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_solutionmigration -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge6" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_solutionmigration</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-2003.24C2068.22,-2047.26 1460.44,-2007.58 1375.5,-2003.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1373.5,-2003.24C1325.27,-1999.52 1271.45,-1987.71 1232.93,-1977.88"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1233.54,-1974.42 1222.98,-1975.3 1231.78,-1981.2 1233.54,-1974.42"/>
+</g>
+<!-- module~self_quadtreemesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node8" class="node">
+<title>module~self_quadtreemesh_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node8"><a xlink:href=".././module/self_quadtreemesh_2d.html" xlink:title="SELF_QuadTreeMesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1851,-1821.24 1709,-1821.24 1709,-1797.24 1851,-1797.24 1851,-1821.24"/>
+<text text-anchor="middle" x="1780" y="-1806.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_QuadTreeMesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge7" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1581.24C2063.27,-1571.08 1867.51,-1734.01 1802.42,-1790.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1800.05,-1787.82 1794.8,-1797.02 1804.64,-1793.1 1800.05,-1787.82"/>
+</g>
+<!-- module~self_refinementindicator_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node9" class="node">
+<title>module~self_refinementindicator_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node9"><a xlink:href=".././module/self_refinementindicator_2d.html" xlink:title="SELF_RefinementIndicator_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1673,-1631.24 1501,-1631.24 1501,-1607.24 1673,-1607.24 1673,-1631.24"/>
+<text text-anchor="middle" x="1587" y="-1616.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementIndicator_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_refinementindicator_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge8" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_refinementindicator_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1581.24C2093.64,-1576.53 2083.36,-1564.93 2036,-1560.24 1970.1,-1553.71 1952.91,-1553.8 1887,-1560.24 1801.38,-1568.61 1703.9,-1590.14 1644.17,-1604.75"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1643.07,-1601.42 1634.19,-1607.21 1644.74,-1608.21 1643.07,-1601.42"/>
+</g>
+<!-- module~self_geometry_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node10" class="node">
+<title>module~self_geometry_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node10"><a xlink:href=".././module/self_geometry_2d.html" xlink:title="SELF_Geometry_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1838.5,-757.24 1721.5,-757.24 1721.5,-733.24 1838.5,-733.24 1838.5,-757.24"/>
+<text text-anchor="middle" x="1780" y="-742.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge9" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2443.41,-762.21C2398.35,-741.36 2300.16,-699.26 2212,-684.24 2150.66,-673.79 2128.53,-658.24 2072,-684.24 2049.66,-694.51 2056.86,-713.23 2036,-726.24 2007.37,-744.09 1995.83,-740.01 1962.5,-745.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1960.5,-745.24C1923.65,-748.58 1882.38,-748.82 1848.71,-748.12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1848.6,-744.62 1838.52,-747.88 1848.43,-751.61 1848.6,-744.62"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node11" class="node">
+<title>mpi</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node11"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-1973.24 151,-1973.24 151,-1949.24 205,-1949.24 205,-1973.24"/>
+<text text-anchor="middle" x="178" y="-1958.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;mpi -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge10" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-2003.24C1930.67,-2135.51 1836.27,-2095.03 1588,-2085.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1586,-2085.24C1532,-2081.43 1519.05,-2074.36 1465,-2071.24 1384.69,-2066.61 1364.44,-2070.92 1284,-2071.24 1062.88,-2072.13 1007.62,-2075.24 786.5,-2075.24 786.5,-2075.24 786.5,-2075.24 479.5,-2075.24 382.25,-2075.24 348.8,-2095.1 262,-2051.24 245.78,-2043.04 214.2,-2005.64 195.01,-1981.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="197.51,-1979.23 188.55,-1973.58 192.03,-1983.58 197.51,-1979.23"/>
+</g>
+<!-- module~self_adaptivemesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node12" class="node">
+<title>module~self_adaptivemesh_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node12"><a xlink:href=".././module/self_adaptivemesh_2d.html" xlink:title="SELF_AdaptiveMesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2030.5,-1878.24 1892.5,-1878.24 1892.5,-1854.24 2030.5,-1854.24 2030.5,-1878.24"/>
+<text text-anchor="middle" x="1961.5" y="-1863.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_AdaptiveMesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_adaptivemesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge11" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_adaptivemesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2305,-1581.24C2197.11,-1727.38 2333.52,-1844.22 2212,-1979.24 2190.28,-2003.37 2170.78,-1986.43 2143,-2003.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-2003.24C2073.45,-2044.09 2001.32,-1935.08 1973.93,-1887.35"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1976.87,-1885.43 1968.92,-1878.43 1970.77,-1888.86 1976.87,-1885.43"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node13" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node13"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-1435.24 130,-1435.24 130,-1411.24 226,-1411.24 226,-1435.24"/>
+<text text-anchor="middle" x="178" y="-1420.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge12" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1373.5,-2003.24C1113.38,-1983.18 1047.39,-1999.24 786.5,-1999.24 786.5,-1999.24 786.5,-1999.24 614,-1999.24 477.04,-1999.24 419.77,-1985.36 328.5,-1883.24"/>
+</g>
+<!-- module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node14" class="node">
+<title>module~self_lagrange~2</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node14"><a xlink:href=".././module/self_lagrange~2.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-1551.24 568,-1551.24 568,-1527.24 662,-1527.24 662,-1551.24"/>
+<text text-anchor="middle" x="615" y="-1536.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge13" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1427.24C1926.94,-1301.84 1835.44,-1485.38 1588,-1503.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1586,-1503.24C1284.11,-1515.73 1209.96,-1414.43 909,-1441.24 853.9,-1446.15 835.43,-1437.45 786.5,-1463.24"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge19" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1965.24C2130.61,-1976.66 1746.4,-2044.02 1375.5,-2085.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1373.5,-2085.24C1113.5,-2110.14 1047.69,-2113.24 786.5,-2113.24 786.5,-2113.24 786.5,-2113.24 479.5,-2113.24 341.74,-2113.24 275.96,-2135.1 179,-2037.24"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge20" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2303.4,-786.41C2293.11,-862.49 2234,-1271.96 2143,-1351.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1351.24C2125.71,-1364.56 1982.38,-1317.25 1962.5,-1313.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1960.5,-1313.24C1847.42,-1290.4 1715.12,-1263.32 1642.55,-1248.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1643.21,-1245 1632.71,-1246.42 1641.81,-1251.86 1643.21,-1245"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_transferplan_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge23" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_transferplan_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2304.75,-786.44C2302.87,-867.5 2288.88,-1328.62 2212,-1441.24 2166.07,-1508.52 2076.58,-1547.05 2018.2,-1566.06"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2016.87,-1562.81 2008.4,-1569.17 2018.99,-1569.48 2016.87,-1562.81"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_solutionmigration -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge21" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_solutionmigration</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2304.18,-786.54C2296.05,-907.01 2228.35,-1873.63 2143,-1965.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1965.24C2113.73,-1994.5 1821,-1965.24 1781,-1965.24 1781,-1965.24 1781,-1965.24 1586,-1965.24 1472.07,-1965.24 1340.14,-1964.44 1258.5,-1963.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1258.33,-1960.35 1248.3,-1963.78 1258.28,-1967.35 1258.33,-1960.35"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge27" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2253.65,-762.19C2186.42,-748.17 2065.04,-728.91 1962.5,-745.24"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node17" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="646.5,-483.24 583.5,-483.24 583.5,-459.24 646.5,-459.24 646.5,-483.24"/>
+<text text-anchor="middle" x="615" y="-468.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge14" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1960.5,-511.24C1808.34,-446 1753.56,-511.24 1588,-511.24 1588,-511.24 1588,-511.24 1373.5,-511.24 1201.05,-511.24 1162.37,-619.68 993,-587.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-587.24C933.55,-573.63 928.53,-546.3 873,-526.24 835.98,-512.87 824.25,-518.4 786.5,-507.24"/>
+</g>
+<!-- module~self_mappedscalar_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node18" class="node">
+<title>module~self_mappedscalar_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node18"><a xlink:href=".././module/self_mappedscalar_2d.html" xlink:title="SELF_MappedScalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2212,-816.24 2072,-816.24 2072,-792.24 2212,-792.24 2212,-816.24"/>
+<text text-anchor="middle" x="2142" y="-801.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge16" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2247.88,-784.82C2238.18,-786.61 2227.98,-788.5 2217.9,-790.37"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2217.09,-786.96 2207.89,-792.22 2218.36,-793.84 2217.09,-786.96"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node19" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node19"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-1435.24 262,-1435.24 262,-1411.24 393,-1411.24 393,-1435.24"/>
+<text text-anchor="middle" x="327.5" y="-1420.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge18" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1351.24C1885.73,-1591.49 1726.05,-1541.24 1375.5,-1541.24 1375.5,-1541.24 1375.5,-1541.24 1178.5,-1541.24 907.04,-1541.24 814.63,-1673.67 568,-1560.24 545.66,-1549.97 548.15,-1536.77 532,-1518.24 509.76,-1492.72 513.71,-1471.65 481.5,-1461.24"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node20" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node20"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-901.24 291,-901.24 291,-877.24 364,-877.24 364,-901.24"/>
+<text text-anchor="middle" x="327.5" y="-886.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge17" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2141,-1351.24C2037.78,-1441.16 1034.4,-1420.14 909,-1365.24 887.39,-1355.78 891.91,-1340.35 873,-1326.24 803.54,-1274.41 769.17,-1289.69 698,-1240.24 632.68,-1194.85 621.36,-1176.23 568,-1117.24 525.81,-1070.6 526.88,-1048.79 481.5,-1005.24"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node21" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node21"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-403.24 568,-403.24 568,-379.24 662,-379.24 662,-403.24"/>
+<text text-anchor="middle" x="615" y="-388.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge22" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-392.24C878.24,-385.89 746.11,-387.68 672.64,-389.5"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="672.14,-386.01 662.23,-389.77 672.32,-393.01 672.14,-386.01"/>
+</g>
+<!-- module~self_mappedvector_2d~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node22" class="node">
+<title>module~self_mappedvector_2d~2</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node22"><a xlink:href=".././module/self_mappedvector_2d~2.html" xlink:title="SELF_MappedVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2212,-717.24 2072,-717.24 2072,-693.24 2212,-693.24 2212,-717.24"/>
+<text text-anchor="middle" x="2142" y="-702.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge24" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2279.96,-762.06C2261.36,-753.16 2235.3,-741 2212,-731.24 2203.68,-727.75 2194.71,-724.22 2186.08,-720.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2187.13,-717.57 2176.53,-717.32 2184.65,-724.12 2187.13,-717.57"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node29" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-675.24 151,-675.24 151,-651.24 205,-651.24 205,-675.24"/>
+<text text-anchor="middle" x="178" y="-660.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge15" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2301.95,-762.15C2293.05,-728.93 2264.42,-634.77 2212,-575.24 1998.02,-332.23 1908.43,-245.74 1588,-199.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1586,-199.24C1322.8,-130.3 1265.08,-47.24 993,-47.24 993,-47.24 993,-47.24 479.5,-47.24 209.72,-47.24 182.1,-530.41 179.31,-640.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="175.8,-641.14 179.09,-651.21 182.8,-641.28 175.8,-641.14"/>
+</g>
+<!-- module~self_boundaryconditions -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node30" class="node">
+<title>module~self_boundaryconditions</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node30"><a xlink:href=".././module/self_boundaryconditions.html" xlink:title="SELF_BoundaryConditions">
+<polygon fill="#337ab7" stroke="#337ab7" points="861,-251.24 710,-251.24 710,-227.24 861,-227.24 861,-251.24"/>
+<text text-anchor="middle" x="785.5" y="-236.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge25" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1586,-199.24C1324.63,-164.79 1011.62,-203.36 867.01,-225.65"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="866.24,-222.23 856.89,-227.22 867.31,-229.14 866.24,-222.23"/>
+</g>
+<!-- module~self_model -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node31" class="node">
+<title>module~self_model</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node31"><a xlink:href=".././module/self_model.html" xlink:title="SELF_Model">
+<polygon fill="#337ab7" stroke="#337ab7" points="823.5,-364.24 747.5,-364.24 747.5,-340.24 823.5,-340.24 823.5,-364.24"/>
+<text text-anchor="middle" x="785.5" y="-349.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_model -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge26" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_model</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2293.82,-762.24C2276.9,-744.35 2243.43,-710.05 2212,-684.24 2107.73,-598.59 2080.16,-577.3 1962.5,-511.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1960.5,-511.24C1804.28,-435.07 1761.8,-392.24 1588,-392.24 1588,-392.24 1588,-392.24 1373.5,-392.24 1204.39,-392.24 1161.91,-400.4 993,-392.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-392.24C936.28,-389.16 874.7,-375.71 833.55,-365.25"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="834.36,-361.84 823.8,-362.73 832.61,-368.62 834.36,-361.84"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node23" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node23"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="873,-1359.24 698,-1359.24 698,-1335.24 873,-1335.24 873,-1359.24"/>
+<text text-anchor="middle" x="785.5" y="-1344.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge28" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#ff7500" stroke-dasharray="5,2" d="M922.62,-1323.28C904.03,-1326.55 883.76,-1330.12 864.67,-1333.48"/>
+<polygon fill="#ff7500" stroke="#ff7500" points="864.06,-1330.03 854.82,-1335.21 865.27,-1336.93 864.06,-1330.03"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node26" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node26"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1424.5,-1287.24 1324.5,-1287.24 1324.5,-1263.24 1424.5,-1263.24 1424.5,-1287.24"/>
+<text text-anchor="middle" x="1374.5" y="-1272.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge29" class="edge">
+<title>module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#9cff00" stroke-dasharray="5,2" d="M1541.36,-1245.3C1510.41,-1250.89 1468.85,-1258.39 1435.07,-1264.48"/>
+<polygon fill="#9cff00" stroke="#9cff00" points="1434.08,-1261.11 1424.86,-1266.33 1435.32,-1268 1434.08,-1261.11"/>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge33" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M1906.51,-1593.28C1899.22,-1596.81 1892.4,-1601.36 1887,-1607.24 1844.12,-1653.92 1883.73,-1690.96 1851,-1745.24 1840.05,-1763.39 1822.41,-1779.47 1807.58,-1790.97"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="1805.17,-1788.41 1799.25,-1797.2 1809.35,-1794.02 1805.17,-1788.41"/>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge32" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M1933.99,-1593.26C1855.07,-1628.85 1624.86,-1731.24 1588,-1731.24 1588,-1731.24 1588,-1731.24 1373.5,-1731.24 1204.39,-1731.24 1161.91,-1739.4 993,-1731.24"/>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M991,-1731.24C937.81,-1728.38 926.06,-1714.92 873,-1710.24 795.52,-1703.4 775.17,-1700.51 698,-1710.24 660.67,-1714.94 653.29,-1726.25 616,-1731.24"/>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge31" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M1931.85,-1569.09C1869.83,-1544.15 1718.21,-1490.54 1588,-1503.24"/>
+</g>
+<!-- module~self_solutiontransfer_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node28" class="node">
+<title>module~self_solutiontransfer_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node28"><a xlink:href=".././module/self_solutiontransfer_2d.html" xlink:title="SELF_SolutionTransfer_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="860.5,-1743.24 710.5,-1743.24 710.5,-1719.24 860.5,-1719.24 860.5,-1743.24"/>
+<text text-anchor="middle" x="785.5" y="-1728.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SolutionTransfer_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_solutiontransfer_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge30" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_solutiontransfer_2d</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M991,-1731.24C951.62,-1729.34 907.92,-1729.08 871.06,-1729.41"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="870.81,-1725.91 860.85,-1729.51 870.89,-1732.91 870.81,-1725.91"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge35" class="edge">
+<title>module~self_solutionmigration&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M1127.54,-1951.19C1121.12,-1947.67 1115.3,-1943.12 1111,-1937.24 1032.14,-1829.43 1157.09,-1442.61 1075,-1337.24 1072.61,-1334.17 1069.86,-1331.46 1066.84,-1329.06"/>
+<polygon fill="#00ff4e" stroke="#00ff4e" points="1068.59,-1326.02 1058.32,-1323.42 1064.73,-1331.86 1068.59,-1326.02"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge37" class="edge">
+<title>module~self_solutionmigration&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M326.5,-2037.24C261.56,-2028.25 225.14,-2083.81 179,-2037.24"/>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M177,-2037.24C154.37,-2014.4 143.64,-2011.36 130,-1982.24 53.6,-1819.09 47.54,-1595.07 47.69,-1523.9"/>
+<polygon fill="#00ff4e" stroke="#00ff4e" points="51.19,-1523.49 47.76,-1513.47 44.19,-1523.45 51.19,-1523.49"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;mpi -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge36" class="edge">
+<title>module~self_solutionmigration&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M1140.56,-1975.29C1071.08,-1996.26 918.44,-2037.24 786.5,-2037.24 786.5,-2037.24 786.5,-2037.24 614,-2037.24 487.11,-2037.24 454.41,-2052.99 328.5,-2037.24"/>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M326.5,-2037.24C278.61,-2030.61 230.11,-2000.01 202.39,-1979.71"/>
+<polygon fill="#00ff4e" stroke="#00ff4e" points="204.25,-1976.73 194.15,-1973.53 200.05,-1982.33 204.25,-1976.73"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge34" class="edge">
+<title>module~self_solutionmigration&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M1110.63,-1963.56C1075.5,-1963.46 1031.93,-1962.92 993,-1961.24"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge38" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M1726.51,-1797.23C1719.8,-1793.7 1713.66,-1789.14 1709,-1783.24 1668.2,-1731.59 1687.59,-1553.42 1673,-1489.24 1653.09,-1401.69 1614.38,-1301.73 1596.92,-1258.74"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="1600.09,-1257.24 1593.06,-1249.31 1593.61,-1259.89 1600.09,-1257.24"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge40" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M1708.66,-1807.66C1672.57,-1807.25 1627.91,-1807.36 1588,-1809.24"/>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M1586,-1809.24C1405.98,-1817.69 1360.72,-1809.24 1180.5,-1809.24 1180.5,-1809.24 1180.5,-1809.24 991,-1809.24 858.34,-1809.24 827.42,-1781.37 698,-1752.24 661.3,-1743.98 653.4,-1727.18 616,-1731.24"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge39" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M1776.93,-1797.18C1769.94,-1760.4 1743.52,-1649.03 1673,-1598.24 1621.81,-1561.37 1173.34,-1526.92 1111,-1517.24 966.53,-1494.81 915.17,-1393.82 786.5,-1463.24"/>
+</g>
+<!-- module~self_refinementprimitives_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node24" class="node">
+<title>module~self_refinementprimitives_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node24"><a xlink:href=".././module/self_refinementprimitives_2d.html" xlink:title="SELF_RefinementPrimitives_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1463,-1861.24 1286,-1861.24 1286,-1837.24 1463,-1837.24 1463,-1861.24"/>
+<text text-anchor="middle" x="1374.5" y="-1846.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementPrimitives_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge41" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M1586,-1809.24C1531.99,-1811.77 1471.46,-1824.33 1429.21,-1834.7"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="1428.27,-1831.33 1419.42,-1837.15 1429.97,-1838.12 1428.27,-1831.33"/>
+</g>
+<!-- module~self_refinementindicator_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge42" class="edge">
+<title>module~self_refinementindicator_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00c4ff" stroke-dasharray="5,2" d="M1500.98,-1613.35C1342.25,-1603.92 990.41,-1590.36 698,-1631.24 613.75,-1643.02 399.29,-1778.41 328.5,-1731.24"/>
+<path fill="none" stroke="#00c4ff" stroke-dasharray="5,2" d="M326.5,-1731.24C232.98,-1660.46 279.21,-1591.76 226,-1487.24 218.05,-1471.62 206.4,-1455.73 196.69,-1443.69"/>
+<polygon fill="#00c4ff" stroke="#00c4ff" points="199.12,-1441.13 190.04,-1435.66 193.73,-1445.6 199.12,-1441.13"/>
+</g>
+<!-- module~self_refinementindicator_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node32" class="node">
+<title>module~self_refinementindicator_2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node32"><a xlink:href=".././module/self_refinementindicator_2d_t.html" xlink:title="SELF_RefinementIndicator_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1465,-1669.24 1284,-1669.24 1284,-1645.24 1465,-1645.24 1465,-1669.24"/>
+<text text-anchor="middle" x="1374.5" y="-1654.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementIndicator_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_refinementindicator_2d&#45;&gt;module~self_refinementindicator_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge43" class="edge">
+<title>module~self_refinementindicator_2d&#45;&gt;module~self_refinementindicator_2d_t</title>
+<path fill="none" stroke="#00c4ff" stroke-dasharray="5,2" d="M1519.4,-1631.26C1497.98,-1635.13 1474.09,-1639.44 1452.03,-1643.42"/>
+<polygon fill="#00c4ff" stroke="#00c4ff" points="1451.25,-1640.01 1442.03,-1645.23 1452.49,-1646.9 1451.25,-1640.01"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge47" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1759.28,-757.26C1742.79,-768.49 1720.21,-786.86 1709,-809.24 1636.19,-954.59 1752.64,-1031.52 1673,-1173.24 1661.67,-1193.4 1641.1,-1209.14 1623.03,-1219.97"/>
+<polygon fill="#004eff" stroke="#004eff" points="1620.83,-1217.2 1613.87,-1225.19 1624.29,-1223.28 1620.83,-1217.2"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge51" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1770.16,-733.03C1756.44,-713.87 1729.47,-675.41 1709,-641.24 1691.43,-611.9 1698,-596.57 1673,-573.24 1388.58,-307.87 1253.54,-298.88 873,-218.24 723.87,-186.64 682.29,-229.7 532,-255.24 487.11,-262.87 354.95,-242.17 328.5,-279.24"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge49" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1586,-861.24C1524.31,-887.44 1519.83,-912.7 1465,-951.24 1370.31,-1017.8 1351.29,-1043 1248,-1095.24 1104.84,-1167.65 1013.29,-1097.34 909,-1219.24 855.4,-1281.89 917.64,-1331.91 873,-1401.24 847.39,-1441.01 827.98,-1440.52 786.5,-1463.24"/>
+</g>
+<!-- module~self_scalar_2d~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node16" class="node">
+<title>module~self_scalar_2d~2</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node16"><a xlink:href=".././module/self_scalar_2d~2.html" xlink:title="SELF_Scalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1228,-911.24 1131,-911.24 1131,-887.24 1228,-887.24 1228,-911.24"/>
+<text text-anchor="middle" x="1179.5" y="-896.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_scalar_2d~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge50" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_scalar_2d~2</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1721.28,-756.71C1595.19,-781.83 1304.72,-840.04 1284,-847.24 1257.81,-856.34 1229.81,-870.72 1209.54,-882.06"/>
+<polygon fill="#004eff" stroke="#004eff" points="1207.77,-879.03 1200.81,-887.02 1211.23,-885.12 1207.77,-879.03"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge44" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1761.77,-757.37C1729.08,-780.01 1655.29,-829.28 1588,-861.24"/>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1586,-861.24C1459.94,-921.11 1391.43,-858.16 1284,-947.24 1256.46,-970.08 1277.07,-998.38 1248,-1019.24 1124.42,-1107.92 1034.42,-980.18 909,-1066.24 881.77,-1084.92 896.35,-1107.88 873,-1131.24 786.78,-1217.48 503.09,-1344.79 393,-1397.24 385.64,-1400.75 377.67,-1404.21 369.93,-1407.42"/>
+<polygon fill="#004eff" stroke="#004eff" points="368.61,-1404.17 360.66,-1411.18 371.24,-1410.66 368.61,-1404.17"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node25" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node25"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="820,-559.24 751,-559.24 751,-535.24 820,-535.24 820,-559.24"/>
+<text text-anchor="middle" x="785.5" y="-544.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_data -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge45" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1721.31,-733.42C1705.65,-730.32 1688.7,-727.06 1673,-724.24 1334.48,-663.48 1238.82,-698.73 909,-601.24 877.12,-591.82 842.63,-576.07 818.39,-564"/>
+<polygon fill="#004eff" stroke="#004eff" points="819.82,-560.8 809.31,-559.42 816.66,-567.05 819.82,-560.8"/>
+</g>
+<!-- module~self_vector_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node27" class="node">
+<title>module~self_vector_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node27"><a xlink:href=".././module/self_vector_2d.html" xlink:title="SELF_Vector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1635.5,-639.24 1538.5,-639.24 1538.5,-615.24 1635.5,-615.24 1635.5,-639.24"/>
+<text text-anchor="middle" x="1587" y="-624.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_vector_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge46" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_vector_2d</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1768.16,-732.97C1750.23,-713.4 1712.43,-675.08 1673,-653.24 1664.48,-648.52 1655,-644.55 1645.55,-641.24"/>
+<polygon fill="#004eff" stroke="#004eff" points="1646.34,-637.82 1635.75,-638.04 1644.17,-644.47 1646.34,-637.82"/>
+</g>
+<!-- module~self_tensor_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node33" class="node">
+<title>module~self_tensor_2d</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node33"><a xlink:href=".././module/self_tensor_2d.html" xlink:title="SELF_Tensor_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1636,-757.24 1538,-757.24 1538,-733.24 1636,-733.24 1636,-757.24"/>
+<text text-anchor="middle" x="1587" y="-742.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge48" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#004eff" stroke-dasharray="5,2" d="M1721.43,-745.24C1697.71,-745.24 1670.25,-745.24 1646.43,-745.24"/>
+<polygon fill="#004eff" stroke="#004eff" points="1646.12,-741.74 1636.12,-745.24 1646.12,-748.74 1646.12,-741.74"/>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge52" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M1953.39,-1854.24C1908.03,-1777.64 1659.09,-1357.28 1600.4,-1258.18"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="1603.29,-1256.19 1595.18,-1249.37 1597.27,-1259.76 1603.29,-1256.19"/>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge55" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M1922.43,-1854.15C1895.06,-1845.46 1857.97,-1833.68 1828.64,-1824.37"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="1829.6,-1821 1819.01,-1821.31 1827.48,-1827.67 1829.6,-1821"/>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge54" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M1178.5,-1923.24C1094.34,-1923.28 1077.08,-1964.87 993,-1961.24"/>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M991,-1961.24C972.49,-1960.44 341.28,-1896.65 328.5,-1883.24"/>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M326.5,-1883.24C300,-1853.59 279.52,-1856.93 262,-1821.24 196.22,-1687.21 280.05,-1626.42 226,-1487.24 219.59,-1470.74 207.79,-1454.7 197.62,-1442.8"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="200.18,-1440.41 190.92,-1435.27 194.95,-1445.07 200.18,-1440.41"/>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge53" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M1586,-1923.24C1406,-1914.23 1358.76,-1949.74 1180.5,-1923.24"/>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M1178.5,-1923.24C954.73,-1887.04 860.32,-1910.46 698,-1752.24 643.04,-1698.67 624.3,-1604.23 618.44,-1561.43"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="621.88,-1560.74 617.16,-1551.26 614.94,-1561.62 621.88,-1560.74"/>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_refinementprimitives_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge56" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_refinementprimitives_2d</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M1922.09,-1878.25C1854.75,-1897.93 1710.86,-1933.86 1588,-1923.24"/>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M1586,-1923.24C1518.66,-1919.87 1445.59,-1886.88 1405.7,-1866.1"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="1407.24,-1862.95 1396.77,-1861.36 1403.96,-1869.14 1407.24,-1862.95"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge57" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00eb" stroke-dasharray="5,2" d="M157.13,-1435.26C135.69,-1448.21 101.37,-1468.97 76.94,-1483.74"/>
+<polygon fill="#ff00eb" stroke="#ff00eb" points="74.86,-1480.91 68.11,-1489.08 78.48,-1486.9 74.86,-1480.91"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node15" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node15"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-1435.24 5,-1435.24 5,-1411.24 89,-1411.24 89,-1435.24"/>
+<text text-anchor="middle" x="47" y="-1420.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge58" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00eb" stroke-dasharray="5,2" d="M129.7,-1423.24C119.88,-1423.24 109.48,-1423.24 99.52,-1423.24"/>
+<polygon fill="#ff00eb" stroke="#ff00eb" points="99.34,-1419.74 89.34,-1423.24 99.34,-1426.74 99.34,-1419.74"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge62" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0075" stroke-dasharray="5,2" d="M326.5,-1807.24C261.08,-1803.1 242.4,-1823.93 179,-1807.24"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge61" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0075" stroke-dasharray="5,2" d="M568.68,-1527.15C488.22,-1505.7 320.74,-1461.04 233.89,-1437.88"/>
+<polygon fill="#ff0075" stroke="#ff0075" points="234.78,-1434.49 224.22,-1435.3 232.98,-1441.26 234.78,-1434.49"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge60" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0075" stroke-dasharray="5,2" d="M610.88,-1551.29C602.65,-1581.1 577.72,-1659.35 532,-1707.24 462.41,-1780.13 429.07,-1813.6 328.5,-1807.24"/>
+<path fill="none" stroke="#ff0075" stroke-dasharray="5,2" d="M326.5,-1807.24C309.69,-1809.23 189.69,-1782.36 179,-1769.24"/>
+<path fill="none" stroke="#ff0075" stroke-dasharray="5,2" d="M177,-1769.24C92.63,-1665.61 155.63,-1598.81 94,-1480.24 86.97,-1466.71 76.43,-1453.34 67.21,-1442.96"/>
+<polygon fill="#ff0075" stroke="#ff0075" points="69.54,-1440.32 60.19,-1435.33 64.38,-1445.06 69.54,-1440.32"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node34" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node34"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="532,-1551.24 429,-1551.24 429,-1527.24 532,-1527.24 532,-1551.24"/>
+<text text-anchor="middle" x="480.5" y="-1536.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge59" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#ff0075" stroke-dasharray="5,2" d="M567.66,-1539.24C559.49,-1539.24 550.87,-1539.24 542.37,-1539.24"/>
+<polygon fill="#ff0075" stroke="#ff0075" points="542.11,-1535.74 532.11,-1539.24 542.11,-1542.74 542.11,-1535.74"/>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge63" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M991,-929.24C954.43,-939.46 945.02,-941.2 909,-953.24 739.18,-1009.98 705.97,-1052.89 532,-1095.24 487.76,-1106.01 364.34,-1091.15 328.5,-1119.24"/>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge64" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M1130.71,-906.2C1093.17,-911.85 1039.62,-920.32 993,-929.24"/>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M991,-929.24C946.69,-937.71 214.55,-901.47 179,-929.24"/>
+</g>
+<!-- module~self_scalar_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node35" class="node">
+<title>module~self_scalar_2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node35"><a xlink:href=".././module/self_scalar_2d_t.html" xlink:title="SELF_Scalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045,-863.24 939,-863.24 939,-839.24 1045,-839.24 1045,-863.24"/>
+<text text-anchor="middle" x="992" y="-848.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;module~self_scalar_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge65" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;module~self_scalar_2d_t</title>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M1131.69,-887.13C1106.66,-880.65 1075.66,-872.63 1049.32,-865.81"/>
+<polygon fill="#ff4c00" stroke="#ff4c00" points="1050.03,-862.38 1039.47,-863.26 1048.28,-869.16 1050.03,-862.38"/>
+</g>
+<!-- module~self_mappedscalar_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node38" class="node">
+<title>module~self_mappedscalar_2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node38"><a xlink:href=".././module/self_mappedscalar_2d_t.html" xlink:title="SELF_MappedScalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2036,-825.24 1887,-825.24 1887,-801.24 2036,-801.24 2036,-825.24"/>
+<text text-anchor="middle" x="1961.5" y="-810.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge66" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#ffe500" stroke-dasharray="5,2" d="M2071.99,-807.72C2063.53,-808.15 2054.81,-808.58 2046.16,-809.02"/>
+<polygon fill="#ffe500" stroke="#ffe500" points="2045.87,-805.53 2036.06,-809.53 2046.22,-812.52 2045.87,-805.53"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge68" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M312.24,-1435.36C287.24,-1455.49 233.02,-1494.31 179,-1501.24"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M177,-1501.24C153.31,-1504.28 126.96,-1504.79 104.29,-1504.34"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="104.24,-1500.84 94.15,-1504.08 104.06,-1507.84 104.24,-1500.84"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge67" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M261.8,-1423.24C253.42,-1423.24 244.88,-1423.24 236.63,-1423.24"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="236.35,-1419.74 226.35,-1423.24 236.35,-1426.74 236.35,-1419.74"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge71" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M310.64,-901.36C296.16,-913.18 275.06,-932.38 262,-953.24 139.59,-1148.72 205.45,-1242.31 94,-1444.24 86.63,-1457.59 76.07,-1470.94 66.92,-1481.37"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="64.1,-1479.28 59.98,-1489.04 69.29,-1483.97 64.1,-1479.28"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge70" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M324.77,-901.53C316.82,-958.4 283.2,-1201.84 262,-1402.24 242.34,-1588.11 264.01,-1638.24 226,-1821.24 217.03,-1864.42 198.89,-1912.79 187.96,-1939.87"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="184.71,-1938.57 184.16,-1949.15 191.19,-1941.22 184.71,-1938.57"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge69" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M309.18,-901.31C294.11,-912.82 273.01,-931.58 262,-953.24 213.92,-1047.82 244.45,-1084.75 226,-1189.24 212.17,-1267.53 192.67,-1359.9 183.77,-1401.27"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="180.34,-1400.58 181.65,-1411.1 187.18,-1402.06 180.34,-1400.58"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge72" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M318.53,-877.19C306.32,-858.71 282.27,-822.27 262,-791.24 237.23,-753.32 208.52,-708.95 192.18,-683.66"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="195.12,-681.76 186.75,-675.26 189.24,-685.56 195.12,-681.76"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge73" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M567.93,-400.45C534.87,-407.9 494.02,-419.13 481.5,-431.24"/>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge74" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M587.03,-379.14C580.32,-375.32 573.48,-370.66 568,-365.24 520.21,-318 547.47,-253.99 481.5,-241.24"/>
+</g>
+<!-- module~self_mappedvector_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node36" class="node">
+<title>module~self_mappedvector_2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node36"><a xlink:href=".././module/self_mappedvector_2d_t.html" xlink:title="SELF_MappedVector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2036,-717.24 1887,-717.24 1887,-693.24 2036,-693.24 2036,-717.24"/>
+<text text-anchor="middle" x="1961.5" y="-702.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge75" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t</title>
+<path fill="none" stroke="#00ff19" stroke-dasharray="5,2" d="M2071.99,-705.24C2063.53,-705.24 2054.81,-705.24 2046.16,-705.24"/>
+<polygon fill="#00ff19" stroke="#00ff19" points="2046.06,-701.74 2036.06,-705.24 2046.06,-708.74 2046.06,-701.74"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge79" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M724.72,-1359.32C715.25,-1362.85 705.96,-1367.39 698,-1373.24 675.04,-1390.09 680.27,-1404.39 662,-1426.24 624.5,-1471.08 606.83,-1474.54 568,-1518.24 546.85,-1542.05 418.68,-1726.41 393,-1745.24 342.99,-1781.9 308.14,-1751.82 262,-1793.24 217.03,-1833.61 193.62,-1903.87 184.16,-1939.37"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="180.73,-1938.64 181.66,-1949.2 187.51,-1940.37 180.73,-1938.64"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge78" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M734.01,-1359.33C721.91,-1363.06 709.25,-1367.68 698,-1373.24 680.3,-1381.98 680.34,-1391.94 662,-1399.24 586.81,-1429.17 562.26,-1428.49 481.5,-1423.24"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M479.5,-1423.24C410.09,-1421.56 394.18,-1360.73 328.5,-1383.24"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge77" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M718.02,-1359.25C710.57,-1362.79 703.65,-1367.36 698,-1373.24 653.5,-1419.57 701.09,-1462.25 662,-1513.24 659.81,-1516.09 657.22,-1518.68 654.39,-1521.02"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="652.12,-1518.34 645.95,-1526.96 656.15,-1524.06 652.12,-1518.34"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge80" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M726.46,-1335.23C681.97,-1324.94 619.65,-1308.14 568,-1285.24 421.65,-1220.36 369.87,-1213.52 262,-1095.24 206.42,-1034.29 240.39,-874.14 179,-929.24"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge76" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M479.5,-1423.24C454.78,-1421.63 427.73,-1421.21 403.45,-1421.32"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="403.2,-1417.82 393.22,-1421.4 403.25,-1424.82 403.2,-1417.82"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge81" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffb2" stroke-dasharray="5,2" d="M1312.38,-1861.27C1139.28,-1891.73 638.26,-1954.46 328.5,-1731.24"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge82" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffb2" stroke-dasharray="5,2" d="M1347.32,-1837.17C1295.61,-1813.44 1176.54,-1759.35 1075,-1717.24 922.82,-1654.12 739.58,-1585.14 658.34,-1554.91"/>
+<polygon fill="#00ffb2" stroke="#00ffb2" points="659.07,-1551.45 648.48,-1551.24 656.64,-1558.01 659.07,-1551.45"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge88" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M751,-551.38C734.69,-554.01 714.98,-558.1 698,-564.24 586.92,-604.4 319.2,-764.9 262,-868.24 209.69,-962.75 185.73,-1309.96 180.25,-1401.17"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="176.75,-1401.02 179.66,-1411.21 183.74,-1401.43 176.75,-1401.02"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge84" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M750.74,-548.55C732.27,-551.15 710.65,-557.65 698,-573.24 636.55,-648.95 619.16,-1379.15 616.41,-1516.89"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="612.91,-1517.01 616.22,-1527.07 619.91,-1517.14 612.91,-1517.01"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge86" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M750.83,-541.62C704.79,-533.71 626.66,-519.34 616,-511.24"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M614,-511.24C596.38,-497.86 581.51,-509.75 568,-492.24 495.4,-398.13 616.78,-310.54 532,-227.24 467.04,-163.41 418.13,-187.09 328.5,-203.24"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge89" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M750.79,-539.59C734.43,-535.26 714.74,-529.12 698,-521.24 680.6,-513.05 678.38,-507.31 662,-497.24 657.21,-494.3 652.08,-491.27 647.05,-488.38"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="648.61,-485.24 638.19,-483.34 645.15,-491.33 648.61,-485.24"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge83" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M750.77,-546.91C733.44,-548.34 712.89,-552.72 698,-564.24 668.76,-586.87 687.37,-612.34 662,-639.24 599.07,-705.95 560.84,-693.24 481.5,-739.24"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M479.5,-739.24C431.17,-766.48 432.55,-790.33 393,-829.24 378.74,-843.27 362.2,-858.63 349.45,-870.3"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="347.08,-867.72 342.05,-877.04 351.8,-872.9 347.08,-867.72"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge85" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M765.76,-535.03C747.64,-522.85 719.8,-503.14 698,-483.24 672.95,-460.37 647.48,-430.54 631.71,-411.14"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="634.38,-408.88 625.38,-403.28 628.92,-413.26 634.38,-408.88"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge87" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M614,-511.24C596.3,-497.97 582.36,-509.06 568,-492.24 523.21,-439.76 573.88,-396.07 532,-341.24 501.42,-301.19 369.65,-212.16 328.5,-241.24"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge91" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1324.44,-1271.35C1285.26,-1269.18 1229.07,-1268.16 1180.5,-1275.24"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge97" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1324.36,-1265.6C1310.73,-1261.71 1296.31,-1256.4 1284,-1249.24 1264.71,-1238.02 1267.79,-1224.54 1248,-1214.24 1178.57,-1178.1 1152.93,-1188.6 1075,-1181.24 784.75,-1153.8 688.11,-1161.6 429,-1295.24 376.23,-1322.45 384.05,-1362.29 328.5,-1383.24"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge92" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M991,-1351.24C925.9,-1344.79 931.75,-1410.45 873,-1439.24 837.17,-1456.8 821.61,-1444.29 786.5,-1463.24"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge95" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1178.5,-1005.24C1100.87,-950.79 413.32,-1123.63 328.5,-1081.24"/>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M326.5,-1081.24C242.23,-1039.29 252.79,-870.79 179,-929.24"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge93" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M991,-1351.24C875.73,-1339.82 591.14,-1498.6 481.5,-1461.24"/>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M479.5,-1461.24C451.79,-1452.28 420.66,-1444.13 393.89,-1437.7"/>
+<polygon fill="#00b2ff" stroke="#00b2ff" points="394.4,-1434.22 383.87,-1435.32 392.79,-1441.03 394.4,-1434.22"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge98" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1344.63,-1287.4C1281.42,-1312.62 1125.79,-1366.98 993,-1351.24"/>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M991,-1351.24C953.7,-1348.42 941.34,-1351.04 909,-1332.24 888.61,-1320.38 890.58,-1308.97 873,-1293.24 712.01,-1149.22 650.02,-1140.37 481.5,-1005.24"/>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M479.5,-1005.24C439.34,-966.7 386.68,-928.67 355.34,-907.16"/>
+<polygon fill="#00b2ff" stroke="#00b2ff" points="356.96,-904.02 346.72,-901.29 353.02,-909.81 356.96,-904.02"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge96" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1324.07,-1269.07C1309.82,-1265.26 1295.13,-1259.12 1284,-1249.24 1239.96,-1210.13 1228.43,-1039.47 1180.5,-1005.24"/>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1178.5,-1005.24C1128.89,-969.81 1130.63,-940.16 1075,-915.24 920.85,-846.18 861.63,-909.12 698,-867.24 508.06,-818.62 293.84,-719.26 212.62,-679.86"/>
+<polygon fill="#00b2ff" stroke="#00b2ff" points="213.91,-676.6 203.39,-675.36 210.84,-682.89 213.91,-676.6"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node37" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node37"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379.5,-1591.24 275.5,-1591.24 275.5,-1567.24 379.5,-1567.24 379.5,-1591.24"/>
+<text text-anchor="middle" x="327.5" y="-1576.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge94" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1359.73,-1287.27C1337.55,-1306.14 1291.95,-1342.82 1248,-1365.24 1003.49,-1489.96 931.59,-1508.65 662,-1560.24 568.14,-1578.2 456.92,-1580.91 389.59,-1580.56"/>
+<polygon fill="#00b2ff" stroke="#00b2ff" points="389.6,-1577.06 379.58,-1580.49 389.55,-1584.06 389.6,-1577.06"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node39" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node39"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1215,-1247.24 1144,-1247.24 1144,-1223.24 1215,-1223.24 1215,-1247.24"/>
+<text text-anchor="middle" x="1179.5" y="-1232.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge90" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M1324.3,-1265.04C1293.73,-1258.71 1254.74,-1250.63 1225.08,-1244.48"/>
+<polygon fill="#00b2ff" stroke="#00b2ff" points="1225.51,-1240.99 1215.01,-1242.39 1224.09,-1247.85 1225.51,-1240.99"/>
+</g>
+<!-- module~self_vector_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node40" class="node">
+<title>module~self_vector_2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node40"><a xlink:href=".././module/self_vector_2d_t.html" xlink:title="SELF_Vector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045,-519.24 939,-519.24 939,-495.24 1045,-495.24 1045,-519.24"/>
+<text text-anchor="middle" x="992" y="-504.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_2d&#45;&gt;module~self_vector_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge99" class="edge">
+<title>module~self_vector_2d&#45;&gt;module~self_vector_2d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1538.47,-617.62C1432.05,-596.09 1174.61,-543.99 1055.45,-519.88"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1055.88,-516.39 1045.39,-517.84 1054.49,-523.25 1055.88,-516.39"/>
+</g>
+<!-- module~self_solutiontransfer_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge100" class="edge">
+<title>module~self_solutiontransfer_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0019ff" stroke-dasharray="5,2" d="M710.21,-1729.42C680.85,-1729.17 646.81,-1729.48 616,-1731.24"/>
+</g>
+<!-- module~self_solutiontransfer_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge101" class="edge">
+<title>module~self_solutiontransfer_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#0019ff" stroke-dasharray="5,2" d="M763.97,-1719.09C745.31,-1707.39 717.77,-1688.39 698,-1667.24 666.86,-1633.93 640.4,-1587.28 626.49,-1560.46"/>
+<polygon fill="#0019ff" stroke="#0019ff" points="629.6,-1558.87 621.95,-1551.54 623.37,-1562.04 629.6,-1558.87"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge103" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M772.86,-227.15C747.35,-201.67 683.43,-143.2 616,-123.24"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge102" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M716.15,-251.25C666.54,-263.8 602.33,-288.75 568,-337.24 514.39,-412.97 553.19,-662.9 532,-753.24 503.42,-875.05 458.04,-893.54 429,-1015.24 409.21,-1098.17 443.97,-1328.89 393,-1397.24 390.7,-1400.32 387.97,-1403.04 384.96,-1405.44"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="382.84,-1402.64 376.42,-1411.07 386.69,-1408.49 382.84,-1402.64"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge104" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M772.92,-251.55C744.79,-281.37 674.32,-355.74 662,-365.24 658.12,-368.23 653.85,-371.11 649.53,-373.79"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="647.54,-370.9 640.69,-378.98 651.09,-376.93 647.54,-370.9"/>
+</g>
+<!-- module~self_model&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge108" class="edge">
+<title>module~self_model&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M767.42,-364.3C737.64,-385.33 676.12,-428.78 641.35,-453.33"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="639.28,-450.51 633.13,-459.14 643.32,-456.23 639.28,-450.51"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge105" class="edge">
+<title>module~self_model&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M614,-351.24C596.34,-364.56 580.8,-352.2 568,-370.24 526.2,-429.13 546.79,-948.55 532,-1019.24 505.18,-1147.39 473.68,-1172.17 429,-1295.24 412.6,-1340.43 426.24,-1362.51 393,-1397.24 389.68,-1400.71 385.83,-1403.73 381.7,-1406.35"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="379.98,-1403.31 372.91,-1411.21 383.36,-1409.44 379.98,-1403.31"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge106" class="edge">
+<title>module~self_model&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M747.64,-340.21C710.56,-330.59 653.6,-322.88 616,-351.24"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M614,-351.24C596.34,-364.56 586.31,-357.83 568,-370.24 549,-383.11 550.66,-393.88 532,-407.24 511.79,-421.71 499.36,-413.96 481.5,-431.24"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M479.5,-431.24C384.66,-522.97 435.17,-590.21 393,-715.24 374.32,-770.61 349.74,-834.86 336.99,-867.61"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="333.66,-866.5 333.29,-877.09 340.18,-869.05 333.66,-866.5"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge107" class="edge">
+<title>module~self_model&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M747.1,-360.89C725.03,-366 696.67,-372.57 671.98,-378.28"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="670.96,-374.93 662.01,-380.59 672.54,-381.75 670.96,-374.93"/>
+</g>
+<!-- module~self_model&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge109" class="edge">
+<title>module~self_model&#45;&gt;HDF5</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M760.14,-340.24C709.65,-316.07 589.31,-262.07 481.5,-241.24"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M479.5,-241.24C415.54,-220.93 382.67,-201.62 328.5,-241.24"/>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;mpi -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge110" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M1364.32,-1669.32C1345.09,-1693.95 1298.19,-1750.57 1248,-1785.24 1008.11,-1950.98 907.58,-1961.24 616,-1961.24 616,-1961.24 616,-1961.24 479.5,-1961.24 384.17,-1961.24 271.84,-1961.24 215.34,-1961.24"/>
+<polygon fill="#ff00e5" stroke="#ff00e5" points="215.13,-1957.74 205.13,-1961.24 215.13,-1964.74 215.13,-1957.74"/>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge112" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M1178.5,-1655.24C966.43,-1628.23 901.32,-1611.2 698,-1677.24 656.5,-1690.72 659.57,-1728.76 616,-1731.24"/>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M614,-1731.24C487.16,-1734.68 433.17,-1802.96 328.5,-1731.24"/>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge111" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M1283.93,-1659.83C1251.3,-1659.85 1214.16,-1658.79 1180.5,-1655.24"/>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M1178.5,-1655.24C1166.44,-1653.97 797.19,-1457.53 786.5,-1463.24"/>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge114" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M1335.56,-1669.32C1279.09,-1687.09 1169.42,-1720.83 1075,-1745.24 897.05,-1791.24 411.72,-2003.85 262,-1897.24 222.16,-1868.87 258.1,-1830.14 226,-1793.24 210.61,-1775.54 193.81,-1787.43 179,-1769.24"/>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;module~self_scalar_2d~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge113" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;module~self_scalar_2d~2</title>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M1369.93,-1645.2C1356.61,-1599.89 1309.29,-1435.04 1284,-1296.24 1259.53,-1161.95 1298.03,-1118.24 1248,-991.24 1237.08,-963.52 1215.7,-936.62 1199.91,-919.14"/>
+<polygon fill="#ff00e5" stroke="#ff00e5" points="1202.05,-916.3 1192.68,-911.35 1196.92,-921.06 1202.05,-916.3"/>
+</g>
+<!-- module~self_tensor_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node41" class="node">
+<title>module~self_tensor_2d_t</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node41"><a xlink:href=".././module/self_tensor_2d_t.html" xlink:title="SELF_Tensor_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045.5,-677.24 938.5,-677.24 938.5,-653.24 1045.5,-653.24 1045.5,-677.24"/>
+<text text-anchor="middle" x="992" y="-662.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge115" class="edge">
+<title>module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M1537.97,-738.76C1431.34,-724.37 1174.88,-689.78 1055.76,-673.71"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="1056.08,-670.22 1045.7,-672.35 1055.14,-677.15 1056.08,-670.22"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge116" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M326.5,-1501.24C273.42,-1462.77 244.02,-1492.9 179,-1501.24"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge121" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M326.5,-1501.24C301.73,-1483.29 288.71,-1492.13 262,-1477.24 244.3,-1467.37 242.92,-1460.4 226,-1449.24 221.54,-1446.3 216.72,-1443.37 211.93,-1440.6"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="213.29,-1437.34 202.85,-1435.5 209.86,-1443.45 213.29,-1437.34"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge119" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M326.5,-1501.24C317.14,-1494.45 177.02,-1457.04 99.19,-1436.59"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="99.66,-1433.1 89.1,-1433.95 97.88,-1439.87 99.66,-1433.1"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge117" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M463.63,-1527.04C437.05,-1506.63 383.41,-1465.42 352.3,-1441.52"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="354.22,-1438.59 344.16,-1435.27 349.96,-1444.14 354.22,-1438.59"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge122" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M471.47,-1526.99C459.77,-1508.44 438.44,-1471.74 429,-1437.24 400.55,-1333.21 438.13,-1051.19 393,-953.24 384.56,-934.91 368.45,-918.93 354.45,-907.51"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="356.56,-904.72 346.52,-901.34 352.26,-910.24 356.56,-904.72"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge120" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M428.94,-1536.01C397.53,-1531.84 357.72,-1522.42 328.5,-1501.24"/>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M326.5,-1501.24C295.52,-1478.79 278.9,-1478.56 262,-1444.24 209.96,-1338.53 240.83,-1032.13 226,-915.24 215.13,-829.56 193.73,-728.98 184.02,-685.31"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="187.41,-684.47 181.81,-675.48 180.58,-686.01 187.41,-684.47"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge118" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M434.2,-1551.24C418.44,-1555.41 400.59,-1560.14 384.09,-1564.51"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="382.8,-1561.23 374.03,-1567.18 384.6,-1568 382.8,-1561.23"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge130" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-853.24C716.94,-853.47 718.46,-906.14 662,-943.24 547.24,-1018.65 517.92,-1038.21 393,-1095.24 365.18,-1107.94 352.31,-1100.04 328.5,-1119.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-1119.24C231.7,-1193.52 194.09,-1344.19 182.91,-1400.94"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="179.43,-1400.51 181.02,-1410.99 186.31,-1401.81 179.43,-1400.51"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge125" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M965.9,-863.45C946.75,-874.23 921.58,-891.86 909,-915.24 861.15,-1004.16 939.35,-1292.11 873,-1368.24 847.14,-1397.91 808.07,-1354.31 786.5,-1387.24"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge128" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-853.24C677.29,-848.12 662.52,-797.09 568,-746.24 551.69,-737.46 549.88,-730.07 532,-725.24 487.81,-713.29 472.12,-709.88 429,-725.24 293.91,-773.36 285.35,-833.03 179,-929.24"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge131" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-743.24C751.65,-710.98 723.55,-724.54 698,-686.24 650.55,-615.1 711.84,-566.72 662,-497.24 659.9,-494.32 657.37,-491.68 654.59,-489.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="656.39,-486.3 646.22,-483.32 652.31,-491.99 656.39,-486.3"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge123" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-853.24C633.94,-849.78 456.21,-871.2 374.19,-882.54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="373.62,-879.08 364.2,-883.93 374.59,-886.02 373.62,-879.08"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge126" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M954.15,-839.19C909.84,-823.18 835.35,-791.2 786.5,-743.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-743.24C751.65,-710.98 722.84,-725.01 698,-686.24 640.77,-596.9 703.98,-547.68 662,-450.24 655.78,-435.79 645.14,-421.81 635.67,-411.08"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="638.09,-408.54 628.74,-403.56 632.94,-413.29 638.09,-408.54"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge127" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M984.77,-838.85C970.99,-811.41 936.94,-743.44 909,-686.24 892.77,-653.02 896.55,-639.74 873,-611.24 857.49,-592.48 835.37,-576.24 817.37,-564.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="818.75,-561.54 808.4,-559.28 815.08,-567.51 818.75,-561.54"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge129" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M938.88,-852.58C897.55,-853.45 838.33,-854.24 786.5,-853.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-853.24C716.95,-851.93 718.46,-800.34 662,-763.24 606.07,-726.49 595.97,-706.92 532,-687.24 420.77,-653.02 280.84,-656.3 215.61,-660.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="215.18,-656.84 205.43,-661 215.64,-663.83 215.18,-656.84"/>
+</g>
+<!-- module~self_datapool -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_node42" class="node">
+<title>module~self_datapool</title>
+<g id="a_module~~self_amrcontroller_2d~~UsesGraph_node42"><a xlink:href=".././module/self_datapool.html" xlink:title="SELF_DataPool">
+<polygon fill="#337ab7" stroke="#337ab7" points="831,-677.24 740,-677.24 740,-653.24 831,-653.24 831,-677.24"/>
+<text text-anchor="middle" x="785.5" y="-662.84" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataPool</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge124" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M980.54,-839.17C960.65,-816.51 915.55,-766.52 873,-729.24 853.98,-712.57 830.88,-695.63 813.34,-683.37"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="814.94,-680.22 804.72,-677.41 810.96,-685.98 814.94,-680.22"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge140" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1779,-627.24C1747.59,-618.1 1521.98,-699.14 1501,-724.24 1435.49,-802.62 1503.63,-856.68 1465,-951.24 1449.27,-989.74 1282.01,-1232.3 1248,-1256.24 1222.52,-1274.18 1211.34,-1270.75 1180.5,-1275.24"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1178.5,-1275.24C1142.78,-1283.06 1102.99,-1290.89 1069.46,-1297.25"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1068.44,-1293.88 1059.26,-1299.17 1069.74,-1300.76 1068.44,-1293.88"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge132" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1949.01,-717.32C1933.83,-733.59 1906.73,-763.81 1887,-792.24 1776.28,-951.8 1800.86,-1027.05 1673,-1173.24 1657.05,-1191.47 1635.14,-1207.82 1617.56,-1219.43"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1615.33,-1216.7 1608.81,-1225.05 1619.11,-1222.59 1615.33,-1216.7"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge135" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1906.64,-717.24C1887.3,-721.55 1865.29,-726.46 1845.15,-730.94"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1844.13,-727.59 1835.13,-733.18 1845.65,-734.42 1844.13,-727.59"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge138" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1937.64,-693.2C1904.16,-676.07 1839.42,-644.78 1781,-627.24"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1779,-627.24C1683.4,-598.54 1742.97,-500.42 1673,-429.24 1598.8,-353.75 1563.77,-351.29 1465,-313.24 1091.04,-169.15 962.63,-151.43 568,-221.24 554.52,-223.62 336.12,-267.87 328.5,-279.24"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M326.5,-279.24C269.69,-340.17 279.57,-373.8 262,-455.24 216.14,-667.83 244.6,-726.56 226,-943.24 210.84,-1119.86 188.61,-1332.64 181.37,-1400.97"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="177.88,-1400.7 180.31,-1411.01 184.84,-1401.44 177.88,-1400.7"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge133" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1586,-587.24C1548.55,-597.04 1532.63,-583.92 1501,-606.24 1353.01,-710.7 1374.66,-794.42 1284,-951.24 1266.88,-980.84 1274.03,-997.07 1248,-1019.24 1126.88,-1122.4 1010.14,-1011.42 909,-1134.24 832.88,-1226.67 934.71,-1298.63 873,-1401.24 848.62,-1441.77 828.23,-1440.96 786.5,-1463.24"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M784.5,-1463.24C749.21,-1481.84 734.46,-1471.05 698,-1487.24 677.33,-1496.42 655.81,-1510.26 640,-1521.35"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="637.94,-1518.52 631.85,-1527.18 642.01,-1524.21 637.94,-1518.52"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge137" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1954.62,-693.01C1928.88,-640.75 1820.89,-433.86 1673,-323.24 1600.29,-268.85 984.2,-9.24 786.5,-9.24 786.5,-9.24 786.5,-9.24 479.5,-9.24 382.25,-9.24 341.53,22.73 262,-33.24 193.24,-81.63 223.03,-131.61 179,-203.24"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M177,-203.24C44.96,-413.54 46.43,-1252.89 47.74,-1400.89"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="44.25,-1401.06 47.84,-1411.02 51.25,-1400.99 44.25,-1401.06"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge139" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1779,-627.24C1695.93,-602.3 1672.2,-566.43 1588,-587.24"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1586,-587.24C1458.07,-618.85 1121.62,-615.92 993,-587.24"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge134" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1779,-627.24C1735.6,-614.61 1684.26,-615.43 1645.74,-618.96"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1645.34,-615.48 1635.74,-619.96 1646.04,-622.45 1645.34,-615.48"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge136" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1779,-627.24C1719.1,-609.81 1727.57,-689.01 1673,-719.24 1664.58,-723.9 1655.23,-727.83 1645.88,-731.12"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1644.6,-727.85 1636.19,-734.31 1646.79,-734.5 1644.6,-727.85"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge142" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M323.44,-1591.4C314.26,-1625.69 283.93,-1724.47 226,-1783.24 209.53,-1799.94 201.68,-1813.21 179,-1807.24"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M177,-1807.24C154.32,-1801.27 144.94,-1801.32 130,-1783.24 64.62,-1704.16 51.36,-1575.15 48.68,-1523.58"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="52.17,-1523.36 48.24,-1513.52 45.18,-1523.67 52.17,-1523.36"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge141" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M313.93,-1567.17C300.78,-1554.45 279.64,-1533.73 262,-1515.24 238.72,-1490.83 212.82,-1461.81 196.25,-1442.98"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="198.76,-1440.55 189.54,-1435.34 193.5,-1445.16 198.76,-1440.55"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge151" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1373.5,-1235.24C1330.34,-1242.72 1223.84,-1268.92 1180.5,-1275.24"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge143" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1779,-1159.24C1737.84,-1190.11 1682.73,-1210.9 1642.28,-1223.2"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1641.19,-1219.87 1632.6,-1226.07 1643.18,-1226.58 1641.19,-1219.87"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge146" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1928.82,-801.24C1899.27,-790.04 1855,-773.27 1822.61,-761"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1823.56,-757.62 1812.96,-757.35 1821.08,-764.16 1823.56,-757.62"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge149" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1586,-1159.24C1444.67,-1155.03 1391.97,-1150.52 1284,-1059.24 1257.89,-1037.16 1277.3,-1008.88 1248,-991.24 1195.84,-959.83 1170.94,-980.52 1111,-991.24 792.91,-1048.13 686.04,-1047.4 429,-1243.24 368.07,-1289.66 400.17,-1356.22 328.5,-1383.24"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M326.5,-1383.24C309.78,-1389.38 270.04,-1400.08 236.01,-1408.87"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="234.94,-1405.53 226.13,-1411.41 236.69,-1412.31 234.94,-1405.53"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge144" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1586,-1159.24C1486.58,-1156.28 1473.5,-1218.24 1375.5,-1235.24"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1373.5,-1235.24C1317.78,-1244.9 1304.36,-1218.92 1248,-1214.24 1187.32,-1209.2 1170.91,-1203.34 1111,-1214.24 1016.63,-1231.4 975.24,-1220.86 909,-1290.24 873.18,-1327.75 903.61,-1359.37 873,-1401.24 845.09,-1439.42 828.11,-1440.74 786.5,-1463.24"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge148" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1779,-823.24C1745.49,-823.61 1738.66,-835.64 1709,-851.24 1691.98,-860.19 1691.4,-869.67 1673,-875.24 1599.84,-897.39 1576.93,-884.05 1501,-875.24 1489.62,-873.92 708.39,-691.07 698,-686.24 656.81,-667.08 659.48,-638.37 616,-625.24"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge145" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d~2</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1958.13,-825.5C1947.7,-875.97 1900.91,-1069.3 1781,-1159.24"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1779,-1159.24C1711.09,-1210.17 1672.05,-1171.13 1588,-1159.24"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1586,-1159.24C1497.88,-1146.78 1275.97,-975.3 1203.67,-917.85"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1205.61,-914.92 1195.61,-911.43 1201.25,-920.4 1205.61,-914.92"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge150" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1779,-823.24C1414.38,-832.65 1347.54,-672.9 993,-587.24"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge147" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1886.74,-818.34C1854.33,-820.33 1815.79,-822.34 1781,-823.24"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1779,-823.24C1715.56,-824.88 1648.45,-786.89 1613.13,-763.34"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1614.68,-760.16 1604.45,-757.41 1610.74,-765.94 1614.68,-760.16"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge153" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1143.87,-1246.91C1133.11,-1250.97 1121.37,-1255.87 1111,-1261.24 1093.92,-1270.08 1092.34,-1276.92 1075,-1285.24 1066.69,-1289.23 1057.63,-1292.8 1048.66,-1295.93"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1047.37,-1292.67 1038.99,-1299.15 1049.59,-1299.31 1047.37,-1292.67"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge152" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1143.93,-1237.35C1026.53,-1245.32 633.5,-1278.7 328.5,-1383.24"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge154" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1143.9,-1230.36C993.53,-1208.97 401.2,-1122.72 328.5,-1081.24"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge162" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M979.64,-495.2C962.81,-476.96 930.88,-440.77 909,-406.24 889.21,-375.01 904.29,-350.93 873,-331.24 702.88,-224.19 568.17,-272.21 429,-417.24 317.93,-532.99 309.52,-584.01 262,-737.24 241.84,-802.25 192.19,-1291.16 181.18,-1401.26"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="177.7,-1400.94 180.19,-1411.23 184.66,-1401.63 177.7,-1400.94"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge157" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M971.2,-519.32C948.29,-532.87 909.06,-554.71 873,-568.24 798.02,-596.38 750.15,-550.45 698,-611.24 637.12,-682.21 619.32,-1382.26 616.44,-1516.9"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="612.94,-1517.13 616.23,-1527.2 619.94,-1517.28 612.94,-1517.13"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge160" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M977.42,-495.02C958.76,-477.38 925.59,-442.86 909,-406.24 869.73,-319.59 936.68,-265.92 873,-195.24 793.6,-107.11 729.74,-156.9 616,-123.24"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M614,-123.24C489.85,-79.05 458.32,-180.61 328.5,-203.24"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M326.5,-203.24C261.24,-209.47 213.33,-147.39 179,-203.24"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge163" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M939,-515.24C896.96,-519.82 836.72,-522.08 786.5,-507.24"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M784.5,-507.24C741.6,-494.56 691.33,-484.41 656.93,-478.16"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="657.25,-474.66 646.79,-476.35 656.02,-481.55 657.25,-474.66"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge155" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M784.5,-431.24C751.76,-423.41 505.7,-407.83 481.5,-431.24"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge158" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M966.56,-495.22C942.98,-483.94 906.1,-467.05 873,-455.24 835.43,-441.83 825.3,-440.52 786.5,-431.24"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M784.5,-431.24C747,-422.27 704.79,-412.25 672,-404.48"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="672.68,-401.05 662.14,-402.15 671.06,-407.86 672.68,-401.05"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge159" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M938.87,-517.44C905.23,-524.02 861.98,-532.47 830.16,-538.7"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="829.4,-535.28 820.26,-540.64 830.74,-542.15 829.4,-535.28"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge161" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M977.53,-494.97C958.98,-477.28 925.96,-442.69 909,-406.24 873.1,-329.11 938.57,-272.44 873,-218.24 826.33,-179.66 377.38,-205.49 328.5,-241.24"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M326.5,-241.24C300.92,-258.01 281.94,-242.04 262,-265.24 212.43,-322.89 187.51,-565.38 180.86,-640.77"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="177.35,-640.75 179.98,-651.02 184.32,-641.35 177.35,-640.75"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge156" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M983.48,-519.46C966.86,-545.47 924.35,-606.57 873,-639.24 863.28,-645.42 852.01,-650.2 840.89,-653.87"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="839.74,-650.56 831.19,-656.81 841.78,-657.26 839.74,-650.56"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge171" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M978.12,-677.39C957.36,-696.47 914.59,-733.69 873,-757.24 760.14,-821.13 418.63,-873.99 328.5,-967.24"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge166" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M982.83,-677.39C965.54,-703.83 925.53,-769.1 909,-830.24 893.37,-888.07 912.08,-1322.83 873,-1368.24 847.32,-1398.07 808.07,-1354.31 786.5,-1387.24"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M784.5,-1387.24C758.58,-1426.8 729.57,-1414.01 698,-1449.24 676.22,-1473.54 685.05,-1490.14 662,-1513.24 658.94,-1516.31 655.44,-1519.13 651.77,-1521.69"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="649.63,-1518.9 643.02,-1527.19 653.35,-1524.83 649.63,-1518.9"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge169" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M784.5,-625.24C709.87,-618.96 690.39,-633.85 616,-625.24"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M614,-625.24C534.53,-616.04 623.76,-408.69 262,-736.24 192.78,-798.91 250.35,-869 179,-929.24"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M177,-929.24C99.96,-989.42 59.91,-1312.61 50.3,-1400.93"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="46.82,-1400.61 49.24,-1410.93 53.78,-1401.36 46.82,-1400.61"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge172" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M970.63,-653.17C952.57,-641.66 926.44,-622.9 909,-601.24 885.81,-572.44 901.99,-549.19 873,-526.24 842.14,-501.8 824.25,-518.4 786.5,-507.24"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge164" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M784.5,-625.24C745.21,-622.93 732.02,-624.44 698,-644.24 677.33,-656.27 682.18,-671.4 662,-684.24 591.25,-729.27 554.56,-698.06 481.5,-739.24"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge167" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M984.23,-653.22C964.1,-617.87 904.12,-515.39 873,-493.24 807.29,-446.47 771.47,-478.49 698,-445.24 676.9,-435.69 655.11,-421.07 639.29,-409.45"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="641.27,-406.55 631.17,-403.35 637.07,-412.15 641.27,-406.55"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge168" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M943.01,-653.15C931.55,-649.42 919.58,-644.8 909,-639.24 891.06,-629.81 889.15,-623.49 873,-611.24 852.47,-595.66 828.95,-578.29 811.62,-565.58"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="813.31,-562.48 803.17,-559.39 809.17,-568.12 813.31,-562.48"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge170" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M943.04,-653.16C901.84,-643.44 840.69,-630.55 786.5,-625.24"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M784.5,-625.24C679.01,-614.91 638.68,-604.23 568,-525.24 534.26,-487.53 573.05,-446.82 532,-417.24 494.86,-390.47 471.36,-399.89 429,-417.24 314.39,-464.17 224.09,-591.81 191.81,-642.29"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="188.67,-640.72 186.31,-651.04 194.59,-644.44 188.67,-640.72"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge165" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M938.34,-665.24C908.59,-665.24 871.45,-665.24 841.35,-665.24"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="841.03,-661.74 831.03,-665.24 841.03,-668.74 841.03,-661.74"/>
+</g>
+<!-- module~self_datapool&#45;&gt;module~self_constants -->
+<g id="module~~self_amrcontroller_2d~~UsesGraph_edge173" class="edge">
+<title>module~self_datapool&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M763.74,-677.32C684.33,-723.79 400.71,-892.1 328.5,-967.24"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-967.24C263.34,-1032.59 200.56,-1318.47 183.51,-1400.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="180.03,-1400.45 181.45,-1410.95 186.89,-1401.86 180.03,-1400.45"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_amrcontroller_2dUsesGraph = svgPanZoom('#moduleself_amrcontroller_2dUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+    
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomdebugresolved~2">geomDebugResolved</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomfull~2">geomFull</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomnoreuse~2">geomNoReuse</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-geomverify~2">geomVerify</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-migrategather~2">migrateGather</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-migrateverify~2">migrateVerify</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-transferhost~2">transferHost</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#variable-transferverify~2">transferVerify</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#type-amrcontroller2d">AMRController2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-recommendedtimestep_amrcontroller2d">RecommendedTimeStep_AMRController2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-adapt_amrcontroller2d">Adapt_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-allgatherperelemints~2">AllgatherPerElemInts</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-allgatherperelemreals~2">AllgatherPerElemReals</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-applyindicatorsettings_amrcontroller2d">ApplyIndicatorSettings_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-buildgeometry_amrcontroller2d">BuildGeometry_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-exchangeoldwindow~2">ExchangeOldWindow</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-free_amrcontroller2d">Free_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-initforestfromdecomposedmesh~2">InitForestFromDecomposedMesh</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-init_amrcontroller2d">Init_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-nextgeombuffer_amrcontroller2d">NextGeomBuffer_AMRController2D</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-planwindows~2">PlanWindows</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-resolvegeomdebug~2">ResolveGeomDebug</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-verifygeometry~2">VerifyGeometry</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-verifymigration~2">VerifyMigration</a>
+      <a class="list-group-item" href="../module/self_amrcontroller_2d.html#proc-verifywindowedapply~2">VerifyWindowedApply</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    <section>
+    <h2>Variables</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-geomdebugresolved~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>geomDebugResolved</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geomfull~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>geomFull</strong></td><td> =</td><td>.false.</td><td><p>SELF_AMR_GEOM_FULL=1: bypass the incremental path</p>
+<p>Debug switches for the multi-rank solution migration, resolved in the same place:</p>
+<p>SELF_AMR_MIGRATE_GATHER=1  migrate through the Stage-5 v1 allgather instead of the
+                             point-to-point window exchange
+  SELF_AMR_MIGRATE_VERIFY=1  run BOTH migrations and compare the received window against
+                             the allgathered global field, bit for bit
+  SELF_AMR_TRANSFER_HOST=1   migrate and apply on the HOST even on a GPU build, i.e.
+                             the portable windowed path. Both an escape hatch and the
+                             way the device path is timed against it in one binary,
+                             which is what keeps the mesh trajectory identical on
+                             both sides of the comparison.
+  SELF_AMR_TRANSFER_VERIFY=1 apply the plan BOTH ways from the same migrated window
+                             and compare, to a TOLERANCE. Deliberately a separate
+                             switch from MIGRATE_VERIFY and deliberately not exact:
+                             migration is byte movement and is checked bitwise, while
+                             the device apply contracts its multiply-accumulates into
+                             FMAs and agrees with the host only to round-off. Merging
+                             the two would force the strict one down to the loose bar.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geomnoreuse~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>geomNoReuse</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geomverify~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>geomVerify</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-migrategather~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>migrateGather</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-migrateverify~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>migrateVerify</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-transferhost~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>transferHost</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-transferverify~2"></span>logical,</td>
+<td>public,</td>  <td>save</td><td>::</td>
+  <td><strong>transferVerify</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-amrcontroller2d"></span><h3>type, public :: <a href='../type/amrcontroller2d.html'>AMRController2D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-activegeom~2"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>activeGeom</strong></td><td>=> </td><td>null()</td><td><p>geometry the model currently runs on</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-activemesh~2"></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>activeMesh</strong></td><td>=> </td><td>null()</td><td><p>mesh the model currently runs on</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-basemesh~2"></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>baseMesh</strong></td><td>=> </td><td>null()</td><td><p>caller-owned; metadata source for EmitMesh</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-coarsenthreshold~4"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>coarsenThreshold</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-energyweights~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>energyWeights</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-forest~2"></span>type(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>forest</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gengeom~2"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>genGeom</strong></td><td>=> </td><td>null()</td><td><p>Cumulative geometry-reuse accounting (AMR Stage 6c), so a run can report what fraction of
+elements avoided regeneration rather than leaving the payoff to be estimated.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geoma~2"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geomA</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geomb~2"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geomB</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geomslot~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>geomSlot</strong></td><td> =</td><td>0</td><td><p>Scratch geometry holding just the elements an epoch actually changed, generated compacted
+and then scattered into place. Persistent and resized, so it allocates only when an epoch
+changes more elements than any epoch before it.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-indicator~4"></span>type(<a href='../type/refinementindicator2d~2.html'>RefinementIndicator2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>indicator</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interp~2"></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>interp</strong></td><td>=> </td><td>null()</td><td><p>the model's solution interpolant</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ivar~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td> =</td><td>SELF_AMR_ALLVARS</td><td><p>driving variable for the indicator</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-maxlevel~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>maxLevel</strong></td><td> =</td><td>1</td><td><p>refinement-level cap</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ngeomgenerated~2"></span>integer(kind=int64),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nGeomGenerated</strong></td><td> =</td><td>0</td><td><p>Point-to-point solution migration state. xferWin holds this rank's window of the OLD
+field - the contiguous run of old elements its new element range references - and is
+persistent and grow-only, so a settled adapting run performs no allocation in the
+migration path. It is flat because it is viewed through a rank-remapped pointer whose
+element lower bound is the window's first GLOBAL old element index, which is the
+numbering the transfer plan uses. winFirst/winLast hold that window for every rank.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ngeomreused~2"></span>integer(kind=int64),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nGeomReused</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nhalo~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nHalo</strong></td><td> =</td><td>1</td><td><p>refine-flag halo-expansion passes</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nmigratebytesrecv~2"></span>integer(kind=int64),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nMigrateBytesRecv</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nmigratebytessent~2"></span>integer(kind=int64),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nMigrateBytesSent</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nmigrateelemremote~2"></span>integer(kind=int64),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nMigrateElemRemote</strong></td><td> =</td><td>0</td><td><p>old elements received from other ranks</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ownsactive~2"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ownsActive</strong></td><td> =</td><td>.false.</td><td><p>whether activeMesh was emitted by us (vs the caller's)
+Two long-lived geometry buffers, alternated each epoch (AMR Stage 6c). Geometry is now
+resized in place rather than allocated and freed per epoch, which is what lets Stage 6b's
+amortization apply to it; alternating means the PREVIOUS epoch's geometry is still intact
+while the new one is filled, which the incremental reuse path needs. geomSlot records
+which buffer activeGeom currently is, or 0 while it is still the caller's geometry.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-refinethreshold~4"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>refineThreshold</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-relativeenergyfloor~4"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>relativeEnergyFloor</strong></td><td> =</td><td>SELF_AMR_DEFAULT_RELFLOOR</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-significantenergyfloor~4"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>significantEnergyFloor</strong></td><td> =</td><td>SELF_AMR_DEFAULT_RELFLOOR</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-winfirst~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>winFirst</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-winlast~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>winLast</strong>(:)</td><td></td><td></td><td><p>Cumulative migration accounting, so the communication volume a repartition actually
+costs is measured rather than estimated. Both migration paths count, so the two are
+directly comparable in one binary.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-xferwin~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>xferWin</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/amrcontroller2d.html#boundprocedure-adapt~2'>Adapt</a></strong>  => Adapt_AMRController2D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/amrcontroller2d.html#boundprocedure-applyindicatorsettings~2'>ApplyIndicatorSettings</a></strong>  => ApplyIndicatorSettings_AMRController2D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/amrcontroller2d.html#boundprocedure-buildgeometry~2'>BuildGeometry</a></strong>  => BuildGeometry_AMRController2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/amrcontroller2d.html#boundprocedure-free~32'>Free</a></strong>  => Free_AMRController2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/amrcontroller2d.html#boundprocedure-init~30'>Init</a></strong>  => Init_AMRController2D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/amrcontroller2d.html#boundprocedure-nextgeombuffer~2'>NextGeomBuffer</a></strong>  => NextGeomBuffer_AMRController2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/amrcontroller2d.html#boundprocedure-recommendedtimestep~2'>RecommendedTimeStep</a></strong>  => RecommendedTimeStep_AMRController2D </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+ 
+    <section>
+    <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-recommendedtimestep_amrcontroller2d"></span><h3>public function <a href='../proc/recommendedtimestep_amrcontroller2d.html'>RecommendedTimeStep_AMRController2D</a>(this, dtBase) result(dt)</h3></div>
+  <div class="panel-body">
+       
+<p>Level-based explicit-stability time step: refinement halves the element scale per
+level, so a time step dtBase that is stable on the base (level-0) mesh scales to
+dtBase / 2**MaxLevel on the current forest. Deterministic and exact for the quadtree
+(child elements are exact half-scale subdivisions); no geometry reduction is needed.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dtBase</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+  </div>
+  </div>
+
+    </section>
+    <br>
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-adapt_amrcontroller2d"></span><h3>public subroutine <a href='../proc/adapt_amrcontroller2d.html'>Adapt_AMRController2D</a>(this, model, adapted)</h3></div>
+  <div class="panel-body">
+       
+<p>Perform one adaptation epoch on the model (see the module documentation). On return,
+adapted reports whether the mesh changed; when it did, the model is already rebound to
+the new mesh with the solution transferred (conservatively), and the caller should
+re-evaluate its time step (RecommendedTimeStep) before the next ForwardStep. When the
+leaf set is unchanged the model is untouched.</p><a href="../proc/adapt_amrcontroller2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(inout),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>model</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>logical,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>adapted</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-allgatherperelemints~2"></span><h3>public subroutine <a href='../proc/allgatherperelemints~2.html'>AllgatherPerElemInts</a>(decomp, perElem, localArr, globalArr)</h3></div>
+  <div class="panel-body">
+       
+<p>Allgather an integer array with perElem entries per element from the decomposition's
+contiguous rank-local element ranges into the global element ordering.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>perElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>localArr</strong>(*)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>globalArr</strong>(*)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-allgatherperelemreals~2"></span><h3>public subroutine <a href='../proc/allgatherperelemreals~2.html'>AllgatherPerElemReals</a>(decomp, perElem, localArr, globalArr)</h3></div>
+  <div class="panel-body">
+       
+<p>Allgather a real(prec) array with perElem entries per element from the decomposition's
+contiguous rank-local element ranges into the global element ordering.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>perElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>localArr</strong>(*)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>globalArr</strong>(*)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-applyindicatorsettings_amrcontroller2d"></span><h3>public subroutine <a href='../proc/applyindicatorsettings_amrcontroller2d.html'>ApplyIndicatorSettings_AMRController2D</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Push the controller-owned amplitude-gate settings onto the indicator. Called after every
+indicator Init, because Init is intent(out) and therefore resets them to the indicator's
+defaults. The setters carry the validation.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-buildgeometry_amrcontroller2d"></span><h3>public subroutine <a href='../proc/buildgeometry_amrcontroller2d.html'>BuildGeometry_AMRController2D</a>(this, newMesh, plan, newGeom, nReused)</h3></div>
+  <div class="panel-body">
+       
+<p>Fill newGeom for the emitted mesh, reusing the previous epoch's geometry for every element
+that did not change and generating only the rest (AMR Stage 6c). nReused reports how many
+elements were copied rather than computed.</p><a href="../proc/buildgeometry_amrcontroller2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>newMesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan2d.html'>TransferPlan2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>newGeom</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nReused</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-exchangeoldwindow~2"></span><h3>public subroutine <a href='../proc/exchangeoldwindow~2.html'>ExchangeOldWindow</a>(decomp, Np, nvar, nLocalOld, uLocal, winFirst, winLast, wFirst, wLast, uWin, nBytesRecv, nBytesSent, nElemRemote)</h3></div>
+  <div class="panel-body">
+       
+<p>Migrate the pre-regrid solution into this rank's old-element window with point-to-point
+messages: the Stage-5 v2 replacement for allgathering the whole old field onto every rank.</p><a href="../proc/exchangeoldwindow~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>Np</strong></td><td><p>nodes per direction (N+1)</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nLocalOld</strong></td><td><p>elements this rank owned before the epoch</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uLocal</strong>(1:Np,1:Np,1:nLocalOld,1:nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>winFirst</strong>(1:decomp%nRanks)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>winLast</strong>(1:decomp%nRanks)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>wFirst</strong></td><td><p>this rank's window, normalized (wFirst &gt; wLast if empty)</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>wLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uWin</strong>(1:Np,1:Np,wFirst:wLast,1:nvar)</td><td><p>intent(inout), not out: the receives write it through MPI rather than through the dummy,
+and an intent(out) dummy would license a compiler to treat it as undefined on entry.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=int64),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nBytesRecv</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=int64),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nBytesSent</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=int64),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElemRemote</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_amrcontroller2d"></span><h3>public subroutine <a href='../proc/free_amrcontroller2d.html'>Free_AMRController2D</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Release the forest, the indicator, and any controller-emitted mesh/geometry. The
+caller-owned base mesh/geometry are untouched. A model still pointing at a
+controller-emitted mesh must not be used after this call.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-initforestfromdecomposedmesh~2"></span><h3>public subroutine <a href='../proc/initforestfromdecomposedmesh~2.html'>InitForestFromDecomposedMesh</a>(forest, mesh)</h3></div>
+  <div class="panel-body">
+       
+<p>Build a rank-replicated forest over a decomposed base mesh: allgather the global
+node coordinates, side table, and material ids (by the decomposition's contiguous
+element ownership) and initialize the forest from the global tables. Collective over
+the mesh communicator; runs once, at controller initialization.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>forest</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_amrcontroller2d"></span><h3>public subroutine <a href='../proc/init_amrcontroller2d.html'>Init_AMRController2D</a>(this, model, refineThreshold, coarsenThreshold, ivar, maxLevel, nHalo, relativeEnergyFloor, energyWeights, significantEnergyFloor)</h3></div>
+  <div class="panel-body">
+       
+<p>Attach the controller to an initialized model. The model's current mesh becomes the
+forest's base mesh (level 0); its geometry interpolant drives the indicator and the
+solution transfer. Thresholds are the sigma = log10 modal-energy-ratio cut-offs of the
+refinement indicator (refineThreshold &gt; coarsenThreshold; see
+SELF_RefinementIndicator_2D). ivar is the driving solution variable (or
+SELF_AMR_ALLVARS). maxLevel &gt;= 0 caps the refinement depth; nHalo &gt;= 0 sets the
+refine-flag halo width in elements.</p><a href="../proc/init_amrcontroller2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>model</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>refineThreshold</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>coarsenThreshold</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>maxLevel</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nHalo</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>relativeEnergyFloor</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>energyWeights</strong>(:)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>significantEnergyFloor</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-nextgeombuffer_amrcontroller2d"></span><h3>public subroutine <a href='../proc/nextgeombuffer_amrcontroller2d.html'>NextGeomBuffer_AMRController2D</a>(this, nElem, geom, slot)</h3></div>
+  <div class="panel-body">
+       
+<p>Select the geometry buffer to fill this epoch: whichever of the two is not currently
+active, so the previous epoch's geometry stays intact and readable (AMR Stage 6c).</p><a href="../proc/nextgeombuffer_amrcontroller2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>intent(out),</td>
+  <td></td>  <td>pointer</td><td>::</td>
+  <td><strong>geom</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>slot</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-planwindows~2"></span><h3>public subroutine <a href='../proc/planwindows~2.html'>PlanWindows</a>(plan, nRanks, newOffset, winFirst, winLast)</h3></div>
+  <div class="panel-body">
+       
+<p>For every rank r, the contiguous window [winFirst(r),winLast(r)] of GLOBAL old element
+indices that rank r's new element range references through the transfer plan. The plan is
+rank-replicated, so this is a purely local computation: no communication is needed to
+learn what a peer wants, which is what makes the point-to-point migration cheap here.</p><a href="../proc/planwindows~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan2d.html'>TransferPlan2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nRanks</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>newOffset</strong>(1:nRanks+1)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>winFirst</strong>(1:nRanks)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>winLast</strong>(1:nRanks)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-resolvegeomdebug~2"></span><h3>public subroutine <a href='../proc/resolvegeomdebug~2.html'>ResolveGeomDebug</a>()</h3></div>
+  <div class="panel-body">
+       
+<p>Read the Stage 6c geometry and the solution-migration debug switches once. Idempotent, so
+it is safe (and intended) to call from every path that consults a switch rather than
+relying on one caller having run first.</p>
+    
+<h4>Arguments</h4>      <em>None</em>
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-verifygeometry~2"></span><h3>public subroutine <a href='../proc/verifygeometry~2.html'>VerifyGeometry</a>(this, newMesh, newGeom)</h3></div>
+  <div class="panel-body">
+       
+<p>Generate the geometry the original way and report, per quantity, the largest discrepancy
+against the incrementally built one. Diagnostic only; gated by SELF_AMR_GEOM_VERIFY.</p><a href="../proc/verifygeometry~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/amrcontroller2d.html'>AMRController2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>newMesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>newGeom</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-verifymigration~2"></span><h3>public subroutine <a href='../proc/verifymigration~2.html'>VerifyMigration</a>(decomp, Np, nvar, nOld, nLocalOld, uLocal, wFirst, wLast, uWin)</h3></div>
+  <div class="panel-body">
+       
+<p>Cross-check a migrated window against the v1 allgathered global old field, bit for bit,
+over the whole window. Diagnostic only; gated by SELF_AMR_MIGRATE_VERIFY. Bit-identity is
+the design guarantee (the same numbers routed differently, then fed to the same operators
+in the same order), so any difference at all is a routing defect and stops the run.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>Np</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nOld</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nLocalOld</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uLocal</strong>(1:Np,1:Np,1:nLocalOld,1:nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>wFirst</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>wLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uWin</strong>(1:Np,1:Np,wFirst:wLast,1:nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-verifywindowedapply~2"></span><h3>public subroutine <a href='../proc/verifywindowedapply~2.html'>VerifyWindowedApply</a>(model, plan, interp, eFirst, eLast, wFirst, wLast, uWin)</h3></div>
+  <div class="panel-body">
+       
+<p>Apply the transfer plan a second time on the HOST, from the same migrated window the
+backend just used, and compare. SELF_AMR_TRANSFER_VERIFY=1.</p><a href="../proc/verifywindowedapply~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>model</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan2d.html'>TransferPlan2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eFirst</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>wFirst</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>wLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uWin</strong>(1:interp%N+1,1:interp%N+1,wFirst:wLast,1:model%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

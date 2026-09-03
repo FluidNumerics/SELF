@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>build_nodeCoords_for_hex &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>build_nodeCoords_for_hex
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.6% of total for procedures.">130 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_3D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_mesh_3d_t.f90.html'>SELF_Mesh_3D_t.f90</a></li>
+     <li><a href='../module/self_mesh_3d_t.html'>SELF_Mesh_3D_t</a></li>
+     <li class="active">build_nodeCoords_for_hex</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/build_nodecoords_for_hex.html#src">build_nodeCoords_for_hex</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine build_nodeCoords_for_hex(mesh, e, nGeo, allCorners, allFlags, allFaces, nodeXYZ)</h2>
+    
+
+    <p>Fill mesh%nodeCoords(:,:,:,:,e) for one hexahedral element by
+transfinite (Coons) interpolation of its six face grids. Faces
+flagged in the mesh file use the file's face-point grids; the
+remaining faces are bilinear patches of their four corner nodes
+evaluated at Chebyshev-Gauss-Lobatto parametric coordinates.
+Edge curves are extracted from the face grids (preferring a
+flagged face when an edge borders one flagged and one bilinear
+face) and the standard Boolean-sum formula
+  x = Pxi + Peta + Pzeta - Pxi<em>Peta - Pxi</em>Pzeta - Peta<em>Pzeta
+      + Pxi</em>Peta*Pzeta
+combines face, edge, and corner contributions. For an element
+with all-straight faces this reduces to trilinear interpolation
+of the eight corners.</p>
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-mesh~28"></span>class(<a href='../type/mesh3d_t.html'>Mesh3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-e~12"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>e</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ngeo~12"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nGeo</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-allcorners"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>allCorners</strong>(:,:)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-allflags"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>allFlags</strong>(:,:)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-allfaces"></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>allFaces</strong>(:,:,:,:,:)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nodexyz"></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nodeXYZ</strong>(:,:)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~build_nodecoords_for_hex~~CallsGraph Pages: 1 -->
+<svg id="procbuild_nodecoords_for_hexCallsGraph" width="509pt" height="74pt"
+ viewBox="0.00 0.00 509.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>proc~~build_nodecoords_for_hex~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 505,-70 505,4 -4,4"/>
+<!-- proc~build_nodecoords_for_hex -->
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph_node1" class="node">
+<title>proc~build_nodecoords_for_hex</title>
+<polygon fill="none" stroke="black" points="153,-45 0,-45 0,-21 153,-21 153,-45"/>
+<text text-anchor="middle" x="76.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">build_nodeCoords_for_hex</text>
+</g>
+<!-- proc~chebyshevquadrature -->
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph_node2" class="node">
+<title>proc~chebyshevquadrature</title>
+<g id="a_proc~~build_nodecoords_for_hex~~CallsGraph_node2"><a xlink:href=".././proc/chebyshevquadrature.html" xlink:title="ChebyshevQuadrature">
+<polygon fill="#d9534f" stroke="#d9534f" points="321,-45 189,-45 189,-21 321,-21 321,-45"/>
+<text text-anchor="middle" x="255" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ChebyshevQuadrature</text>
+</a>
+</g>
+</g>
+<!-- proc~build_nodecoords_for_hex&#45;&gt;proc~chebyshevquadrature -->
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph_edge1" class="edge">
+<title>proc~build_nodecoords_for_hex&#45;&gt;proc~chebyshevquadrature</title>
+<path fill="none" stroke="#ff0000" d="M153.12,-33C161.57,-33 170.17,-33 178.62,-33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="178.82,-36.5 188.82,-33 178.82,-29.5 178.82,-36.5"/>
+</g>
+<!-- proc~chebyshevgausslobatto -->
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph_node3" class="node">
+<title>proc~chebyshevgausslobatto</title>
+<g id="a_proc~~build_nodecoords_for_hex~~CallsGraph_node3"><a xlink:href=".././proc/chebyshevgausslobatto.html" xlink:title="ChebyshevGaussLobatto">
+<polygon fill="#d9534f" stroke="#d9534f" points="501,-66 357,-66 357,-42 501,-42 501,-66"/>
+<text text-anchor="middle" x="429" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ChebyshevGaussLobatto</text>
+</a>
+</g>
+</g>
+<!-- proc~chebyshevquadrature&#45;&gt;proc~chebyshevgausslobatto -->
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph_edge2" class="edge">
+<title>proc~chebyshevquadrature&#45;&gt;proc~chebyshevgausslobatto</title>
+<path fill="none" stroke="#ff0000" d="M321.03,-40.94C329.44,-41.97 338.13,-43.03 346.76,-44.08"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="346.49,-47.57 356.84,-45.31 347.34,-40.63 346.49,-47.57"/>
+</g>
+<!-- proc~chebyshevgauss -->
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph_node4" class="node">
+<title>proc~chebyshevgauss</title>
+<g id="a_proc~~build_nodecoords_for_hex~~CallsGraph_node4"><a xlink:href=".././proc/chebyshevgauss.html" xlink:title="ChebyshevGauss">
+<polygon fill="#d9534f" stroke="#d9534f" points="480.5,-24 377.5,-24 377.5,0 480.5,0 480.5,-24"/>
+<text text-anchor="middle" x="429" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ChebyshevGauss</text>
+</a>
+</g>
+</g>
+<!-- proc~chebyshevquadrature&#45;&gt;proc~chebyshevgauss -->
+<g id="proc~~build_nodecoords_for_hex~~CallsGraph_edge3" class="edge">
+<title>proc~chebyshevquadrature&#45;&gt;proc~chebyshevgauss</title>
+<path fill="none" stroke="#ff0000" d="M321.03,-25.06C336.18,-23.21 352.25,-21.25 367.21,-19.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="367.86,-22.87 377.36,-18.18 367.01,-15.92 367.86,-22.87"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Called by</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~build_nodecoords_for_hex~~CalledByGraph Pages: 1 -->
+<svg id="procbuild_nodecoords_for_hexCalledByGraph" width="360pt" height="32pt"
+ viewBox="0.00 0.00 360.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~build_nodecoords_for_hex~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~build_nodecoords_for_hex~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 356,-28 356,4 -4,4"/>
+<!-- proc~build_nodecoords_for_hex -->
+<g id="proc~~build_nodecoords_for_hex~~CalledByGraph_node1" class="node">
+<title>proc~build_nodecoords_for_hex</title>
+<polygon fill="none" stroke="black" points="352,-24 199,-24 199,0 352,0 352,-24"/>
+<text text-anchor="middle" x="275.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">build_nodeCoords_for_hex</text>
+</g>
+<!-- proc~read_hohqmesh_mesh3d_t -->
+<g id="proc~~build_nodecoords_for_hex~~CalledByGraph_node2" class="node">
+<title>proc~read_hohqmesh_mesh3d_t</title>
+<g id="a_proc~~build_nodecoords_for_hex~~CalledByGraph_node2"><a xlink:href=".././proc/read_hohqmesh_mesh3d_t.html" xlink:title="Read_HOHQMesh_Mesh3D_t">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-24 0,-24 0,0 163,0 163,-24"/>
+<text text-anchor="middle" x="81.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Read_HOHQMesh_Mesh3D_t</text>
+</a>
+</g>
+</g>
+<!-- proc~read_hohqmesh_mesh3d_t&#45;&gt;proc~build_nodecoords_for_hex -->
+<g id="proc~~build_nodecoords_for_hex~~CalledByGraph_edge1" class="edge">
+<title>proc~read_hohqmesh_mesh3d_t&#45;&gt;proc~build_nodecoords_for_hex</title>
+<path fill="none" stroke="#ff0000" d="M163.09,-12C171.48,-12 180.03,-12 188.48,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="188.71,-15.5 198.71,-12 188.71,-8.5 188.71,-15.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/build_nodecoords_for_hex.html#src">build_nodeCoords_for_hex</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">build_nodeCoords_for_hex</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">nGeo</span><span class="p">,</span><span class="n">allCorners</span><span class="p">,</span><span class="n">allFlags</span><span class="p">,</span><span class="n">allFaces</span><span class="p">,</span><span class="n">nodeXYZ</span><span class="p">)</span>
+<span class="w">    </span><span class="c">!! Fill mesh%nodeCoords(:,:,:,:,e) for one hexahedral element by</span>
+<span class="w">    </span><span class="c">!! transfinite (Coons) interpolation of its six face grids. Faces</span>
+<span class="w">    </span><span class="c">!! flagged in the mesh file use the file's face-point grids; the</span>
+<span class="w">    </span><span class="c">!! remaining faces are bilinear patches of their four corner nodes</span>
+<span class="w">    </span><span class="c">!! evaluated at Chebyshev-Gauss-Lobatto parametric coordinates.</span>
+<span class="w">    </span><span class="c">!! Edge curves are extracted from the face grids (preferring a</span>
+<span class="w">    </span><span class="c">!! flagged face when an edge borders one flagged and one bilinear</span>
+<span class="w">    </span><span class="c">!! face) and the standard Boolean-sum formula</span>
+<span class="w">    </span><span class="c">!!   x = Pxi + Peta + Pzeta - Pxi*Peta - Pxi*Pzeta - Peta*Pzeta</span>
+<span class="w">    </span><span class="c">!!       + Pxi*Peta*Pzeta</span>
+<span class="w">    </span><span class="c">!! combines face, edge, and corner contributions. For an element</span>
+<span class="w">    </span><span class="c">!! with all-straight faces this reduces to trilinear interpolation</span>
+<span class="w">    </span><span class="c">!! of the eight corners.</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Mesh3D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">e</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGeo</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">allCorners</span><span class="p">(:,:)</span><span class="w"> </span><span class="c">! 8 x nElem corner-node ids</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">allFlags</span><span class="p">(:,:)</span><span class="w"> </span><span class="c">! 6 x nElem face flags (SELF side order)</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">allFaces</span><span class="p">(:,:,:,:,:)</span><span class="w"> </span><span class="c">! 3 x nGeo+1 x nGeo+1 x 6 x nElem</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nodeXYZ</span><span class="p">(:,:)</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ng1</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">l</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">cornerIDs</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">8</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">6</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">8</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">6</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="c">! xi-directed edges: bs, bn, ts, tn</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="c">! eta-directed edges: bw, be, tw, te</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="c">! zeta-directed edges: sw, se, nw, ne</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">xi</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">nGeo</span><span class="p">),</span><span class="n">wts</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">nGeo</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">xfp</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">),</span><span class="n">xep</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">),</span><span class="n">xcp</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">ng1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">    </span><span class="n">cornerIDs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allCorners</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+<span class="w">    </span><span class="n">flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allFlags</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">do </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span>
+<span class="w">      </span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">l</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nodeXYZ</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">cornerIDs</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+<span class="w">    </span><span class="k">enddo</span>
+
+<span class="k">    if</span><span class="p">(</span><span class="n">nGeo</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="c">! Pure trilinear element with the 8 corners</span>
+<span class="w">      </span><span class="k">do </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span>
+<span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">CGNSCornerMap</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+<span class="w">        </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">CGNSCornerMap</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+<span class="w">        </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">CGNSCornerMap</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+<span class="w">        </span><span class="n">mesh</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+<span class="w">      </span><span class="k">enddo</span>
+<span class="k">      return</span>
+<span class="k">    endif</span>
+
+<span class="w">    </span><span class="c">! Chebyshev-Gauss-Lobatto parametric coordinates on [-1,1] and</span>
+<span class="w">    </span><span class="c">! their [0,1] image used in the blending weights. We use SELF's</span>
+<span class="w">    </span><span class="c">! quadrature routine to keep node placement consistent with the</span>
+<span class="w">    </span><span class="c">! rest of the code.</span>
+<span class="w">    </span><span class="k">call </span><span class="n">ChebyshevQuadrature</span><span class="p">(</span><span class="n">nGeo</span><span class="p">,</span><span class="n">xi</span><span class="p">,</span><span class="n">wts</span><span class="p">,</span><span class="n">CHEBYSHEV_GAUSS_LOBATTO</span><span class="p">)</span>
+<span class="w">    </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">ng1</span>
+<span class="w">      </span><span class="n">u</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5_prec</span><span class="o">*</span><span class="p">(</span><span class="n">xi</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mf">1.0_prec</span><span class="p">)</span>
+<span class="w">    </span><span class="k">enddo</span>
+
+<span class="w">    </span><span class="c">! Face grids: curved faces from the file, straight faces as</span>
+<span class="w">    </span><span class="c">! bilinear patches of their four corners (face-index corner order</span>
+<span class="w">    </span><span class="c">! per sideMap; all faces use the natural on-face volume axes).</span>
+<span class="w">    </span><span class="k">do </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">ng1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">ng1</span><span class="p">,</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allFaces</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">ng1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">ng1</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">ng1</span>
+<span class="w">          </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">ng1</span>
+<span class="w">            </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="w">            </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+<span class="w">            </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideMap</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">s</span><span class="p">))</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                              </span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideMap</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">s</span><span class="p">))</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                              </span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideMap</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">s</span><span class="p">))</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                              </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideMap</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">s</span><span class="p">))</span>
+<span class="w">          </span><span class="k">enddo</span>
+<span class="k">        enddo</span>
+<span class="k">      endif</span>
+<span class="k">    enddo</span>
+
+<span class="w">    </span><span class="c">! Edge curves extracted from the face grids. Each edge borders two</span>
+<span class="w">    </span><span class="c">! faces; a flagged (curved) face is preferred so that straight-face</span>
+<span class="w">    </span><span class="c">! bilinear patches never override curved edge data. When both</span>
+<span class="w">    </span><span class="c">! bordering faces are straight, the two restrictions coincide (the</span>
+<span class="w">    </span><span class="c">! straight line between the edge's corner nodes). SELF side ids:</span>
+<span class="w">    </span><span class="c">! 1=bottom, 2=south, 3=east, 4=north, 5=west, 6=top.</span>
+<span class="w">    </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">ng1</span>
+<span class="w">      </span><span class="c">! xi-directed edges</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! bottom-south: bottom or south</span>
+<span class="w">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! bottom-north: bottom or north</span>
+<span class="w">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! top-south: top or south</span>
+<span class="w">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! top-north: top or north</span>
+<span class="w">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="w">      </span><span class="c">! eta-directed edges</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! bottom-west: bottom or west</span>
+<span class="w">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! bottom-east: bottom or east</span>
+<span class="w">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! top-west: top or west</span>
+<span class="w">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! top-east: top or east</span>
+<span class="w">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="w">      </span><span class="c">! zeta-directed edges</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! south-west: south or west</span>
+<span class="w">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! south-east: south or east</span>
+<span class="w">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! north-west: north or west</span>
+<span class="w">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! north-east: north or east</span>
+<span class="w">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">ng1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">    enddo</span>
+
+<span class="w">    </span><span class="c">! Boolean-sum transfinite interpolation. u,v,w in [0,1] are the</span>
+<span class="w">    </span><span class="c">! blending parameters along xi, eta, zeta.</span>
+<span class="w">    </span><span class="k">do </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">ng1</span>
+<span class="w">      </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+<span class="w">      </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">ng1</span>
+<span class="w">        </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+<span class="w">        </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">ng1</span>
+<span class="w">          </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+<span class="w">          </span><span class="c">! Face contributions (Pxi + Peta + Pzeta)</span>
+<span class="w">          </span><span class="n">xfp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="n">a</span><span class="o">*</span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">b</span><span class="o">*</span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">c</span><span class="o">*</span><span class="n">face</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="w">          </span><span class="c">! Edge corrections (Pxi*Peta + Pxi*Pzeta + Peta*Pzeta)</span>
+<span class="w">          </span><span class="n">xep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">ezEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">eyEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">b</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">b</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">exEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="w">          </span><span class="c">! Corner contributions (Pxi*Peta*Pzeta)</span>
+<span class="w">          </span><span class="n">xcp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">c</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="w">          </span><span class="n">mesh</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xfp</span><span class="o">-</span><span class="n">xep</span><span class="o">+</span><span class="n">xcp</span>
+
+<span class="w">        </span><span class="k">enddo</span>
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
+
+<span class="k">  endsubroutine </span><span class="n">build_nodeCoords_for_hex</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

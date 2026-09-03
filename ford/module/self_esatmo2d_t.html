@@ -1,0 +1,2851 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_ESAtmo2D_t &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_ESAtmo2D_t 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.9% of total for modules and submodules.">489 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_ESAtmo2D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_esatmo2d_t.f90.html'>SELF_ESAtmo2D_t.f90</a></li>
+     <li class="active">SELF_ESAtmo2D_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#type-esatmo2d_t">ESAtmo2D_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-entropy_func_esatmo2d_t">entropy_func_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-log_mean~2">log_mean</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-riemannflux2d_esatmo2d_t">riemannflux2d_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-twopointflux2d_esatmo2d_t">twopointflux2d_ESAtmo2D_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-addthermalbubble_esatmo2d_t">AddThermalBubble_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-additionalfree_esatmo2d_t">AdditionalFree_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-additionalinit_esatmo2d_t">AdditionalInit_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-boundaryflux_esatmo2d_t">BoundaryFlux_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-calculatetendency_esatmo2d_t">CalculateTendency_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-diffusiveboundaryflux_esatmo2d_t">DiffusiveBoundaryFlux_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-diffusivefluxmethod_esatmo2d_t">DiffusiveFluxMethod_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-setdiffusion_esatmo2d_t">SetDiffusion_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-sethydrostaticbalance_esatmo2d_t">SetHydrostaticBalance_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-setmetadata_esatmo2d_t">SetMetadata_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-setnumberofvariables_esatmo2d_t">SetNumberOfVariables_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-sourcemethod_esatmo2d_t">SourceMethod_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-twopointfluxmethod_esatmo2d_t">TwoPointFluxMethod_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-hbc2d_nonormalflow_esatmo2d">hbc2d_NoNormalFlow_ESAtmo2D</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-pbc2d_nostress_esatmo2d">pbc2d_NoStress_ESAtmo2D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>Entropy-conserving compressible Euler equations in 2-D with potential
+temperature formulation (FastEddy / atmospheric LES equation set).</p>
+<p>Conservative variables:</p>
+<p>U = [rho, rho<em>u, rho</em>v, rho*theta, Phi]</p>
+<p>where theta is potential temperature and Phi = g*y is the geopotential
+(gravity acts in the +y direction; y is the vertical coordinate).</p>
+<p>Governing equations:</p>
+<p>d(rho)/dt     + div(rho * v)         = 0
+  d(rho<em>u)/dt   + div(rho</em>u * v) + dp/dx = 0
+  d(rho<em>v)/dt   + div(rho</em>v * v) + dp/dy = -rho * g
+  d(rho<em>th)/dt  + div(rho</em>th * v)      = 0</p>
+<p>Equation of state (dry ideal gas):</p>
+<p>p = p0 * (rho * Rd * theta / p0)^(cp/cv)</p>
+<p>Two-point volume flux: Souza et al. (2023) entropy-conservative.</p>
+<p>Surface Riemann flux: LMARS (Chen et al. 2013).</p>
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_mappedscalar_2d.html'>SELF_MappedScalar_2D</a></li>
+    <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
+    <li><a href='../module/self_boundaryconditions.html'>SELF_BoundaryConditions</a></li>
+    <li><a href='../module/self_ecdgmodel2d.html'>SELF_ECDGModel2D</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_esatmo2d_t~~UsesGraph Pages: 1 -->
+<svg id="moduleself_esatmo2d_tUsesGraph" width="641pt" height="440pt"
+ viewBox="0.00 0.00 641.00 439.76" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_esatmo2d_t~~UsesGraph" class="graph" transform="scale(0.21 0.21) rotate(0) translate(4 2052.79)">
+<title>module~~self_esatmo2d_t~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-2052.79 2994,-2052.79 2994,4 -4,4"/>
+<!-- module~self_esatmo2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node1" class="node">
+<title>module~self_esatmo2d_t</title>
+<polygon fill="none" stroke="black" points="2990,-1193.95 2881,-1193.95 2881,-1169.95 2990,-1169.95 2990,-1193.95"/>
+<text text-anchor="middle" x="2935.5" y="-1179.55" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_ESAtmo2D_t</text>
+</g>
+<!-- module~self_mappedscalar_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node2" class="node">
+<title>module~self_mappedscalar_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node2"><a xlink:href=".././module/self_mappedscalar_2d.html" xlink:title="SELF_MappedScalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2148,-1244.95 2008,-1244.95 2008,-1220.95 2148,-1220.95 2148,-1244.95"/>
+<text text-anchor="middle" x="2078" y="-1230.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d_t&#45;&gt;module~self_mappedscalar_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge1" class="edge">
+<title>module~self_esatmo2d_t&#45;&gt;module~self_mappedscalar_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2897.68,-1194C2840,-1211.78 2724.53,-1242.95 2624,-1242.95 2624,-1242.95 2624,-1242.95 2428,-1242.95 2335.42,-1242.95 2229.08,-1239.39 2158.35,-1236.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2158.32,-1233.01 2148.18,-1236.1 2158.03,-1240.01 2158.32,-1233.01"/>
+</g>
+<!-- module~self_boundaryconditions -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node3" class="node">
+<title>module~self_boundaryconditions</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node3"><a xlink:href=".././module/self_boundaryconditions.html" xlink:title="SELF_BoundaryConditions">
+<polygon fill="#337ab7" stroke="#337ab7" points="862,-401.95 711,-401.95 711,-377.95 862,-377.95 862,-401.95"/>
+<text text-anchor="middle" x="786.5" y="-387.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge2" class="edge">
+<title>module~self_esatmo2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2932.48,-1169.67C2915.81,-1070.18 2797.1,-399.95 2624,-399.95 2624,-399.95 2624,-399.95 2241,-399.95 2078.56,-399.95 2036.59,-420.86 1875.5,-399.95"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1873.5,-399.95C1814.62,-391.42 1800.32,-385.42 1741,-380.95 1462.67,-359.96 1392.06,-371.38 1113,-376.95 1031.28,-378.58 938.1,-382.51 872.43,-385.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="871.96,-382.15 862.13,-386.12 872.29,-389.14 871.96,-382.15"/>
+</g>
+<!-- module~self_ecdgmodel2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node4" class="node">
+<title>module~self_ecdgmodel2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node4"><a xlink:href=".././module/self_ecdgmodel2d.html" xlink:title="SELF_ECDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2845,-1193.95 2724,-1193.95 2724,-1169.95 2845,-1169.95 2845,-1193.95"/>
+<text text-anchor="middle" x="2784.5" y="-1179.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d_t&#45;&gt;module~self_ecdgmodel2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge3" class="edge">
+<title>module~self_esatmo2d_t&#45;&gt;module~self_ecdgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2880.71,-1181.95C2872.38,-1181.95 2863.68,-1181.95 2855.06,-1181.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2855.02,-1178.45 2845.02,-1181.95 2855.02,-1185.45 2855.02,-1178.45"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node5" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node5"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1217,-409.95 1146,-409.95 1146,-385.95 1217,-385.95 1217,-409.95"/>
+<text text-anchor="middle" x="1181.5" y="-395.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge4" class="edge">
+<title>module~self_esatmo2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1873.5,-399.95C1631.03,-372.16 1337.56,-387.28 1227.26,-394.65"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1226.91,-391.17 1217.17,-395.34 1227.39,-398.15 1226.91,-391.17"/>
+</g>
+<!-- module~self_mappedscalar_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node6" class="node">
+<title>module~self_mappedscalar_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node6"><a xlink:href=".././module/self_mappedscalar_2d_t.html" xlink:title="SELF_MappedScalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1949,-1244.95 1800,-1244.95 1800,-1220.95 1949,-1220.95 1949,-1244.95"/>
+<text text-anchor="middle" x="1874.5" y="-1230.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge5" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2007.94,-1232.95C1992.42,-1232.95 1975.79,-1232.95 1959.74,-1232.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1959.29,-1229.45 1949.29,-1232.95 1959.29,-1236.45 1959.29,-1229.45"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node7" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node7"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-546.95 262,-546.95 262,-522.95 393,-522.95 393,-546.95"/>
+<text text-anchor="middle" x="327.5" y="-532.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge6" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M744.05,-402.06C729.47,-406.37 712.99,-411.31 698,-415.95 581.26,-452.09 444.51,-496.74 374.67,-519.71"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="373.27,-516.48 364.86,-522.94 375.46,-523.13 373.27,-516.48"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node9" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node9"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-1236.95 568,-1236.95 568,-1212.95 662,-1212.95 662,-1236.95"/>
+<text text-anchor="middle" x="615" y="-1222.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge8" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M754.77,-401.96C734.86,-411.49 710.4,-426.92 698,-448.95 616.14,-594.35 749.52,-1056.89 662,-1198.95 660.27,-1201.76 658.11,-1204.3 655.69,-1206.58"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="653.55,-1203.81 647.76,-1212.68 657.82,-1209.35 653.55,-1203.81"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node10" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node10"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-890.95 5,-890.95 5,-866.95 89,-866.95 89,-890.95"/>
+<text text-anchor="middle" x="47" y="-876.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge7" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M777.08,-377.81C758.6,-351.85 712.14,-290 662,-249.95 539.6,-152.2 484.84,-126.28 328.5,-135.95"/>
+</g>
+<!-- module~self_ecdgmodel2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node8" class="node">
+<title>module~self_ecdgmodel2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node8"><a xlink:href=".././module/self_ecdgmodel2d_t.html" xlink:title="SELF_ECDGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2688,-1193.95 2558,-1193.95 2558,-1169.95 2688,-1169.95 2688,-1193.95"/>
+<text text-anchor="middle" x="2623" y="-1179.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge9" class="edge">
+<title>module~self_ecdgmodel2d&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2723.65,-1181.95C2715.42,-1181.95 2706.89,-1181.95 2698.43,-1181.95"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2698.18,-1178.45 2688.18,-1181.95 2698.18,-1185.45 2698.18,-1178.45"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge12" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1171.92,-385.55C1148.17,-351.29 1082.96,-257.46 1077,-251.95 966.96,-150.18 937.39,-78.95 787.5,-78.95 787.5,-78.95 787.5,-78.95 614,-78.95 484.61,-78.95 457.56,-126.72 328.5,-135.95"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-135.95C226.04,-139.39 177.96,-159.61 130,-247.95 69.02,-360.27 140.31,-702.83 94,-821.95 88.49,-836.12 78.1,-849.48 68.58,-859.7"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="66.06,-857.27 61.57,-866.87 71.07,-862.17 66.06,-857.27"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node11" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node11"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-890.95 130,-890.95 130,-866.95 226,-866.95 226,-890.95"/>
+<text text-anchor="middle" x="178" y="-876.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge10" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1162.43,-385.82C1083.17,-334.1 757.93,-137.07 481.5,-192.95"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node12" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node12"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1077,-641.95 911,-641.95 911,-617.95 1077,-617.95 1077,-641.95"/>
+<text text-anchor="middle" x="994" y="-627.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge11" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1170.79,-410.1C1140.61,-447.84 1048.27,-563.33 1010.92,-610.04"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1008.13,-607.93 1004.62,-617.92 1013.59,-612.3 1008.13,-607.93"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge18" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1873.07,-1245.15C1869.15,-1337.18 1831.8,-1918.95 1515,-1918.95 1515,-1918.95 1515,-1918.95 1356.5,-1918.95 1060.48,-1918.95 990.25,-1971.82 698,-2018.95 661.5,-2024.84 652.57,-2038.41 616,-2032.95"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-2032.95C547.63,-2018.66 549.39,-1957.42 481.5,-1956.95"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge19" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1864.03,-1245.07C1803.86,-1320.94 1464.74,-1731.48 1077,-1856.95 968.48,-1892.07 669.05,-1843.85 568,-1790.95 381.66,-1693.4 342.74,-1624.16 262,-1429.95 220.91,-1331.12 188.84,-991.49 180.9,-901.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="184.39,-900.86 180.03,-891.2 177.41,-901.46 184.39,-900.86"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge21" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1823.54,-1244.95C1751.68,-1259.59 1616.59,-1277.07 1515,-1230.95"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1513,-1230.95C1493,-1219.71 1481.63,-1227.76 1465,-1211.95 1437.03,-1185.37 1445.88,-1167.65 1429,-1132.95 1368.56,-1008.72 1331.77,-987.3 1286,-856.95 1258.97,-779.97 1303.38,-738.65 1250,-676.95 1229.17,-652.87 1212.33,-664.08 1182.5,-652.95"/>
+</g>
+<!-- module~self_mesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node15" class="node">
+<title>module~self_mesh_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node15"><a xlink:href=".././module/self_mesh_2d.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1559.5,-873.95 1468.5,-873.95 1468.5,-849.95 1559.5,-849.95 1559.5,-873.95"/>
+<text text-anchor="middle" x="1514" y="-859.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge13" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1799.78,-1222.94C1791.18,-1219.1 1783.27,-1213.91 1777,-1206.95 1708.96,-1131.35 1806.63,-1058.65 1741,-980.95 1698.01,-930.06 1657.02,-965.7 1599,-932.95 1592.11,-929.06 1558.97,-900.48 1536.43,-880.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1538.5,-877.95 1528.67,-873.99 1533.89,-883.21 1538.5,-877.95"/>
+</g>
+<!-- module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node16" class="node">
+<title>module~self_lagrange~2</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node16"><a xlink:href=".././module/self_lagrange~2.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-966.95 568,-966.95 568,-942.95 662,-942.95 662,-966.95"/>
+<text text-anchor="middle" x="615" y="-952.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge14" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1513,-1230.95C1492.69,-1220.28 1486.27,-1220.55 1465,-1211.95 1292.05,-1142.07 1254.67,-1108.75 1077,-1051.95 1041.37,-1040.56 1026.67,-1052.87 995,-1032.95"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M993,-1032.95C949.21,-1004.5 839.56,-914.87 787.5,-918.95"/>
+</g>
+<!-- module~self_scalar_2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node17" class="node">
+<title>module~self_scalar_2d~2</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node17"><a xlink:href=".././module/self_scalar_2d~2.html" xlink:title="SELF_Scalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1230,-1436.95 1133,-1436.95 1133,-1412.95 1230,-1412.95 1230,-1436.95"/>
+<text text-anchor="middle" x="1181.5" y="-1422.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge15" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1857.77,-1245.21C1797.34,-1291.1 1572.8,-1450.89 1358.5,-1464.95"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1356.5,-1464.95C1309.45,-1467.32 1256.93,-1452.78 1222.02,-1440.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1222.82,-1437.13 1212.22,-1437.04 1220.45,-1443.72 1222.82,-1437.13"/>
+</g>
+<!-- module~self_geometry_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node18" class="node">
+<title>module~self_geometry_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node18"><a xlink:href=".././module/self_geometry_2d.html" xlink:title="SELF_Geometry_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1728.5,-1087.95 1611.5,-1087.95 1611.5,-1063.95 1728.5,-1063.95 1728.5,-1087.95"/>
+<text text-anchor="middle" x="1670" y="-1073.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge16" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1801.82,-1220.76C1792.91,-1217.26 1784.36,-1212.75 1777,-1206.95 1750.75,-1186.27 1761.51,-1167.33 1741,-1140.95 1727.55,-1123.66 1709.35,-1106.91 1694.88,-1094.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1696.8,-1091.79 1686.85,-1088.14 1692.35,-1097.19 1696.8,-1091.79"/>
+</g>
+<!-- module~self_tensor_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node19" class="node">
+<title>module~self_tensor_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node19"><a xlink:href=".././module/self_tensor_2d.html" xlink:title="SELF_Tensor_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1563,-1202.95 1465,-1202.95 1465,-1178.95 1563,-1178.95 1563,-1202.95"/>
+<text text-anchor="middle" x="1514" y="-1188.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge17" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1821.58,-1220.93C1806.98,-1217.02 1791.21,-1212.29 1777,-1206.95 1727.88,-1188.48 1722.77,-1146.35 1671,-1154.95"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node20" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="646.5,-1472.95 583.5,-1472.95 583.5,-1448.95 646.5,-1448.95 646.5,-1472.95"/>
+<text text-anchor="middle" x="615" y="-1458.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge20" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1356.5,-1464.95C1154.67,-1475.13 1071.01,-1432.51 911,-1555.95 882.36,-1578.05 905.72,-1609.85 875,-1628.95 808.2,-1670.49 764.72,-1670.63 698,-1628.95 646.14,-1596.55 626.2,-1520.85 619.29,-1483.13"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="622.72,-1482.42 617.6,-1473.15 615.81,-1483.59 622.72,-1482.42"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge22" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M323.46,-547.21C313.26,-587.27 277.92,-717.38 226,-814.95 217.66,-830.62 205.82,-846.71 196.11,-858.85"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="193.13,-856.96 189.5,-866.91 198.55,-861.4 193.13,-856.96"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node21" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node21"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-812.95 0,-812.95 0,-788.95 94,-788.95 94,-812.95"/>
+<text text-anchor="middle" x="47" y="-798.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge23" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M261.98,-545.45C235.38,-551.32 204.81,-560.12 179,-572.95"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M177,-572.95C156,-583.39 145.82,-579.64 130,-596.95 80.7,-650.89 59.28,-738.24 51.61,-778.87"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="48.15,-778.34 49.83,-788.8 55.04,-779.57 48.15,-778.34"/>
+</g>
+<!-- module~self_mappedtwopointvector_2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node22" class="node">
+<title>module~self_mappedtwopointvector_2d~2</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node22"><a xlink:href=".././module/self_mappedtwopointvector_2d~2.html" xlink:title="SELF_MappedTwoPointVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2522,-1214.95 2336,-1214.95 2336,-1190.95 2522,-1190.95 2522,-1214.95"/>
+<text text-anchor="middle" x="2429" y="-1200.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d_t&#45;&gt;module~self_mappedtwopointvector_2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge24" class="edge">
+<title>module~self_ecdgmodel2d_t&#45;&gt;module~self_mappedtwopointvector_2d~2</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M2557.8,-1188.97C2549.57,-1189.87 2540.99,-1190.81 2532.35,-1191.76"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="2531.74,-1188.3 2522.18,-1192.87 2532.5,-1195.26 2531.74,-1188.3"/>
+</g>
+<!-- module~self_dgmodel2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node23" class="node">
+<title>module~self_dgmodel2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node23"><a xlink:href=".././module/self_dgmodel2d.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2482.5,-1172.95 2375.5,-1172.95 2375.5,-1148.95 2482.5,-1148.95 2482.5,-1172.95"/>
+<text text-anchor="middle" x="2429" y="-1158.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge25" class="edge">
+<title>module~self_ecdgmodel2d_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M2557.8,-1174.93C2536.81,-1172.63 2513.54,-1170.09 2492.67,-1167.8"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="2492.96,-1164.32 2482.64,-1166.71 2492.2,-1171.27 2492.96,-1164.32"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node13" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-1314.95 151,-1314.95 151,-1290.95 205,-1290.95 205,-1314.95"/>
+<text text-anchor="middle" x="178" y="-1300.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge27" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M578.91,-1237.06C525.56,-1254.89 420.51,-1287.74 328.5,-1302.95"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node24" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node24"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-1122.95 291,-1122.95 291,-1098.95 364,-1098.95 364,-1122.95"/>
+<text text-anchor="middle" x="327.5" y="-1108.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge26" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M586.93,-1212.95C580.22,-1209.13 573.41,-1204.44 568,-1198.95 544.55,-1175.15 556.28,-1155.91 532,-1132.95 513.95,-1115.87 506.33,-1108.05 481.5,-1108.95"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge29" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M129.7,-878.95C119.88,-878.95 109.48,-878.95 99.52,-878.95"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="99.34,-875.45 89.34,-878.95 99.34,-882.45 99.34,-875.45"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge28" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M157.13,-866.93C135.69,-853.97 101.37,-833.22 76.94,-818.45"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="78.48,-815.29 68.11,-813.11 74.86,-821.28 78.48,-815.29"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node14" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node14"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="874,-641.95 699,-641.95 699,-617.95 874,-617.95 874,-641.95"/>
+<text text-anchor="middle" x="786.5" y="-627.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge30" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M910.9,-629.95C902.12,-629.95 893.14,-629.95 884.22,-629.95"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="884.19,-626.45 874.19,-629.95 884.19,-633.45 884.19,-626.45"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge31" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M479.5,-534.95C455.01,-529.92 427.81,-528.63 403.32,-529.01"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="402.91,-525.51 393,-529.26 403.08,-532.51 402.91,-525.51"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge35" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M769.16,-617.76C746.28,-601.2 702.9,-571.64 662,-553.95 548.3,-504.76 515.79,-497.32 393,-480.95 335.29,-473.26 309.33,-447.04 262,-480.95 221.56,-509.93 258.55,-549.32 226,-586.95 210.66,-604.69 194.23,-593.11 179,-610.95"/>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M177,-610.95C105.05,-681.51 144.67,-734.84 94,-821.95 86.33,-835.13 75.75,-848.47 66.67,-858.93"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="63.84,-856.85 59.79,-866.64 69.06,-861.51 63.84,-856.85"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge33" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M744.5,-617.95C729.81,-613.6 713.15,-608.61 698,-603.95 601.48,-574.23 580.42,-555.28 481.5,-534.95"/>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M479.5,-534.95C411.59,-520.51 378.23,-446.51 328.5,-494.95"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge32" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M743.57,-642.02C727.2,-648.69 709.62,-658.62 698,-672.95 657,-723.53 680.17,-752.43 662,-814.95 649.77,-857.02 633.32,-905.46 623.76,-932.92"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="620.35,-932.08 620.35,-942.68 626.95,-934.39 620.35,-932.08"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node25" class="node">
+<title>mpi</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node25"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-280.95 151,-280.95 151,-256.95 205,-256.95 205,-280.95"/>
+<text text-anchor="middle" x="178" y="-266.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge34" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M759.87,-617.92C740.61,-607.75 714.77,-591.56 698,-570.95 671.33,-538.17 684.01,-519.02 662,-482.95 615.69,-407.07 609.21,-375.01 532,-330.95 428.63,-271.96 282.68,-266.51 215.47,-267.52"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="215.3,-264.03 205.38,-267.73 215.45,-271.02 215.3,-264.03"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node28" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node28"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1407.5,-704.95 1307.5,-704.95 1307.5,-680.95 1407.5,-680.95 1407.5,-704.95"/>
+<text text-anchor="middle" x="1357.5" y="-690.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge36" class="edge">
+<title>module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1501.89,-849.8C1475.5,-820.93 1408.85,-748.03 1376.57,-712.72"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1378.84,-710.01 1369.51,-704.99 1373.67,-714.74 1378.84,-710.01"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge38" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M595.97,-967.15C552.34,-995.57 436.63,-1064.26 328.5,-1070.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M326.5,-1070.95C206.03,-1079.57 99.39,-950.43 62.1,-899.31"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="64.81,-897.08 56.15,-890.99 59.12,-901.16 64.81,-897.08"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge39" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M567.73,-962.94C498.41,-974.15 371.17,-991.5 328.5,-975.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M326.5,-975.95C294.87,-962.3 288.49,-954.97 262,-932.95 244.36,-918.28 245.28,-908.39 226,-895.95 225.91,-895.89 225.83,-895.84 225.74,-895.78"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="227.62,-892.82 217.17,-891.05 224.23,-898.95 227.62,-892.82"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge40" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M610.59,-942.62C601.85,-912.83 576.16,-835.84 532,-786.95 470.51,-718.88 261.14,-532.11 179,-572.95"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node29" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node29"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="532,-852.95 429,-852.95 429,-828.95 532,-828.95 532,-852.95"/>
+<text text-anchor="middle" x="480.5" y="-838.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge37" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M599.82,-942.75C576.71,-922.87 530.76,-883.33 503.42,-859.81"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="505.44,-856.93 495.58,-853.06 500.88,-862.24 505.44,-856.93"/>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge42" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M993,-1842.95C913.56,-1899.26 874.21,-1874.62 787.5,-1918.95"/>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge41" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1179.39,-1437.29C1173.5,-1494.91 1140.37,-1739.12 995,-1842.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M993,-1842.95C979.37,-1852.68 712.54,-1789.26 698,-1780.95 651.03,-1754.09 658.87,-1723.97 616,-1690.95"/>
+</g>
+<!-- module~self_scalar_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node27" class="node">
+<title>module~self_scalar_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node27"><a xlink:href=".././module/self_scalar_2d_t.html" xlink:title="SELF_Scalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1047,-1436.95 941,-1436.95 941,-1412.95 1047,-1412.95 1047,-1436.95"/>
+<text text-anchor="middle" x="994" y="-1422.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;module~self_scalar_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge43" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;module~self_scalar_2d_t</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1132.73,-1424.95C1109.81,-1424.95 1082.06,-1424.95 1057.49,-1424.95"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1057.17,-1421.45 1047.17,-1424.95 1057.17,-1428.45 1057.17,-1421.45"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge44" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1648.81,-1063.84C1627.57,-1051.18 1593.12,-1030.84 1563,-1013.95 1509.54,-983.97 1135.29,-771.92 1077,-752.95 915.32,-700.34 858.7,-756.48 698,-700.95 634.74,-679.09 625.57,-659.08 568,-624.95 529.41,-602.07 524.05,-587.15 481.5,-572.95"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge51" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M993,-956.95C700.15,-917.84 599.77,-1093.03 328.5,-975.95"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge47" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1652.39,-1063.85C1636.65,-1051.6 1613.35,-1031.32 1599,-1008.95 1572.59,-967.78 1590.08,-945.68 1563,-904.95 1556.96,-895.87 1548.56,-887.46 1540.47,-880.54"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="1542.56,-877.73 1532.59,-874.14 1538.14,-883.16 1542.56,-877.73"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge49" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1611.19,-1071.98C1570.23,-1068.76 1514.07,-1063.5 1465,-1055.95 1254.01,-1023.49 1207.49,-977.44 995,-956.95"/>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M993,-956.95C900.94,-944.65 880.14,-912.25 787.5,-918.95"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_scalar_2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge50" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_scalar_2d~2</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1513,-1150.95C1493.21,-1162.56 1484.49,-1157.85 1465,-1169.95 1450.13,-1179.18 1266.18,-1347.97 1203.36,-1405.74"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="1200.65,-1403.48 1195.66,-1412.83 1205.39,-1408.64 1200.65,-1403.48"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge48" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1656.3,-1088.09C1637.06,-1106.12 1598.96,-1140.48 1563,-1164.95 1558.4,-1168.08 1553.38,-1171.15 1548.38,-1174.01"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="1546.55,-1171.02 1539.49,-1178.91 1549.94,-1177.15 1546.55,-1171.02"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node26" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node26"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="821,-1240.95 752,-1240.95 752,-1216.95 821,-1216.95 821,-1240.95"/>
+<text text-anchor="middle" x="786.5" y="-1226.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_data -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge45" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1644.82,-1087.95C1614.56,-1102.92 1561.12,-1129.18 1515,-1150.95"/>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1513,-1150.95C1391.48,-1208.31 1044.22,-1190.34 911,-1207.95 884.42,-1211.46 854.81,-1216.46 831.24,-1220.7"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="830.42,-1217.29 821.21,-1222.52 831.67,-1224.18 830.42,-1217.29"/>
+</g>
+<!-- module~self_vector_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node30" class="node">
+<title>module~self_vector_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node30"><a xlink:href=".././module/self_vector_2d.html" xlink:title="SELF_Vector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1562.5,-1046.95 1465.5,-1046.95 1465.5,-1022.95 1562.5,-1022.95 1562.5,-1046.95"/>
+<text text-anchor="middle" x="1514" y="-1032.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_vector_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge46" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_vector_2d</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1623.63,-1063.87C1606.94,-1059.43 1587.85,-1054.35 1570.38,-1049.69"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="1570.88,-1046.2 1560.31,-1047.01 1569.08,-1052.97 1570.88,-1046.2"/>
+</g>
+<!-- module~self_tensor_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node31" class="node">
+<title>module~self_tensor_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node31"><a xlink:href=".././module/self_tensor_2d_t.html" xlink:title="SELF_Tensor_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1047.5,-1240.95 940.5,-1240.95 940.5,-1216.95 1047.5,-1216.95 1047.5,-1240.95"/>
+<text text-anchor="middle" x="994" y="-1226.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge52" class="edge">
+<title>module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1464.6,-1195.78C1452.95,-1196.88 1440.53,-1198 1429,-1198.95 1297.13,-1209.79 1142.49,-1219.84 1058.01,-1225.11"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1057.57,-1221.63 1047.81,-1225.74 1058.01,-1228.62 1057.57,-1221.63"/>
+</g>
+<!-- module~self_mappedtwopointvector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node32" class="node">
+<title>module~self_mappedtwopointvector_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node32"><a xlink:href=".././module/self_mappedtwopointvector_2d_t.html" xlink:title="SELF_MappedTwoPointVector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1972,-1890.95 1777,-1890.95 1777,-1866.95 1972,-1866.95 1972,-1890.95"/>
+<text text-anchor="middle" x="1874.5" y="-1876.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedtwopointvector_2d~2&#45;&gt;module~self_mappedtwopointvector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge53" class="edge">
+<title>module~self_mappedtwopointvector_2d~2&#45;&gt;module~self_mappedtwopointvector_2d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M2418.18,-1214.97C2352.34,-1295.52 1975.36,-1756.77 1891.87,-1858.92"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1888.95,-1856.96 1885.33,-1866.92 1894.37,-1861.39 1888.95,-1856.96"/>
+</g>
+<!-- module~self_dgmodel2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node33" class="node">
+<title>module~self_dgmodel2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node33"><a xlink:href=".././module/self_dgmodel2d_t.html" xlink:title="SELF_DGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2300,-1193.95 2184,-1193.95 2184,-1169.95 2300,-1169.95 2300,-1193.95"/>
+<text text-anchor="middle" x="2242" y="-1179.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge54" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M2375.48,-1166.91C2355.19,-1169.21 2331.73,-1171.88 2310.23,-1174.32"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="2309.73,-1170.85 2300.19,-1175.46 2310.52,-1177.81 2309.73,-1170.85"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge55" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M318.78,-1098.8C294.88,-1061.22 221.96,-946.53 192.03,-899.45"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="194.96,-897.54 186.65,-890.98 189.06,-901.29 194.96,-897.54"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge58" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M317.27,-1122.96C292.59,-1155.08 224.88,-1243.23 194.32,-1283.01"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="191.54,-1280.88 188.22,-1290.94 197.09,-1285.15 191.54,-1280.88"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge57" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M314.73,-1098.81C283.82,-1066.84 198.06,-977.42 130,-899.95 106.41,-873.1 80.25,-841.11 63.96,-820.91"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="66.62,-818.62 57.63,-813.02 61.16,-823.01 66.62,-818.62"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge56" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M320.86,-1098.76C308.01,-1070.37 276.53,-997.4 262,-932.95 225.26,-770.05 247.37,-724.57 226,-558.95 213.04,-458.52 191.91,-339.44 183.08,-291.05"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="186.5,-290.27 181.25,-281.06 179.61,-291.53 186.5,-290.27"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge61" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M751.61,-1228.15C728.92,-1227.61 698.52,-1226.9 672.25,-1226.28"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="672.11,-1222.77 662.04,-1226.04 671.95,-1229.77 672.11,-1222.77"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge62" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M614,-1302.95C388.29,-1364.87 528.82,-1590.34 393,-1780.95 369.93,-1813.33 360.01,-1818.69 328.5,-1842.95"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M326.5,-1842.95C267.82,-1881.63 231.76,-1946.38 179,-1899.95"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M177,-1899.95C99.05,-1831.36 56.3,-1045.51 49.09,-901.53"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="52.58,-901.09 48.59,-891.27 45.59,-901.43 52.58,-901.09"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge64" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M614,-1302.95C557.21,-1318.53 540.28,-1306.59 481.5,-1302.95"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M479.5,-1302.95C462.23,-1301.88 340.85,-1277.07 328.5,-1264.95"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge63" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M479.5,-1302.95C412.52,-1298.81 394.73,-1292.13 328.5,-1302.95"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge60" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M751.98,-1227.21C733.52,-1224.46 711.64,-1217.96 698,-1202.95 641.96,-1141.28 695.08,-1095.43 662,-1018.95 655.09,-1002.98 643.7,-987.09 633.98,-975.14"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="636.41,-972.58 627.29,-967.18 631.05,-977.09 636.41,-972.58"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge65" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M751.7,-1231.91C733.83,-1235.07 712.62,-1241.59 698,-1254.95 669.66,-1280.85 635.7,-1391.45 622.09,-1439.03"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="618.64,-1438.36 619.29,-1448.94 625.37,-1440.27 618.64,-1438.36"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge59" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M751.69,-1231.17C734.84,-1233.33 714.58,-1237.59 698,-1245.95 678.62,-1255.72 679.77,-1266.49 662,-1278.95 643.12,-1292.19 638.34,-1297.23 616,-1302.95"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M614,-1302.95C553.75,-1318.38 402.58,-1181.64 348.3,-1130.1"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="350.66,-1127.52 341.01,-1123.14 345.83,-1132.58 350.66,-1127.52"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge69" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M940.93,-1436.63C876.61,-1447.82 767.25,-1455.87 698,-1400.95 657.03,-1368.46 685.54,-1335.63 662,-1288.95 654.07,-1273.22 642.48,-1257.12 632.92,-1245.01"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="635.41,-1242.52 626.4,-1236.95 629.97,-1246.93 635.41,-1242.52"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge71" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M785.5,-1766.95C724.39,-1818.05 561.16,-1956.95 481.5,-1956.95"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M479.5,-1956.95C343.58,-1954.59 281.06,-1989.75 179,-1899.95"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge73" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M984.89,-1436.98C969.67,-1459.77 936.09,-1510.96 911,-1555.95 893.38,-1587.54 903.27,-1606.38 875,-1628.95 828.75,-1665.88 661.76,-1728.48 616,-1690.95"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M614,-1690.95C573.4,-1660.13 431.58,-1322.26 393,-1288.95 369.85,-1268.96 350.93,-1285.74 328.5,-1264.95"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge72" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M983.18,-1437.12C965.79,-1459.33 929.66,-1508.51 911,-1555.95 880.02,-1634.71 932.48,-1680.83 875,-1742.95 847.61,-1772.55 819.03,-1741.81 787.5,-1766.95"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M785.5,-1766.95C745.8,-1798.61 375.44,-1786.31 328.5,-1766.95"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge68" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M940.81,-1413.84C920.33,-1409.61 896.6,-1404.87 875,-1400.95 855.63,-1397.43 800.53,-1401.71 787.5,-1386.95"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M785.5,-1386.95C758.81,-1356.72 724.09,-1393.7 698,-1362.95 648.27,-1304.35 689.34,-1090.78 662,-1018.95 655.81,-1002.69 644.42,-986.8 634.53,-974.91"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="636.88,-972.28 627.68,-967.02 631.59,-976.87 636.88,-972.28"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge74" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M972.17,-1437.16C954.3,-1448.4 928.71,-1466.4 911,-1486.95 889.19,-1512.26 897.2,-1527.98 875,-1552.95 843.33,-1588.57 834.56,-1607.37 787.5,-1614.95"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M785.5,-1614.95C745.69,-1621.36 730.4,-1614.96 698,-1590.95 660.2,-1562.93 635.57,-1511.83 623.9,-1482.74"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="627.04,-1481.17 620.18,-1473.1 620.51,-1483.69 627.04,-1481.17"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge66" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M785.5,-1614.95C673.63,-1632.97 653.94,-1555.79 568,-1481.95 563.45,-1478.04 432.27,-1321.97 429,-1316.95 407.46,-1283.85 358.9,-1178.24 338.18,-1132.46"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="341.28,-1130.83 333.97,-1123.15 334.9,-1133.71 341.28,-1130.83"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge70" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M984.17,-1412.64C965.73,-1387.41 920.99,-1328.82 875,-1287.95 857.27,-1272.2 835.1,-1257.29 817.51,-1246.4"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="819.15,-1243.3 808.78,-1241.09 815.51,-1249.28 819.15,-1243.3"/>
+</g>
+<!-- module~self_datapool -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node34" class="node">
+<title>module~self_datapool</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node34"><a xlink:href=".././module/self_datapool.html" xlink:title="SELF_DataPool">
+<polygon fill="#337ab7" stroke="#337ab7" points="832,-1320.95 741,-1320.95 741,-1296.95 832,-1296.95 832,-1320.95"/>
+<text text-anchor="middle" x="786.5" y="-1306.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataPool</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge67" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M980.28,-1412.69C959.73,-1393.53 917.26,-1356.43 875,-1334.95 864.73,-1329.73 853.23,-1325.38 842.04,-1321.82"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="842.9,-1318.43 832.32,-1318.9 840.89,-1325.13 842.9,-1318.43"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge75" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1349.24,-680.65C1322.43,-635.19 1228.74,-476.34 1194.85,-418.89"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1197.69,-416.81 1189.59,-409.98 1191.66,-420.37 1197.69,-416.81"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge78" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1307.26,-689.62C1272.35,-687.93 1224.46,-686.98 1182.5,-690.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1180.5,-690.95C1098.42,-698.71 1077.17,-684.26 995,-690.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M993,-690.95C901.95,-698.36 878.36,-696.37 787.5,-686.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M785.5,-686.95C703.38,-678.44 695.37,-633.67 616,-610.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M614,-610.95C555.1,-594.09 539.61,-592.35 481.5,-572.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M479.5,-572.95C452.1,-563.81 421.27,-555.67 394.64,-549.3"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="395.2,-545.84 384.66,-546.95 393.59,-552.65 395.2,-545.84"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge80" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M614,-610.95C567.53,-597.65 213.51,-577.11 179,-610.95"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge82" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M993,-690.95C761.24,-709.81 710.85,-762.63 481.5,-800.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M479.5,-800.95C467.26,-802.79 317.72,-842.19 234.33,-864.27"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="233.27,-860.93 224.5,-866.87 235.06,-867.69 233.27,-860.93"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge76" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1307.19,-684.98C1271.83,-678.46 1223.41,-667.87 1182.5,-652.95"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge81" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1180.5,-690.95C1091.8,-699.34 1076.81,-731.66 995,-766.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M993,-766.95C907.71,-803.74 877.04,-780.25 787.5,-804.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M785.5,-804.95C689.38,-831.46 658.07,-817.18 568,-859.95 480.48,-901.51 478.14,-943.71 393,-989.95 366.12,-1004.55 348.25,-990.59 328.5,-1013.95"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge77" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M993,-766.95C979.96,-772.57 801.66,-917.93 787.5,-918.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M785.5,-918.95C745.12,-921.87 700.35,-931.67 666.97,-940.31"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="665.77,-937 656.99,-942.94 667.56,-943.77 665.77,-937"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge83" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M785.5,-804.95C731.64,-820.98 601.32,-888.7 568,-933.95 527.09,-989.5 575.41,-1031.33 532,-1084.95 516.36,-1104.26 506.27,-1106.96 481.5,-1108.95"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M479.5,-1108.95C444.35,-1112.19 404.41,-1112.58 374.44,-1112.21"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="374.33,-1108.71 364.28,-1112.06 374.22,-1115.71 374.33,-1108.71"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node37" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node37"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379.5,-812.95 275.5,-812.95 275.5,-788.95 379.5,-788.95 379.5,-812.95"/>
+<text text-anchor="middle" x="327.5" y="-798.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge79" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M785.5,-686.95C623.09,-667.59 435.49,-748.08 361.2,-784.2"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="359.32,-781.23 351.9,-788.79 362.41,-787.51 359.32,-781.23"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge85" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M473.39,-828.58C450.34,-781.86 368.42,-615.84 339.06,-556.35"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="342.08,-554.56 334.52,-547.14 335.8,-557.66 342.08,-554.56"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge87" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M326.5,-918.95C244.46,-932.97 148.25,-910.6 93.08,-894.08"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="93.85,-890.66 83.27,-891.07 91.8,-897.35 93.85,-890.66"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge89" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M454.18,-853.05C446,-857.21 436.98,-862.05 429,-866.95 412.18,-877.27 410.28,-883.41 393,-892.95 365.94,-907.89 358.97,-913.74 328.5,-918.95"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M326.5,-918.95C285.44,-925.97 239.26,-909.33 209.69,-895.42"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="211.22,-892.27 200.7,-891.03 208.15,-898.56 211.22,-892.27"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge88" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M446.52,-853.01C439.99,-856.65 433.71,-861.25 429,-866.95 392.74,-910.88 431.81,-948.26 393,-989.95 372.16,-1012.34 348.25,-990.59 328.5,-1013.95"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M326.5,-1013.95C297.9,-1047.78 284.69,-1051.9 262,-1089.95 223.28,-1154.9 196.22,-1241.16 184.91,-1281.03"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="181.51,-1280.2 182.2,-1290.77 188.25,-1282.07 181.51,-1280.2"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge84" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M428.67,-838.82C384.4,-836.42 318.62,-831.52 262,-821.95 224.48,-815.61 216.97,-803.48 179,-800.95"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge90" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M445.22,-853.04C439,-856.64 433.18,-861.21 429,-866.95 371.19,-946.33 454.41,-1008.32 393,-1084.95 387.9,-1091.31 381.01,-1096.12 373.62,-1099.76"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="371.95,-1096.67 364.1,-1103.78 374.67,-1103.12 371.95,-1096.67"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge86" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M434.2,-828.95C418.44,-824.78 400.59,-820.05 384.09,-815.68"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="384.6,-812.19 374.03,-813.01 382.8,-818.96 384.6,-812.19"/>
+</g>
+<!-- module~self_vector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node35" class="node">
+<title>module~self_vector_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node35"><a xlink:href=".././module/self_vector_2d_t.html" xlink:title="SELF_Vector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1047,-1084.95 941,-1084.95 941,-1060.95 1047,-1060.95 1047,-1084.95"/>
+<text text-anchor="middle" x="994" y="-1070.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_2d&#45;&gt;module~self_vector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge91" class="edge">
+<title>module~self_vector_2d&#45;&gt;module~self_vector_2d_t</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1465.2,-1038.46C1371.15,-1045.36 1162.15,-1060.69 1057.39,-1068.37"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="1057,-1064.89 1047.28,-1069.11 1057.51,-1071.87 1057,-1064.89"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge95" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M959.17,-1216.9C918.73,-1203.77 848.81,-1185.11 787.5,-1188.95"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M785.5,-1188.95C744.82,-1191.5 699.72,-1201.43 666.28,-1210.22"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="665.04,-1206.93 656.29,-1212.9 666.86,-1213.69 665.04,-1206.93"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge97" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M985.47,-1240.98C967.46,-1269.53 920.02,-1343.29 875,-1400.95 801.95,-1494.51 757.89,-1498.47 698,-1600.95 673.32,-1643.18 695.4,-1669.21 662,-1704.95 573.34,-1799.82 513.66,-1770.96 393,-1818.95 364.58,-1830.25 354.04,-1826.11 328.5,-1842.95"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge99" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M785.5,-1188.95C745.78,-1191.44 732.67,-1188.41 698,-1207.95 677.73,-1219.37 683.37,-1236.76 662,-1245.95 623.62,-1262.46 603.36,-1268.2 568,-1245.95 536.71,-1226.26 563.29,-1190.64 532,-1170.95 493.25,-1146.57 471.58,-1154.14 429,-1170.95 372.11,-1193.41 373.86,-1305.98 328.5,-1264.95"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M326.5,-1264.95C215.58,-1162.15 187.32,-966.91 180.8,-901.18"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="184.27,-900.76 179.87,-891.12 177.3,-901.4 184.27,-900.76"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge98" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M982.67,-1241.08C963.66,-1262.57 920.89,-1307.16 875,-1329.95 839.36,-1347.65 822.28,-1329.62 787.5,-1348.95"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M785.5,-1348.95C693.91,-1399.85 650.3,-1375.09 568,-1439.95 426.51,-1551.46 496.47,-1832.06 328.5,-1766.95"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M326.5,-1766.95C298.22,-1755.29 281.72,-1766.33 262,-1742.95 207.44,-1678.24 185.65,-1405.26 180.35,-1325.14"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="183.84,-1324.91 179.71,-1315.16 176.86,-1325.36 183.84,-1324.91"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge94" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M985.13,-1216.9C970.02,-1193.58 936.22,-1140.48 911,-1093.95 893.38,-1061.44 903.69,-1042.28 875,-1018.95 817.15,-971.91 729.64,-958.72 672.65,-955.41"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="672.54,-951.9 662.38,-954.9 672.19,-958.89 672.54,-951.9"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge100" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M785.5,-1348.95C727.26,-1381.32 718.21,-1398.17 662,-1433.95 656.9,-1437.2 651.4,-1440.55 646.04,-1443.74"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="644.11,-1440.81 637.26,-1448.9 647.66,-1446.85 644.11,-1440.81"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge92" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M987.21,-1216.59C972.95,-1187.82 933.03,-1116.81 875,-1089.95 716.1,-1016.41 656.48,-1102.61 481.5,-1108.95"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge96" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M940.35,-1228.95C906.58,-1228.95 863.27,-1228.95 831.37,-1228.95"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="831.03,-1225.45 821.03,-1228.95 831.03,-1232.45 831.03,-1225.45"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge93" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M969.01,-1241.13C945.46,-1252.8 908.33,-1270.44 875,-1282.95 864.55,-1286.87 853.23,-1290.6 842.3,-1293.95"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="840.99,-1290.69 832.41,-1296.92 843,-1297.4 840.99,-1290.69"/>
+</g>
+<!-- module~self_mappedtwopointvector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge105" class="edge">
+<title>module~self_mappedtwopointvector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1513,-1956.95C1364.61,-1983.37 1333.22,-2032.95 1182.5,-2032.95 1182.5,-2032.95 1182.5,-2032.95 993,-2032.95 825.44,-2032.95 779.8,-2068.22 616,-2032.95"/>
+</g>
+<!-- module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge103" class="edge">
+<title>module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1849.77,-1891.01C1823.77,-1903.65 1780.51,-1923.01 1741,-1932.95 1643.04,-1957.59 1615.29,-1944.95 1515,-1956.95"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1513,-1956.95C1333.32,-1987.83 874.36,-1909.16 698,-1862.95 572.56,-1830.08 534.46,-1825.41 429,-1749.95 338.11,-1684.91 307.94,-1663.83 262,-1561.95 258.5,-1554.19 195.32,-1017.83 181.61,-901.18"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="185.09,-900.76 180.44,-891.23 178.13,-901.57 185.09,-900.76"/>
+</g>
+<!-- module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge102" class="edge">
+<title>module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1861.01,-1866.8C1773.67,-1781.77 1253.67,-1274.13 1113,-1103.95 1095.09,-1082.28 1100.26,-1067.74 1077,-1051.95 1046.05,-1030.94 1026.37,-1053.33 995,-1032.95"/>
+</g>
+<!-- module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge104" class="edge">
+<title>module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1871.79,-1866.8C1859.01,-1776.26 1777.75,-1208.21 1741,-1140.95 1730.76,-1122.21 1713.12,-1105.88 1698.11,-1094.28"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1699.77,-1091.15 1689.65,-1088.01 1695.6,-1096.78 1699.77,-1091.15"/>
+</g>
+<!-- module~self_twopointvector_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node38" class="node">
+<title>module~self_twopointvector_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node38"><a xlink:href=".././module/self_twopointvector_2d.html" xlink:title="SELF_TwoPointVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1429,-1890.95 1286,-1890.95 1286,-1866.95 1429,-1866.95 1429,-1890.95"/>
+<text text-anchor="middle" x="1357.5" y="-1876.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_twopointvector_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge101" class="edge">
+<title>module~self_mappedtwopointvector_2d_t&#45;&gt;module~self_twopointvector_2d</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1776.93,-1878.95C1679.52,-1878.95 1530.82,-1878.95 1439.41,-1878.95"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1439.37,-1875.45 1429.37,-1878.95 1439.37,-1882.45 1439.37,-1875.45"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge108" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2202.61,-1194.04C2179.99,-1201.16 2151.18,-1210.23 2127.07,-1217.82"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="2125.88,-1214.52 2117.4,-1220.86 2127.99,-1221.2 2125.88,-1214.52"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge117" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1513,-437.95C1284.38,-410.59 1224.7,-445.91 995,-429.95"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M993,-429.95C940.7,-427.02 882.16,-414.71 840.98,-404.51"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="841.71,-401.09 831.16,-402.04 840,-407.87 841.71,-401.09"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge110" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1873.5,-437.95C1714.35,-430.38 1672.93,-459.01 1515,-437.95"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1513,-437.95C1394.27,-420.56 1369.06,-391.86 1250,-376.95 1084.59,-356.23 1041.7,-370.73 875,-368.95 796.34,-368.11 775.54,-355.66 698,-368.95 573.03,-390.37 532.36,-390.51 429,-463.95 408.12,-478.79 413.55,-493.66 393,-508.95 388.16,-512.55 382.75,-515.74 377.18,-518.53"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="375.35,-515.52 367.73,-522.87 378.28,-521.88 375.35,-515.52"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge114" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1873.5,-1192.95C1733.86,-1184.02 1702.44,-1233.35 1563,-1244.95 1519.59,-1248.56 1508.45,-1247.95 1465,-1244.95 1313.36,-1234.48 932.86,-1106.53 787.5,-1150.95"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge107" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2241.31,-1194.07C2243.2,-1295.21 2243.04,-1994.95 1875.5,-1994.95 1875.5,-1994.95 1875.5,-1994.95 785.5,-1994.95 646.91,-1994.95 334.89,-1773.83 262,-1655.95 193.72,-1545.53 181.59,-1383.96 179.45,-1325.28"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="182.95,-1325.15 179.15,-1315.26 175.95,-1325.36 182.95,-1325.15"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge112" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2077,-437.95C2066.63,-430.16 1751.76,-754.72 1741,-761.95 1683.99,-800.28 1609.89,-829.78 1562.37,-846.5"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="1560.95,-843.29 1552.65,-849.88 1563.25,-849.9 1560.95,-843.29"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge119" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2183.95,-1187.23C2111.97,-1193.07 1984.42,-1200.7 1875.5,-1192.95"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1873.5,-1192.95C1802.49,-1187.9 1804.07,-1135.97 1741,-1102.95 1733.2,-1098.87 1724.65,-1095.06 1716.27,-1091.66"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="1717.53,-1088.4 1706.95,-1088.01 1714.98,-1094.92 1717.53,-1088.4"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge106" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1873.5,-1192.95C1829.83,-1190.95 1817.25,-1194.9 1777,-1211.95 1759.06,-1219.55 1758.92,-1229.31 1741,-1236.95 1394.83,-1384.44 1242.66,-1226.21 911,-1403.95 891.06,-1414.64 895.54,-1430.45 875,-1439.95 803.79,-1472.88 709.81,-1470.76 656.85,-1466.02"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="657.12,-1462.52 646.83,-1465.04 656.44,-1469.49 657.12,-1462.52"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge111" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2240.51,-1169.8C2236.65,-1080.4 2207.58,-525.38 2079,-437.95"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2077,-437.95C1819.9,-263.14 2032.48,-226.19 1077,-26.95 855.54,19.23 793.02,-3.62 568,-26.95 529.26,-30.97 520.35,-38.22 481.5,-40.95"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M479.5,-40.95C316.89,-46.69 234.43,-25.18 130,-149.95 47.81,-248.15 46.74,-675.95 47.7,-778.7"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="44.2,-778.89 47.81,-788.85 51.2,-778.82 44.2,-778.89"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge109" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M993,-429.95C927.41,-426.27 747.53,-405.8 698,-448.95 637.8,-501.4 689.51,-550 662,-624.95 620.61,-737.73 592.69,-758.27 532,-861.95 473.01,-962.74 482.45,-1009.87 393,-1084.95 387.28,-1089.75 380.55,-1093.75 373.65,-1097.06"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="371.98,-1093.96 364.19,-1101.14 374.76,-1100.39 371.98,-1093.96"/>
+</g>
+<!-- module~self_solutionmigration -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node36" class="node">
+<title>module~self_solutionmigration</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node36"><a xlink:href=".././module/self_solutionmigration.html" xlink:title="SELF_SolutionMigration">
+<polygon fill="#337ab7" stroke="#337ab7" points="1250,-291.95 1113,-291.95 1113,-267.95 1250,-267.95 1250,-291.95"/>
+<text text-anchor="middle" x="1181.5" y="-277.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SolutionMigration</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_solutionmigration -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge113" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_solutionmigration</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2077,-437.95C2002.94,-387.59 1964.47,-448.15 1875.5,-437.95"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1873.5,-437.95C1748.13,-423.58 1380.18,-330.84 1238.76,-294.51"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="1239.54,-291.1 1228.98,-292 1237.79,-297.88 1239.54,-291.1"/>
+</g>
+<!-- module~self_transferplan_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node39" class="node">
+<title>module~self_transferplan_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node39"><a xlink:href=".././module/self_transferplan_2d.html" xlink:title="SELF_TransferPlan_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1939,-522.95 1810,-522.95 1810,-498.95 1939,-498.95 1939,-522.95"/>
+<text text-anchor="middle" x="1874.5" y="-508.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TransferPlan_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_transferplan_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge115" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_transferplan_2d</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2077,-437.95C2049.06,-416.95 1953.59,-466.1 1904.77,-493.74"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="1902.88,-490.79 1895.94,-498.79 1906.36,-496.86 1902.88,-490.79"/>
+</g>
+<!-- module~self_mappedvector_2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node40" class="node">
+<title>module~self_mappedvector_2d~2</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node40"><a xlink:href=".././module/self_mappedvector_2d~2.html" xlink:title="SELF_MappedVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2148,-1083.95 2008,-1083.95 2008,-1059.95 2148,-1059.95 2148,-1083.95"/>
+<text text-anchor="middle" x="2078" y="-1069.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge116" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d~2</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M2223.04,-1169.76C2194.46,-1150.35 2138.46,-1112.32 2105.33,-1089.83"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="2107.28,-1086.92 2097.04,-1084.2 2103.34,-1092.71 2107.28,-1086.92"/>
+</g>
+<!-- module~self_model -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node41" class="node">
+<title>module~self_model</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node41"><a xlink:href=".././module/self_model.html" xlink:title="SELF_Model">
+<polygon fill="#337ab7" stroke="#337ab7" points="824.5,-1122.95 748.5,-1122.95 748.5,-1098.95 824.5,-1098.95 824.5,-1122.95"/>
+<text text-anchor="middle" x="786.5" y="-1108.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_model -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge118" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_model</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1873.5,-1192.95C1810.4,-1188.46 1802.97,-1153.69 1741,-1140.95 1399.54,-1070.77 975,-1095.71 834.83,-1106.8"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="834.53,-1103.31 824.84,-1107.61 835.09,-1110.29 834.53,-1103.31"/>
+</g>
+<!-- module~self_datapool&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge120" class="edge">
+<title>module~self_datapool&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M740.95,-1312.53C717.48,-1314.25 688.2,-1316.1 662,-1316.95 558.5,-1320.3 526.95,-1350.56 429,-1316.95 409.83,-1310.37 410.7,-1298.82 393,-1288.95 366.29,-1274.05 350.33,-1286.38 328.5,-1264.95"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge124" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M972.8,-1085.01C949.83,-1098.26 910.86,-1119.32 875,-1131.95 837.47,-1145.17 825.56,-1139.32 787.5,-1150.95"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M785.5,-1150.95C746.94,-1162.73 734.69,-1158.22 698,-1174.95 680.5,-1182.93 678.38,-1188.88 662,-1198.95 657.21,-1201.89 652.08,-1204.92 647.05,-1207.81"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="645.15,-1204.86 638.19,-1212.84 648.61,-1210.95 645.15,-1204.86"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge126" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M479.5,-1070.95C412.39,-1070.09 395.18,-1078.56 328.5,-1070.95"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge128" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M955.55,-1060.85C914.68,-1048.77 847.1,-1032.13 787.5,-1032.95"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M785.5,-1032.95C710.17,-1033.99 689.83,-1017.95 616,-1032.95"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M614,-1032.95C553.96,-1045.15 542.76,-1071.74 481.5,-1070.95"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M479.5,-1070.95C429.77,-1070.31 436.12,-1024.74 393,-999.95 366.48,-984.71 356.58,-988.07 328.5,-975.95"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge127" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M785.5,-1032.95C634.46,-1035.04 616.44,-1117.06 481.5,-1184.95"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M479.5,-1184.95C429.4,-1211.67 440.13,-1247.29 393,-1278.95 367.61,-1296.01 358.69,-1298.02 328.5,-1302.95"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M326.5,-1302.95C288.86,-1309.1 245.09,-1308.09 215.06,-1306.17"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="215.27,-1302.68 205.05,-1305.47 214.78,-1309.66 215.27,-1302.68"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge123" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M940.95,-1063.02C930.26,-1059.25 919.64,-1054.07 911,-1046.95 885.21,-1025.7 897.2,-1005.92 875,-980.95 843.33,-945.33 835.04,-915.51 787.5,-918.95"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge129" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M985.67,-1085.05C962.49,-1123.16 891.3,-1238.87 875,-1249.95 808.46,-1295.19 761.07,-1238 698,-1287.95 649.15,-1326.64 627.87,-1401.45 619.98,-1438.73"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="616.53,-1438.1 618.02,-1448.59 623.4,-1439.47 616.53,-1438.1"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge121" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M614,-1032.95C547.47,-1046.47 549.34,-1106.49 481.5,-1108.95"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge125" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M983.29,-1085.24C960.04,-1114.39 901.19,-1186.48 875,-1202.95 861.81,-1211.24 845.85,-1217 831.18,-1220.95"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="830.16,-1217.6 821.29,-1223.4 831.84,-1224.39 830.16,-1217.6"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge122" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M985.13,-1085C970.02,-1108.32 936.22,-1161.42 911,-1207.95 893.38,-1240.46 903.13,-1258.96 875,-1282.95 865.67,-1290.9 854,-1296.42 842.24,-1300.26"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="841.03,-1296.96 832.39,-1303.09 842.97,-1303.69 841.03,-1296.96"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge130" class="edge">
+<title>module~self_solutionmigration&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M993,-40.95C937.56,-19.94 539.47,-180.51 481.5,-192.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M479.5,-192.95C371.53,-210.27 321.71,-216.34 262,-307.95 200.32,-402.57 264.96,-708.93 226,-814.95 219.97,-831.35 208.39,-847.2 198.24,-859.02"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="195.58,-856.74 191.52,-866.52 200.8,-861.41 195.58,-856.74"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge131" class="edge">
+<title>module~self_solutionmigration&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1171.06,-292.06C1157.31,-309.99 1131.42,-344.94 1113,-376.95 1065.67,-459.2 1021.71,-563.64 1003.65,-608.21"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1000.31,-607.14 999.82,-617.73 1006.8,-609.76 1000.31,-607.14"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge133" class="edge">
+<title>module~self_solutionmigration&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1176.12,-267.74C1160.09,-225.32 1100.05,-84.48 995,-40.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M993,-40.95C915.6,-8.88 699.31,-32.07 616,-40.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M614,-40.95C555.7,-49.23 540.24,-36.82 481.5,-40.95"/>
+</g>
+<!-- module~self_solutionmigration&#45;&gt;mpi -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge132" class="edge">
+<title>module~self_solutionmigration&#45;&gt;mpi</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M614,-40.95C505.52,-55.98 493.67,-106.83 393,-149.95 336,-174.37 315.52,-166.63 262,-197.95 237.53,-212.27 213.33,-234.09 197.43,-249.75"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="194.9,-247.33 190.33,-256.89 199.86,-252.27 194.9,-247.33"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge134" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M303.78,-812.97C278.95,-826.1 238.98,-847.23 210.99,-862.03"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="209.2,-859.02 201.99,-866.79 212.47,-865.21 209.2,-859.02"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge135" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M275.25,-802.62C246.85,-803.13 210.94,-803.08 179,-800.95"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M177,-800.95C153.16,-799.36 126.8,-799.1 104.14,-799.33"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="103.97,-795.83 94.02,-799.47 104.07,-802.83 103.97,-795.83"/>
+</g>
+<!-- module~self_twopointvector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node42" class="node">
+<title>module~self_twopointvector_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node42"><a xlink:href=".././module/self_twopointvector_2d_t.html" xlink:title="SELF_TwoPointVector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1070,-1588.95 918,-1588.95 918,-1564.95 1070,-1564.95 1070,-1588.95"/>
+<text text-anchor="middle" x="994" y="-1574.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_2d&#45;&gt;module~self_twopointvector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge136" class="edge">
+<title>module~self_twopointvector_2d&#45;&gt;module~self_twopointvector_2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1341.88,-1866.74C1285.89,-1819.96 1084.86,-1652.02 1017.32,-1595.59"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1019.32,-1592.71 1009.4,-1588.98 1014.84,-1598.08 1019.32,-1592.71"/>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge139" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1513,-557.95C1150.85,-567.21 1051.49,-650.22 698,-570.95 680.73,-567.08 678.65,-559.93 662,-553.95 591.17,-528.5 390.03,-451.61 328.5,-494.95"/>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge138" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1809.84,-513.22C1797.91,-516.17 1786.28,-521.05 1777,-528.95 1741.02,-559.55 1773.9,-595.05 1741,-628.95 1500.78,-876.48 1329.78,-759.91 995,-842.95"/>
+</g>
+<!-- module~self_quadtreemesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node44" class="node">
+<title>module~self_quadtreemesh_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node44"><a xlink:href=".././module/self_quadtreemesh_2d.html" xlink:title="SELF_QuadTreeMesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1741,-619.95 1599,-619.95 1599,-595.95 1741,-595.95 1741,-619.95"/>
+<text text-anchor="middle" x="1670" y="-605.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_QuadTreeMesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge140" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1810.4,-522.98C1798.87,-526.55 1787.26,-531.12 1777,-536.95 1757.6,-547.98 1759.12,-558.93 1741,-571.95 1730.86,-579.24 1719.03,-585.91 1708.02,-591.48"/>
+<polygon fill="#003fff" stroke="#003fff" points="1706.46,-588.35 1699.02,-595.89 1709.54,-594.64 1706.46,-588.35"/>
+</g>
+<!-- module~self_solutiontransfer_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node45" class="node">
+<title>module~self_solutiontransfer_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node45"><a xlink:href=".././module/self_solutiontransfer_2d.html" xlink:title="SELF_SolutionTransfer_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="861.5,-561.95 711.5,-561.95 711.5,-537.95 861.5,-537.95 861.5,-561.95"/>
+<text text-anchor="middle" x="786.5" y="-547.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SolutionTransfer_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_solutiontransfer_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge137" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_solutiontransfer_2d</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1809.63,-521.07C1714.46,-535.88 1543.51,-561.36 1515,-557.95"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1513,-557.95C1475.23,-555.5 1466.72,-547.07 1429,-543.95 1229.81,-527.46 994.65,-537.04 871.83,-544.24"/>
+<polygon fill="#003fff" stroke="#003fff" points="871.52,-540.75 861.75,-544.84 871.94,-547.74 871.52,-540.75"/>
+</g>
+<!-- module~self_mappedvector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node43" class="node">
+<title>module~self_mappedvector_2d_t</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node43"><a xlink:href=".././module/self_mappedvector_2d_t.html" xlink:title="SELF_MappedVector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1949,-1046.95 1800,-1046.95 1800,-1022.95 1949,-1022.95 1949,-1046.95"/>
+<text text-anchor="middle" x="1874.5" y="-1032.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge141" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M2011.58,-1059.94C1992.21,-1056.38 1970.85,-1052.46 1950.91,-1048.8"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1951.41,-1045.33 1940.94,-1046.97 1950.14,-1052.21 1951.41,-1045.33"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge142" class="edge">
+<title>module~self_model&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M748.3,-1111.48C699.06,-1110 613.21,-1099.44 568,-1046.95 491.86,-958.56 578.34,-894.01 532,-786.95 488.46,-686.35 393.23,-592.84 350.28,-553.95"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="352.44,-551.19 342.65,-547.13 347.77,-556.4 352.44,-551.19"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge144" class="edge">
+<title>module~self_model&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M748.14,-1115.67C731.43,-1119.29 712.32,-1125.68 698,-1136.95 672.96,-1156.66 684.66,-1176.55 662,-1198.95 658.92,-1202 655.41,-1204.8 651.73,-1207.36"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="649.59,-1204.57 642.97,-1212.85 653.3,-1210.5 649.59,-1204.57"/>
+</g>
+<!-- module~self_model&#45;&gt;HDF5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge146" class="edge">
+<title>module~self_model&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M614,-1184.95C555.24,-1188.83 534.11,-1158.48 481.5,-1184.95"/>
+</g>
+<!-- module~self_model&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge145" class="edge">
+<title>module~self_model&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M760.64,-1122.96C740.76,-1133.84 713.69,-1151.71 698,-1174.95 661.57,-1228.91 679.91,-1254.36 662,-1316.95 649.51,-1360.58 632.91,-1410.96 623.45,-1439.08"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="620.08,-1438.1 620.19,-1448.7 626.71,-1440.35 620.08,-1438.1"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge143" class="edge">
+<title>module~self_model&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M748.41,-1119.34C732.49,-1123.6 713.93,-1129.48 698,-1136.95 659.76,-1154.88 658.14,-1182.16 616,-1184.95"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M614,-1184.95C546.26,-1189.43 549.34,-1106.49 481.5,-1108.95"/>
+</g>
+<!-- module~self_twopointvector_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge147" class="edge">
+<title>module~self_twopointvector_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M934.61,-1564.88C867.37,-1547.88 758.42,-1510.28 698,-1435.95 655.57,-1383.76 690.14,-1350.04 662,-1288.95 654.72,-1273.15 643.33,-1257.26 633.7,-1245.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="636.16,-1242.74 627.09,-1237.27 630.77,-1247.21 636.16,-1242.74"/>
+</g>
+<!-- module~self_twopointvector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge151" class="edge">
+<title>module~self_twopointvector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M990.3,-1589.17C978.07,-1641.14 922.5,-1844.58 787.5,-1918.95"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M785.5,-1918.95C755.68,-1935.38 515.53,-1957.65 481.5,-1956.95"/>
+</g>
+<!-- module~self_twopointvector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge149" class="edge">
+<title>module~self_twopointvector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M785.5,-1728.95C688.26,-1727.44 651.97,-1754.02 568,-1704.95 366.74,-1587.32 355.72,-1492.4 262,-1278.95 202.67,-1143.84 184.96,-964.15 180.4,-901.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="183.87,-901.03 179.7,-891.29 176.89,-901.5 183.87,-901.03"/>
+</g>
+<!-- module~self_twopointvector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge148" class="edge">
+<title>module~self_twopointvector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M985.52,-1564.64C968.64,-1537.68 925.17,-1472.63 875,-1431.95 841.03,-1404.41 816.44,-1419.74 787.5,-1386.95"/>
+</g>
+<!-- module~self_twopointvector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge152" class="edge">
+<title>module~self_twopointvector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M985.19,-1589.28C968.32,-1614.88 925.86,-1673.99 875,-1704.95 840.56,-1725.92 827.82,-1729.58 787.5,-1728.95"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M785.5,-1728.95C669.7,-1727.15 629.76,-1547.33 619.2,-1483.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="622.6,-1482.41 617.6,-1473.07 615.69,-1483.49 622.6,-1482.41"/>
+</g>
+<!-- module~self_twopointvector_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge150" class="edge">
+<title>module~self_twopointvector_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M983.34,-1564.71C966.2,-1542.41 930.46,-1493.07 911,-1445.95 883.51,-1379.38 915.71,-1347.36 875,-1287.95 862.56,-1269.8 842.55,-1255.7 824.79,-1245.84"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="826.24,-1242.65 815.77,-1241.07 822.97,-1248.84 826.24,-1242.65"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge158" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1669,-918.95C1604.67,-895.59 1582.75,-928.7 1515,-918.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1513,-918.95C1467.07,-912.34 1471.45,-875.7 1429,-856.95 1399.78,-844.04 1388.96,-852.58 1358.5,-842.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1356.5,-842.95C1310.24,-828.32 1298.22,-824.32 1250,-818.95 1006.17,-791.82 941.5,-848.93 698,-818.95 681.63,-816.93 678.13,-813.39 662,-809.95 604.61,-797.72 590.3,-793.55 532,-786.95 470.54,-779.99 454.84,-781.51 393,-779.95 334.8,-778.49 315.95,-758.05 262,-779.95 241.32,-788.34 244.93,-803.13 226,-814.95 186.54,-839.59 136.23,-856.56 99.18,-866.8"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="97.84,-863.54 89.1,-869.52 99.66,-870.3 97.84,-863.54"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge159" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1356.5,-842.95C1071.21,-777.34 988.39,-893.9 698,-856.95 599.41,-844.41 580.83,-797.45 481.5,-800.95"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge161" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1862.3,-1022.93C1840.08,-999.31 1788.47,-945.64 1741,-904.95 1609.6,-792.31 1591.02,-732.79 1429,-671.95 1326.13,-633.33 1285.73,-690.6 1182.5,-652.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1180.5,-652.95C1151.27,-642.05 1117.84,-636.09 1087.47,-632.9"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1087.6,-629.4 1077.31,-631.92 1086.93,-636.36 1087.6,-629.4"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge153" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1858.86,-1022.73C1835.31,-1003.57 1786.97,-966.22 1741,-942.95 1711.66,-928.1 1701.91,-930.18 1671,-918.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1669,-918.95C1630.92,-905.12 1587.66,-889.08 1556.7,-877.54"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1557.7,-874.18 1547.11,-873.96 1555.25,-880.74 1557.7,-874.18"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge154" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1513,-918.95C1192.84,-880.64 1109.11,-895.7 787.5,-918.95"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge156" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1814.11,-1046.97C1790.42,-1051.77 1763.01,-1057.32 1738.56,-1062.27"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1737.75,-1058.86 1728.64,-1064.28 1739.14,-1065.72 1737.75,-1058.86"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge157" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1860.7,-1047.32C1830.65,-1075.19 1752.03,-1141.49 1671,-1154.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1669,-1154.95C1635.68,-1160.48 1598.83,-1169.01 1569.53,-1176.38"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1568.33,-1173.07 1559.5,-1178.93 1570.06,-1179.85 1568.33,-1173.07"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge160" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1826.84,-1022.93C1786.05,-1013.09 1725.05,-1000.01 1671,-994.95"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1669,-994.95C1578.34,-986.46 1551.11,-984.32 1465,-1013.95 1395.87,-1037.74 969.28,-1324.81 911,-1368.95 893.94,-1381.88 894.02,-1391.12 875,-1400.95 803.7,-1437.81 709.75,-1452.28 656.82,-1457.77"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="656.42,-1454.29 646.8,-1458.75 657.1,-1461.26 656.42,-1454.29"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge155" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1669,-994.95C1626.94,-991.01 1580.16,-1006.06 1549.32,-1018.81"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1547.72,-1015.69 1539.9,-1022.84 1550.47,-1022.13 1547.72,-1015.69"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge164" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1513,-595.95C1412.15,-586.6 1386.6,-587.64 1286,-575.95 1023.72,-545.46 958.91,-531.55 698,-490.95 681.97,-488.46 678.1,-486.91 662,-484.95 514.79,-467.06 439.24,-396.32 328.5,-494.95"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M326.5,-494.95C302.07,-512.16 281.29,-491.13 262,-513.95 218.52,-565.4 250.75,-752.3 226,-814.95 219.5,-831.41 207.7,-847.45 197.55,-859.36"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="194.88,-857.09 190.87,-866.9 200.12,-861.74 194.88,-857.09"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge162" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1661.57,-620.2C1637.08,-660.6 1558.65,-789.96 1527.71,-840.98"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1524.54,-839.46 1522.35,-849.82 1530.53,-843.09 1524.54,-839.46"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge163" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1644.55,-619.99C1601.62,-640.85 1509.58,-684.31 1429,-713.95 1240.14,-783.41 1188.64,-788.21 995,-842.95"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M993,-842.95C898.48,-866.39 884.63,-911.93 787.5,-918.95"/>
+</g>
+<!-- module~self_refinementprimitives_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_node46" class="node">
+<title>module~self_refinementprimitives_2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsesGraph_node46"><a xlink:href=".././module/self_refinementprimitives_2d.html" xlink:title="SELF_RefinementPrimitives_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="875,-481.95 698,-481.95 698,-457.95 875,-457.95 875,-481.95"/>
+<text text-anchor="middle" x="786.5" y="-467.55" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementPrimitives_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge165" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1598.96,-604.86C1572.54,-603.07 1542.28,-600.28 1515,-595.95"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1513,-595.95C1394.78,-577.18 1367.73,-559.56 1250,-537.95 1124.65,-514.94 979.06,-494.58 885.23,-482.27"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="885.55,-478.78 875.18,-480.95 884.64,-485.72 885.55,-478.78"/>
+</g>
+<!-- module~self_solutiontransfer_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge166" class="edge">
+<title>module~self_solutiontransfer_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M745,-537.88C684.49,-520.07 573.19,-488.3 532,-482.95 486.6,-477.05 474.7,-480.23 429,-482.95 384.1,-485.62 360.72,-463.56 328.5,-494.95"/>
+</g>
+<!-- module~self_solutiontransfer_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge167" class="edge">
+<title>module~self_solutiontransfer_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M756.48,-562.06C736.82,-571.8 711.96,-587.43 698,-608.95 647.43,-686.93 684.57,-724.79 662,-814.95 651.36,-857.46 634.37,-905.75 624.29,-933.06"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="620.88,-932.17 620.67,-942.76 627.44,-934.62 620.88,-932.17"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge168" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M758.51,-457.92C739.06,-447.96 713.58,-432.01 698,-410.95 665.4,-366.87 706.07,-325.58 662,-292.95 578.77,-231.33 523.46,-250.51 429,-292.95 327.05,-338.75 307.25,-378.76 262,-480.95 201.55,-617.47 280.05,-675.77 226,-814.95 219.59,-831.45 207.79,-847.49 197.62,-859.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="194.95,-857.12 190.92,-866.92 200.18,-861.77 194.95,-857.12"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_esatmo2d_t~~UsesGraph_edge169" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M755.74,-482.06C735.99,-491.73 711.34,-507.26 698,-528.95 630.89,-638.08 690.13,-689.96 662,-814.95 652.38,-857.7 635.04,-905.91 624.62,-933.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="621.22,-932.22 620.87,-942.81 627.75,-934.75 621.22,-932.22"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_esatmo2d_tUsesGraph = svgPanZoom('#moduleself_esatmo2d_tUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_esatmo2d_t~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_esatmo2d_tUsedByGraph" width="253pt" height="74pt"
+ viewBox="0.00 0.00 253.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_esatmo2d_t~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>module~~self_esatmo2d_t~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 249,-70 249,4 -4,4"/>
+<!-- module~self_esatmo2d_t -->
+<g id="module~~self_esatmo2d_t~~UsedByGraph_node1" class="node">
+<title>module~self_esatmo2d_t</title>
+<polygon fill="none" stroke="black" points="109,-45 0,-45 0,-21 109,-21 109,-45"/>
+<text text-anchor="middle" x="54.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_ESAtmo2D_t</text>
+</g>
+<!-- module~self_esatmo2d~2 -->
+<g id="module~~self_esatmo2d_t~~UsedByGraph_node2" class="node">
+<title>module~self_esatmo2d~2</title>
+<g id="a_module~~self_esatmo2d_t~~UsedByGraph_node2"><a xlink:href=".././module/self_esatmo2d~2.html" xlink:title="SELF_ESAtmo2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="245,-66 145,-66 145,-42 245,-42 245,-66"/>
+<text text-anchor="middle" x="195" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d~2&#45;&gt;module~self_esatmo2d_t -->
+<g id="module~~self_esatmo2d_t~~UsedByGraph_edge1" class="edge">
+<title>module~self_esatmo2d~2&#45;&gt;module~self_esatmo2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M144.78,-46.54C136.51,-45.28 127.82,-43.97 119.25,-42.67"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="119.68,-39.19 109.26,-41.15 118.63,-46.11 119.68,-39.19"/>
+</g>
+<!-- module~self_esatmo2d -->
+<g id="module~~self_esatmo2d_t~~UsedByGraph_node3" class="node">
+<title>module~self_esatmo2d</title>
+<g id="a_module~~self_esatmo2d_t~~UsedByGraph_node3"><a xlink:href=".././module/self_esatmo2d.html" xlink:title="SELF_ESAtmo2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="245,-24 145,-24 145,0 245,0 245,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d&#45;&gt;module~self_esatmo2d_t -->
+<g id="module~~self_esatmo2d_t~~UsedByGraph_edge2" class="edge">
+<title>module~self_esatmo2d&#45;&gt;module~self_esatmo2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M144.78,-19.46C136.51,-20.72 127.82,-22.03 119.25,-23.33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="118.63,-19.89 109.26,-24.85 119.68,-26.81 118.63,-19.89"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#type-esatmo2d_t">ESAtmo2D_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-entropy_func_esatmo2d_t">entropy_func_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-log_mean~2">log_mean</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-riemannflux2d_esatmo2d_t">riemannflux2d_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-twopointflux2d_esatmo2d_t">twopointflux2d_ESAtmo2D_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-addthermalbubble_esatmo2d_t">AddThermalBubble_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-additionalfree_esatmo2d_t">AdditionalFree_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-additionalinit_esatmo2d_t">AdditionalInit_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-boundaryflux_esatmo2d_t">BoundaryFlux_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-calculatetendency_esatmo2d_t">CalculateTendency_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-diffusiveboundaryflux_esatmo2d_t">DiffusiveBoundaryFlux_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-diffusivefluxmethod_esatmo2d_t">DiffusiveFluxMethod_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-setdiffusion_esatmo2d_t">SetDiffusion_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-sethydrostaticbalance_esatmo2d_t">SetHydrostaticBalance_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-setmetadata_esatmo2d_t">SetMetadata_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-setnumberofvariables_esatmo2d_t">SetNumberOfVariables_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-sourcemethod_esatmo2d_t">SourceMethod_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-twopointfluxmethod_esatmo2d_t">TwoPointFluxMethod_ESAtmo2D_t</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-hbc2d_nonormalflow_esatmo2d">hbc2d_NoNormalFlow_ESAtmo2D</a>
+      <a class="list-group-item" href="../module/self_esatmo2d_t.html#proc-pbc2d_nostress_esatmo2d">pbc2d_NoStress_ESAtmo2D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-esatmo2d_t"></span><h3>type, public, extends(<a href='../type/ecdgmodel2d.html'>ECDGModel2D</a>) :: <a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-rd~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>Rd</strong></td><td> =</td><td>287.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-cp~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>cp</strong></td><td> =</td><td>1004.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-cv~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>cv</strong></td><td> =</td><td>717.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dsdt~3"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-diffdiv~2"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>diffDiv</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-diffflux~2"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>diffFlux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-eta_penalty~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>eta_penalty</strong></td><td> =</td><td>4.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux~3"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence~3"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-g~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>g</strong></td><td> =</td><td>9.81_prec</td><td><p>Constant-coefficient Laplacian diffusion. The interface flux is
+BR1 central + Nitsche-style jump penalty (i.e. SIPG-style):</p><a href="../type/esatmo2d_t.html#variable-g~2" class="pull-right"><emph>Read more&hellip;</emph></a></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~5"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-hyperbolicbcs~3"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>hyperbolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-kappa~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>kappa</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-length_scale~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>length_scale</strong></td><td> =</td><td>0.0_prec</td><td><p>Diffusive-flux scratch buffer. Holds the constant-coefficient
+Laplacian flux F_diff(i,j,iel,iVar,d) = -coeff_iVar * d(s_iVar)/dx_d.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh~3"></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nunmappedboundaries~3"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nUnmappedBoundaries</strong></td><td> =</td><td>0</td><td><p>The first unregistered bcid found, and meaningful only when nUnmappedBoundaries &gt; 0:
+-1 is itself a legal bcid, so it cannot double as an "absent" marker.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nstepped"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nstepped</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nu~4"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nu</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-p0~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>p0</strong></td><td> =</td><td>100000.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parabolicbcs~3"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>parabolicBCs</strong></td><td></td><td></td><td><p>Mesh boundary edges whose sideInfo(5) boundary condition id matches no registered
+boundary condition, counted over the whole domain by MapBoundaryConditions and summed
+across ranks. Nothing writes solution%extBoundary on such an edge, so the Riemann solver
+reads zeros at t = 0 and stale values afterwards. ReportUnmappedBoundaries warns about
+them once, from the top of ForwardStep.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution~3"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient~3"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source~3"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-transferstage~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>transferStage</strong>(:,:,:,:)</td><td></td><td></td><td><p>Migrated old-element window, held between MigrateOldWindow and ApplyTransferPlan on the
+multi-rank path: the contiguous run of OLD elements this rank's new element range
+references. Flat, because it is viewed through a rank-remapped pointer whose element lower
+bound is the window's first GLOBAL old element index - the numbering the transfer plan
+uses. Persistent and grow-only, so a settled adapting run allocates nothing here. The GPU
+backend overrides the migration and keeps the window in device memory instead, leaving
+this unallocated.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-twopointflux~2"></span>type(<a href='../type/mappedtwopointvector2d.html'>MappedTwoPointVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>twoPointFlux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-unmappedboundariesreported"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>unmappedBoundariesReported</strong></td><td> =</td><td>.false.</td><td><p>Pre-regrid copy of the solution, held between StageSolutionForTransfer and
+ApplyTransferPlan so that Regrid is free to release the storage it was read from. The
+base implementation stages on the host; the GPU backend overrides both procedures and
+stages device-side instead, leaving this unallocated.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-unmappedboundaryid~3"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>unmappedBoundaryID</strong></td><td> =</td><td>-1</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-winstage~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>winStage</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-winstagefirst~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>winStageFirst</strong></td><td> =</td><td>0</td><td><p>global old index of winStage's first element</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-winstagen~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>winStageN</strong></td><td> =</td><td>0</td><td><p>window element count; 0 means no window is migrated</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol~3"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-addthermalbubble~2'>AddThermalBubble</a></strong>  => AddThermalBubble_ESAtmo2D_t </td>
+       <td><p>Constant-coefficient Laplacian / Bassi-Rebay diffusion hooks</p></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-additionalfree~4'>AdditionalFree</a></strong>  => AdditionalFree_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-additionalinit~6'>AdditionalInit</a></strong>  => AdditionalInit_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionaloutput'>AdditionalOutput</a></strong>  => AdditionalOutput_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-applytransferplan~2'>ApplyTransferPlan</a></strong>  => ApplyTransferPlan_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-boundaryflux~4'>BoundaryFlux</a></strong>  => BoundaryFlux_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-calculateentropy~3'>CalculateEntropy</a></strong>  => CalculateEntropy_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-calculatesolutiongradient~3'>CalculateSolutionGradient</a></strong>  => CalculateSolutionGradient_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-calculatetendency~5'>CalculateTendency</a></strong>  => CalculateTendency_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-diffusiveboundaryflux~2'>DiffusiveBoundaryFlux</a></strong>  => DiffusiveBoundaryFlux_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-diffusivefluxmethod~2'>DiffusiveFluxMethod</a></strong>  => DiffusiveFluxMethod_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-downloadoldwindow~2'>DownloadOldWindow</a></strong>  => DownloadOldWindow_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-euler_timeintegrator'>Euler_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-fluxmethod~3'>FluxMethod</a></strong>  => fluxmethod_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-forwardstep'>ForwardStep</a></strong>  => ForwardStep_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/ecdgmodel2d_t.html#boundprocedure-free~8'>Free</a></strong>  => Free_ECDGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-getsimulationtime'>GetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-incrementiocounter'>IncrementIOCounter</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/ecdgmodel2d_t.html#boundprocedure-init~8'>Init</a></strong>  => Init_ECDGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk2_timeintegrator'>LowStorageRK2_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk3_timeintegrator'>LowStorageRK3_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk4_timeintegrator'>LowStorageRK4_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-mapboundaryconditions~3'>MapBoundaryConditions</a></strong>  => MapBoundaryConditions_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-migrateoldwindow~2'>MigrateOldWindow</a></strong>  => MigrateOldWindow_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-poststephook'>PostStepHook</a></strong>  => PostStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-prestephook'>PreStepHook</a></strong>  => PreStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pretendencyhook'>PreTendencyHook</a></strong>  => PreTendencyHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-printtype'>PrintType</a></strong>  => PrintType_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-readmodel~3'>ReadModel</a></strong>  => Read_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-regrid~2'>Regrid</a></strong>  => Regrid_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportentropy'>ReportEntropy</a></strong>  => ReportEntropy_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-reportmetrics~3'>ReportMetrics</a></strong>  => ReportMetrics_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-reportunmappedboundaries~3'>ReportUnmappedBoundaries</a></strong>  => ReportUnmappedBoundaries_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportusermetrics'>ReportUserMetrics</a></strong>  => ReportUserMetrics_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-setboundarycondition~3'>SetBoundaryCondition</a></strong>  => setboundarycondition_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-setdiffusion~2'>SetDiffusion</a></strong>  => SetDiffusion_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-setgradientboundarycondition~3'>SetGradientBoundaryCondition</a></strong>  => setgradientboundarycondition_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-sethydrostaticbalance~2'>SetHydrostaticBalance</a></strong>  => SetHydrostaticBalance_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-setmetadata~5'>SetMetadata</a></strong>  => SetMetadata_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-setnumberofvariables~4'>SetNumberOfVariables</a></strong>  => SetNumberOfVariables_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setsimulationtime'>SetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-setsolution~7'>SetSolution</a></strong>  => SetSolutionFromChar_DGModel2D_t, SetSolutionFromEqn_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-settimeintegrator~7'>SetTimeIntegrator</a></strong>  => SetTimeIntegrator_withChar </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-sourcemethod~4'>SourceMethod</a></strong>  => SourceMethod_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-stagesolutionfortransfer~2'>StageSolutionForTransfer</a></strong>  => StageSolutionForTransfer_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-twopointfluxmethod~3'>TwoPointFluxMethod</a></strong>  => TwoPointFluxMethod_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-updategrk2~3'>UpdateGRK2</a></strong>  => UpdateGRK2_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-updategrk3~3'>UpdateGRK3</a></strong>  => UpdateGRK3_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-updategrk4~3'>UpdateGRK4</a></strong>  => UpdateGRK4_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-updatesolution~3'>UpdateSolution</a></strong>  => UpdateSolution_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-writemodel~3'>WriteModel</a></strong>  => Write_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-writetecplot~3'>WriteTecplot</a></strong>  => WriteTecplot_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-entropy_func~7'>entropy_func</a></strong>  => entropy_func_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux1d'>flux1D</a></strong>  => flux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux2d'>flux2D</a></strong>  => flux2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux3d'>flux3D</a></strong>  => flux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux1d'>riemannflux1d</a></strong>  => riemannflux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-riemannflux2d~5'>riemannflux2d</a></strong>  => riemannflux2d_ESAtmo2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux3d~2'>riemannflux3d</a></strong>  => riemannflux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source1d'>source1d</a></strong>  => source1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source2d'>source2d</a></strong>  => source2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source3d'>source3d</a></strong>  => source3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/esatmo2d_t.html#boundprocedure-twopointflux2d~3'>twopointflux2d</a></strong>  => twopointflux2d_ESAtmo2D_t </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+ 
+    <section>
+    <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-entropy_func_esatmo2d_t"></span><h3>public pure function <a href='../proc/entropy_func_esatmo2d_t.html'>entropy_func_ESAtmo2D_t</a>(this, s) result(e)</h3></div>
+  <div class="panel-body">
+       
+<p>Mathematical entropy: total energy density (kinetic + internal).</p><a href="../proc/entropy_func_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-log_mean~2"></span><h3>public pure function <a href='../proc/log_mean~2.html'>log_mean</a>(a, b) result(am)</h3></div>
+  <div class="panel-body">
+       
+<p>Numerically stable logarithmic mean (Ismail-Roe 2009 / Ranocha 2018).</p><a href="../proc/log_mean~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>a</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>b</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-riemannflux2d_esatmo2d_t"></span><h3>public pure function <a href='../proc/riemannflux2d_esatmo2d_t.html'>riemannflux2d_ESAtmo2D_t</a>(this, sL, sR, dsdx, nhat) result(flux)</h3></div>
+  <div class="panel-body">
+       
+<p>Local Lax-Friedrichs (Rusanov) Riemann flux. Provided as a fallback;
+the model overrides BoundaryFlux directly with the LMARS solver.</p><a href="../proc/riemannflux2d_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-twopointflux2d_esatmo2d_t"></span><h3>public pure function <a href='../proc/twopointflux2d_esatmo2d_t.html'>twopointflux2d_ESAtmo2D_t</a>(this, sL, sR) result(flux)</h3></div>
+  <div class="panel-body">
+       
+<p>Souza et al. (2023, JAMES) entropy-conservative two-point flux for
+2-D compressible Euler in (rho, rho<em>v, rho</em>theta) variables with
+p = p0<em>(rho</em>Rd*theta/p0)^gamma.</p><a href="../proc/twopointflux2d_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:2)</small></h4>  
+
+  </div>
+  </div>
+
+    </section>
+    <br>
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-addthermalbubble_esatmo2d_t"></span><h3>public subroutine <a href='../proc/addthermalbubble_esatmo2d_t.html'>AddThermalBubble_ESAtmo2D_t</a>(this, dtheta, r0, x0, y0)</h3></div>
+  <div class="panel-body">
+       
+<p>Adds a pressure-balanced warm bubble perturbation.</p><a href="../proc/addthermalbubble_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dtheta</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>r0</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>x0</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>y0</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-additionalfree_esatmo2d_t"></span><h3>public subroutine <a href='../proc/additionalfree_esatmo2d_t.html'>AdditionalFree_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-additionalinit_esatmo2d_t"></span><h3>public subroutine <a href='../proc/additionalinit_esatmo2d_t.html'>AdditionalInit_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-boundaryflux_esatmo2d_t"></span><h3>public subroutine <a href='../proc/boundaryflux_esatmo2d_t.html'>BoundaryFlux_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>LMARS (Low-Mach Approximate Riemann Solver, Chen et al. 2013)
+interface flux. No hydrostatic pressure split: gravity is folded
+into SourceMethod via the Souza non-conservative form using the
+geopotential carried in the state vector (variable index 5).</p><a href="../proc/boundaryflux_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-calculatetendency_esatmo2d_t"></span><h3>public subroutine <a href='../proc/calculatetendency_esatmo2d_t.html'>CalculateTendency_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>ESAtmo2D tendency = EC inviscid pipeline (parent) + optional
+constant-coefficient Laplacian diffusion (BR1 weak-form DG).</p><a href="../proc/calculatetendency_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-diffusiveboundaryflux_esatmo2d_t"></span><h3>public subroutine <a href='../proc/diffusiveboundaryflux_esatmo2d_t.html'>DiffusiveBoundaryFlux_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Fill diffFlux%boundaryNormal with the SIPG-stabilised BR1 flux:</p><a href="../proc/diffusiveboundaryflux_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-diffusivefluxmethod_esatmo2d_t"></span><h3>public subroutine <a href='../proc/diffusivefluxmethod_esatmo2d_t.html'>DiffusiveFluxMethod_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Fill diffFlux%interior with the constant-coefficient Laplacian
+flux at every interior node:</p><a href="../proc/diffusivefluxmethod_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setdiffusion_esatmo2d_t"></span><h3>public subroutine <a href='../proc/setdiffusion_esatmo2d_t.html'>SetDiffusion_ESAtmo2D_t</a>(this, nu, kappa, eta_penalty)</h3></div>
+  <div class="panel-body">
+       
+<p>Set the constant-coefficient Laplacian diffusion coefficients
+(kinematic momentum diffusivity and thermal diffusivity, both
+in m^2/s) and the dimensionless SIPG jump penalty. Setting nu
+or kappa &gt; 0 enables the gradient pipeline so that the diffusive
+flux methods receive solutionGradient.</p><a href="../proc/setdiffusion_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nu</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>kappa</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>eta_penalty</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sethydrostaticbalance_esatmo2d_t"></span><h3>public subroutine <a href='../proc/sethydrostaticbalance_esatmo2d_t.html'>SetHydrostaticBalance_ESAtmo2D_t</a>(this, theta0)</h3></div>
+  <div class="panel-body">
+       
+<p>Initialise a hydrostatically balanced atmosphere with uniform
+potential temperature theta0, zero velocity, and the geopotential
+Phi = g*y carried as state variable index 5.</p><a href="../proc/sethydrostaticbalance_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>theta0</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setmetadata_esatmo2d_t"></span><h3>public subroutine <a href='../proc/setmetadata_esatmo2d_t.html'>SetMetadata_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setnumberofvariables_esatmo2d_t"></span><h3>public subroutine <a href='../proc/setnumberofvariables_esatmo2d_t.html'>SetNumberOfVariables_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Five conserved variables: (rho, rho<em>u, rho</em>v, rho<em>theta, Phi),
+where Phi = g</em>y is the geopotential. Phi has zero flux (volume
+and surface) so its tendency is identically zero; it is carried
+in the state vector solely so that the Souza et al. (2023)
+non-conservative gravity flux differencing in SourceMethod can
+read it node-locally.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sourcemethod_esatmo2d_t"></span><h3>public subroutine <a href='../proc/sourcemethod_esatmo2d_t.html'>SourceMethod_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Souza et al. (2023) non-conservative gravity flux differencing.</p><a href="../proc/sourcemethod_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-twopointfluxmethod_esatmo2d_t"></span><h3>public subroutine <a href='../proc/twopointfluxmethod_esatmo2d_t.html'>TwoPointFluxMethod_ESAtmo2D_t</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Pre-projected scalar contravariant two-point Souza et al. (2023) EC
+flux. For each node pair (a, b) along reference direction r:</p><a href="../proc/twopointfluxmethod_esatmo2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/esatmo2d_t.html'>ESAtmo2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-hbc2d_nonormalflow_esatmo2d"></span><h3>public subroutine <a href='../proc/hbc2d_nonormalflow_esatmo2d.html'>hbc2d_NoNormalFlow_ESAtmo2D</a>(bc, mymodel)</h3></div>
+  <div class="panel-body">
+       
+<p>No-normal-flow (wall) boundary condition.</p><a href="../proc/hbc2d_nonormalflow_esatmo2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bc</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mymodel</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pbc2d_nostress_esatmo2d"></span><h3>public subroutine <a href='../proc/pbc2d_nostress_esatmo2d.html'>pbc2d_NoStress_ESAtmo2D</a>(bc, mymodel)</h3></div>
+  <div class="panel-body">
+       
+<p>Parabolic boundary condition: zero diffusive flux normal to the wall
+(no-stress for momentum, no-heat-flux for rho*theta).</p><a href="../proc/pbc2d_nostress_esatmo2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bc</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mymodel</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

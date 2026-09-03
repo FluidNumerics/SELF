@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>MapBoundaryConditions_DGModel2D_t &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>MapBoundaryConditions_DGModel2D_t
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.5% of total for procedures.">116 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_DGModel2D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_dgmodel2d_t.f90.html'>SELF_DGModel2D_t.f90</a></li>
+     <li><a href='../module/self_dgmodel2d_t.html'>SELF_DGModel2D_t</a></li>
+     <li class="active">MapBoundaryConditions_DGModel2D_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/mapboundaryconditions_dgmodel2d_t.html#src">MapBoundaryConditions_DGModel2D_t</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine MapBoundaryConditions_DGModel2D_t(this)</h2>
+    
+
+    <p>Scan the mesh sideInfo and populate the elements/sides
+arrays for each registered boundary condition.</p>
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-this~388"></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph Pages: 1 -->
+<svg id="procmapboundaryconditions_dgmodel2d_tCallsGraph" width="353pt" height="74pt"
+ viewBox="0.00 0.00 353.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 349,-70 349,4 -4,4"/>
+<!-- proc~mapboundaryconditions_dgmodel2d_t -->
+<g id="proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph_node1" class="node">
+<title>proc~mapboundaryconditions_dgmodel2d_t</title>
+<polygon fill="none" stroke="black" points="221,-45 0,-45 0,-21 221,-21 221,-45"/>
+<text text-anchor="middle" x="110.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">MapBoundaryConditions_DGModel2D_t</text>
+</g>
+<!-- mpi_allreduce -->
+<g id="proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph_node2" class="node">
+<title>mpi_allreduce</title>
+<polygon fill="#777777" stroke="#777777" points="345,-66 257,-66 257,-42 345,-42 345,-66"/>
+<text text-anchor="middle" x="301" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_allreduce</text>
+</g>
+<!-- proc~mapboundaryconditions_dgmodel2d_t&#45;&gt;mpi_allreduce -->
+<g id="proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph_edge1" class="edge">
+<title>proc~mapboundaryconditions_dgmodel2d_t&#45;&gt;mpi_allreduce</title>
+<path fill="none" stroke="#ff0000" d="M219.24,-45C228.72,-46.06 238.02,-47.1 246.74,-48.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="246.35,-51.55 256.68,-49.17 247.13,-44.59 246.35,-51.55"/>
+</g>
+<!-- mpi_bcast -->
+<g id="proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph_node3" class="node">
+<title>mpi_bcast</title>
+<polygon fill="#777777" stroke="#777777" points="334.5,-24 267.5,-24 267.5,0 334.5,0 334.5,-24"/>
+<text text-anchor="middle" x="301" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_bcast</text>
+</g>
+<!-- proc~mapboundaryconditions_dgmodel2d_t&#45;&gt;mpi_bcast -->
+<g id="proc~~mapboundaryconditions_dgmodel2d_t~~CallsGraph_edge2" class="edge">
+<title>proc~mapboundaryconditions_dgmodel2d_t&#45;&gt;mpi_bcast</title>
+<path fill="none" stroke="#ff0000" d="M219.24,-21C232.62,-19.51 245.64,-18.06 257.17,-16.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="257.77,-20.23 267.32,-15.64 256.99,-13.27 257.77,-20.23"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/mapboundaryconditions_dgmodel2d_t.html#src">MapBoundaryConditions_DGModel2D_t</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">MapBoundaryConditions_DGModel2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<span class="w">    </span><span class="c">!! Scan the mesh sideInfo and populate the elements/sides</span>
+<span class="w">    </span><span class="c">!! arrays for each registered boundary condition.</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">DGModel2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcnode</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iEl</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">e2</span><span class="p">,</span><span class="n">bcid</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="nb">count</span><span class="p">,</span><span class="n">n</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nUnmapped</span><span class="p">,</span><span class="n">idUnmapped</span><span class="p">,</span><span class="n">iError</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">idRank</span><span class="p">,</span><span class="n">srcRank</span>
+<span class="w">    </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">skipMortars</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elems</span><span class="p">(:),</span><span class="n">sds</span><span class="p">(:)</span>
+
+<span class="w">    </span><span class="c">! Mortar sides carry sideInfo(3) = 0 but are interior faces; sideInfo(1) holds the mortar</span>
+<span class="w">    </span><span class="c">! index (see SELF_Mesh_2D_t / SELF_Mesh_3D_t). They must be excluded from every pass below,</span>
+<span class="w">    </span><span class="c">! forward and reverse alike: a model may legitimately register bcid 0, and a mortar side</span>
+<span class="w">    </span><span class="c">! carries sideInfo(5) = 0, so a forward pass matching on sideInfo(5) alone would put</span>
+<span class="w">    </span><span class="c">! interior faces into that condition's list and SetBoundaryCondition would then overwrite</span>
+<span class="w">    </span><span class="c">! what the mortar exchange had just written. The HOPr reader copies sideInfo(1) verbatim</span>
+<span class="w">    </span><span class="c">! from the file, where it is the HOPr side type and may be nonzero on an ordinary face, so</span>
+<span class="w">    </span><span class="c">! sideInfo(1) is only a mortar marker on a mesh that actually carries mortars.</span>
+<span class="w">    </span><span class="n">skipMortars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nMortars</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="w">    </span><span class="c">! Map hyperbolic BCs</span>
+<span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">head</span>
+<span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<span class="w">      </span><span class="c">! Pass 1: count boundary faces for this bcid</span>
+<span class="w">      </span><span class="nb">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">      </span><span class="k">do </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span>
+<span class="w">        </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">          </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">          </span><span class="n">bcid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">skipMortars</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span>
+<span class="k">          if</span><span class="p">(</span><span class="n">e2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">bcid</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">bcid</span><span class="p">)</span><span class="w"> </span><span class="nb">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">count</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">enddo</span>
+<span class="k">      enddo</span>
+
+<span class="k">      if</span><span class="p">(</span><span class="nb">count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="c">! Pass 2: fill element/side arrays</span>
+<span class="w">        </span><span class="k">allocate</span><span class="p">(</span><span class="n">elems</span><span class="p">(</span><span class="nb">count</span><span class="p">),</span><span class="n">sds</span><span class="p">(</span><span class="nb">count</span><span class="p">))</span>
+<span class="w">        </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="k">do </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span>
+<span class="w">          </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">            </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">            </span><span class="n">bcid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">skipMortars</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span>
+<span class="k">            if</span><span class="p">(</span><span class="n">e2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">bcid</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">bcid</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">              </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">              </span><span class="n">elems</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iEl</span>
+<span class="w">              </span><span class="n">sds</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">j</span>
+<span class="w">            </span><span class="k">endif</span>
+<span class="k">          enddo</span>
+<span class="k">        enddo</span>
+<span class="k">        call </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">PopulateBoundaries</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">bcid</span><span class="p">,</span><span class="nb">count</span><span class="p">,</span><span class="n">elems</span><span class="p">,</span><span class="n">sds</span><span class="p">)</span>
+<span class="w">        </span><span class="k">deallocate</span><span class="p">(</span><span class="n">elems</span><span class="p">,</span><span class="n">sds</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="w">        </span><span class="c">! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every</span>
+<span class="w">        </span><span class="c">! registered condition and each one loops over its own nBoundaries, so a stale</span>
+<span class="w">        </span><span class="c">! element/side list would keep this condition writing faces it no longer owns once</span>
+<span class="w">        </span><span class="c">! the mesh is re-tagged - and the unmapped tally below would then describe something</span>
+<span class="w">        </span><span class="c">! other than what runs. Clearing nBoundaries also parks the GPU wrappers, which guard</span>
+<span class="w">        </span><span class="c">! on the same field, so the device arrays are never read while stale.</span>
+<span class="w">        </span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<span class="w">    </span><span class="k">enddo</span>
+
+<span class="w">    </span><span class="c">! Map parabolic BCs</span>
+<span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">parabolicBCs</span><span class="p">%</span><span class="n">head</span>
+<span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<span class="w">      </span><span class="nb">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">      </span><span class="k">do </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span>
+<span class="w">        </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">          </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">          </span><span class="n">bcid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">skipMortars</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span>
+<span class="k">          if</span><span class="p">(</span><span class="n">e2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">bcid</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">bcid</span><span class="p">)</span><span class="w"> </span><span class="nb">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">count</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">enddo</span>
+<span class="k">      enddo</span>
+
+<span class="k">      if</span><span class="p">(</span><span class="nb">count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        allocate</span><span class="p">(</span><span class="n">elems</span><span class="p">(</span><span class="nb">count</span><span class="p">),</span><span class="n">sds</span><span class="p">(</span><span class="nb">count</span><span class="p">))</span>
+<span class="w">        </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="k">do </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span>
+<span class="w">          </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">            </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">            </span><span class="n">bcid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">skipMortars</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span>
+<span class="k">            if</span><span class="p">(</span><span class="n">e2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">bcid</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">bcid</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">              </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">              </span><span class="n">elems</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iEl</span>
+<span class="w">              </span><span class="n">sds</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">j</span>
+<span class="w">            </span><span class="k">endif</span>
+<span class="k">          enddo</span>
+<span class="k">        enddo</span>
+<span class="k">        call </span><span class="n">this</span><span class="p">%</span><span class="n">parabolicBCs</span><span class="p">%</span><span class="n">PopulateBoundaries</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">bcid</span><span class="p">,</span><span class="nb">count</span><span class="p">,</span><span class="n">elems</span><span class="p">,</span><span class="n">sds</span><span class="p">)</span>
+<span class="w">        </span><span class="k">deallocate</span><span class="p">(</span><span class="n">elems</span><span class="p">,</span><span class="n">sds</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="w">        </span><span class="c">! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every</span>
+<span class="w">        </span><span class="c">! registered condition and each one loops over its own nBoundaries, so a stale</span>
+<span class="w">        </span><span class="c">! element/side list would keep this condition writing faces it no longer owns once</span>
+<span class="w">        </span><span class="c">! the mesh is re-tagged - and the unmapped tally below would then describe something</span>
+<span class="w">        </span><span class="c">! other than what runs. Clearing nBoundaries also parks the GPU wrappers, which guard</span>
+<span class="w">        </span><span class="c">! on the same field, so the device arrays are never read while stale.</span>
+<span class="w">        </span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<span class="w">    </span><span class="k">enddo</span>
+
+<span class="w">    </span><span class="c">! Reverse check. Both loops above iterate over registrations, so a boundary edge whose</span>
+<span class="w">    </span><span class="c">! bcid matches no registration is never enumerated and its exterior state is never</span>
+<span class="w">    </span><span class="c">! written. Count those edges here: the sideInfo scan is already what this routine costs,</span>
+<span class="w">    </span><span class="c">! and it runs at Init and after every Regrid, never inside the time loop.</span>
+<span class="w">    </span><span class="c">!</span>
+<span class="w">    </span><span class="n">nUnmapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">idUnmapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span>
+<span class="w">    </span><span class="k">do </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span>
+<span class="w">      </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">        </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">e2</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span><span class="w"> </span><span class="c">! interior or rank-shared: sideInfo(3) holds a global element id</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">skipMortars</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span>
+<span class="k">        </span><span class="n">bcid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+<span class="w">        </span><span class="c">! Only the HYPERBOLIC list decides whether the face is handled. SetBoundaryCondition</span>
+<span class="w">        </span><span class="c">! dispatches that list alone and it is what writes solution%extBoundary, the trace the</span>
+<span class="w">        </span><span class="c">! Riemann solver consumes; the parabolic list writes solutionGradient%extBoundary</span>
+<span class="w">        </span><span class="c">! through SetGradientBoundaryCondition. A bcid registered only parabolically therefore</span>
+<span class="w">        </span><span class="c">! leaves the solution trace unwritten - exactly the failure this scan exists to catch.</span>
+<span class="w">        </span><span class="n">bcnode</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">GetBCForID</span><span class="p">(</span><span class="n">bcid</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bcnode</span><span class="p">))</span><span class="w"> </span><span class="k">cycle</span>
+<span class="k">        </span><span class="n">nUnmapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nUnmapped</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="c">! Keep the FIRST offender, not the largest: a bcid is any integer, so a max()</span>
+<span class="w">        </span><span class="c">! against a sentinel would never report one that sits below the sentinel.</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">nUnmapped</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">idUnmapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bcid</span>
+<span class="w">      </span><span class="k">enddo</span>
+<span class="k">    enddo</span>
+
+<span class="w">    </span><span class="c">! Each rank owns a slice of the mesh, so a bcid that appears nowhere here may still be</span>
+<span class="w">    </span><span class="c">! present on another rank. Every rank reaches this routine on both the Init and the Regrid</span>
+<span class="w">    </span><span class="c">! path, so the collective is safe.</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiEnabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      call </span><span class="n">mpi_allreduce</span><span class="p">(</span><span class="n">nUnmapped</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nUnmappedBoundaries</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">MPI_INTEGER</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                         </span><span class="n">MPI_SUM</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">,</span><span class="n">iError</span><span class="p">)</span>
+<span class="w">      </span><span class="c">! A bcid is any integer, so no value can serve as an "absent" sentinel in a reduction</span>
+<span class="w">      </span><span class="c">! over the id itself. Agree on the lowest-numbered rank that actually has an offender</span>
+<span class="w">      </span><span class="c">! and take its id from there; a rank with none bids nRanks and so never wins.</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">nUnmapped</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">idRank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">idRank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      call </span><span class="n">mpi_allreduce</span><span class="p">(</span><span class="n">idRank</span><span class="p">,</span><span class="n">srcRank</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">MPI_INTEGER</span><span class="p">,</span><span class="n">MPI_MIN</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                         </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">,</span><span class="n">iError</span><span class="p">)</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">srcRank</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">this</span><span class="p">%</span><span class="n">unmappedBoundaryID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">idUnmapped</span>
+<span class="w">        </span><span class="k">call </span><span class="n">mpi_bcast</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">unmappedBoundaryID</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">MPI_INTEGER</span><span class="p">,</span><span class="n">srcRank</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                       </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">,</span><span class="n">iError</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">this</span><span class="p">%</span><span class="n">unmappedBoundaryID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">    else</span>
+<span class="k">      </span><span class="n">this</span><span class="p">%</span><span class="n">nUnmappedBoundaries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nUnmapped</span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">unmappedBoundaryID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">idUnmapped</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="w">    </span><span class="c">! Regrid remaps onto a new mesh, so a mesh that is still mis-tagged warns again.</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">unmappedBoundariesReported</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">MapBoundaryConditions_DGModel2D_t</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

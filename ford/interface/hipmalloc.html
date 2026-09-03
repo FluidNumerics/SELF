@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>hipMalloc &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>hipMalloc
+   <small>Interface</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.0% of total for procedures.</p>Including implementation: 11 statements,  0.0% of total for procedures.">11 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_GPU.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_gpu.f90.html'>SELF_GPU.f90</a></li>
+     <li><a href='../module/self_gpu.html'>SELF_GPU</a></li>
+     <li class="active">hipMalloc</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../interface/hipmalloc.html#proc-hipmalloc_">hipMalloc_</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>public interface hipMalloc</h2>
+   
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Called by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: interface~~hipmalloc~~CalledByGraph Pages: 1 -->
+<svg id="interfacehipmallocCalledByGraph" width="324pt" height="1712pt"
+ viewBox="0.00 0.00 324.00 1712.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="interface~~hipmalloc~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 1708)">
+<title>interface~~hipmalloc~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1708 320,-1708 320,4 -4,4"/>
+<!-- interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_node1" class="node">
+<title>interface~hipmalloc</title>
+<polygon fill="none" stroke="black" points="316,-864 252,-864 252,-840 316,-840 316,-864"/>
+<text text-anchor="middle" x="284" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50">hipMalloc</text>
+</g>
+<!-- proc~migrateoldwindow_dgmodel2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node2" class="node">
+<title>proc~migrateoldwindow_dgmodel2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node2"><a xlink:href=".././proc/migrateoldwindow_dgmodel2d.html" xlink:title="MigrateOldWindow_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-1704 17,-1704 17,-1680 199,-1680 199,-1704"/>
+<text text-anchor="middle" x="108" y="-1689.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MigrateOldWindow_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~migrateoldwindow_dgmodel2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge14" class="edge">
+<title>proc~migrateoldwindow_dgmodel2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M199.2,-1683.92C205.48,-1680.6 211.21,-1676.36 216,-1671 270.56,-1609.95 281.15,-999.71 282.75,-874.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="286.25,-874.17 282.87,-864.13 279.25,-874.08 286.25,-874.17"/>
+</g>
+<!-- proc~init_points -->
+<g id="interface~~hipmalloc~~CalledByGraph_node3" class="node">
+<title>proc~init_points</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node3"><a xlink:href=".././proc/init_points.html" xlink:title="Init_Points">
+<polygon fill="#d9534f" stroke="#d9534f" points="141,-1662 75,-1662 75,-1638 141,-1638 141,-1662"/>
+<text text-anchor="middle" x="108" y="-1647.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Points</text>
+</a>
+</g>
+</g>
+<!-- proc~init_points&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge18" class="edge">
+<title>proc~init_points&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M141.06,-1653.09C165.33,-1653.51 197.54,-1649.57 216,-1629 267.75,-1571.35 280.52,-995.76 282.65,-874.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="286.15,-874.16 282.82,-864.1 279.15,-874.04 286.15,-874.16"/>
+</g>
+<!-- proc~estimate_refinementindicator3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node4" class="node">
+<title>proc~estimate_refinementindicator3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node4"><a xlink:href=".././proc/estimate_refinementindicator3d.html" xlink:title="Estimate_RefinementIndicator3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="202,-1620 14,-1620 14,-1596 202,-1596 202,-1620"/>
+<text text-anchor="middle" x="108" y="-1605.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Estimate_RefinementIndicator3D</text>
+</a>
+</g>
+</g>
+<!-- proc~estimate_refinementindicator3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge19" class="edge">
+<title>proc~estimate_refinementindicator3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M202.08,-1598.23C207.23,-1595.2 211.94,-1591.5 216,-1587 264.95,-1532.73 279.87,-991.4 282.53,-874.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="286.04,-874.09 282.76,-864.02 279.04,-873.94 286.04,-874.09"/>
+</g>
+<!-- proc~init_esatmo3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node5" class="node">
+<title>proc~init_esatmo3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node5"><a xlink:href=".././proc/init_esatmo3d.html" xlink:title="Init_ESAtmo3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="153.5,-1578 62.5,-1578 62.5,-1554 153.5,-1554 153.5,-1578"/>
+<text text-anchor="middle" x="108" y="-1563.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_esatmo3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge4" class="edge">
+<title>proc~init_esatmo3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M153.51,-1568.82C175.46,-1567.68 200.48,-1562.11 216,-1545 262.13,-1494.15 279.15,-987.72 282.4,-874.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="285.9,-874.26 282.68,-864.16 278.91,-874.06 285.9,-874.26"/>
+</g>
+<!-- proc~mpiexchangeasync_mappedvector2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node6" class="node">
+<title>proc~mpiexchangeasync_mappedvector2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node6"><a xlink:href=".././proc/mpiexchangeasync_mappedvector2d.html" xlink:title="MPIExchangeAsync_MappedVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="213.5,-1536 2.5,-1536 2.5,-1512 213.5,-1512 213.5,-1536"/>
+<text text-anchor="middle" x="108" y="-1521.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MPIExchangeAsync_MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~mpiexchangeasync_mappedvector2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge5" class="edge">
+<title>proc~mpiexchangeasync_mappedvector2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M205.81,-1511.79C209.51,-1509.27 212.94,-1506.36 216,-1503 259.32,-1455.53 278.4,-983.51 282.25,-874.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="285.76,-874.35 282.6,-864.23 278.76,-874.11 285.76,-874.35"/>
+</g>
+<!-- proc~init_dgmodel1d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node7" class="node">
+<title>proc~init_dgmodel1d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node7"><a xlink:href=".././proc/init_dgmodel1d.html" xlink:title="Init_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="157,-1494 59,-1494 59,-1470 157,-1470 157,-1494"/>
+<text text-anchor="middle" x="108" y="-1479.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel1d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge3" class="edge">
+<title>proc~init_dgmodel1d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M157.21,-1484.49C178.18,-1482.89 201.27,-1477.03 216,-1461 256.54,-1416.89 277.62,-978.76 282.09,-874.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="285.59,-874.37 282.51,-864.23 278.59,-874.07 285.59,-874.37"/>
+</g>
+<!-- proc~stagesolutionfortransfer_dgmodel2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node8" class="node">
+<title>proc~stagesolutionfortransfer_dgmodel2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node8"><a xlink:href=".././proc/stagesolutionfortransfer_dgmodel2d.html" xlink:title="StageSolutionForTransfer_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="216,-1452 0,-1452 0,-1428 216,-1428 216,-1452"/>
+<text text-anchor="middle" x="108" y="-1437.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">StageSolutionForTransfer_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~stagesolutionfortransfer_dgmodel2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge2" class="edge">
+<title>proc~stagesolutionfortransfer_dgmodel2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M205.75,-1427.73C209.46,-1425.23 212.91,-1422.33 216,-1419 253.75,-1378.26 276.75,-974.3 281.9,-874.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="285.4,-874.3 282.41,-864.13 278.41,-873.94 285.4,-874.3"/>
+</g>
+<!-- proc~init_lagrange -->
+<g id="interface~~hipmalloc~~CalledByGraph_node9" class="node">
+<title>proc~init_lagrange</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node9"><a xlink:href=".././proc/init_lagrange.html" xlink:title="Init_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="150.5,-1410 65.5,-1410 65.5,-1386 150.5,-1386 150.5,-1410"/>
+<text text-anchor="middle" x="108" y="-1395.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~init_lagrange&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge6" class="edge">
+<title>proc~init_lagrange&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M150.62,-1400.75C173.12,-1399.86 199.58,-1394.56 216,-1377 285.37,-1302.83 284.9,-965.32 283.47,-874.54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="286.97,-874.22 283.29,-864.29 279.97,-874.35 286.97,-874.22"/>
+</g>
+<!-- proc~init_scalar1d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node10" class="node">
+<title>proc~init_scalar1d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node10"><a xlink:href=".././proc/init_scalar1d.html" xlink:title="Init_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="149.5,-1368 66.5,-1368 66.5,-1344 149.5,-1344 149.5,-1368"/>
+<text text-anchor="middle" x="108" y="-1353.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_scalar1d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge7" class="edge">
+<title>proc~init_scalar1d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M149.75,-1358.71C172.39,-1357.9 199.29,-1352.68 216,-1335 279.87,-1267.45 283.46,-960.27 283.19,-874.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="286.69,-874.17 283.14,-864.19 279.69,-874.2 286.69,-874.17"/>
+</g>
+<!-- proc~updatedevice_mesh2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node11" class="node">
+<title>proc~updatedevice_mesh2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node11"><a xlink:href=".././proc/updatedevice_mesh2d.html" xlink:title="UpdateDevice_Mesh2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="176,-1326 40,-1326 40,-1302 176,-1302 176,-1326"/>
+<text text-anchor="middle" x="108" y="-1311.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_mesh2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge8" class="edge">
+<title>proc~updatedevice_mesh2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M176.05,-1313.44C190.97,-1310.17 205.46,-1304.01 216,-1293 274.32,-1232.11 281.9,-955.72 282.87,-874.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="286.37,-874.42 282.96,-864.38 279.37,-874.35 286.37,-874.42"/>
+</g>
+<!-- proc~mortarexchange_mappedvector2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node12" class="node">
+<title>proc~mortarexchange_mappedvector2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node12"><a xlink:href=".././proc/mortarexchange_mappedvector2d.html" xlink:title="MortarExchange_MappedVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="206.5,-1284 9.5,-1284 9.5,-1260 206.5,-1260 206.5,-1284"/>
+<text text-anchor="middle" x="108" y="-1269.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MortarExchange_MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~mortarexchange_mappedvector2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge13" class="edge">
+<title>proc~mortarexchange_mappedvector2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M205.08,-1259.85C209.02,-1257.32 212.7,-1254.39 216,-1251 268.88,-1196.65 280.22,-950.15 282.48,-874.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="285.98,-874.09 282.76,-864 278.98,-873.9 285.98,-874.09"/>
+</g>
+<!-- proc~init_dgmodel3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node13" class="node">
+<title>proc~init_dgmodel3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node13"><a xlink:href=".././proc/init_dgmodel3d.html" xlink:title="Init_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="157,-1242 59,-1242 59,-1218 157,-1218 157,-1242"/>
+<text text-anchor="middle" x="108" y="-1227.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge11" class="edge">
+<title>proc~init_dgmodel3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M157.22,-1231.93C177.92,-1230.16 200.8,-1224.32 216,-1209 263.42,-1161.19 278.35,-944.68 282,-874.23"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="285.49,-874.38 282.49,-864.22 278.5,-874.04 285.49,-874.38"/>
+</g>
+<!-- proc~regrid_dgmodel2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node14" class="node">
+<title>proc~regrid_dgmodel2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node14"><a xlink:href=".././proc/regrid_dgmodel2d.html" xlink:title="Regrid_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-1200 50,-1200 50,-1176 166,-1176 166,-1200"/>
+<text text-anchor="middle" x="108" y="-1185.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Regrid_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~regrid_dgmodel2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge32" class="edge">
+<title>proc~regrid_dgmodel2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M166.13,-1188.71C184.19,-1186.08 202.85,-1179.95 216,-1167 257.91,-1125.74 276.18,-939.58 281.37,-874.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="284.89,-874.41 282.16,-864.17 277.91,-873.88 284.89,-874.41"/>
+</g>
+<!-- proc~init_scalar1d~2 -->
+<g id="interface~~hipmalloc~~CalledByGraph_node15" class="node">
+<title>proc~init_scalar1d~2</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node15"><a xlink:href=".././proc/init_scalar1d~2.html" xlink:title="Init_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="149.5,-1158 66.5,-1158 66.5,-1134 149.5,-1134 149.5,-1158"/>
+<text text-anchor="middle" x="108" y="-1143.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_scalar1d~2&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge33" class="edge">
+<title>proc~init_scalar1d~2&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M149.61,-1148.03C171.93,-1146.94 198.54,-1141.66 216,-1125 252.57,-1090.11 273.83,-932.93 280.61,-874.22"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="284.1,-874.48 281.74,-864.15 277.14,-873.7 284.1,-874.48"/>
+</g>
+<!-- proc~mortarexchange_mappedvector3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node16" class="node">
+<title>proc~mortarexchange_mappedvector3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node16"><a xlink:href=".././proc/mortarexchange_mappedvector3d.html" xlink:title="MortarExchange_MappedVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="206.5,-1116 9.5,-1116 9.5,-1092 206.5,-1092 206.5,-1116"/>
+<text text-anchor="middle" x="108" y="-1101.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MortarExchange_MappedVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~mortarexchange_mappedvector3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge34" class="edge">
+<title>proc~mortarexchange_mappedvector3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M203.63,-1091.94C208.06,-1089.41 212.23,-1086.45 216,-1083 276.76,-1027.4 283.66,-920.35 283.63,-874.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="287.13,-873.97 283.51,-864.01 280.13,-874.05 287.13,-873.97"/>
+</g>
+<!-- proc~init_ecadvection3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node17" class="node">
+<title>proc~init_ecadvection3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node17"><a xlink:href=".././proc/init_ecadvection3d.html" xlink:title="Init_ECAdvection3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-1074 50,-1074 50,-1050 166,-1050 166,-1074"/>
+<text text-anchor="middle" x="108" y="-1059.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_ecadvection3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge9" class="edge">
+<title>proc~init_ecadvection3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M166.02,-1061.56C183.75,-1058.79 202.24,-1052.87 216,-1041 266.11,-997.76 278.74,-914.5 281.93,-874.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="285.43,-874.66 282.6,-864.45 278.44,-874.2 285.43,-874.66"/>
+</g>
+<!-- proc~applytransferplan_dgmodel3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node18" class="node">
+<title>proc~applytransferplan_dgmodel3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node18"><a xlink:href=".././proc/applytransferplan_dgmodel3d.html" xlink:title="ApplyTransferPlan_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="196.5,-1032 19.5,-1032 19.5,-1008 196.5,-1008 196.5,-1032"/>
+<text text-anchor="middle" x="108" y="-1017.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ApplyTransferPlan_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~applytransferplan_dgmodel3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge10" class="edge">
+<title>proc~applytransferplan_dgmodel3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M196.55,-1010.29C203.53,-1007.34 210.13,-1003.63 216,-999 255.95,-967.45 272.93,-906.76 279.43,-874.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="282.89,-874.64 281.25,-864.18 276,-873.38 282.89,-874.64"/>
+</g>
+<!-- proc~mortarexchange_mappedscalar3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node19" class="node">
+<title>proc~mortarexchange_mappedscalar3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node19"><a xlink:href=".././proc/mortarexchange_mappedscalar3d.html" xlink:title="MortarExchange_MappedScalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="206.5,-990 9.5,-990 9.5,-966 206.5,-966 206.5,-990"/>
+<text text-anchor="middle" x="108" y="-975.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MortarExchange_MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~mortarexchange_mappedscalar3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge20" class="edge">
+<title>proc~mortarexchange_mappedscalar3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M199.37,-965.97C205.23,-963.48 210.84,-960.52 216,-957 246.02,-936.54 265.49,-897.71 275.33,-873.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.63,-874.61 278.96,-864.02 272.1,-872.09 278.63,-874.61"/>
+</g>
+<!-- proc~mpiexchangeasync_mappedvector3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node20" class="node">
+<title>proc~mpiexchangeasync_mappedvector3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node20"><a xlink:href=".././proc/mpiexchangeasync_mappedvector3d.html" xlink:title="MPIExchangeAsync_MappedVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="213.5,-948 2.5,-948 2.5,-924 213.5,-924 213.5,-948"/>
+<text text-anchor="middle" x="108" y="-933.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MPIExchangeAsync_MappedVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~mpiexchangeasync_mappedvector3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge21" class="edge">
+<title>proc~mpiexchangeasync_mappedvector3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M194.03,-923.94C201.66,-921.49 209.09,-918.54 216,-915 236.3,-904.58 254.82,-886.15 267.22,-871.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="270.03,-874.01 273.78,-864.1 264.67,-869.51 270.03,-874.01"/>
+</g>
+<!-- proc~init_dgmodel2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node21" class="node">
+<title>proc~init_dgmodel2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node21"><a xlink:href=".././proc/init_dgmodel2d.html" xlink:title="Init_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="157,-906 59,-906 59,-882 157,-882 157,-906"/>
+<text text-anchor="middle" x="108" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge22" class="edge">
+<title>proc~init_dgmodel2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M157.19,-885.71C175.68,-882.22 196.92,-877.85 216,-873 224.49,-870.84 233.5,-868.24 242.06,-865.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="243.35,-868.88 251.84,-862.55 241.26,-862.2 243.35,-868.88"/>
+</g>
+<!-- proc~init_lagrange~2 -->
+<g id="interface~~hipmalloc~~CalledByGraph_node22" class="node">
+<title>proc~init_lagrange~2</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node22"><a xlink:href=".././proc/init_lagrange~2.html" xlink:title="Init_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="150.5,-864 65.5,-864 65.5,-840 150.5,-840 150.5,-864"/>
+<text text-anchor="middle" x="108" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~init_lagrange~2&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge23" class="edge">
+<title>proc~init_lagrange~2&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M150.68,-852C178.22,-852 214.18,-852 241.66,-852"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="241.74,-855.5 251.74,-852 241.74,-848.5 241.74,-855.5"/>
+</g>
+<!-- proc~init_mesh3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node23" class="node">
+<title>proc~init_mesh3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node23"><a xlink:href=".././proc/init_mesh3d.html" xlink:title="Init_Mesh3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="146.5,-822 69.5,-822 69.5,-798 146.5,-798 146.5,-822"/>
+<text text-anchor="middle" x="108" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_mesh3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge16" class="edge">
+<title>proc~init_mesh3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M146.86,-816.38C167.43,-820.11 193.25,-825.22 216,-831 224.49,-833.16 233.5,-835.76 242.06,-838.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="241.26,-841.8 251.84,-841.45 243.35,-835.12 241.26,-841.8"/>
+</g>
+<!-- proc~updatedevice_points -->
+<g id="interface~~hipmalloc~~CalledByGraph_node24" class="node">
+<title>proc~updatedevice_points</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node24"><a xlink:href=".././proc/updatedevice_points.html" xlink:title="UpdateDevice_Points">
+<polygon fill="#d9534f" stroke="#d9534f" points="170,-780 46,-780 46,-756 170,-756 170,-780"/>
+<text text-anchor="middle" x="108" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Points</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_points&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge17" class="edge">
+<title>proc~updatedevice_points&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M170.12,-773.92C185.66,-777.04 201.94,-781.78 216,-789 236.3,-799.42 254.82,-817.85 267.22,-832.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="264.67,-834.49 273.78,-839.9 270.03,-829.99 264.67,-834.49"/>
+</g>
+<!-- proc~init_refinementindicator2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node25" class="node">
+<title>proc~init_refinementindicator2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node25"><a xlink:href=".././proc/init_refinementindicator2d.html" xlink:title="Init_RefinementIndicator2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="187,-738 29,-738 29,-714 187,-714 187,-738"/>
+<text text-anchor="middle" x="108" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_RefinementIndicator2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_refinementindicator2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge15" class="edge">
+<title>proc~init_refinementindicator2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M187.12,-733.58C197.37,-736.74 207.32,-741.08 216,-747 246.02,-767.46 265.49,-806.29 275.33,-830.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="272.1,-831.91 278.96,-839.98 278.63,-829.39 272.1,-831.91"/>
+</g>
+<!-- proc~init_twopointvector2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node26" class="node">
+<title>proc~init_twopointvector2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node26"><a xlink:href=".././proc/init_twopointvector2d.html" xlink:title="Init_TwoPointVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="172.5,-696 43.5,-696 43.5,-672 172.5,-672 172.5,-696"/>
+<text text-anchor="middle" x="108" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_TwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_twopointvector2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge1" class="edge">
+<title>proc~init_twopointvector2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M172.66,-686.47C188.09,-689.63 203.67,-695.26 216,-705 255.95,-736.55 272.93,-797.24 279.43,-829.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="276,-830.62 281.25,-839.82 282.89,-829.36 276,-830.62"/>
+</g>
+<!-- proc~mortarexchange_mappedscalar2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node27" class="node">
+<title>proc~mortarexchange_mappedscalar2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node27"><a xlink:href=".././proc/mortarexchange_mappedscalar2d.html" xlink:title="MortarExchange_MappedScalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="206.5,-654 9.5,-654 9.5,-630 206.5,-630 206.5,-654"/>
+<text text-anchor="middle" x="108" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MortarExchange_MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~mortarexchange_mappedscalar2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge24" class="edge">
+<title>proc~mortarexchange_mappedscalar2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M202.89,-654.06C207.57,-656.58 211.99,-659.54 216,-663 266.11,-706.24 278.74,-789.5 281.93,-829.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.44,-829.8 282.6,-839.55 285.43,-829.34 278.44,-829.8"/>
+</g>
+<!-- proc~applytransferplan_dgmodel2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node28" class="node">
+<title>proc~applytransferplan_dgmodel2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node28"><a xlink:href=".././proc/applytransferplan_dgmodel2d.html" xlink:title="ApplyTransferPlan_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="196.5,-612 19.5,-612 19.5,-588 196.5,-588 196.5,-612"/>
+<text text-anchor="middle" x="108" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ApplyTransferPlan_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~applytransferplan_dgmodel2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge25" class="edge">
+<title>proc~applytransferplan_dgmodel2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M196.53,-608.47C203.64,-611.66 210.27,-615.76 216,-621 276.76,-676.6 283.66,-783.65 283.63,-829.86"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="280.13,-829.95 283.51,-839.99 287.13,-830.03 280.13,-829.95"/>
+</g>
+<!-- proc~sideexchangestart_mappedscalar3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node29" class="node">
+<title>proc~sideexchangestart_mappedscalar3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node29"><a xlink:href=".././proc/sideexchangestart_mappedscalar3d.html" xlink:title="SideExchangeStart_MappedScalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="213.5,-570 2.5,-570 2.5,-546 213.5,-546 213.5,-570"/>
+<text text-anchor="middle" x="108" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SideExchangeStart_MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~sideexchangestart_mappedscalar3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge26" class="edge">
+<title>proc~sideexchangestart_mappedscalar3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M204.29,-570.17C208.5,-572.68 212.44,-575.6 216,-579 252.57,-613.89 273.83,-771.07 280.61,-829.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="277.14,-830.3 281.74,-839.85 284.1,-829.52 277.14,-830.3"/>
+</g>
+<!-- proc~init_ecadvection2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node30" class="node">
+<title>proc~init_ecadvection2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node30"><a xlink:href=".././proc/init_ecadvection2d.html" xlink:title="Init_ECAdvection2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-528 50,-528 50,-504 166,-504 166,-528"/>
+<text text-anchor="middle" x="108" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_ecadvection2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge27" class="edge">
+<title>proc~init_ecadvection2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M166.13,-515.29C184.19,-517.92 202.85,-524.05 216,-537 257.91,-578.26 276.18,-764.42 281.37,-829.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="277.91,-830.12 282.16,-839.83 284.89,-829.59 277.91,-830.12"/>
+</g>
+<!-- proc~init_mesh2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node31" class="node">
+<title>proc~init_mesh2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node31"><a xlink:href=".././proc/init_mesh2d.html" xlink:title="Init_Mesh2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="146.5,-486 69.5,-486 69.5,-462 146.5,-462 146.5,-486"/>
+<text text-anchor="middle" x="108" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_mesh2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge28" class="edge">
+<title>proc~init_mesh2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M146.57,-471.49C169.66,-472.08 198.14,-476.99 216,-495 263.42,-542.81 278.35,-759.32 282,-829.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.5,-829.96 282.49,-839.78 285.49,-829.62 278.5,-829.96"/>
+</g>
+<!-- proc~init_esatmo2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node32" class="node">
+<title>proc~init_esatmo2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node32"><a xlink:href=".././proc/init_esatmo2d.html" xlink:title="Init_ESAtmo2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="153.5,-444 62.5,-444 62.5,-420 153.5,-420 153.5,-444"/>
+<text text-anchor="middle" x="108" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_esatmo2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge29" class="edge">
+<title>proc~init_esatmo2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M153.56,-429.66C175.25,-430.99 200.03,-436.58 216,-453 268.88,-507.35 280.22,-753.85 282.48,-829.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.98,-830.1 282.76,-840 285.98,-829.91 278.98,-830.1"/>
+</g>
+<!-- proc~updatedevice_mesh3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node33" class="node">
+<title>proc~updatedevice_mesh3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node33"><a xlink:href=".././proc/updatedevice_mesh3d.html" xlink:title="UpdateDevice_Mesh3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="176,-402 40,-402 40,-378 176,-378 176,-402"/>
+<text text-anchor="middle" x="108" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_mesh3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge35" class="edge">
+<title>proc~updatedevice_mesh3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M176.05,-390.56C190.97,-393.83 205.46,-399.99 216,-411 274.32,-471.89 281.9,-748.28 282.87,-829.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="279.37,-829.65 282.96,-839.62 286.37,-829.58 279.37,-829.65"/>
+</g>
+<!-- proc~init_refinementindicator3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node34" class="node">
+<title>proc~init_refinementindicator3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node34"><a xlink:href=".././proc/init_refinementindicator3d.html" xlink:title="Init_RefinementIndicator3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="187,-360 29,-360 29,-336 187,-336 187,-360"/>
+<text text-anchor="middle" x="108" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_RefinementIndicator3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_refinementindicator3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge36" class="edge">
+<title>proc~init_refinementindicator3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M187.13,-351.48C198.01,-355.12 208.13,-360.68 216,-369 279.87,-436.55 283.46,-743.73 283.19,-829.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="279.69,-829.8 283.14,-839.81 286.69,-829.83 279.69,-829.8"/>
+</g>
+<!-- proc~mortarfluxcollect_mappedvector2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node35" class="node">
+<title>proc~mortarfluxcollect_mappedvector2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node35"><a xlink:href=".././proc/mortarfluxcollect_mappedvector2d.html" xlink:title="MortarFluxCollect_MappedVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209.5,-318 6.5,-318 6.5,-294 209.5,-294 209.5,-318"/>
+<text text-anchor="middle" x="108" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MortarFluxCollect_MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~mortarfluxcollect_mappedvector2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge37" class="edge">
+<title>proc~mortarfluxcollect_mappedvector2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M205.71,-318.31C209.43,-320.8 212.9,-323.68 216,-327 285.37,-401.17 284.9,-738.68 283.47,-829.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="279.97,-829.65 283.29,-839.71 286.97,-829.78 279.97,-829.65"/>
+</g>
+<!-- proc~sideexchangestart_mappedscalar2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node36" class="node">
+<title>proc~sideexchangestart_mappedscalar2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node36"><a xlink:href=".././proc/sideexchangestart_mappedscalar2d.html" xlink:title="SideExchangeStart_MappedScalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="213.5,-276 2.5,-276 2.5,-252 213.5,-252 213.5,-276"/>
+<text text-anchor="middle" x="108" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SideExchangeStart_MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~sideexchangestart_mappedscalar2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge38" class="edge">
+<title>proc~sideexchangestart_mappedscalar2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M205.75,-276.27C209.46,-278.77 212.91,-281.67 216,-285 253.75,-325.74 276.75,-729.7 281.9,-829.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.41,-830.06 282.41,-839.87 285.4,-829.7 278.41,-830.06"/>
+</g>
+<!-- proc~estimate_refinementindicator2d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node37" class="node">
+<title>proc~estimate_refinementindicator2d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node37"><a xlink:href=".././proc/estimate_refinementindicator2d.html" xlink:title="Estimate_RefinementIndicator2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="202,-234 14,-234 14,-210 202,-210 202,-234"/>
+<text text-anchor="middle" x="108" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Estimate_RefinementIndicator2D</text>
+</a>
+</g>
+</g>
+<!-- proc~estimate_refinementindicator2d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge39" class="edge">
+<title>proc~estimate_refinementindicator2d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M202.47,-232.14C207.45,-235.1 212.03,-238.68 216,-243 256.54,-287.11 277.62,-725.24 282.09,-829.72"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.59,-829.93 282.51,-839.77 285.59,-829.63 278.59,-829.93"/>
+</g>
+<!-- proc~regrid_dgmodel3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node38" class="node">
+<title>proc~regrid_dgmodel3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node38"><a xlink:href=".././proc/regrid_dgmodel3d.html" xlink:title="Regrid_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-192 50,-192 50,-168 166,-168 166,-192"/>
+<text text-anchor="middle" x="108" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Regrid_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~regrid_dgmodel3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge31" class="edge">
+<title>proc~regrid_dgmodel3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M166.12,-178.39C184.5,-180.88 203.37,-187.16 216,-201 259.32,-248.47 278.4,-720.49 282.25,-829.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.76,-829.89 282.6,-839.77 285.76,-829.65 278.76,-829.89"/>
+</g>
+<!-- proc~init_twopointvector3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node39" class="node">
+<title>proc~init_twopointvector3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node39"><a xlink:href=".././proc/init_twopointvector3d.html" xlink:title="Init_TwoPointVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="172.5,-150 43.5,-150 43.5,-126 172.5,-126 172.5,-150"/>
+<text text-anchor="middle" x="108" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_twopointvector3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge40" class="edge">
+<title>proc~init_twopointvector3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M172.58,-137.37C188.85,-140.4 204.87,-146.73 216,-159 262.13,-209.85 279.15,-716.28 282.4,-829.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.91,-829.94 282.68,-839.84 285.9,-829.74 278.91,-829.94"/>
+</g>
+<!-- proc~stagesolutionfortransfer_dgmodel3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node40" class="node">
+<title>proc~stagesolutionfortransfer_dgmodel3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node40"><a xlink:href=".././proc/stagesolutionfortransfer_dgmodel3d.html" xlink:title="StageSolutionForTransfer_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="216,-108 0,-108 0,-84 216,-84 216,-108"/>
+<text text-anchor="middle" x="108" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">StageSolutionForTransfer_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~stagesolutionfortransfer_dgmodel3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge12" class="edge">
+<title>proc~stagesolutionfortransfer_dgmodel3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M205.86,-108.17C209.54,-110.7 212.96,-113.63 216,-117 264.95,-171.27 279.87,-712.6 282.53,-829.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="279.04,-830.06 282.76,-839.98 286.04,-829.91 279.04,-830.06"/>
+</g>
+<!-- proc~migrateoldwindow_dgmodel3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node41" class="node">
+<title>proc~migrateoldwindow_dgmodel3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node41"><a xlink:href=".././proc/migrateoldwindow_dgmodel3d.html" xlink:title="MigrateOldWindow_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-66 17,-66 17,-42 199,-42 199,-66"/>
+<text text-anchor="middle" x="108" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MigrateOldWindow_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~migrateoldwindow_dgmodel3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge30" class="edge">
+<title>proc~migrateoldwindow_dgmodel3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M199.17,-62.1C205.46,-65.42 211.19,-69.65 216,-75 267.75,-132.65 280.52,-708.24 282.65,-829.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="279.15,-829.96 282.82,-839.9 286.15,-829.84 279.15,-829.96"/>
+</g>
+<!-- proc~mortarfluxcollect_mappedvector3d -->
+<g id="interface~~hipmalloc~~CalledByGraph_node42" class="node">
+<title>proc~mortarfluxcollect_mappedvector3d</title>
+<g id="a_interface~~hipmalloc~~CalledByGraph_node42"><a xlink:href=".././proc/mortarfluxcollect_mappedvector3d.html" xlink:title="MortarFluxCollect_MappedVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209.5,-24 6.5,-24 6.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="108" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MortarFluxCollect_MappedVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~mortarfluxcollect_mappedvector3d&#45;&gt;interface~hipmalloc -->
+<g id="interface~~hipmalloc~~CalledByGraph_edge41" class="edge">
+<title>proc~mortarfluxcollect_mappedvector3d&#45;&gt;interface~hipmalloc</title>
+<path fill="none" stroke="#ff0000" d="M205.9,-24.13C209.57,-26.68 212.97,-29.61 216,-33 270.56,-94.05 281.15,-704.29 282.75,-829.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="279.25,-829.92 282.87,-839.87 286.25,-829.83 279.25,-829.92"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+     <section class="visible-xs visible-sm hidden-md">
+       <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../interface/hipmalloc.html#proc-hipmalloc_">hipMalloc_</a>
+    </div>
+  </div>
+</div>
+
+     </section>
+     <br class="visible-xs visible-sm hidden-md">
+     
+   <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-hipmalloc_"></span><h3>public function hipMalloc_(ptr, mySize) bind(c,name="hipMalloc")</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+<td></td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ptr</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_size_t),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>mySize</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer(kind=kind(hipSuccess))</small></h4>  
+
+  </div>
+  </div>
+
+
+
+
+ </div>
+</div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

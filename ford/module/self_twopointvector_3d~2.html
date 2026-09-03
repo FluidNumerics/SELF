@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_TwoPointVector_3D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_TwoPointVector_3D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.3% of total for modules and submodules.">69 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_TwoPointVector_3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_twopointvector_3d.f90~2.html'>SELF_TwoPointVector_3D.f90</a></li>
+     <li class="active">SELF_TwoPointVector_3D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#type-twopointvector3d~2">TwoPointVector3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-divergence_twopointvector3d">Divergence_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-free_twopointvector3d">Free_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-init_twopointvector3d">Init_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-updatedevice_twopointvector3d">UpdateDevice_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-updatehost_twopointvector3d">UpdateHost_TwoPointVector3D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_gpu.html'>SELF_GPU</a></li>
+    <li><a href='../module/self_gpuinterfaces.html'>SELF_GPUInterfaces</a></li>
+    <li><a href='../module/self_twopointvector_3d_t.html'>SELF_TwoPointVector_3D_t</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_twopointvector_3d~2~~UsesGraph Pages: 1 -->
+<svg id="moduleself_twopointvector_3d2UsesGraph" width="641pt" height="238pt"
+ viewBox="0.00 0.00 641.00 237.78" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_twopointvector_3d~2~~UsesGraph" class="graph" transform="scale(0.55 0.55) rotate(0) translate(4 428.9)">
+<title>module~~self_twopointvector_3d~2~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-428.9 1163,-428.9 1163,4 -4,4"/>
+<!-- module~self_twopointvector_3d~2 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node1" class="node">
+<title>module~self_twopointvector_3d~2</title>
+<polygon fill="none" stroke="black" points="1159,-181.56 1016,-181.56 1016,-157.56 1159,-157.56 1159,-181.56"/>
+<text text-anchor="middle" x="1087.5" y="-167.16" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_TwoPointVector_3D</text>
+</g>
+<!-- module~self_gpu -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node2" class="node">
+<title>module~self_gpu</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node2"><a xlink:href=".././module/self_gpu.html" xlink:title="SELF_GPU">
+<polygon fill="#337ab7" stroke="#337ab7" points="370,-380.56 305,-380.56 305,-356.56 370,-356.56 370,-380.56"/>
+<text text-anchor="middle" x="337.5" y="-366.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge1" class="edge">
+<title>module~self_twopointvector_3d~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M639,-408.56C576.78,-408.41 561.1,-412.41 499,-408.56"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M497,-408.56C456.36,-406.03 411.49,-393.78 379.89,-383.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="380.72,-380.07 370.12,-380.23 378.5,-386.71 380.72,-380.07"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node3" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node3"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-302.56 5,-302.56 5,-278.56 89,-278.56 89,-302.56"/>
+<text text-anchor="middle" x="47" y="-288.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge2" class="edge">
+<title>module~self_twopointvector_3d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M497,-408.56C358.16,-399.94 317.18,-448.73 184,-408.56"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node4" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node4"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="231,-64.56 135,-64.56 135,-40.56 231,-40.56 231,-64.56"/>
+<text text-anchor="middle" x="183" y="-50.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge3" class="edge">
+<title>module~self_twopointvector_3d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1067.87,-157.52C1022.78,-129.18 903.27,-58.85 792,-34.56 762.04,-28.02 753.56,-31.97 723,-34.56 686.16,-37.68 677.73,-52.75 641,-48.56"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M639,-48.56C477.76,-22.2 433.82,-5.02 272,-27.56 257.44,-29.58 241.91,-33.41 228.01,-37.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.77,-34.2 218.22,-40.45 228.8,-40.89 226.77,-34.2"/>
+</g>
+<!-- module~self_twopointvector_3d_t -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node5" class="node">
+<title>module~self_twopointvector_3d_t</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node5"><a xlink:href=".././module/self_twopointvector_3d_t.html" xlink:title="SELF_TwoPointVector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="980,-181.56 828,-181.56 828,-157.56 980,-157.56 980,-181.56"/>
+<text text-anchor="middle" x="904" y="-167.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d~2&#45;&gt;module~self_twopointvector_3d_t -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge4" class="edge">
+<title>module~self_twopointvector_3d~2&#45;&gt;module~self_twopointvector_3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1015.81,-169.56C1007.53,-169.56 999.01,-169.56 990.56,-169.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="990.3,-166.06 980.3,-169.56 990.3,-173.06 990.3,-166.06"/>
+</g>
+<!-- module~self_gpuinterfaces -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node6" class="node">
+<title>module~self_gpuinterfaces</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node6"><a xlink:href=".././module/self_gpuinterfaces.html" xlink:title="SELF_GPUInterfaces">
+<polygon fill="#337ab7" stroke="#337ab7" points="557,-380.56 439,-380.56 439,-356.56 557,-356.56 557,-380.56"/>
+<text text-anchor="middle" x="498" y="-366.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge5" class="edge">
+<title>module~self_twopointvector_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1075.3,-181.81C1027.65,-232.44 835.37,-422.18 641,-408.56"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M639,-408.56C602.26,-408.47 562.1,-395.59 534.26,-384.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="535.53,-381.2 524.95,-380.63 532.86,-387.68 535.53,-381.2"/>
+</g>
+<!-- module~self_gpu&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge7" class="edge">
+<title>module~self_gpu&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M305.95,-380.6C268.34,-394.72 206.67,-415.39 184,-408.56"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M182,-408.56C128.48,-392.41 83.86,-340.45 62.17,-311.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="64.87,-308.92 56.19,-302.85 59.19,-313.01 64.87,-308.92"/>
+</g>
+<!-- module~self_gpu_enums~2 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node7" class="node">
+<title>module~self_gpu_enums~2</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node7"><a xlink:href=".././module/self_gpu_enums~2.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="236,-361.56 130,-361.56 130,-337.56 236,-337.56 236,-361.56"/>
+<text text-anchor="middle" x="183" y="-347.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu&#45;&gt;module~self_gpu_enums~2 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge6" class="edge">
+<title>module~self_gpu&#45;&gt;module~self_gpu_enums~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M304.9,-364.62C287.96,-362.51 266.48,-359.83 246.34,-357.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="246.63,-353.83 236.27,-356.07 245.76,-360.78 246.63,-353.83"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge9" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M170.69,-64.63C159.46,-77.01 142.19,-97.17 130,-116.56 97.46,-168.31 69.53,-235.02 56.25,-268.84"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="52.96,-267.63 52.61,-278.22 59.49,-270.16 52.96,-267.63"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node10" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node10"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-84.56 0,-84.56 0,-60.56 94,-60.56 94,-84.56"/>
+<text text-anchor="middle" x="47" y="-70.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge8" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M134.76,-59.61C124.92,-61.08 114.47,-62.64 104.34,-64.15"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="103.74,-60.7 94.37,-65.64 104.77,-67.62 103.74,-60.7"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge14" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M756.5,-290.56C671.78,-329.57 430.22,-345.49 338.5,-328.56"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M336.5,-328.56C267.89,-315.45 253.72,-294.83 184,-290.56"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge12" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M895.11,-157.24C875.91,-128.85 823.54,-60.3 758.5,-48.56"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M756.5,-48.56C705.98,-39.44 692,-54.38 641,-48.56"/>
+</g>
+<!-- module~self_lagrange~2 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node8" class="node">
+<title>module~self_lagrange~2</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node8"><a xlink:href=".././module/self_lagrange~2.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="687,-100.56 593,-100.56 593,-76.56 687,-76.56 687,-100.56"/>
+<text text-anchor="middle" x="640" y="-86.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge11" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M756.5,-48.56C740.81,-45.72 703.74,-60 675.8,-72.28"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="674.04,-69.23 666.34,-76.5 676.9,-75.62 674.04,-69.23"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node9" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node9"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="545,-260.56 451,-260.56 451,-236.56 545,-236.56 545,-260.56"/>
+<text text-anchor="middle" x="498" y="-246.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge10" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M893.81,-181.61C873.1,-207.63 819.77,-268.52 758.5,-290.56"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M756.5,-290.56C679.78,-318.14 583.64,-286.17 533.32,-264.76"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="534.45,-261.43 523.89,-260.64 531.65,-267.85 534.45,-261.43"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node11" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node11"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="792,-181.56 723,-181.56 723,-157.56 792,-157.56 792,-181.56"/>
+<text text-anchor="middle" x="757.5" y="-167.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge13" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M827.79,-169.56C819.11,-169.56 810.49,-169.56 802.43,-169.56"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="802.19,-166.06 792.19,-169.56 802.19,-173.06 802.19,-166.06"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node12" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="671.5,-142.56 608.5,-142.56 608.5,-118.56 671.5,-118.56 671.5,-142.56"/>
+<text text-anchor="middle" x="640" y="-128.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge15" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M756.5,-48.56C716.05,-41.26 721.51,-87.23 687,-109.56 684.73,-111.03 682.34,-112.45 679.89,-113.81"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="678.16,-110.76 670.88,-118.46 681.37,-116.98 678.16,-110.76"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;module~self_gpu -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge16" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M438.88,-368.56C419.53,-368.56 398.37,-368.56 380.48,-368.56"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="380.37,-365.06 370.37,-368.56 380.37,-372.06 380.37,-365.06"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge17" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M455.61,-356.55C423.82,-347.71 378.69,-335.98 338.5,-328.56"/>
+</g>
+<!-- module~self_gpu_enums~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge18" class="edge">
+<title>module~self_gpu_enums~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M154.56,-337.48C134.42,-328.61 106.84,-316.46 84.79,-306.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="85.97,-303.45 75.4,-302.62 83.15,-309.86 85.97,-303.45"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge20" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M604.39,-100.58C549.03,-119.17 436.8,-154.23 338.5,-168.56"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge21" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M497,-48.56C425.03,-38.61 409.75,-102.76 338.5,-88.56"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M336.5,-88.56C304.76,-82.23 269.58,-74.01 241.02,-67.02"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="241.76,-63.6 231.21,-64.6 240.08,-70.39 241.76,-63.6"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_fortran_env -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge22" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M606.75,-76.53C578.72,-66.76 536.81,-53.78 499,-48.56"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M497,-48.56C425.03,-38.61 409.99,-21.48 338.5,-8.56"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M336.5,-8.56C269.8,3.5 250.96,1.94 184,-8.56"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M182,-8.56C141.45,-14.92 99.5,-38.12 73.58,-54.76"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="71.54,-51.91 65.11,-60.33 75.39,-57.76 71.54,-51.91"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node13" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node13"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="549.5,-100.56 446.5,-100.56 446.5,-76.56 549.5,-76.56 549.5,-100.56"/>
+<text text-anchor="middle" x="498" y="-86.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge19" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M592.77,-88.56C582.16,-88.56 570.72,-88.56 559.61,-88.56"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="559.52,-85.06 549.52,-88.56 559.52,-92.06 559.52,-85.06"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node14" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node14"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="374,-220.56 301,-220.56 301,-196.56 374,-196.56 374,-220.56"/>
+<text text-anchor="middle" x="337.5" y="-206.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge23" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M450.73,-236.88C429.76,-231.59 405.05,-225.35 384.16,-220.08"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="384.79,-216.63 374.24,-217.58 383.08,-223.42 384.79,-216.63"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node15" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-262.56 156,-262.56 156,-238.56 210,-238.56 210,-262.56"/>
+<text text-anchor="middle" x="183" y="-248.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge24" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M450.89,-242.89C418.89,-240.32 375.54,-239.58 338.5,-248.56"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge28" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M336.5,-290.56C268.82,-286.83 251.65,-294.7 184,-290.56"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M182,-290.56C154.65,-288.88 124.11,-288.75 99.09,-289.09"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="99.03,-285.59 89.09,-289.26 99.15,-292.59 99.03,-285.59"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge30" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M726.08,-181.61C703.05,-190.29 670.47,-201.65 641,-208.56"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M639,-208.56C578.42,-222.75 560.23,-219.63 499,-208.56"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M497,-208.56C436.66,-197.65 455.15,-139.81 403,-107.56 377.58,-91.84 367.81,-94.4 338.5,-88.56"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge26" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M744.55,-157.35C731.34,-144.32 709.01,-123.67 687,-109.56 684.72,-108.1 682.33,-106.68 679.88,-105.33"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="681.35,-102.15 670.86,-100.69 678.15,-108.37 681.35,-102.15"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge27" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M639,-208.56C608.23,-215.77 574.12,-225.48 547.28,-233.52"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="545.93,-230.27 537.36,-236.52 547.95,-236.98 545.93,-230.27"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge31" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M722.78,-158.17C709.82,-153.79 694.88,-148.75 681.35,-144.18"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="682.39,-140.84 671.8,-140.96 680.15,-147.47 682.39,-140.84"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge25" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M497,-208.56C459.53,-201.78 416.27,-202.33 384.42,-204.27"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="383.82,-200.8 374.08,-204.97 384.29,-207.78 383.82,-200.8"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge29" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M743.25,-181.64C729.86,-193.36 708.18,-211.01 687,-222.56 548.45,-298.11 495.98,-300.71 338.5,-290.56"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M336.5,-290.56C295.62,-288.31 250.44,-275.03 219.95,-264.38"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="220.79,-260.96 210.2,-260.89 218.43,-267.55 220.79,-260.96"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge35" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M483.74,-100.69C457.87,-123.04 397.99,-168.47 338.5,-168.56"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M336.5,-168.56C244.33,-168.7 211.1,-143.77 130,-187.56 96.06,-205.88 71.24,-244.8 58.26,-269.21"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="55,-267.88 53.57,-278.37 61.24,-271.06 55,-267.88"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge37" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M446.18,-93.58C414.84,-95.44 373.99,-95.63 338.5,-88.56"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge32" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M464.63,-76.44C455.97,-72.57 446.85,-67.89 439,-62.56 420.54,-50.02 422.27,-38.82 403,-27.56 377.2,-12.48 367.91,-13.87 338.5,-8.56"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge38" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M487.54,-100.8C471.84,-120.4 438.61,-159.01 403,-182.56 396.98,-186.54 390.25,-190.08 383.47,-193.17"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="382.08,-189.96 374.26,-197.1 384.83,-196.39 382.08,-189.96"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge36" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M492.28,-100.84C481.1,-128.24 450.38,-194.67 403,-229.56 378.93,-247.28 367.54,-241.52 338.5,-248.56"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M336.5,-248.56C297.54,-257.99 251.33,-256.97 220.07,-254.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.33,-251.07 210.07,-253.7 219.74,-258.04 220.33,-251.07"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node16" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node16"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="403,-140.56 272,-140.56 272,-116.56 403,-116.56 403,-140.56"/>
+<text text-anchor="middle" x="337.5" y="-126.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge33" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M449.44,-100.56C432.75,-104.77 413.81,-109.55 396.37,-113.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="395.13,-110.65 386.3,-116.5 396.85,-117.44 395.13,-110.65"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node18" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node18"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="389.5,-60.56 285.5,-60.56 285.5,-36.56 389.5,-36.56 389.5,-60.56"/>
+<text text-anchor="middle" x="337.5" y="-46.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge34" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M449.44,-76.56C432.75,-72.34 413.81,-67.56 396.37,-63.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="396.85,-59.67 386.3,-60.62 395.13,-66.46 396.85,-59.67"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge39" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M322.57,-196.49C309.26,-184.81 288.81,-166.44 272,-149.56 246.45,-123.9 218.63,-92.63 201.26,-72.66"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="203.68,-70.11 194.49,-64.84 198.39,-74.69 203.68,-70.11"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge41" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M309.64,-196.54C270.11,-178.77 194.04,-144.29 130,-113.56 113.76,-105.76 95.84,-96.84 80.91,-89.32"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="82.09,-85.99 71.58,-84.6 78.93,-92.24 82.09,-85.99"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge42" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M300.75,-218.4C276.56,-225.07 244.71,-233.84 220.39,-240.54"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="219.18,-237.24 210.47,-243.27 221.04,-243.99 219.18,-237.24"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_node17" class="node">
+<title>mpi</title>
+<g id="a_module~~self_twopointvector_3d~2~~UsesGraph_node17"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-220.56 156,-220.56 156,-196.56 210,-196.56 210,-220.56"/>
+<text text-anchor="middle" x="183" y="-206.16" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge40" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M300.75,-208.56C276.67,-208.56 245,-208.56 220.72,-208.56"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="220.47,-205.06 210.47,-208.56 220.47,-212.06 220.47,-205.06"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge43" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M302.77,-116.47C292.68,-112.45 281.72,-107.69 272,-102.56 254.99,-93.58 252.63,-88.21 236,-78.56 230.5,-75.37 224.56,-72.17 218.72,-69.17"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.23,-66.01 209.73,-64.63 217.08,-72.26 220.23,-66.01"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge44" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M274.61,-116.54C224.06,-106.73 153.23,-92.98 104.27,-83.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="104.65,-79.99 94.17,-81.52 103.32,-86.86 104.65,-79.99"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge45" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M285.3,-49.9C271.23,-50.27 255.89,-50.67 241.49,-51.05"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="241.12,-47.56 231.21,-51.32 241.3,-54.56 241.12,-47.56"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_twopointvector_3d~2~~UsesGraph_edge46" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M303.22,-36.48C265.64,-23.44 206.78,-4.98 184,-8.56"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_twopointvector_3d2UsesGraph = svgPanZoom('#moduleself_twopointvector_3d2UsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+    
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#type-twopointvector3d~2">TwoPointVector3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-divergence_twopointvector3d">Divergence_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-free_twopointvector3d">Free_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-init_twopointvector3d">Init_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-updatedevice_twopointvector3d">UpdateDevice_TwoPointVector3D</a>
+      <a class="list-group-item" href="../module/self_twopointvector_3d~2.html#proc-updatehost_twopointvector3d">UpdateHost_TwoPointVector3D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-twopointvector3d~2"></span><h3>type, public, extends(<a href='../type/twopointvector3d_t.html'>TwoPointVector3D_t</a>) :: <a href='../type/twopointvector3d~2.html'>TwoPointVector3D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-m~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>M</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-n~4"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-backend~26"></span>character(len=3),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>backend</strong></td><td> =</td><td>"gpu"</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-eqn"></span>type(EquationParser),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>eqn</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interior~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:,:,:,:)</td><td>::</td>
+  <td><strong>interior</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interior_gpu~8"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>interior_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interp~3"></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>interp</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-meta"></span>type(<a href='../type/metadata.html'>Metadata</a>),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>meta</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem~5"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>generic, public :: <strong><a href='../type/twopointvector3d~2.html#boundprocedure-divergence~23'>Divergence</a></strong>  => Divergence_TwoPointVector3D_t, Divergence_TwoPointVector3D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/twopointvector3d~2.html#boundprocedure-divergence_twopointvector3d'>Divergence_TwoPointVector3D</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/twopointvector3d~2.html#boundprocedure-free~56'>Free</a></strong>  => Free_TwoPointVector3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/twopointvector3d~2.html#boundprocedure-init~52'>Init</a></strong>  => Init_TwoPointVector3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/self_dataobj.html#boundprocedure-setdescription~2'>SetDescription</a></strong>  => SetDescription_DataObj </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/twopointvector3d~2.html#boundprocedure-setequation~48'>SetEquation</a></strong>  => SetEquation_DataObj </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/self_dataobj.html#boundprocedure-setname~2'>SetName</a></strong>  => SetName_DataObj </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/self_dataobj.html#boundprocedure-setunits~2'>SetUnits</a></strong>  => SetUnits_DataObj </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/twopointvector3d~2.html#boundprocedure-updatedevice~25'>UpdateDevice</a></strong>  => UpdateDevice_TwoPointVector3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/twopointvector3d~2.html#boundprocedure-updatehost~20'>UpdateHost</a></strong>  => UpdateHost_TwoPointVector3D </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-divergence_twopointvector3d"></span><h3>public subroutine <a href='../proc/divergence_twopointvector3d.html'>Divergence_TwoPointVector3D</a>(this, df)</h3></div>
+  <div class="panel-body">
+       
+<p>GPU implementation of the reference-element split-form divergence.
+df must be a device pointer to a scalar field of size
+(N+1)^3 * nElem * nVar.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/twopointvector3d~2.html'>TwoPointVector3D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>df</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_twopointvector3d"></span><h3>public subroutine <a href='../proc/free_twopointvector3d.html'>Free_TwoPointVector3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/twopointvector3d~2.html'>TwoPointVector3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_twopointvector3d"></span><h3>public subroutine <a href='../proc/init_twopointvector3d.html'>Init_TwoPointVector3D</a>(this, interp, nVar, nElem)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/twopointvector3d~2.html'>TwoPointVector3D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-updatedevice_twopointvector3d"></span><h3>public subroutine <a href='../proc/updatedevice_twopointvector3d.html'>UpdateDevice_TwoPointVector3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/twopointvector3d~2.html'>TwoPointVector3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-updatehost_twopointvector3d"></span><h3>public subroutine <a href='../proc/updatehost_twopointvector3d.html'>UpdateHost_TwoPointVector3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/twopointvector3d~2.html'>TwoPointVector3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

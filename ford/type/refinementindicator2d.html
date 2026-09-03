@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>RefinementIndicator2D &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>RefinementIndicator2D
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.8% of total for derived types.</p>Including implementation: 185 statements,  0.2% of total for derived types.">15 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_RefinementIndicator_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_refinementindicator_2d.f90~2.html'>SELF_RefinementIndicator_2D.f90</a></li>
+     <li><a href='../module/self_refinementindicator_2d~2.html'>SELF_RefinementIndicator_2D</a></li>
+     <li class="active">RefinementIndicator2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-n~2">N</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-pmodal~2">Pmodal</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-pmodal_gpu">Pmodal_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-backend~24">backend</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-coarsenthreshold~2">coarsenThreshold</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyscale~2">energyScale</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyscaleisset~2">energyScaleIsSet</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyweight~2">energyWeight</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyweight_gpu">energyWeight_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyweightsset~2">energyWeightsSet</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-flag~2">flag</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-flag_gpu">flag_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-gate~2">gate</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-gate_gpu">gate_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-indicator~2">indicator</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-indicator_gpu">indicator_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-nelem~3">nElem</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-nvarweights~2">nVarWeights</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-nvarweights_gpu">nVarWeights_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-refinethreshold~2">refineThreshold</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-relativeenergyfloor~2">relativeEnergyFloor</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-significantenergyfloor~2">significantEnergyFloor</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-clearenergyscale~2">ClearEnergyScale</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-countflagged~2">CountFlagged</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-estimate~3">Estimate</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-free~53">Free</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-init~49">Init</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setenergyscale~2">SetEnergyScale</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setenergyweights~2">SetEnergyWeights</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setrelativeenergyfloor~2">SetRelativeEnergyFloor</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setthresholds~2">SetThresholds</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-updatedevice~22">UpdateDevice</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-updatehost~19">UpdateHost</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/refinementindicator2d.html#src">RefinementIndicator2D</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>) :: RefinementIndicator2D</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~refinementindicator2d~~InheritsGraph Pages: 1 -->
+<svg id="typerefinementindicator2dInheritsGraph" width="641pt" height="73pt"
+ viewBox="0.00 0.00 641.00 73.31" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~refinementindicator2d~~InheritsGraph" class="graph" transform="scale(0.99 0.99) rotate(0) translate(4 70)">
+<title>type~~refinementindicator2d~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 643,-70 643,4 -4,4"/>
+<!-- type~refinementindicator2d -->
+<g id="type~~refinementindicator2d~~InheritsGraph_node1" class="node">
+<title>type~refinementindicator2d</title>
+<polygon fill="none" stroke="black" points="639,-45 503,-45 503,-21 639,-21 639,-45"/>
+<text text-anchor="middle" x="571" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">RefinementIndicator2D</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~refinementindicator2d~~InheritsGraph_node2" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="99.5,-66 45.5,-66 45.5,-42 99.5,-42 99.5,-66"/>
+<text text-anchor="middle" x="72.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~refinementindicator2d&#45;&gt;c_ptr -->
+<g id="type~~refinementindicator2d~~InheritsGraph_edge1" class="edge">
+<title>type~refinementindicator2d&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M502.78,-35.84C396.32,-40.35 192.5,-48.97 109.75,-52.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="109.43,-48.98 99.59,-52.9 109.73,-55.97 109.43,-48.98"/>
+<text text-anchor="middle" x="324" y="-51.4" font-family="Helvetica,sans-Serif" font-size="9.50">Pmodal_gpu, indicator_gpu, flag_gpu, gate_gpu, energyWeight_gpu</text>
+</g>
+<!-- type~refinementindicator2d_t -->
+<g id="type~~refinementindicator2d~~InheritsGraph_node3" class="node">
+<title>type~refinementindicator2d_t</title>
+<g id="a_type~~refinementindicator2d~~InheritsGraph_node3"><a xlink:href=".././type/refinementindicator2d_t.html" xlink:title="RefinementIndicator2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="145,-24 0,-24 0,0 145,0 145,-24"/>
+<text text-anchor="middle" x="72.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">RefinementIndicator2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~refinementindicator2d&#45;&gt;type~refinementindicator2d_t -->
+<g id="type~~refinementindicator2d~~InheritsGraph_edge2" class="edge">
+<title>type~refinementindicator2d&#45;&gt;type~refinementindicator2d_t</title>
+<path fill="none" stroke="#ff0000" d="M502.78,-30.16C412.59,-26.34 252.54,-19.57 155.41,-15.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="155.48,-11.96 145.34,-15.04 155.18,-18.96 155.48,-11.96"/>
+</g>
+</g>
+</svg>
+</div><script>var pantyperefinementindicator2dInheritsGraph = svgPanZoom('#typerefinementindicator2dInheritsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-n~2">N</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-pmodal~2">Pmodal</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-pmodal_gpu">Pmodal_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-backend~24">backend</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-coarsenthreshold~2">coarsenThreshold</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyscale~2">energyScale</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyscaleisset~2">energyScaleIsSet</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyweight~2">energyWeight</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyweight_gpu">energyWeight_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-energyweightsset~2">energyWeightsSet</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-flag~2">flag</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-flag_gpu">flag_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-gate~2">gate</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-gate_gpu">gate_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-indicator~2">indicator</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-indicator_gpu">indicator_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-nelem~3">nElem</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-nvarweights~2">nVarWeights</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-nvarweights_gpu">nVarWeights_gpu</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-refinethreshold~2">refineThreshold</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-relativeenergyfloor~2">relativeEnergyFloor</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#variable-significantenergyfloor~2">significantEnergyFloor</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-clearenergyscale~2">ClearEnergyScale</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-countflagged~2">CountFlagged</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-estimate~3">Estimate</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-free~53">Free</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-init~49">Init</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setenergyscale~2">SetEnergyScale</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setenergyweights~2">SetEnergyWeights</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setrelativeenergyfloor~2">SetRelativeEnergyFloor</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-setthresholds~2">SetThresholds</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-updatedevice~22">UpdateDevice</a>
+      <a class="list-group-item" href="../type/refinementindicator2d.html#boundprocedure-updatehost~19">UpdateHost</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/refinementindicator2d.html#src">RefinementIndicator2D</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-n~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>N</strong></td><td> =</td><td>0</td><td><p>Polynomial degree of the interpolant the indicator is built for.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pmodal~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:)</td><td>::</td>
+  <td><strong>Pmodal</strong></td><td>=> </td><td>null()</td><td><p>Nodal-to-modal transform. Pmodal(ii,p) is the (p,ii) entry of the inverse Legendre
+Vandermonde in the L2-normalized basis, so the 1-D modal coefficients are
+uhat(p) = sum_ii Pmodal(ii,p) * u(ii) (first index summed, SELF matrix convention).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pmodal_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>Pmodal_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-backend~24"></span>character(len=3),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>backend</strong></td><td> =</td><td>"gpu"</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-coarsenthreshold~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>coarsenThreshold</strong></td><td> =</td><td>0.0_prec</td><td><p>Elements with sigma_e below this value are flagged SELF_AMR_COARSEN.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-energyscale~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>energyScale</strong></td><td> =</td><td>0.0_prec</td><td><p>Squared field scale the relative floor is measured against, in the units of the gate
+energy. Meaningful only when energyScaleIsSet is true; otherwise the scale is recomputed
+from the current field on every Estimate.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-energyscaleisset~2"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>energyScaleIsSet</strong></td><td> =</td><td>.false.</td><td><p>Whether energyScale was pinned by SetEnergyScale (true) or is computed automatically as
+the largest gate energy over the elements (false, the default).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-energyweight~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:)</td><td>::</td>
+  <td><strong>energyWeight</strong></td><td>=> </td><td>null()</td><td><p>Non-negative weights w_v of the gate energy g_e = sum_v w_v E_tot,e,v, indexed by
+solution variable. Resolved lazily, because the variable count is a property of the
+solution field and is not known at Init.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-energyweight_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>energyWeight_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-energyweightsset~2"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>energyWeightsSet</strong></td><td> =</td><td>.false.</td><td><p>Whether energyWeight was supplied by SetEnergyWeights (true) or is regenerated from the
+driving-variable index on every Estimate (false, the default).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flag~2"></span>integer,</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:)</td><td>::</td>
+  <td><strong>flag</strong></td><td>=> </td><td>null()</td><td><p>Per-element refinement flag: SELF_AMR_REFINE / SELF_AMR_KEEP / SELF_AMR_COARSEN.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flag_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flag_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gate~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:)</td><td>::</td>
+  <td><strong>gate</strong></td><td>=> </td><td>null()</td><td><p>Per-element gate energy g_e from the most recent Estimate. Retained as a diagnostic: it
+is the quantity the amplitude gate actually compared against the effective floor.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gate_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gate_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-indicator~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:)</td><td>::</td>
+  <td><strong>indicator</strong></td><td>=> </td><td>null()</td><td><p>Per-element indicator value sigma_e = log10(S_e).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-indicator_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>indicator_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem~3"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td> =</td><td>0</td><td><p>Number of (rank-local) elements the indicator arrays are sized for.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvarweights~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nVarWeights</strong></td><td> =</td><td>0</td><td><p>Allocated length of energyWeight (the solution variable count it was resolved for).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvarweights_gpu"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nVarWeights_gpu</strong></td><td> =</td><td>0</td><td><p>Allocated length of energyWeight_gpu. Zero until the first Estimate fixes the solution's
+variable count, which is not known at Init.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-refinethreshold~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>refineThreshold</strong></td><td> =</td><td>0.0_prec</td><td><p>Elements with sigma_e above this value are flagged SELF_AMR_REFINE.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-relativeenergyfloor~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>relativeEnergyFloor</strong></td><td> =</td><td>SELF_AMR_DEFAULT_RELFLOOR</td><td><p>Elements whose gate energy is at or below relativeEnergyFloor<em>energyScale are treated as
+quiescent (hence perfectly resolved) regardless of their modal shape. Energy goes as
+amplitude squared, so this is 10</em>*(dB/10) in amplitude terms: 1e-8 gates amplitudes
+below 1e-4 (-80 dB) of the field scale. Set to 0 to recover the pure absolute
+(machine-epsilon) floor.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-significantenergyfloor~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>significantEnergyFloor</strong></td><td> =</td><td>SELF_AMR_DEFAULT_RELFLOOR</td><td><p>Upper edge of the hysteresis band on the energy axis. Elements between
+relativeEnergyFloor and this fraction of the energy scale are flagged SELF_AMR_KEEP
+whatever their spectrum: too weak to justify spending levels on, too strong to declare
+resolved. Equal to relativeEnergyFloor by default, which collapses the band to a single
+hard cut. See SetRelativeEnergyFloor.</p></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-clearenergyscale~2"></span><h3>procedure, public :: <strong>ClearEnergyScale</strong>  => <a href='../proc/clearenergyscale_refinementindicator2d_t.html'>ClearEnergyScale_RefinementIndicator2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/clearenergyscale_refinementindicator2d_t.html'>ClearEnergyScale_RefinementIndicator2D_t</a>(this)</h3>
+<p>Return to the automatic energy scale (the largest gate energy over the elements).</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-countflagged~2"></span><h3>procedure, public :: <strong>CountFlagged</strong>  => <a href='../proc/countflagged_refinementindicator2d_t.html'>CountFlagged_RefinementIndicator2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public function <a href='../proc/countflagged_refinementindicator2d_t.html'>CountFlagged_RefinementIndicator2D_t</a>(this, flagValue) result(n)</h3>
+<p>Count the rank-local elements currently carrying the requested flag value
+(SELF_AMR_REFINE / SELF_AMR_KEEP / SELF_AMR_COARSEN). Provided as a convenience for
+drivers and tests; a global count across MPI ranks is the caller's responsibility.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>flagValue</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-estimate~3"></span><h3>procedure, public :: <strong>Estimate</strong>  => <a href='../proc/estimate_refinementindicator2d.html'>Estimate_RefinementIndicator2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/estimate_refinementindicator2d.html'>Estimate_RefinementIndicator2D</a>(this, solution, ivar, comm, gate)</h3>
+<p>GPU path: one device thread per element computes the modal transform, the raw smoothness
+ratio and the gate energy; those are copied back to the host, where the shared second phase
+applies the amplitude gate, the log10 and the thresholds.</p><a href="../proc/estimate_refinementindicator2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d.html'>RefinementIndicator2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d~2.html'>Scalar2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>gate</strong>(:)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~53"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_refinementindicator2d.html'>Free_RefinementIndicator2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_refinementindicator2d.html'>Free_RefinementIndicator2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d.html'>RefinementIndicator2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~49"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_refinementindicator2d.html'>Init_RefinementIndicator2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_refinementindicator2d.html'>Init_RefinementIndicator2D</a>(this, interp, nElem, refineThreshold, coarsenThreshold)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d.html'>RefinementIndicator2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>refineThreshold</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>coarsenThreshold</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setenergyscale~2"></span><h3>procedure, public :: <strong>SetEnergyScale</strong>  => <a href='../proc/setenergyscale_refinementindicator2d_t.html'>SetEnergyScale_RefinementIndicator2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setenergyscale_refinementindicator2d_t.html'>SetEnergyScale_RefinementIndicator2D_t</a>(this, energyScale)</h3>
+<p>Pin the energy scale that normalizes the relative floor, in the units of the gate energy
+(squared field amplitude times the reference-element area). Two reasons to use this rather
+than the automatic maximum over elements:</p><a href="../proc/setenergyscale_refinementindicator2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>energyScale</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setenergyweights~2"></span><h3>procedure, public :: <strong>SetEnergyWeights</strong>  => <a href='../proc/setenergyweights_refinementindicator2d_t.html'>SetEnergyWeights_RefinementIndicator2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setenergyweights_refinementindicator2d_t.html'>SetEnergyWeights_RefinementIndicator2D_t</a>(this, w)</h3>
+<p>Set the per-variable weights w_v &gt;= 0 of the gate energy g_e = sum_v w_v E_tot,e,v, where
+E_tot,e,v is the exact L2 energy of variable v on the reference element.</p><a href="../proc/setenergyweights_refinementindicator2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>w</strong>(:)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setrelativeenergyfloor~2"></span><h3>procedure, public :: <strong>SetRelativeEnergyFloor</strong>  => <a href='../proc/setrelativeenergyfloor_refinementindicator2d_t.html'>SetRelativeEnergyFloor_RefinementIndicator2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setrelativeenergyfloor_refinementindicator2d_t.html'>SetRelativeEnergyFloor_RefinementIndicator2D_t</a>(this, relativeEnergyFloor, significantEnergyFloor)</h3>
+<p>Set the relative energy floor of the amplitude gate. An element whose gate energy g
+satisfies</p><a href="../proc/setrelativeenergyfloor_refinementindicator2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>relativeEnergyFloor</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>significantEnergyFloor</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setthresholds~2"></span><h3>procedure, public :: <strong>SetThresholds</strong>  => <a href='../proc/setthresholds_refinementindicator2d_t.html'>SetThresholds_RefinementIndicator2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setthresholds_refinementindicator2d_t.html'>SetThresholds_RefinementIndicator2D_t</a>(this, refineThreshold, coarsenThreshold)</h3>
+<p>Update the refine/coarsen thresholds without rebuilding the transform.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>refineThreshold</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>coarsenThreshold</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatedevice~22"></span><h3>procedure, public :: <strong>UpdateDevice</strong>  => <a href='../proc/updatedevice_refinementindicator2d.html'>UpdateDevice_RefinementIndicator2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatedevice_refinementindicator2d.html'>UpdateDevice_RefinementIndicator2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d.html'>RefinementIndicator2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatehost~19"></span><h3>procedure, public :: <strong>UpdateHost</strong>  => <a href='../proc/updatehost_refinementindicator2d.html'>UpdateHost_RefinementIndicator2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatehost_refinementindicator2d.html'>UpdateHost_RefinementIndicator2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/refinementindicator2d.html'>RefinementIndicator2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">RefinementIndicator2D_t</span><span class="p">),</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">RefinementIndicator2D</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"gpu"</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Pmodal_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<span class="nb">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">indicator_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<span class="nb">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flag_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<span class="nb">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">gate_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<span class="nb">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">energyWeight_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<span class="nb">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nVarWeights_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">      </span><span class="c">!! Allocated length of energyWeight_gpu. Zero until the first Estimate fixes the solution's</span>
+<span class="w">      </span><span class="c">!! variable count, which is not known at Init.</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_RefinementIndicator2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_RefinementIndicator2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateHost</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateHost_RefinementIndicator2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateDevice</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateDevice_RefinementIndicator2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Estimate</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Estimate_RefinementIndicator2D</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">RefinementIndicator2D</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

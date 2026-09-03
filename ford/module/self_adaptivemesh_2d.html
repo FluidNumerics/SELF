@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_AdaptiveMesh_2D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_AdaptiveMesh_2D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.5% of total for modules and submodules.">139 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_AdaptiveMesh_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_adaptivemesh_2d.f90.html'>SELF_AdaptiveMesh_2D.f90</a></li>
+     <li class="active">SELF_AdaptiveMesh_2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_adaptivemesh_2d.html#proc-emitmesh~2">EmitMesh</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>Emit a solver-ready Mesh2D_t from an adaptively refined, 2:1-balanced quad-forest (AMR
+Stage 4b). This closes the adaptive-refinement loop: with the Stage-1 indicator flagging
+elements, Stage 2b mutating the forest, and Stage 4a balancing it, EmitMesh produces the
+nonconforming mesh - leaf geometry, conforming-side connectivity, and a mortar table for the
+2:1 hanging faces - that the existing mortar solver machinery already handles.</p>
+<p>Each leaf of the forest becomes an element (in leaf-list order). For every leaf face the
+Stage-4a FaceNeighbor query classifies the face and drives the emitted connectivity:</p>
+<ul>
+<li>domain boundary      -&gt; sideInfo(3)=0, sideInfo(5)=base BC id</li>
+<li>same-level leaf       -&gt; conforming interior side (sideInfo(3)=neighbour, (4)=10*side+flip)</li>
+<li>one-level-finer face  -&gt; this leaf is the BIG side of a 2:1 mortar; the two small elements
+                             are the finer neighbour node's children on the shared face</li>
+<li>one-level-coarser face-&gt; this leaf is a SMALL side; filled when its big side is processed</li>
+</ul>
+<p>Mortar sides carry sideInfo(1)=mortar index and sideInfo(3)=sideInfo(5)=0 so the conforming
+side-exchange machinery skips them, exactly as in the hand-built SimpleMortarMesh. The mortar
+table follows the same 8-row layout (big elem/side; small elem + 10*side+flip per sub-edge;
+two sub-edge global side ids), with sub-edge 1 covering the big edge coordinate [-1,0] and
+sub-edge 2 covering [0,1], and the small-side flips inherited from the base face flip.</p>
+<p>Decomposition (AMR Stage 5): every rank builds the same GLOBAL connectivity and mortar
+tables deterministically from the (rank-replicated) forest, generates a fresh contiguous
+decomposition over the leaf list - leaf-list order is Morton order within each root tree, so
+contiguous ranges are space-filling-curve partitions - and stores only its local slice of
+the element-sized arrays, exactly as the built-in mesh constructors do. sideInfo(3) carries
+global element ids, nUniqueSides is the global side count, and mortarInfo/nMortars are
+replicated in full with global ids on every rank, which is what SideExchange/MortarExchange
+require. Repartitioning is implicit: each epoch's emitted mesh is re-decomposed over the new
+leaf list, so equal-count partitions move with the refinement.</p>
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_mesh_2d.html'>SELF_Mesh_2D</a></li>
+    <li><a href='../module/self_quadtreemesh_2d.html'>SELF_QuadTreeMesh_2D</a></li>
+    <li><a href='../module/self_refinementprimitives_2d.html'>SELF_RefinementPrimitives_2D</a></li>
+    <li><a href='../module/self_lagrange~2.html'>SELF_Lagrange</a></li>
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_adaptivemesh_2d~~UsesGraph Pages: 1 -->
+<svg id="moduleself_adaptivemesh_2dUsesGraph" width="641pt" height="192pt"
+ viewBox="0.00 0.00 641.00 192.49" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_adaptivemesh_2d~~UsesGraph" class="graph" transform="scale(0.34 0.34) rotate(0) translate(4 561.15)">
+<title>module~~self_adaptivemesh_2d~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-561.15 1878,-561.15 1878,4 -4,4"/>
+<!-- module~self_adaptivemesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node1" class="node">
+<title>module~self_adaptivemesh_2d</title>
+<polygon fill="none" stroke="black" points="1874,-165.15 1736,-165.15 1736,-141.15 1874,-141.15 1874,-165.15"/>
+<text text-anchor="middle" x="1805" y="-150.75" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_AdaptiveMesh_2D</text>
+</g>
+<!-- module~self_mesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node2" class="node">
+<title>module~self_mesh_2d</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node2"><a xlink:href=".././module/self_mesh_2d.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1522,-324.15 1431,-324.15 1431,-300.15 1522,-300.15 1522,-324.15"/>
+<text text-anchor="middle" x="1476.5" y="-309.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge1" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1802.12,-165.37C1793.65,-215.35 1753.86,-403.49 1630,-443.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1628,-443.15C1563.1,-463.92 1509.07,-375.4 1487.53,-333.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1490.57,-331.55 1482.99,-324.15 1484.3,-334.66 1490.57,-331.55"/>
+</g>
+<!-- module~self_lagrange~2 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node3" class="node">
+<title>module~self_lagrange~2</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node3"><a xlink:href=".././module/self_lagrange~2.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-339.15 568,-339.15 568,-315.15 662,-315.15 662,-339.15"/>
+<text text-anchor="middle" x="615" y="-324.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge2" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1628,-443.15C1492.34,-486.57 1449.94,-443.15 1307.5,-443.15 1307.5,-443.15 1307.5,-443.15 1145.5,-443.15 944.71,-443.15 884.45,-455.67 698,-381.15 676.23,-372.44 654.19,-357.51 638.44,-345.54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="640.43,-342.65 630.39,-339.26 636.12,-348.17 640.43,-342.65"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node4" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node4"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-259.15 130,-259.15 130,-235.15 226,-235.15 226,-259.15"/>
+<text text-anchor="middle" x="178" y="-244.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge3" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1774.58,-141.05C1740.33,-128.23 1681.83,-110.19 1630,-113.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1628,-113.15C1623.68,-113.39 1481.77,-153.82 1477.5,-153.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1475.5,-153.15C1015.48,-80.27 888.38,-21.36 429,-98.15 353.92,-110.69 325.83,-94.67 262,-136.15 227.62,-158.48 202.24,-200.26 189.11,-225.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="185.86,-224.37 184.53,-234.88 192.12,-227.49 185.86,-224.37"/>
+</g>
+<!-- module~self_quadtreemesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node5" class="node">
+<title>module~self_quadtreemesh_2d</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node5"><a xlink:href=".././module/self_quadtreemesh_2d.html" xlink:title="SELF_QuadTreeMesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1700,-165.15 1558,-165.15 1558,-141.15 1700,-141.15 1700,-165.15"/>
+<text text-anchor="middle" x="1629" y="-150.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_QuadTreeMesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge4" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1735.73,-153.15C1727.31,-153.15 1718.65,-153.15 1710.08,-153.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1710.08,-149.65 1700.08,-153.15 1710.08,-156.65 1710.08,-149.65"/>
+</g>
+<!-- module~self_refinementprimitives_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node6" class="node">
+<title>module~self_refinementprimitives_2d</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node6"><a xlink:href=".././module/self_refinementprimitives_2d.html" xlink:title="SELF_RefinementPrimitives_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1395,-204.15 1218,-204.15 1218,-180.15 1395,-180.15 1395,-204.15"/>
+<text text-anchor="middle" x="1306.5" y="-189.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementPrimitives_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_refinementprimitives_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge5" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_refinementprimitives_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1628,-113.15C1595.85,-115.49 1586,-116.18 1558,-132.15 1538.61,-143.2 1542.15,-157.57 1522,-167.15 1486.1,-184.21 1443.14,-191.43 1405.13,-194.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1404.85,-190.54 1395.07,-194.62 1405.26,-197.53 1404.85,-190.54"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node7" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node7"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1356.5,-324.15 1256.5,-324.15 1256.5,-300.15 1356.5,-300.15 1356.5,-324.15"/>
+<text text-anchor="middle" x="1306.5" y="-309.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge6" class="edge">
+<title>module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1430.92,-312.15C1411.29,-312.15 1387.94,-312.15 1366.87,-312.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1366.73,-308.65 1356.73,-312.15 1366.73,-315.65 1366.73,-308.65"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge9" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M573.33,-315.12C547.08,-307.3 512.22,-296.79 481.5,-287.15"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node8" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node8"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-259.15 5,-259.15 5,-235.15 89,-235.15 89,-259.15"/>
+<text text-anchor="middle" x="47" y="-244.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge8" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M591.14,-315.09C583.63,-310.91 575.33,-306.03 568,-301.15 551.13,-289.91 548.95,-284.27 532,-273.15 495.36,-249.1 218.9,-79.02 179,-97.15"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node9" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node9"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-337.15 0,-337.15 0,-313.15 94,-313.15 94,-337.15"/>
+<text text-anchor="middle" x="47" y="-322.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_fortran_env -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge10" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M605.19,-339.28C591.19,-358 562.32,-394.37 532,-419.15 390.53,-534.77 283.66,-604 130,-505.15 74.83,-469.65 56.34,-386.89 50.5,-347.18"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="53.96,-346.64 49.17,-337.19 47.02,-347.57 53.96,-346.64"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node10" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node10"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="532,-377.15 429,-377.15 429,-353.15 532,-353.15 532,-377.15"/>
+<text text-anchor="middle" x="480.5" y="-362.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge7" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M572.08,-339.17C559.75,-342.7 546.12,-346.61 533.26,-350.3"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="532.25,-346.95 523.61,-353.07 534.18,-353.68 532.25,-346.95"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge12" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M129.7,-247.15C119.88,-247.15 109.48,-247.15 99.52,-247.15"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="99.34,-243.65 89.34,-247.15 99.34,-250.65 99.34,-243.65"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge11" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M154.37,-259.31C146.59,-263.58 137.86,-268.48 130,-273.15 111.45,-284.14 90.97,-297.13 75.12,-307.37"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="72.85,-304.67 66.37,-313.05 76.66,-310.55 72.85,-304.67"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge13" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1620.47,-165.4C1604.65,-190.43 1565.76,-248.28 1522,-286.15 1518.56,-289.12 1514.73,-291.95 1510.8,-294.55"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1508.81,-291.67 1502.15,-299.91 1512.49,-297.62 1508.81,-291.67"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge14" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1475.5,-272.15C1333.1,-303.36 1290.57,-244.15 1147.5,-272.15"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge15" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1557.96,-157.69C1532.49,-158.15 1503.56,-157.27 1477.5,-153.15"/>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge16" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1619.2,-165.28C1598.38,-192.63 1542.9,-257.81 1477.5,-272.15"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1475.5,-272.15C1446.74,-278.45 1373.75,-235.21 1334.1,-209.79"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1335.78,-206.7 1325.48,-204.2 1331.97,-212.58 1335.78,-206.7"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge18" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1289.57,-204.16C1262.28,-223.8 1204.03,-261.64 1147.5,-272.15"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1145.5,-272.15C974.76,-303.86 769.39,-318.65 672.22,-324.27"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="671.82,-320.79 662.04,-324.85 672.22,-327.78 671.82,-320.79"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge17" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1282.7,-180.11C1232.08,-154.55 1105.84,-97.15 993,-97.15 993,-97.15 993,-97.15 614,-97.15 451.36,-97.15 411.19,-132.39 262,-197.15 241.88,-205.88 220.72,-218.69 204.8,-229.16"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="202.44,-226.53 196.08,-235 206.34,-232.34 202.44,-226.53"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge21" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.83,-324.23C1260.93,-343.93 1202.39,-382.97 1147.5,-405.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1145.5,-405.15C1082.65,-430.53 1060.78,-405.15 993,-405.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-405.15C898.56,-405.15 877.92,-380.9 786.5,-367.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-367.15C744.89,-361.18 700.88,-350.6 667.77,-341.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="668.42,-338.36 657.86,-339.15 666.61,-345.12 668.42,-338.36"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge26" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1290.57,-299.98C1263.87,-279.15 1205.3,-237.6 1147.5,-224.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1145.5,-224.15C990,-187.94 946.16,-211.15 786.5,-211.15 786.5,-211.15 786.5,-211.15 614,-211.15 487.11,-211.15 455.11,-202.77 328.5,-211.15"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge24" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1294.04,-299.99C1276.92,-281.64 1243.91,-245.59 1218,-213.15 1200.91,-191.75 1203.63,-179.94 1182,-163.15 931.13,31.72 797.55,10.83 481.5,-21.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-21.15C382.26,-19.52 353.85,-13.19 262,-45.15 220.89,-59.45 217.68,-77.18 179,-97.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M177,-97.15C119.95,-125.64 77.79,-191.71 58.94,-225.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="55.69,-224.5 54.05,-234.97 61.86,-227.81 55.69,-224.5"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node11" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node11"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1182,-196.15 1111,-196.15 1111,-172.15 1182,-172.15 1182,-196.15"/>
+<text text-anchor="middle" x="1146.5" y="-181.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge19" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1291.22,-300C1268.39,-280.67 1222.17,-241.84 1182,-210.15 1178.78,-207.6 1175.36,-204.96 1171.98,-202.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1173.85,-199.41 1163.76,-196.17 1169.63,-204.99 1173.85,-199.41"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node12" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node12"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1075,-263.15 909,-263.15 909,-239.15 1075,-239.15 1075,-263.15"/>
+<text text-anchor="middle" x="992" y="-248.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge20" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1145.5,-224.15C1127.31,-219.91 1083.94,-228.22 1048.09,-236.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1047.1,-233.35 1038.2,-239.1 1048.74,-240.16 1047.1,-233.35"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node13" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node13"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-297.15 262,-297.15 262,-273.15 393,-273.15 393,-297.15"/>
+<text text-anchor="middle" x="327.5" y="-282.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge22" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-367.15C688.98,-352.77 663.14,-364.84 568,-348.15 528.82,-341.27 520.92,-330.51 481.5,-325.15"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node14" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node14"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379.5,-377.15 275.5,-377.15 275.5,-353.15 379.5,-353.15 379.5,-377.15"/>
+<text text-anchor="middle" x="327.5" y="-362.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge23" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-405.15C741.08,-405.15 677.13,-416.04 429,-386.15 415.53,-384.52 401.19,-382.01 387.68,-379.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="388.05,-375.78 377.55,-377.16 386.62,-382.63 388.05,-375.78"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node15" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-496.15 151,-496.15 151,-472.15 205,-472.15 205,-496.15"/>
+<text text-anchor="middle" x="178" y="-481.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge25" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1298.32,-324.29C1268.1,-373.73 1145.7,-557.15 993,-557.15 993,-557.15 993,-557.15 614,-557.15 483.25,-557.15 458.89,-476.44 328.5,-486.15"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node16" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node16"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-457.15 291,-457.15 291,-433.15 364,-433.15 364,-457.15"/>
+<text text-anchor="middle" x="327.5" y="-442.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge27" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1145.5,-405.15C994.28,-466.22 949.59,-481.15 786.5,-481.15 786.5,-481.15 786.5,-481.15 614,-481.15 528.87,-481.15 430.58,-465.2 374.37,-454.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="374.85,-451.06 364.37,-452.6 373.53,-457.93 374.85,-451.06"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge33" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M434.26,-353.07C404.27,-345.09 364.05,-334.43 328.5,-325.15"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-325.15C297.59,-317.59 288.88,-319.2 262,-306.15 239.86,-295.39 217.25,-278.88 201.24,-266.06"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="203.02,-263 193.06,-259.38 198.59,-268.42 203.02,-263"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge31" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-325.15C263.07,-308.58 243.87,-334.6 179,-325.15"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M177,-325.15C133.45,-318.8 91.45,-287.13 67.75,-266.15"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="69.91,-263.38 60.16,-259.23 65.2,-268.55 69.91,-263.38"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge28" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M177,-325.15C153.36,-321.7 127.03,-321.13 104.35,-321.63"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="104.1,-318.13 94.2,-321.93 104.3,-325.13 104.1,-318.13"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge29" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M453.81,-353.08C445.7,-348.96 436.81,-344.13 429,-339.15 411.92,-328.24 410.57,-321.25 393,-311.15 386.67,-307.5 379.73,-304.13 372.82,-301.1"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="374.05,-297.82 363.48,-297.19 371.35,-304.28 374.05,-297.82"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge30" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M428.8,-365.15C416.29,-365.15 402.76,-365.15 389.81,-365.15"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="389.58,-361.65 379.58,-365.15 389.58,-368.65 389.58,-361.65"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge32" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M472.32,-377.35C459.23,-398.55 429.46,-442.17 393,-466.15 367.92,-482.63 358.43,-483.92 328.5,-486.15"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-486.15C288.74,-488.96 245.4,-487.85 215.52,-486.42"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="215.32,-482.9 205.15,-485.88 214.96,-489.9 215.32,-482.9"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge34" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M456.57,-377.3C430.81,-390.94 388.84,-413.17 360.02,-428.45"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="358.35,-425.37 351.15,-433.14 361.63,-431.55 358.35,-425.37"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge35" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-135.15C703.44,-63.39 622.81,-176.21 328.5,-211.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-211.15C291.21,-213.48 252.39,-223.26 223.44,-232.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="222.14,-228.77 213.63,-235.08 224.22,-235.46 222.14,-228.77"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge37" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1111.25,-172.13C1080.52,-161.59 1034.07,-146.26 993,-135.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-135.15C846.64,-96.08 525.64,-15.03 481.5,-21.15"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge36" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1117.88,-196.28C1093.16,-207.14 1056.73,-223.15 1029.59,-235.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1028.16,-231.88 1020.41,-239.1 1030.97,-238.28 1028.16,-231.88"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node17" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node17"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="873,-263.15 698,-263.15 698,-239.15 873,-239.15 873,-263.15"/>
+<text text-anchor="middle" x="785.5" y="-248.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge38" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M908.71,-251.15C900.42,-251.15 891.95,-251.15 883.53,-251.15"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="883.3,-247.65 873.3,-251.15 883.3,-254.65 883.3,-247.65"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge39" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M279.83,-273.12C265.77,-269.5 250.19,-265.49 235.56,-261.72"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="236.18,-258.26 225.62,-259.16 234.43,-265.04 236.18,-258.26"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge40" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M261.81,-293.08C223.44,-297.95 173.89,-304.5 130,-311.15 121.69,-312.4 112.91,-313.81 104.32,-315.24"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="103.63,-311.81 94.35,-316.92 104.79,-318.71 103.63,-311.81"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge41" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M288.19,-353.02C279.18,-349.29 269.92,-344.68 262,-339.15 233.59,-319.29 208.05,-287.97 193.04,-267.5"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="195.75,-265.28 187.08,-259.19 190.06,-269.36 195.75,-265.28"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge42" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M275.12,-358.88C235.43,-353.92 179.16,-346.59 130,-339.15 121.69,-337.89 112.91,-336.48 104.32,-335.05"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="104.79,-331.58 94.35,-333.37 103.63,-338.48 104.79,-331.58"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge43" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M310.02,-433.01C295.91,-421.99 275.75,-404.67 262,-386.15 239.96,-356.46 245.02,-342.85 226,-311.15 216.87,-295.93 205.03,-279.83 195.52,-267.58"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="198.02,-265.1 189.08,-259.42 192.53,-269.44 198.02,-265.1"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge45" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M290.8,-449.34C249.52,-452.49 180.76,-452.39 130,-425.15 96.79,-407.32 71.88,-369.87 58.66,-346.2"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="61.68,-344.44 53.87,-337.29 55.52,-347.75 61.68,-344.44"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge46" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M290.79,-454.59C267.77,-460.67 237.94,-468.56 214.88,-474.66"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="213.9,-471.3 205.13,-477.24 215.69,-478.06 213.9,-471.3"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_node18" class="node">
+<title>mpi</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsesGraph_node18"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-416.15 151,-416.15 151,-392.15 205,-392.15 205,-416.15"/>
+<text text-anchor="middle" x="178" y="-401.75" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge44" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M290.79,-435.22C267.77,-428.82 237.94,-420.53 214.88,-414.12"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="215.7,-410.71 205.13,-411.41 213.83,-417.46 215.7,-410.71"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge48" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M735.06,-263.26C722.69,-267.03 709.63,-271.67 698,-277.15 680.6,-285.34 678.38,-291.07 662,-301.15 657.21,-304.09 652.08,-307.11 647.05,-310.01"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="645.15,-307.06 638.19,-315.04 648.61,-313.15 645.15,-307.06"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge49" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M716.25,-263.21C685.36,-269.31 648.55,-277.49 616,-287.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-287.15C557.54,-303.9 537.68,-304.79 481.5,-287.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-287.15C455.79,-279.7 451.26,-274.19 429,-263.15 383.95,-240.79 378.44,-205.22 328.5,-211.15"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge51" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M767.79,-238.93C694.73,-187.13 397.29,7.06 179,-97.15"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge47" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-287.15C555.27,-304.58 542.2,-333.41 481.5,-325.15"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-325.15C443.29,-320.22 403.35,-309.39 373.65,-300.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="374.58,-296.87 363.99,-297.22 372.49,-303.55 374.58,-296.87"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_adaptivemesh_2d~~UsesGraph_edge50" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-287.15C592.79,-293.44 583.88,-290.75 568,-306.15 540,-333.28 564.19,-364.15 532,-386.15 481.39,-420.73 294.79,-412.3 215.27,-406.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="215.45,-403.43 205.23,-406.22 214.96,-410.41 215.45,-403.43"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_adaptivemesh_2dUsesGraph = svgPanZoom('#moduleself_adaptivemesh_2dUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_adaptivemesh_2d~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_adaptivemesh_2dUsedByGraph" width="321pt" height="32pt"
+ viewBox="0.00 0.00 321.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_adaptivemesh_2d~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>module~~self_adaptivemesh_2d~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 317,-28 317,4 -4,4"/>
+<!-- module~self_adaptivemesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsedByGraph_node1" class="node">
+<title>module~self_adaptivemesh_2d</title>
+<polygon fill="none" stroke="black" points="138,-24 0,-24 0,0 138,0 138,-24"/>
+<text text-anchor="middle" x="69" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_AdaptiveMesh_2D</text>
+</g>
+<!-- module~self_amrcontroller_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsedByGraph_node2" class="node">
+<title>module~self_amrcontroller_2d</title>
+<g id="a_module~~self_adaptivemesh_2d~~UsedByGraph_node2"><a xlink:href=".././module/self_amrcontroller_2d.html" xlink:title="SELF_AMRController_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="313,-24 174,-24 174,0 313,0 313,-24"/>
+<text text-anchor="middle" x="243.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_AMRController_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_adaptivemesh_2d -->
+<g id="module~~self_adaptivemesh_2d~~UsedByGraph_edge1" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_adaptivemesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M173.83,-12C165.48,-12 156.9,-12 148.42,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="148.15,-8.5 138.15,-12 148.15,-15.5 148.15,-8.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_adaptivemesh_2d.html#proc-emitmesh~2">EmitMesh</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-emitmesh~2"></span><h3>public subroutine <a href='../proc/emitmesh~2.html'>EmitMesh</a>(forest, baseMesh, outMesh)</h3></div>
+  <div class="panel-body">
+       
+<p>Build outMesh (a conforming-or-mortar Mesh2D_t) from a 2:1-balanced forest. baseMesh is
+the mesh the forest was initialised from (supplies BC metadata and the communicator; on
+nRanks &gt; 1 the forest must be rank-replicated so every rank emits identical global
+tables). The forest must already be balanced (MaxLevelJump &lt;= 1); EmitMesh does not
+mutate it.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>forest</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>baseMesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>outMesh</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

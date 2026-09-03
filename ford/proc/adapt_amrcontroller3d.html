@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Adapt_AMRController3D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>Adapt_AMRController3D
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.8% of total for procedures.">176 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_AMRController_3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_amrcontroller_3d.f90.html'>SELF_AMRController_3D.f90</a></li>
+     <li><a href='../module/self_amrcontroller_3d.html'>SELF_AMRController_3D</a></li>
+     <li class="active">Adapt_AMRController3D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/adapt_amrcontroller3d.html#src">Adapt_AMRController3D</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine Adapt_AMRController3D(this, model, adapted)</h2>
+    
+
+    <p>Perform one adaptation epoch on the model (see the module documentation). On return,
+adapted reports whether the mesh changed; when it did, the model is already rebound to
+the new mesh with the solution transferred (conservatively), and the caller should
+re-evaluate its time step (RecommendedTimeStep) before the next ForwardStep. When the
+leaf set is unchanged the model is untouched.</p>
+<p>Where the transferred solution lives on return: on a GPU build the transfer is performed
+on the device (the 3-D analogue of the 2-D Stage 6a) and the result is left there, so
+solution%interior (the host mirror) is STALE afterwards. This matches the rest of the
+time loop, where the device is authoritative and a caller that wants host data calls
+solution%UpdateHost() first - as Write_DGModel3D_t does before writing a snapshot. Before
+the device transfer existed the mirror happened to be fresh here because the transfer ran
+on the host; do not rely on that. On CPU builds host and device are the same storage and
+the question does not arise. The multi-rank path still transfers on the host (see step 6),
+so both mirrors are fresh there.</p>
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-this~154"></span>class(<a href='../type/amrcontroller3d.html'>AMRController3D</a>),</td>
+<td>intent(inout),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-model"></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>model</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-adapted"></span>logical,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>adapted</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~adapt_amrcontroller3d~~CallsGraph Pages: 1 -->
+<svg id="procadapt_amrcontroller3dCallsGraph" width="641pt" height="332pt"
+ viewBox="0.00 0.00 641.00 331.95" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph" class="graph" transform="scale(0.64 0.64) rotate(0) translate(4 518)">
+<title>proc~~adapt_amrcontroller3d~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-518 1004,-518 1004,4 -4,4"/>
+<!-- proc~adapt_amrcontroller3d -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node1" class="node">
+<title>proc~adapt_amrcontroller3d</title>
+<polygon fill="none" stroke="black" points="139,-276 0,-276 0,-252 139,-252 139,-276"/>
+<text text-anchor="middle" x="69.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50">Adapt_AMRController3D</text>
+</g>
+<!-- proc~verifywindowedapply -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node2" class="node">
+<title>proc~verifywindowedapply</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node2"><a xlink:href=".././proc/verifywindowedapply.html" xlink:title="VerifyWindowedApply">
+<polygon fill="#d9534f" stroke="#d9534f" points="551.5,-434 423.5,-434 423.5,-410 551.5,-410 551.5,-434"/>
+<text text-anchor="middle" x="487.5" y="-419.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">VerifyWindowedApply</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~verifywindowedapply -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge11" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~verifywindowedapply</title>
+<path fill="none" stroke="#ff0000" d="M76.21,-276.31C89.34,-303 124.43,-365.94 175,-393 248.87,-432.53 346.81,-434.95 412.99,-430.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="413.61,-434.1 423.34,-429.89 413.11,-427.12 413.61,-434.1"/>
+</g>
+<!-- proc~allgatherperelemreals -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node3" class="node">
+<title>proc~allgatherperelemreals</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node3"><a xlink:href=".././proc/allgatherperelemreals.html" xlink:title="AllgatherPerElemReals">
+<polygon fill="#d9534f" stroke="#d9534f" points="554.5,-350 420.5,-350 420.5,-326 554.5,-326 554.5,-350"/>
+<text text-anchor="middle" x="487.5" y="-335.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">AllgatherPerElemReals</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~allgatherperelemreals -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge1" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~allgatherperelemreals</title>
+<path fill="none" stroke="#ff0000" d="M128.75,-276.03C143.8,-279.04 159.99,-282.22 175,-285 255.25,-299.89 347.44,-315.37 410.59,-325.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="410.03,-329.19 420.47,-327.35 411.16,-322.28 410.03,-329.19"/>
+</g>
+<!-- proc~allgatherperelemints -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node4" class="node">
+<title>proc~allgatherperelemints</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node4"><a xlink:href=".././proc/allgatherperelemints.html" xlink:title="AllgatherPerElemInts">
+<polygon fill="#d9534f" stroke="#d9534f" points="549.5,-392 425.5,-392 425.5,-368 549.5,-368 549.5,-392"/>
+<text text-anchor="middle" x="487.5" y="-377.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">AllgatherPerElemInts</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~allgatherperelemints -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge2" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~allgatherperelemints</title>
+<path fill="none" stroke="#ff0000" d="M78.49,-276.18C93.99,-298.57 130.54,-345.77 175,-365 252,-398.31 349.92,-396.79 415.22,-390.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="415.82,-393.86 425.41,-389.34 415.1,-386.89 415.82,-393.86"/>
+</g>
+<!-- proc~resolvegeomdebug -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node5" class="node">
+<title>proc~resolvegeomdebug</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node5"><a xlink:href=".././proc/resolvegeomdebug.html" xlink:title="ResolveGeomDebug">
+<polygon fill="#d9534f" stroke="#d9534f" points="337.5,-276 216.5,-276 216.5,-252 337.5,-252 337.5,-276"/>
+<text text-anchor="middle" x="277" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ResolveGeomDebug</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~resolvegeomdebug -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge3" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~resolvegeomdebug</title>
+<path fill="none" stroke="#ff0000" d="M139.21,-264C160.77,-264 184.58,-264 206.21,-264"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="206.3,-267.5 216.3,-264 206.3,-260.5 206.3,-267.5"/>
+</g>
+<!-- proc~buildtransferplan~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node6" class="node">
+<title>proc~buildtransferplan~2</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node6"><a xlink:href=".././proc/buildtransferplan~2.html" xlink:title="BuildTransferPlan">
+<polygon fill="#d9534f" stroke="#d9534f" points="329.5,-234 224.5,-234 224.5,-210 329.5,-210 329.5,-234"/>
+<text text-anchor="middle" x="277" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BuildTransferPlan</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~buildtransferplan~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge4" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~buildtransferplan~2</title>
+<path fill="none" stroke="#ff0000" d="M129.39,-251.96C156,-246.53 187.43,-240.1 214.36,-234.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="215.34,-237.97 224.44,-232.54 213.94,-231.11 215.34,-237.97"/>
+</g>
+<!-- proc~planwindows -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node7" class="node">
+<title>proc~planwindows</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node7"><a xlink:href=".././proc/planwindows.html" xlink:title="PlanWindows">
+<polygon fill="#d9534f" stroke="#d9534f" points="318,-192 236,-192 236,-168 318,-168 318,-192"/>
+<text text-anchor="middle" x="277" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">PlanWindows</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~planwindows -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge5" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~planwindows</title>
+<path fill="none" stroke="#ff0000" d="M86.61,-251.9C106.39,-237.62 141.47,-214.15 175,-201 191.02,-194.72 209.23,-190.19 225.75,-186.99"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.56,-190.4 235.77,-185.17 225.31,-183.52 226.56,-190.4"/>
+</g>
+<!-- proc~emitmesh -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node8" class="node">
+<title>proc~emitmesh</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node8"><a xlink:href=".././proc/emitmesh.html" xlink:title="EmitMesh">
+<polygon fill="#d9534f" stroke="#d9534f" points="309,-150 245,-150 245,-126 309,-126 309,-150"/>
+<text text-anchor="middle" x="277" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EmitMesh</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~emitmesh -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge6" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~emitmesh</title>
+<path fill="none" stroke="#ff0000" d="M78.94,-251.65C94.9,-229.33 131.81,-182.39 175,-159 193.29,-149.09 215.77,-143.85 234.87,-141.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="235.33,-144.56 244.8,-139.82 234.44,-137.61 235.33,-144.56"/>
+</g>
+<!-- proc~migrateoldwindow_dgmodel3d_t -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node9" class="node">
+<title>proc~migrateoldwindow_dgmodel3d_t</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node9"><a xlink:href=".././proc/migrateoldwindow_dgmodel3d_t.html" xlink:title="MigrateOldWindow_DGModel3D_t">
+<polygon fill="#d9534f" stroke="#d9534f" points="372.5,-108 181.5,-108 181.5,-84 372.5,-84 372.5,-108"/>
+<text text-anchor="middle" x="277" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MigrateOldWindow_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~migrateoldwindow_dgmodel3d_t -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge7" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~migrateoldwindow_dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" d="M75.42,-251.76C87.6,-223.12 122.06,-151.6 175,-117 177.61,-115.29 180.34,-113.72 183.15,-112.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="184.74,-115.39 192.39,-108.06 181.84,-109.02 184.74,-115.39"/>
+</g>
+<!-- proc~downloadoldwindow_dgmodel3d_t -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node10" class="node">
+<title>proc~downloadoldwindow_dgmodel3d_t</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node10"><a xlink:href=".././proc/downloadoldwindow_dgmodel3d_t.html" xlink:title="DownloadOldWindow_DGModel3D_t">
+<polygon fill="#d9534f" stroke="#d9534f" points="379,-66 175,-66 175,-42 379,-42 379,-66"/>
+<text text-anchor="middle" x="277" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DownloadOldWindow_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~downloadoldwindow_dgmodel3d_t -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge8" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~downloadoldwindow_dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" d="M73.4,-251.93C82.19,-218.05 111.93,-121.51 175,-75 177.08,-73.47 179.25,-72.04 181.49,-70.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="183.17,-73.78 190.43,-66.06 179.94,-67.57 183.17,-73.78"/>
+</g>
+<!-- proc~verifymigration -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node11" class="node">
+<title>proc~verifymigration</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node11"><a xlink:href=".././proc/verifymigration.html" xlink:title="VerifyMigration">
+<polygon fill="#d9534f" stroke="#d9534f" points="323.5,-356 230.5,-356 230.5,-332 323.5,-332 323.5,-356"/>
+<text text-anchor="middle" x="277" y="-341.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">VerifyMigration</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~verifymigration -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge9" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~verifymigration</title>
+<path fill="none" stroke="#ff0000" d="M90.69,-276.17C111.28,-288.17 144.47,-306.35 175,-318 189.36,-323.48 205.31,-328.18 220.21,-332.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.77,-335.52 230.32,-334.55 221.47,-328.73 219.77,-335.52"/>
+</g>
+<!-- proc~applytransferplan_dgmodel3d_t -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node12" class="node">
+<title>proc~applytransferplan_dgmodel3d_t</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node12"><a xlink:href=".././proc/applytransferplan_dgmodel3d_t.html" xlink:title="ApplyTransferPlan_DGModel3D_t">
+<polygon fill="#d9534f" stroke="#d9534f" points="370,-474 184,-474 184,-450 370,-450 370,-474"/>
+<text text-anchor="middle" x="277" y="-459.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ApplyTransferPlan_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- proc~adapt_amrcontroller3d&#45;&gt;proc~applytransferplan_dgmodel3d_t -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge10" class="edge">
+<title>proc~adapt_amrcontroller3d&#45;&gt;proc~applytransferplan_dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" d="M74.29,-276.21C84.76,-307.87 117.2,-393.11 175,-436 180.2,-439.86 185.92,-443.15 191.91,-445.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="190.94,-449.34 201.51,-449.96 193.64,-442.88 190.94,-449.34"/>
+</g>
+<!-- proc~applytransferplanwindow~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node13" class="node">
+<title>proc~applytransferplanwindow~2</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node13"><a xlink:href=".././proc/applytransferplanwindow~2.html" xlink:title="ApplyTransferPlanWindow">
+<polygon fill="#d9534f" stroke="#d9534f" points="748.5,-474 598.5,-474 598.5,-450 748.5,-450 748.5,-474"/>
+<text text-anchor="middle" x="673.5" y="-459.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ApplyTransferPlanWindow</text>
+</a>
+</g>
+</g>
+<!-- proc~verifywindowedapply&#45;&gt;proc~applytransferplanwindow~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge12" class="edge">
+<title>proc~verifywindowedapply&#45;&gt;proc~applytransferplanwindow~2</title>
+<path fill="none" stroke="#ff0000" d="M543.71,-434C563.63,-438.33 586.31,-443.26 607.02,-447.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="606.5,-451.23 617.02,-449.94 607.99,-444.39 606.5,-451.23"/>
+</g>
+<!-- mpi_allgatherv -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node14" class="node">
+<title>mpi_allgatherv</title>
+<polygon fill="#777777" stroke="#777777" points="719.5,-371 627.5,-371 627.5,-347 719.5,-347 719.5,-371"/>
+<text text-anchor="middle" x="673.5" y="-356.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_allgatherv</text>
+</g>
+<!-- proc~allgatherperelemreals&#45;&gt;mpi_allgatherv -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge13" class="edge">
+<title>proc~allgatherperelemreals&#45;&gt;mpi_allgatherv</title>
+<path fill="none" stroke="#ff8b00" d="M554.67,-345.55C575.2,-347.89 597.6,-350.45 617.3,-352.7"/>
+<polygon fill="#ff8b00" stroke="#ff8b00" points="617,-356.19 627.33,-353.84 617.79,-349.23 617,-356.19"/>
+</g>
+<!-- proc~allgatherperelemints&#45;&gt;mpi_allgatherv -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge14" class="edge">
+<title>proc~allgatherperelemints&#45;&gt;mpi_allgatherv</title>
+<path fill="none" stroke="#e7ff00" d="M549.51,-373.04C571.36,-370.54 595.84,-367.75 617.18,-365.31"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="617.84,-368.76 627.38,-364.15 617.05,-361.81 617.84,-368.76"/>
+</g>
+<!-- proc~invflip3d -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node15" class="node">
+<title>proc~invflip3d</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node15"><a xlink:href=".././proc/invflip3d.html" xlink:title="invFlip3D">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="518.5,-150 456.5,-150 456.5,-126 518.5,-126 518.5,-150"/>
+<text text-anchor="middle" x="487.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">invFlip3D</text>
+</a>
+</g>
+</g>
+<!-- proc~emitmesh&#45;&gt;proc~invflip3d -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge15" class="edge">
+<title>proc~emitmesh&#45;&gt;proc~invflip3d</title>
+<path fill="none" stroke="#00b9ff" d="M309.21,-138C345.71,-138 406.22,-138 446.22,-138"/>
+<polygon fill="#00b9ff" stroke="#00b9ff" points="446.43,-141.5 456.43,-138 446.43,-134.5 446.43,-141.5"/>
+</g>
+<!-- proc~exchangeoldwindowflat -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node17" class="node">
+<title>proc~exchangeoldwindowflat</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node17"><a xlink:href=".././proc/exchangeoldwindowflat.html" xlink:title="ExchangeOldWindowFlat">
+<polygon fill="#d9534f" stroke="#d9534f" points="560,-108 415,-108 415,-84 560,-84 560,-108"/>
+<text text-anchor="middle" x="487.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ExchangeOldWindowFlat</text>
+</a>
+</g>
+</g>
+<!-- proc~migrateoldwindow_dgmodel3d_t&#45;&gt;proc~exchangeoldwindowflat -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge16" class="edge">
+<title>proc~migrateoldwindow_dgmodel3d_t&#45;&gt;proc~exchangeoldwindowflat</title>
+<path fill="none" stroke="#002eff" d="M372.79,-96C383.36,-96 394.06,-96 404.45,-96"/>
+<polygon fill="#002eff" stroke="#002eff" points="404.73,-99.5 414.73,-96 404.73,-92.5 404.73,-99.5"/>
+</g>
+<!-- proc~verifymigration&#45;&gt;proc~allgatherperelemreals -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge17" class="edge">
+<title>proc~verifymigration&#45;&gt;proc~allgatherperelemreals</title>
+<path fill="none" stroke="#e700ff" d="M323.76,-342.68C349.06,-341.96 381.17,-341.03 410.16,-340.2"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="410.38,-343.69 420.27,-339.91 410.18,-336.69 410.38,-343.69"/>
+</g>
+<!-- proc~applytransferplan_dgmodel3d_t&#45;&gt;proc~applytransferplanwindow~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge18" class="edge">
+<title>proc~applytransferplan_dgmodel3d_t&#45;&gt;proc~applytransferplanwindow~2</title>
+<path fill="none" stroke="#ff008b" d="M370.49,-462C436.43,-462 524.36,-462 588.33,-462"/>
+<polygon fill="#ff008b" stroke="#ff008b" points="588.38,-465.5 598.38,-462 588.38,-458.5 588.38,-465.5"/>
+</g>
+<!-- proc~applytransferplanrange~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node16" class="node">
+<title>proc~applytransferplanrange~2</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node16"><a xlink:href=".././proc/applytransferplanrange~2.html" xlink:title="ApplyTransferPlanRange">
+<polygon fill="#d9534f" stroke="#d9534f" points="558.5,-514 416.5,-514 416.5,-490 558.5,-490 558.5,-514"/>
+<text text-anchor="middle" x="487.5" y="-499.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ApplyTransferPlanRange</text>
+</a>
+</g>
+</g>
+<!-- proc~applytransferplan_dgmodel3d_t&#45;&gt;proc~applytransferplanrange~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge19" class="edge">
+<title>proc~applytransferplan_dgmodel3d_t&#45;&gt;proc~applytransferplanrange~2</title>
+<path fill="none" stroke="#ff008b" d="M340.56,-474C363.54,-478.41 389.77,-483.44 413.58,-488.01"/>
+<polygon fill="#ff008b" stroke="#ff008b" points="413.15,-491.49 423.63,-489.94 414.47,-484.62 413.15,-491.49"/>
+</g>
+<!-- proc~restrictfromchildren~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node18" class="node">
+<title>proc~restrictfromchildren~2</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node18"><a xlink:href=".././proc/restrictfromchildren~2.html" xlink:title="RestrictFromChildren">
+<polygon fill="#d9534f" stroke="#d9534f" points="910,-453 787,-453 787,-429 910,-429 910,-453"/>
+<text text-anchor="middle" x="848.5" y="-438.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">RestrictFromChildren</text>
+</a>
+</g>
+</g>
+<!-- proc~applytransferplanwindow~2&#45;&gt;proc~restrictfromchildren~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge20" class="edge">
+<title>proc~applytransferplanwindow~2&#45;&gt;proc~restrictfromchildren~2</title>
+<path fill="none" stroke="#ff0000" d="M748.62,-453C757.98,-451.87 767.54,-450.71 776.85,-449.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="777.32,-453.04 786.82,-448.37 776.47,-446.1 777.32,-453.04"/>
+</g>
+<!-- proc~prolongtochildren~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node20" class="node">
+<title>proc~prolongtochildren~2</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node20"><a xlink:href=".././proc/prolongtochildren~2.html" xlink:title="ProlongToChildren">
+<polygon fill="#d9534f" stroke="#d9534f" points="902.5,-495 794.5,-495 794.5,-471 902.5,-471 902.5,-495"/>
+<text text-anchor="middle" x="848.5" y="-480.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ProlongToChildren</text>
+</a>
+</g>
+</g>
+<!-- proc~applytransferplanwindow~2&#45;&gt;proc~prolongtochildren~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge21" class="edge">
+<title>proc~applytransferplanwindow~2&#45;&gt;proc~prolongtochildren~2</title>
+<path fill="none" stroke="#ff0000" d="M748.62,-471C760.54,-472.44 772.77,-473.93 784.4,-475.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="784.09,-478.83 794.44,-476.56 784.93,-471.88 784.09,-478.83"/>
+</g>
+<!-- proc~applytransferplanrange~2&#45;&gt;proc~applytransferplanwindow~2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge22" class="edge">
+<title>proc~applytransferplanrange~2&#45;&gt;proc~applytransferplanwindow~2</title>
+<path fill="none" stroke="#0066ff" d="M543.71,-490C563.63,-485.67 586.31,-480.74 607.02,-476.23"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="607.99,-479.61 617.02,-474.06 606.5,-472.77 607.99,-479.61"/>
+</g>
+<!-- proc~finisholdwindowexchange -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node19" class="node">
+<title>proc~finisholdwindowexchange</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node19"><a xlink:href=".././proc/finisholdwindowexchange.html" xlink:title="FinishOldWindowExchange">
+<polygon fill="#d9534f" stroke="#d9534f" points="751,-149 596,-149 596,-125 751,-125 751,-149"/>
+<text text-anchor="middle" x="673.5" y="-134.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FinishOldWindowExchange</text>
+</a>
+</g>
+</g>
+<!-- proc~exchangeoldwindowflat&#45;&gt;proc~finisholdwindowexchange -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge24" class="edge">
+<title>proc~exchangeoldwindowflat&#45;&gt;proc~finisholdwindowexchange</title>
+<path fill="none" stroke="#cc00ff" d="M542.71,-108.08C563.3,-112.67 586.95,-117.94 608.37,-122.71"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="607.84,-126.18 618.36,-124.94 609.36,-119.34 607.84,-126.18"/>
+</g>
+<!-- proc~ownedrun -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node21" class="node">
+<title>proc~ownedrun</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node21"><a xlink:href=".././proc/ownedrun.html" xlink:title="OwnedRun">
+<polygon fill="#d9534f" stroke="#d9534f" points="883.5,-108 813.5,-108 813.5,-84 883.5,-84 883.5,-108"/>
+<text text-anchor="middle" x="848.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">OwnedRun</text>
+</a>
+</g>
+</g>
+<!-- proc~exchangeoldwindowflat&#45;&gt;proc~ownedrun -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge25" class="edge">
+<title>proc~exchangeoldwindowflat&#45;&gt;proc~ownedrun</title>
+<path fill="none" stroke="#cc00ff" d="M560.29,-96C632.82,-96 742.6,-96 803.27,-96"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="803.29,-99.5 813.29,-96 803.29,-92.5 803.29,-99.5"/>
+</g>
+<!-- proc~postoldwindowexchange -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node22" class="node">
+<title>proc~postoldwindowexchange</title>
+<g id="a_proc~~adapt_amrcontroller3d~~CallsGraph_node22"><a xlink:href=".././proc/postoldwindowexchange.html" xlink:title="PostOldWindowExchange">
+<polygon fill="#d9534f" stroke="#d9534f" points="747,-67 600,-67 600,-43 747,-43 747,-67"/>
+<text text-anchor="middle" x="673.5" y="-52.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">PostOldWindowExchange</text>
+</a>
+</g>
+</g>
+<!-- proc~exchangeoldwindowflat&#45;&gt;proc~postoldwindowexchange -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge23" class="edge">
+<title>proc~exchangeoldwindowflat&#45;&gt;proc~postoldwindowexchange</title>
+<path fill="none" stroke="#cc00ff" d="M542.71,-83.92C563.3,-79.33 586.95,-74.06 608.37,-69.29"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="609.36,-72.66 618.36,-67.06 607.84,-65.82 609.36,-72.66"/>
+</g>
+<!-- tmp1 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node23" class="node">
+<title>tmp1</title>
+<polygon fill="#777777" stroke="#777777" points="1000,-453 946,-453 946,-429 1000,-429 1000,-453"/>
+<text text-anchor="middle" x="973" y="-438.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">tmp1</text>
+</g>
+<!-- proc~restrictfromchildren~2&#45;&gt;tmp1 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge26" class="edge">
+<title>proc~restrictfromchildren~2&#45;&gt;tmp1</title>
+<path fill="none" stroke="#ff0000" d="M910.03,-441C918.83,-441 927.66,-441 935.77,-441"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="935.97,-444.5 945.97,-441 935.97,-437.5 935.97,-444.5"/>
+</g>
+<!-- up -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node25" class="node">
+<title>up</title>
+<polygon fill="#777777" stroke="#777777" points="1000,-411 946,-411 946,-387 1000,-387 1000,-411"/>
+<text text-anchor="middle" x="973" y="-396.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">up</text>
+</g>
+<!-- proc~restrictfromchildren~2&#45;&gt;up -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge27" class="edge">
+<title>proc~restrictfromchildren~2&#45;&gt;up</title>
+<path fill="none" stroke="#ff0000" d="M884.6,-428.96C900.76,-423.42 919.91,-416.86 936.16,-411.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="937.53,-414.52 945.85,-407.97 935.26,-407.9 937.53,-414.52"/>
+</g>
+<!-- tmp2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node26" class="node">
+<title>tmp2</title>
+<polygon fill="#777777" stroke="#777777" points="1000,-495 946,-495 946,-471 1000,-471 1000,-495"/>
+<text text-anchor="middle" x="973" y="-480.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">tmp2</text>
+</g>
+<!-- proc~restrictfromchildren~2&#45;&gt;tmp2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge28" class="edge">
+<title>proc~restrictfromchildren~2&#45;&gt;tmp2</title>
+<path fill="none" stroke="#ff0000" d="M884.6,-453.04C900.76,-458.58 919.91,-465.14 936.16,-470.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="935.26,-474.1 945.85,-474.03 937.53,-467.48 935.26,-474.1"/>
+</g>
+<!-- mpi_waitall -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node27" class="node">
+<title>mpi_waitall</title>
+<polygon fill="#777777" stroke="#777777" points="885,-150 812,-150 812,-126 885,-126 885,-150"/>
+<text text-anchor="middle" x="848.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_waitall</text>
+</g>
+<!-- proc~finisholdwindowexchange&#45;&gt;mpi_waitall -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge29" class="edge">
+<title>proc~finisholdwindowexchange&#45;&gt;mpi_waitall</title>
+<path fill="none" stroke="#cbff00" d="M751.14,-137.44C768.32,-137.54 786.03,-137.64 801.5,-137.73"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="801.81,-141.24 811.83,-137.79 801.85,-134.24 801.81,-141.24"/>
+</g>
+<!-- proc~prolongtochildren~2&#45;&gt;tmp1 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge30" class="edge">
+<title>proc~prolongtochildren~2&#45;&gt;tmp1</title>
+<path fill="none" stroke="#00ff66" d="M884.6,-470.96C900.76,-465.42 919.91,-458.86 936.16,-453.29"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="937.53,-456.52 945.85,-449.97 935.26,-449.9 937.53,-456.52"/>
+</g>
+<!-- proc~prolongtochildren~2&#45;&gt;tmp2 -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge31" class="edge">
+<title>proc~prolongtochildren~2&#45;&gt;tmp2</title>
+<path fill="none" stroke="#00ff66" d="M902.52,-483C913.65,-483 925.16,-483 935.52,-483"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="935.85,-486.5 945.85,-483 935.85,-479.5 935.85,-486.5"/>
+</g>
+<!-- proc~postoldwindowexchange&#45;&gt;proc~ownedrun -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge32" class="edge">
+<title>proc~postoldwindowexchange&#45;&gt;proc~ownedrun</title>
+<path fill="none" stroke="#cc00ff" d="M725.47,-67.08C750.24,-72.95 779.71,-79.93 803.48,-85.57"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="802.76,-88.99 813.29,-87.89 804.37,-82.18 802.76,-88.99"/>
+</g>
+<!-- mpi_irecv -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node24" class="node">
+<title>mpi_irecv</title>
+<polygon fill="#777777" stroke="#777777" points="880.5,-66 816.5,-66 816.5,-42 880.5,-42 880.5,-66"/>
+<text text-anchor="middle" x="848.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_irecv</text>
+</g>
+<!-- proc~postoldwindowexchange&#45;&gt;mpi_irecv -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge33" class="edge">
+<title>proc~postoldwindowexchange&#45;&gt;mpi_irecv</title>
+<path fill="none" stroke="#cc00ff" d="M747.12,-54.58C767.18,-54.46 788.26,-54.34 805.9,-54.24"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="806.42,-57.74 816.4,-54.18 806.38,-50.74 806.42,-57.74"/>
+</g>
+<!-- mpi_isend -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_node28" class="node">
+<title>mpi_isend</title>
+<polygon fill="#777777" stroke="#777777" points="882,-24 815,-24 815,0 882,0 882,-24"/>
+<text text-anchor="middle" x="848.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_isend</text>
+</g>
+<!-- proc~postoldwindowexchange&#45;&gt;mpi_isend -->
+<g id="proc~~adapt_amrcontroller3d~~CallsGraph_edge34" class="edge">
+<title>proc~postoldwindowexchange&#45;&gt;mpi_isend</title>
+<path fill="none" stroke="#cc00ff" d="M723.15,-42.91C748.89,-36.51 780.19,-28.73 804.95,-22.58"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="805.92,-25.94 814.78,-20.13 804.23,-19.15 805.92,-25.94"/>
+</g>
+</g>
+</svg>
+</div><script>var panprocadapt_amrcontroller3dCallsGraph = svgPanZoom('#procadapt_amrcontroller3dCallsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/adapt_amrcontroller3d.html#src">Adapt_AMRController3D</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Adapt_AMRController3D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">adapted</span><span class="p">)</span>
+<span class="w">    </span><span class="c">!! Perform one adaptation epoch on the model (see the module documentation). On return,</span>
+<span class="w">    </span><span class="c">!! adapted reports whether the mesh changed; when it did, the model is already rebound to</span>
+<span class="w">    </span><span class="c">!! the new mesh with the solution transferred (conservatively), and the caller should</span>
+<span class="w">    </span><span class="c">!! re-evaluate its time step (RecommendedTimeStep) before the next ForwardStep. When the</span>
+<span class="w">    </span><span class="c">!! leaf set is unchanged the model is untouched.</span>
+<span class="w">    </span><span class="c">!!</span>
+<span class="w">    </span><span class="c">!! Where the transferred solution lives on return: on a GPU build the transfer is performed</span>
+<span class="w">    </span><span class="c">!! on the device (the 3-D analogue of the 2-D Stage 6a) and the result is left there, so</span>
+<span class="w">    </span><span class="c">!! solution%interior (the host mirror) is STALE afterwards. This matches the rest of the</span>
+<span class="w">    </span><span class="c">!! time loop, where the device is authoritative and a caller that wants host data calls</span>
+<span class="w">    </span><span class="c">!! solution%UpdateHost() first - as Write_DGModel3D_t does before writing a snapshot. Before</span>
+<span class="w">    </span><span class="c">!! the device transfer existed the mirror happened to be fresh here because the transfer ran</span>
+<span class="w">    </span><span class="c">!! on the host; do not rely on that. On CPU builds host and device are the same storage and</span>
+<span class="w">    </span><span class="c">!! the question does not arise. The multi-rank path still transfers on the host (see step 6),</span>
+<span class="w">    </span><span class="c">!! so both mirrors are fresh there.</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="w">    </span><span class="c">! target: the migration window buffer is a component of this, and the windowed apply is fed</span>
+<span class="w">    </span><span class="c">! through a pointer remapped onto it (see step 6), which requires the target attribute here.</span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">AMRController3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">DGModel3D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">model</span>
+<span class="w">    </span><span class="kt">logical</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">adapted</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">li</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="k">pass</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">nbr</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">nf</span><span class="p">,</span><span class="n">nOld</span><span class="p">,</span><span class="n">Np</span><span class="p">,</span><span class="n">changed</span><span class="p">,</span><span class="n">eFirst</span><span class="p">,</span><span class="n">eLast</span><span class="p">,</span><span class="n">iv</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nR</span><span class="p">,</span><span class="n">nWin</span><span class="p">,</span><span class="n">wFirst</span><span class="p">,</span><span class="n">wLast</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">uWin</span><span class="p">(:,:,:,:,:)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flag</span><span class="p">(:),</span><span class="nb">spread</span><span class="p">(:)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">oldLeaf</span><span class="p">(:)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">leafIdx</span><span class="p">(:)</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">TransferPlan3D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">plan</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh3D</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">newMesh</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">SEMHex</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">newGeom</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">newSlot</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nReused</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">uOld</span><span class="p">(:,:,:,:,:)</span>
+
+<span class="w">    </span><span class="n">adapted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="nb">associated</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">activeMesh</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      print</span><span class="o">*</span><span class="p">,</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="s1">':'</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">        </span><span class="s1">' : Error : the model is not running on this controller''s active mesh.'</span>
+<span class="w">      </span><span class="k">stop </span><span class="mi">1</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="w">    </span><span class="c">! ---- 1. Indicator flags from the current solution ----</span>
+<span class="w">    </span><span class="c">! The indicator is rank-local; the (replicated) forest needs the global per-leaf flags, so</span>
+<span class="w">    </span><span class="c">! on nRanks &gt; 1 they are allgathered by the active decomposition's element ranges. From</span>
+<span class="w">    </span><span class="c">! here on every rank applies identical mutations to its identical forest copy.</span>
+<span class="w">    </span><span class="c">! The indicator's amplitude gate normalizes each element's energy by the peak element</span>
+<span class="w">    </span><span class="c">! energy, so on several ranks that peak must be global: otherwise the gate - and hence the</span>
+<span class="w">    </span><span class="c">! flags and the adapted mesh - would depend on the decomposition. That is one extra small</span>
+<span class="w">    </span><span class="c">! collective per epoch, alongside the flag allgather below, and none inside the</span>
+<span class="w">    </span><span class="c">! time-stepping loop.</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiEnabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      call </span><span class="n">this</span><span class="p">%</span><span class="n">indicator</span><span class="p">%</span><span class="n">Estimate</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">ivar</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                   </span><span class="n">comm</span><span class="o">=</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">)</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      call </span><span class="n">this</span><span class="p">%</span><span class="n">indicator</span><span class="p">%</span><span class="n">Estimate</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">ivar</span><span class="p">)</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    </span><span class="n">nOld</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">nLeaves</span>
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">))</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nElem</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">nOld</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        print</span><span class="o">*</span><span class="p">,</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="s1">':'</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">          </span><span class="s1">' : Error : the active decomposition does not span the forest leaf list.'</span>
+<span class="w">        </span><span class="k">stop </span><span class="mi">1</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      call </span><span class="n">AllgatherPerElemInts</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">indicator</span><span class="p">%</span><span class="n">flag</span><span class="p">,</span><span class="n">flag</span><span class="p">)</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      </span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">indicator</span><span class="p">%</span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="w">    </span><span class="c">! ---- 2. Cap refinement at maxLevel ----</span>
+<span class="w">    </span><span class="k">do </span><span class="n">li</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nOld</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="n">li</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">SELF_AMR_REFINE</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">         </span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">level</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">leaf</span><span class="p">(</span><span class="n">li</span><span class="p">))</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">maxLevel</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">flag</span><span class="p">(</span><span class="n">li</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SELF_AMR_KEEP</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">    enddo</span>
+
+<span class="w">    </span><span class="c">! ---- 3. Halo expansion: spread refine flags to face neighbours ----</span>
+<span class="w">    </span><span class="c">! A leaf neighbour of a refine-flagged leaf is also flagged (up to the level cap) so the</span>
+<span class="w">    </span><span class="c">! refined band extends nHalo elements beyond where the indicator fires; internal (finer)</span>
+<span class="w">    </span><span class="c">! neighbours are already refined and need nothing.</span>
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">leafIdx</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">nNodes</span><span class="p">))</span>
+<span class="w">    </span><span class="n">leafIdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">do </span><span class="n">li</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nOld</span>
+<span class="w">      </span><span class="n">leafIdx</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">leaf</span><span class="p">(</span><span class="n">li</span><span class="p">))</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">li</span>
+<span class="w">    </span><span class="k">enddo</span>
+<span class="k">    allocate</span><span class="p">(</span><span class="nb">spread</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">))</span>
+<span class="w">    </span><span class="k">do pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nHalo</span>
+<span class="w">      </span><span class="nb">spread</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span>
+<span class="w">      </span><span class="k">do </span><span class="n">li</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nOld</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">(</span><span class="n">li</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">SELF_AMR_REFINE</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span>
+<span class="k">        </span><span class="n">node</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">leaf</span><span class="p">(</span><span class="n">li</span><span class="p">)</span>
+<span class="w">        </span><span class="k">do </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span>
+<span class="w">          </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">FaceNeighbor</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">nbr</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">nf</span><span class="p">)</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">nbr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span><span class="w"> </span><span class="c">! physical boundary</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">child</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">nbr</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span><span class="w"> </span><span class="c">! finer neighbour, already refined</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">level</span><span class="p">(</span><span class="n">nbr</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">maxLevel</span><span class="p">)</span><span class="w"> </span><span class="k">cycle</span><span class="w"> </span><span class="c">! at the cap</span>
+<span class="w">          </span><span class="nb">spread</span><span class="p">(</span><span class="n">leafIdx</span><span class="p">(</span><span class="n">nbr</span><span class="p">))</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SELF_AMR_REFINE</span>
+<span class="w">        </span><span class="k">enddo</span>
+<span class="k">      enddo</span>
+<span class="k">      </span><span class="n">flag</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">spread</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span>
+<span class="w">    </span><span class="k">enddo</span>
+<span class="k">    deallocate</span><span class="p">(</span><span class="nb">spread</span><span class="p">,</span><span class="n">leafIdx</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c">! ---- 4. Mutate the forest; detect a no-op epoch ----</span>
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">oldLeaf</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">))</span>
+<span class="w">    </span><span class="n">oldLeaf</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">leaf</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">AdaptFromFlags</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+<span class="w">    </span><span class="k">deallocate</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">Balance2to1</span><span class="p">()</span>
+
+<span class="w">    </span><span class="n">changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">nLeaves</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">nOld</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">      </span><span class="k">do </span><span class="n">li</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nOld</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">%</span><span class="n">leaf</span><span class="p">(</span><span class="n">li</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">oldLeaf</span><span class="p">(</span><span class="n">li</span><span class="p">))</span><span class="w"> </span><span class="n">changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">      </span><span class="k">enddo</span>
+<span class="k">    endif</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">changed</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      deallocate</span><span class="p">(</span><span class="n">oldLeaf</span><span class="p">)</span>
+<span class="w">      </span><span class="k">return</span>
+<span class="k">    endif</span>
+
+<span class="w">    </span><span class="c">! ---- 5. Transfer plan, emitted mesh, and geometry ----</span>
+<span class="w">    </span><span class="k">call </span><span class="n">BuildTransferPlan</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">,</span><span class="n">nOld</span><span class="p">,</span><span class="n">oldLeaf</span><span class="p">,</span><span class="n">plan</span><span class="p">)</span>
+<span class="w">    </span><span class="k">deallocate</span><span class="p">(</span><span class="n">oldLeaf</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">newMesh</span><span class="p">)</span>
+<span class="w">    </span><span class="k">call </span><span class="n">EmitMesh</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">forest</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">baseMesh</span><span class="p">,</span><span class="n">newMesh</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c">! Take the geometry buffer that is NOT currently active, so the previous epoch's geometry</span>
+<span class="w">    </span><span class="c">! stays readable. Each buffer is Init-ed once and resized thereafter.</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">NextGeomBuffer</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">,</span><span class="n">newGeom</span><span class="p">,</span><span class="n">newSlot</span><span class="p">)</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">BuildGeometry</span><span class="p">(</span><span class="n">newMesh</span><span class="p">,</span><span class="n">plan</span><span class="p">,</span><span class="n">newGeom</span><span class="p">,</span><span class="n">nReused</span><span class="p">)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nGeomReused</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">nGeomReused</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">nReused</span><span class="p">,</span><span class="n">int64</span><span class="p">)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nGeomGenerated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">nGeomGenerated</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">nElem</span><span class="o">-</span><span class="n">nReused</span><span class="p">,</span><span class="n">int64</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c">! ---- 6. Regrid the model and transfer (migrate) the solution ----</span>
+<span class="w">    </span><span class="c">! The solution is staged before Regrid (which releases the storage it lives in) and</span>
+<span class="w">    </span><span class="c">! transferred onto the new mesh afterwards. Both steps are type-bound and backend-specific:</span>
+<span class="w">    </span><span class="c">! the portable implementation stages on the host and runs ApplyTransferPlanRange, while the</span>
+<span class="w">    </span><span class="c">! GPU backend stages device-to-device and applies the plan in a kernel. That moves the</span>
+<span class="w">    </span><span class="c">! per-element tensor-product interpolation onto the device - which is where the measured</span>
+<span class="w">    </span><span class="c">! saving comes from - and incidentally leaves no solution data crossing the host link.</span>
+<span class="w">    </span><span class="c">!</span>
+<span class="w">    </span><span class="c">! On several ranks the rank that will own a new element and the rank that owned its old</span>
+<span class="w">    </span><span class="c">! source need not be the same, so old-field data has to move. Both partitions are contiguous</span>
+<span class="w">    </span><span class="c">! ranges of the same leaf order and the plan is rank-replicated, so each rank computes the</span>
+<span class="w">    </span><span class="c">! contiguous WINDOW of old elements its own new range references (PlanWindows) and receives</span>
+<span class="w">    </span><span class="c">! exactly that window point-to-point (ExchangeOldWindow) - Stage-5 v2. Per-rank traffic and</span>
+<span class="w">    </span><span class="c">! memory are then set by what actually moves rather than by the size of the global field.</span>
+<span class="w">    </span><span class="c">! SELF_AMR_MIGRATE_GATHER=1 selects the v1 allgather instead; the two are bit-identical, and</span>
+<span class="w">    </span><span class="c">! SELF_AMR_MIGRATE_VERIFY=1 asserts that in-process.</span>
+<span class="w">    </span><span class="c">!</span>
+<span class="w">    </span><span class="c">! The migration is device-resident on a GPU build (#172): the window is assembled in device</span>
+<span class="w">    </span><span class="c">! memory and the plan applied to it by the kernel, so the multi-rank path moves no solution</span>
+<span class="w">    </span><span class="c">! data across the host link either, and the per-element interpolation never runs on a CPU</span>
+<span class="w">    </span><span class="c">! core. That rests on GPU-aware MPI, which the per-step halo exchange has always required.</span>
+<span class="w">    </span><span class="c">! SELF_AMR_TRANSFER_HOST=1 forces the portable windowed path back on.</span>
+<span class="w">    </span><span class="k">call </span><span class="n">ResolveGeomDebug</span><span class="p">()</span>
+<span class="w">    </span><span class="n">eFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="c">! set below, once newMesh's decomposition is known</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="n">migrateGather</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">Np</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">      </span><span class="n">nR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">winFirst</span><span class="p">))</span><span class="w"> </span><span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">winFirst</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nR</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">winLast</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nR</span><span class="p">))</span>
+
+<span class="w">      </span><span class="k">call </span><span class="n">PlanWindows</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span><span class="n">nR</span><span class="p">,</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">winFirst</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">winLast</span><span class="p">)</span>
+
+<span class="w">      </span><span class="n">eFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">      </span><span class="n">eLast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">      </span><span class="n">wFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">winFirst</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="n">wLast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">winLast</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">eLast</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">eFirst</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="c">! this rank owns no new elements: empty window</span>
+<span class="w">        </span><span class="n">wFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="n">wLast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">      </span><span class="k">endif</span>
+
+<span class="w">      </span><span class="c">! Migrate the window, then apply the plan from it. Both steps are type-bound and</span>
+<span class="w">      </span><span class="c">! backend-specific, and that is the whole point: the portable implementation migrates into</span>
+<span class="w">      </span><span class="c">! host memory and runs the windowed apply on the host, while the GPU backend assembles the</span>
+<span class="w">      </span><span class="c">! window in DEVICE memory - its own run device-to-device, the peers' runs received straight</span>
+<span class="w">      </span><span class="c">! into it - and applies the plan as a kernel. So on a GPU build the per-element</span>
+<span class="w">      </span><span class="c">! tensor-product interpolation runs on the device on any number of ranks, and no solution</span>
+<span class="w">      </span><span class="c">! data crosses the host link. SELF_AMR_TRANSFER_HOST=1 forces the portable path back on,</span>
+<span class="w">      </span><span class="c">! which is how the two are timed against each other in one binary.</span>
+<span class="w">      </span><span class="c">!</span>
+<span class="w">      </span><span class="c">! The migration runs BEFORE Regrid: EmitMesh has already decomposed the new mesh, so both</span>
+<span class="w">      </span><span class="c">! partitions are known, the sends can read the still-live pre-regrid solution, and no</span>
+<span class="w">      </span><span class="c">! point-to-point traffic is left in flight across Regrid - which works on the same</span>
+<span class="w">      </span><span class="c">! communicator with its own tag conventions.</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">transferHost</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        call </span><span class="n">MigrateOldWindow_DGModel3D_t</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">winFirst</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">winLast</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                          </span><span class="n">wFirst</span><span class="p">,</span><span class="n">wLast</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesRecv</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                          </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesSent</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateElemRemote</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        call </span><span class="n">model</span><span class="p">%</span><span class="n">MigrateOldWindow</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">winFirst</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">winLast</span><span class="p">,</span><span class="n">wFirst</span><span class="p">,</span><span class="n">wLast</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                    </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesRecv</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesSent</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                    </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateElemRemote</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+
+<span class="w">      </span><span class="c">! Either diagnostic needs the window on the host, and needs it BEFORE the apply, which</span>
+<span class="w">      </span><span class="c">! consumes the migration marker. One download serves both.</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">migrateVerify</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">transferVerify</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">nWin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="o">*</span><span class="nb">max</span><span class="p">(</span><span class="n">wLast</span><span class="o">-</span><span class="n">wFirst</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">model</span><span class="p">%</span><span class="n">nvar</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">xferWin</span><span class="p">))</span><span class="w"> </span><span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">xferWin</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="nb">max</span><span class="p">(</span><span class="n">nWin</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">nWin</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">xferWin</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">xferWin</span><span class="p">)</span>
+<span class="w">          </span><span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">xferWin</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nWin</span><span class="p">))</span>
+<span class="w">        </span><span class="k">endif</span>
+<span class="k">        </span><span class="n">uWin</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">Np</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">Np</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">Np</span><span class="p">,</span><span class="n">wFirst</span><span class="p">:</span><span class="n">wLast</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">model</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">xferWin</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nWin</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">transferHost</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          call </span><span class="n">DownloadOldWindow_DGModel3D_t</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">wFirst</span><span class="p">,</span><span class="n">wLast</span><span class="p">,</span><span class="n">uWin</span><span class="p">)</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          call </span><span class="n">model</span><span class="p">%</span><span class="n">DownloadOldWindow</span><span class="p">(</span><span class="n">wFirst</span><span class="p">,</span><span class="n">wLast</span><span class="p">,</span><span class="n">uWin</span><span class="p">)</span>
+<span class="w">        </span><span class="k">endif</span>
+<span class="k">      endif</span>
+
+<span class="k">      if</span><span class="p">(</span><span class="n">migrateVerify</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="c">! Cross-check the migrated window against an allgathered reference, BIT FOR BIT. The</span>
+<span class="w">        </span><span class="c">! window is model state now and may live in device memory, hence the download above; the</span>
+<span class="w">        </span><span class="c">! comparison itself is unchanged and stays exact, because migration is pure data</span>
+<span class="w">        </span><span class="c">! movement. Reads the pre-regrid old field, so it must run before Regrid.</span>
+<span class="w">        </span><span class="k">call </span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">UpdateHost</span><span class="p">()</span>
+<span class="w">        </span><span class="k">call </span><span class="n">VerifyMigration</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">,</span><span class="n">Np</span><span class="p">,</span><span class="n">model</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">nOld</span><span class="p">,</span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nElem</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                             </span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">,</span><span class="n">wFirst</span><span class="p">,</span><span class="n">wLast</span><span class="p">,</span><span class="n">uWin</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+
+<span class="k">      call </span><span class="n">model</span><span class="p">%</span><span class="n">Regrid</span><span class="p">(</span><span class="n">newMesh</span><span class="p">,</span><span class="n">newGeom</span><span class="p">)</span>
+
+<span class="w">      </span><span class="c">! A rank that owns no new elements has nothing to fill; it still took part in the</span>
+<span class="w">      </span><span class="c">! migration above, because peers may need old elements it owns.</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">eLast</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">eFirst</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        if</span><span class="p">(</span><span class="n">transferHost</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          call </span><span class="n">ApplyTransferPlan_DGModel3D_t</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">plan</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">,</span><span class="n">eFirst</span><span class="p">,</span><span class="n">eLast</span><span class="p">)</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          call </span><span class="n">model</span><span class="p">%</span><span class="n">ApplyTransferPlan</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">,</span><span class="n">eFirst</span><span class="p">,</span><span class="n">eLast</span><span class="p">)</span>
+<span class="w">        </span><span class="k">endif</span>
+<span class="k">      endif</span>
+
+<span class="k">      if</span><span class="p">(</span><span class="n">transferVerify</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">eLast</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">eFirst</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        call </span><span class="n">VerifyWindowedApply</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">plan</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">,</span><span class="n">eFirst</span><span class="p">,</span><span class="n">eLast</span><span class="p">,</span><span class="n">wFirst</span><span class="p">,</span><span class="n">wLast</span><span class="p">,</span><span class="n">uWin</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+<span class="k">      if</span><span class="p">(</span><span class="n">migrateVerify</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">transferVerify</span><span class="p">)</span><span class="w"> </span><span class="n">uWin</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<span class="w">    </span><span class="k">elseif</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">Np</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">      </span><span class="n">nR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span>
+<span class="w">      </span><span class="k">allocate</span><span class="p">(</span><span class="n">uOld</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">Np</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">Np</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">Np</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nOld</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">model</span><span class="p">%</span><span class="n">nvar</span><span class="p">))</span>
+<span class="w">      </span><span class="k">call </span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">UpdateHost</span><span class="p">()</span>
+<span class="w">      </span><span class="k">do </span><span class="n">iv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">model</span><span class="p">%</span><span class="n">nvar</span>
+<span class="w">        </span><span class="k">call </span><span class="n">AllgatherPerElemReals</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">,</span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                   </span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(:,:,:,:,</span><span class="n">iv</span><span class="p">),</span><span class="n">uOld</span><span class="p">(:,:,:,:,</span><span class="n">iv</span><span class="p">))</span>
+<span class="w">      </span><span class="k">enddo</span>
+<span class="w">      </span><span class="c">! v1 volume, counted the same way as v2 so the two are directly comparable: every rank</span>
+<span class="w">      </span><span class="c">! receives every element it does not own, and sends its own elements to every other rank.</span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateElemRemote</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateElemRemote</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                </span><span class="nb">int</span><span class="p">(</span><span class="n">nOld</span><span class="o">-</span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nElem</span><span class="p">,</span><span class="n">int64</span><span class="p">)</span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesRecv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesRecv</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">nOld</span><span class="o">-</span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nElem</span><span class="p">,</span><span class="n">int64</span><span class="p">)</span><span class="o">*</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                               </span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="o">*</span><span class="n">model</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="p">(</span><span class="nb">storage_size</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="p">)</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesSent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">nMigrateBytesSent</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">model</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nElem</span><span class="p">,</span><span class="n">int64</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nR</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                               </span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="o">*</span><span class="n">Np</span><span class="o">*</span><span class="n">model</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="p">(</span><span class="nb">storage_size</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="p">)</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="w">      </span><span class="k">call </span><span class="n">model</span><span class="p">%</span><span class="n">Regrid</span><span class="p">(</span><span class="n">newMesh</span><span class="p">,</span><span class="n">newGeom</span><span class="p">)</span>
+
+<span class="w">      </span><span class="n">eFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">      </span><span class="n">eLast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">      </span><span class="k">call </span><span class="n">model</span><span class="p">%</span><span class="n">ApplyTransferPlan</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">,</span><span class="n">eFirst</span><span class="p">,</span><span class="n">eLast</span><span class="p">,</span><span class="n">uOld</span><span class="p">)</span>
+<span class="w">      </span><span class="k">deallocate</span><span class="p">(</span><span class="n">uOld</span><span class="p">)</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      call </span><span class="n">model</span><span class="p">%</span><span class="n">StageSolutionForTransfer</span><span class="p">()</span>
+
+<span class="w">      </span><span class="k">call </span><span class="n">model</span><span class="p">%</span><span class="n">Regrid</span><span class="p">(</span><span class="n">newMesh</span><span class="p">,</span><span class="n">newGeom</span><span class="p">)</span>
+
+<span class="w">      </span><span class="n">eFirst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">      </span><span class="n">eLast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">newMesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">      </span><span class="k">call </span><span class="n">model</span><span class="p">%</span><span class="n">ApplyTransferPlan</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">,</span><span class="n">eFirst</span><span class="p">,</span><span class="n">eLast</span><span class="p">)</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    call </span><span class="n">plan</span><span class="p">%</span><span class="n">Free</span><span class="p">()</span>
+
+<span class="w">    </span><span class="c">! ---- 7. Retire the previous mesh/geometry and re-size the indicator ----</span>
+<span class="w">    </span><span class="c">! The geometry buffers are retained and reused; only the mesh is still rebuilt per epoch.</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ownsActive</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      call </span><span class="n">this</span><span class="p">%</span><span class="n">activeMesh</span><span class="p">%</span><span class="n">Free</span><span class="p">()</span>
+<span class="w">      </span><span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">activeMesh</span><span class="p">)</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">activeMesh</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">newMesh</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">activeGeom</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">newGeom</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">geomSlot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newSlot</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">ownsActive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">indicator</span><span class="p">%</span><span class="n">Free</span><span class="p">()</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">indicator</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">,</span><span class="n">newMesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                             </span><span class="n">this</span><span class="p">%</span><span class="n">refineThreshold</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">coarsenThreshold</span><span class="p">)</span>
+<span class="w">    </span><span class="c">! Only controller-owned indicator settings survive an epoch. A driver that called</span>
+<span class="w">    </span><span class="c">! indicator%SetEnergyScale (or SetEnergyWeights) directly must re-apply it after any epoch</span>
+<span class="w">    </span><span class="c">! that reported adapted = .true.</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">ApplyIndicatorSettings</span><span class="p">()</span>
+
+<span class="w">    </span><span class="n">adapted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Adapt_AMRController3D</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-09-03 20:33            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
