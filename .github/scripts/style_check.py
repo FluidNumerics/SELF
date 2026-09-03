@@ -30,11 +30,22 @@ from self_style import Violation, comment_marker, load_rules, report, split_comm
 DEFAULT_ROOTS = ("src", "test", "examples")
 
 RULER = re.compile(r"^!\s*/{40,}\s*!\s*$")
-LICENSE_MARKERS = ("Maintainers : support@fluidnumerics.com", "Fluid Numerics LLC")
+CANONICAL_LICENSE = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "license-header.txt"
+)
+# The copyright year and the style of the quotation marks around "AS IS" vary
+# across the tree without changing the licence, so both are normalized away
+# before the comparison. Everything else must match, which is what catches a
+# truncated or corrupted banner.
+COPYRIGHT_YEAR = re.compile(r"Copyright\s+\S+\s+\d{4}", re.IGNORECASE)
+QUOTES = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"})
 
 # A procedure definition, as opposed to a type bound procedure declaration or
 # an END statement. The optional prefix covers typed function results such as
 # "real(prec) function Foo(...)".
+PROGRAM = re.compile(r"^\s*program\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE)
+CONTAINS = re.compile(r"^\s*contains\s*$", re.IGNORECASE)
+PROGRAM_CLOSE = re.compile(r"^\s*end\s*program\b", re.IGNORECASE)
 PROCEDURE = re.compile(
     r"^\s*(?:(?:pure|elemental|impure|recursive|module)\s+)*"
     r"(?:[a-z]+\s*(?:\([^)]*\))?\s*(?:,\s*[a-z_]+\s*)*)?"
@@ -142,25 +153,53 @@ class FortranFile:
                 yield number, code
 
 
-def check_license(source, found):
-    """F001: every source file opens with the project BSD-3 banner."""
+def canonical_license():
+    """Return the normalized canonical banner, or None when it is unavailable."""
+    if not os.path.isfile(CANONICAL_LICENSE):
+        return None
+    with open(CANONICAL_LICENSE, "r", encoding="utf-8") as handle:
+        return normalize_license(handle.read().splitlines())
+
+
+def normalize_license(lines):
+    """Collapse the incidental variation between otherwise identical banners."""
+    text = "\n".join(lines).translate(QUOTES)
+    text = COPYRIGHT_YEAR.sub("Copyright YEAR", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def check_license(source, found, canonical):
+    """F001: every source file opens with the project BSD-3 banner, intact.
+
+    The banner is compared against .github/license-header.txt rather than
+    probed for a couple of marker strings, because the tree contains banners
+    that were truncated or corrupted in earlier edits and a substring test
+    does not see either.
+    """
     if source.license_end < 0:
         found.append(
             Violation(
                 "F001",
                 source.path,
                 1,
-                "missing the BSD-3 license banner; copy the 25 line header "
-                "verbatim from an existing source file",
+                "missing the BSD-3 license banner; copy .github/license-header.txt "
+                "verbatim to the top of the file",
             )
         )
         return
-    header = "\n".join(source.lines[: source.license_end + 1])
-    for marker in LICENSE_MARKERS:
-        if marker not in header:
-            found.append(
-                Violation("F001", source.path, 1, "license banner is missing %r" % marker)
+    if canonical is None:
+        return
+    header = normalize_license(source.lines[: source.license_end + 1])
+    if header != canonical:
+        found.append(
+            Violation(
+                "F001",
+                source.path,
+                1,
+                "the BSD-3 license banner does not match "
+                ".github/license-header.txt; it has been truncated or altered",
             )
+        )
 
 
 def check_docmark(source, found):
@@ -245,6 +284,8 @@ def check_banned_words(source, found):
 def check_end_keywords(source, found):
     """F006: closing keywords are fused, as in endsubroutine and enddo."""
     for number, code in source.code():
+        # source.code() yields the masked form, so a keyword quoted inside a
+        # character constant is not read as a split end keyword.
         match = SPLIT_END.search(code)
         if match:
             found.append(
@@ -279,33 +320,54 @@ def procedures(source):
             yield index, match.group(2)
 
 
-def check_implicit_none(source, found):
-    """F007: implicit none appears at module scope and in every procedure.
+def scope_body(lines, start, closers):
+    """Return the declaration part of a scope beginning after ``start``.
 
-    This is a hard requirement of CLAUDE.md section 2. Parts of the legacy
-    source predate it, so this rule reports genuine pre-existing gaps as well
-    as new ones.
+    The scan stops at the scope's own ``contains`` statement so that an
+    ``implicit none`` belonging to an internal procedure is not counted as
+    satisfying the procedure that hosts it.
     """
-    if any(MODULE.match(split_comment(t)[0]) for t in source.lines):
-        module_scope = []
-        for text in source.lines:
-            code, _ = split_comment(text)
-            if PROCEDURE.match(code) and not PROCEDURE_CLOSE.match(code):
-                break
-            module_scope.append(code)
-        if not any(IMPLICIT_NONE.match(c) for c in module_scope):
-            found.append(
-                Violation("F007", source.path, 1, "module scope is missing implicit none")
-            )
+    body = []
+    for text in lines[start:]:
+        code, _ = split_comment(text)
+        if CONTAINS.match(code) or any(closer.match(code) for closer in closers):
+            break
+        body.append(code)
+    return body
+
+
+def check_implicit_none(source, found):
+    """F007: implicit none appears in every program unit.
+
+    CLAUDE.md section 2 requires it in all program units, which means modules,
+    main programs, and every procedure. Parts of the source predate the
+    requirement, so this rule reports genuine pre-existing gaps as well as new
+    ones.
+    """
+    for index, text in enumerate(source.lines):
+        code, _ = split_comment(text)
+        for pattern, closer, kind in (
+            (MODULE, re.compile(r"^\s*end\s*module\b", re.IGNORECASE), "module"),
+            (PROGRAM, PROGRAM_CLOSE, "program"),
+        ):
+            match = pattern.match(code)
+            if not match:
+                continue
+            body = scope_body(source.lines, index + 1, (closer, PROCEDURE))
+            if not any(IMPLICIT_NONE.match(line) for line in body):
+                found.append(
+                    Violation(
+                        "F007",
+                        source.path,
+                        index + 1,
+                        "%s %r is missing implicit none"
+                        % (kind, match.group(1)),
+                    )
+                )
 
     for index, name in procedures(source):
-        body = []
-        for text in source.lines[index + 1 :]:
-            code, _ = split_comment(text)
-            if PROCEDURE_CLOSE.match(code):
-                break
-            body.append(code)
-        if not any(IMPLICIT_NONE.match(c) for c in body):
+        body = scope_body(source.lines, index + 1, (PROCEDURE_CLOSE,))
+        if not any(IMPLICIT_NONE.match(line) for line in body):
             found.append(
                 Violation(
                     "F007",
@@ -412,7 +474,6 @@ def check_metrics(source, metrics, rules, found):
 
 
 BINARY_CHECKS = (
-    ("F001", check_license),
     ("F002", check_docmark),
     ("F003", check_characters),
     ("F004", check_markdown),
@@ -422,11 +483,13 @@ BINARY_CHECKS = (
 )
 
 
-def check_file(path, rules):
+def check_file(path, rules, canonical=None):
     """Run every enabled rule against one file, returning violations and metrics."""
     source = FortranFile(path)
     found = []
     disabled = set(rules["fortran"].get("disabled", ()))
+    if "F001" not in disabled:
+        check_license(source, found, canonical)
     for rule, check in BINARY_CHECKS:
         if rule not in disabled:
             check(source, found)
@@ -466,10 +529,11 @@ def main(argv=None):
         return 0
 
     rules = load_rules(args.rules)
+    canonical = canonical_license()
     violations = []
     stats = {}
     for path in files:
-        found, metrics = check_file(path, rules)
+        found, metrics = check_file(path, rules, canonical)
         violations.extend(found)
         stats[path] = metrics
 

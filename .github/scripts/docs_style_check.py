@@ -165,6 +165,8 @@ def check_title(page, found):
                     "second level one heading %r; a page has one title" % text,
                 )
             )
+    # Leading blank lines are harmless, so the title must be the first content
+    # on the page rather than literally line one.
     first = next(
         (index + 1 for index, text in enumerate(page.lines) if text.strip()), 1
     )
@@ -174,7 +176,8 @@ def check_title(page, found):
                 "D003",
                 page.path,
                 top[0][0],
-                "the title is not the first line of the page",
+                "the title is not the first content on the page; %d line(s) of "
+                "content precede it" % (top[0][0] - first),
             )
         )
 
@@ -280,7 +283,10 @@ def measure(page):
             "mean_sentence_words": None,
         }
 
-    bold = sum(len(BOLD.findall(text)) for _, text in prose)
+    # Inline code is neutralized first: identifiers such as `__shared__` and
+    # `**kwargs` are literals, not emphasis, and counting them as emphasis
+    # would fail a page that contains none.
+    bold = sum(len(BOLD.findall(INLINE_CODE.sub(" ", text))) for _, text in prose)
     bullets = sum(1 for _, text in prose if BULLET.match(text))
 
     words = 0
@@ -372,6 +378,18 @@ def main(argv=None):
     parser.add_argument("--stats", action="store_true", help="report metrics, exit 0")
     parser.add_argument("--rules", default=None, help="path to style-rules.json")
     parser.add_argument("--mkdocs", default="mkdocs.yml", help="path to mkdocs.yml")
+    parser.add_argument(
+        "--nav-only",
+        action="store_true",
+        help="check only D006, over every page; use when mkdocs.yml changes",
+    )
+    parser.add_argument(
+        "--baseline-mkdocs",
+        default=None,
+        help="the mkdocs.yml this change starts from; with --nav-only, only "
+        "pages that this change orphans are reported, leaving pages that were "
+        "already unreachable to the backlog",
+    )
     args = parser.parse_args(argv)
 
     rules = load_rules(args.rules)
@@ -395,6 +413,31 @@ def main(argv=None):
 
     nav = nav_pages(args.mkdocs)
     docs_dir = rules["docs"].get("docs_dir", "docs")
+
+    if args.nav_only:
+        # A change to the navigation tree can orphan a page it does not touch,
+        # so reachability is checked across every page rather than across the
+        # changed ones. When a baseline is given, only pages this change
+        # orphans are reported; pages that were already unreachable belong to
+        # the backlog and are counted but not failed on.
+        violations = []
+        for path in files:
+            check_nav(MarkdownPage(path), violations, nav, docs_dir)
+        if args.baseline_mkdocs:
+            before = nav_pages(args.baseline_mkdocs)
+            regressions = []
+            for violation in violations:
+                page = violation.message.rsplit("'", 2)[-2]
+                if page in before:
+                    regressions.append(violation)
+            skipped = len(violations) - len(regressions)
+            if skipped:
+                print(
+                    "%d page(s) were already unreachable before this change and "
+                    "are left to the backlog.\n" % skipped
+                )
+            violations = regressions
+        return report(violations)
 
     violations = []
     stats = {}

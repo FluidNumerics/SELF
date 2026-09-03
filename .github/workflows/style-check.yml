@@ -62,6 +62,7 @@ jobs:
 
                 fortran=$(echo "${changed}" | grep -E '^(src|test|examples)/.*\.f90$' || true)
                 markdown=$(echo "${changed}" | grep -E '^(docs/.*|[^/]*)\.md$' || true)
+                nav=$(echo "${changed}" | grep -E '^mkdocs\.yml$' || true)
 
                 {
                   echo "fortran<<EOF"
@@ -70,7 +71,16 @@ jobs:
                   echo "markdown<<EOF"
                   echo "${markdown}"
                   echo "EOF"
+                  echo "nav=${nav:+yes}"
+                  echo "base=${base}"
                 } >> "${GITHUB_OUTPUT}"
+
+            # The checkers themselves are gated, because a change confined to
+            # .github/scripts/ leaves both steps below with nothing to score and
+            # would otherwise merge a broken rule green.
+            - name: Test the style checkers
+              run: |
+                python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v
 
             - name: Check Fortran style (src/, test/, examples/)
               run: |
@@ -90,3 +100,13 @@ jobs:
                     exit 0
                 fi
                 python3 .github/scripts/docs_style_check.py --files ${files}
+
+            # Editing the navigation can orphan a page the change never touches,
+            # so reachability is rechecked across every page whenever mkdocs.yml
+            # moves. Only D006 runs, leaving the rest of the backlog alone.
+            - name: Check documentation reachability (mkdocs.yml)
+              if: always() && steps.changed.outputs.nav == 'yes'
+              run: |
+                git show "${{ steps.changed.outputs.base }}:mkdocs.yml" > /tmp/base-mkdocs.yml
+                python3 .github/scripts/docs_style_check.py --nav-only \
+                    --baseline-mkdocs /tmp/base-mkdocs.yml

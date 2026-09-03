@@ -28,8 +28,15 @@ pull request changes, scoring each changed file in full.
 ### F001, the license banner
 
 Every source file opens with the 25 line BSD-3 banner, ruled above and below by a
-line of forward slashes. Copy it verbatim from a neighbouring file rather than
-retyping it.
+line of forward slashes. The canonical text is `.github/license-header.txt`;
+copy it rather than retyping it.
+
+The banner is compared against that file rather than probed for a marker string,
+because a substring test does not notice a banner that has been truncated or
+corrupted. Ten files in the tree are missing the warranty disclaimer and one has
+a mangled word in it, and none of that was visible before. The copyright year
+and the style of the quotation marks around "AS IS" vary harmlessly across the
+tree and are normalized away before the comparison.
 
 ### F002, the FORD post mark
 
@@ -93,9 +100,13 @@ Closing keywords are written without a space: `endmodule`, `endsubroutine Foo`,
 
 ### F007, implicit none
 
-`implicit none` appears at module scope and again in every procedure, placed
-after the docstring and before the dummy argument declarations. This is a hard
-requirement of `CLAUDE.md`.
+`implicit none` appears in every program unit: modules, main programs, and every
+procedure. In a procedure it is placed after the docstring and before the dummy
+argument declarations. This is a hard requirement of `CLAUDE.md`.
+
+The declaration must belong to the scope that needs it. A scope is scanned only
+as far as its own `contains` statement, so an `implicit none` inside an internal
+procedure does not satisfy the program or procedure hosting it.
 
 Parts of the source predate the requirement, so this rule reports genuine
 pre-existing gaps as well as new ones. Adding the missing declarations is
@@ -149,7 +160,8 @@ blocks.
 
 ### D003, one title
 
-A page opens with exactly one level one heading, on the first line of the page.
+A page opens with exactly one level one heading, and it is the first content on
+the page. Leading blank lines are allowed; text before the title is not.
 
 ### D004, heading depth
 
@@ -172,6 +184,9 @@ A page carries no more than fourteen bold spans per hundred lines of prose. The
 limit is the density of the most heavily emphasised hand written page in the
 reference tree, so a page that trips it is emphasising more than any page the
 original authors wrote.
+
+Inline code is neutralized before the count, so a literal such as `__shared__`
+or `**kwargs` is read as an identifier rather than as emphasis.
 
 Emphasis is rare in SELF documentation because the sentence carries it. A
 paragraph of bold labels followed by fragments reads as a slide, not as an
@@ -206,6 +221,19 @@ which every model page restates and then specializes.
 Read `docs/Models/linear-shallow-water-model.md` for the structure of a model
 page and `docs/Tutorials/LinearShallowWater/KelvinWaves.md` for a tutorial before
 writing a new one.
+
+## Testing the checks
+
+The checkers gate every pull request, so they carry their own tests:
+
+```shell
+python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+```
+
+The tests pin each rule against a small fixture rather than against the
+repository, so they keep working as the tree changes. `style-check` runs them on
+every invocation, which is what stops a change confined to `.github/scripts/`
+from merging green without either checker having scored anything.
 
 ## Running the checks locally
 

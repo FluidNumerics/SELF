@@ -69,23 +69,36 @@ def report(violations, stats=None, stream=sys.stdout):
     return 0
 
 
-# Fortran string literals are stripped before comment detection so that an
+# Fortran string literals are masked before comment detection so that an
 # exclamation point inside a character constant is not mistaken for a comment.
 _STRING = re.compile(r"'[^']*'|\"[^\"]*\"")
+
+
+def mask_strings(line):
+    """Return the line with the contents of character constants blanked out.
+
+    Any check that looks for Fortran syntax must run against the masked form,
+    otherwise a keyword quoted inside a string, as in
+    ``write(*,*) "expected end if"``, is read as code.
+    """
+    return _STRING.sub(lambda m: m.group(0)[0] + " " * (len(m.group(0)) - 2) +
+                       m.group(0)[-1], line)
 
 
 def split_comment(line):
     """Split a Fortran source line into its code and comment halves.
 
-    Returns (code, comment) where comment is the text following the first
-    comment marker with the marker removed, or None when the line has no
-    comment. Character constants are masked before the marker is located.
+    Returns (code, comment) where code is the masked source preceding the
+    first comment marker and comment is the text following it with the marker
+    removed, or None when the line has no comment. Character constants are
+    masked so that neither half is confused by a quoted exclamation point or a
+    quoted keyword.
     """
-    masked = _STRING.sub(lambda m: " " * len(m.group(0)), line)
+    masked = mask_strings(line)
     index = masked.find("!")
     if index < 0:
-        return line, None
-    return line[:index], line[index:].lstrip("!")
+        return masked, None
+    return masked[:index], line[index:].lstrip("!")
 
 
 def comment_marker(line):
