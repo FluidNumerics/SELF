@@ -158,6 +158,36 @@ endprogram example
 """
         self.assertIn("F007", self.rules_for("test/a.f90", body))
 
+    def test_f007_reports_a_submodule_without_implicit_none(self):
+        body = (
+            "\nsubmodule (self_Example) self_Example_impl\n"
+            "  integer :: i\n"
+            "endsubmodule self_Example_impl\n"
+        )
+        self.assertIn("F007", self.rules_for("src/a.f90", body))
+
+    def test_f007_accepts_a_submodule_with_implicit_none(self):
+        body = (
+            "\nsubmodule (self_Example) self_Example_impl\n"
+            "  !! Implementation of the example interface.\n"
+            "  implicit none\n"
+            "  integer :: i\n"
+            "endsubmodule self_Example_impl\n"
+        )
+        self.assertNotIn("F007", self.rules_for("src/a.f90", body))
+
+    def test_f101_reports_a_sparsely_commented_core_file(self):
+        body = "\nmodule self_Example\n  implicit none\n" + "".join(
+            "  integer :: v%d = 0\n" % n for n in range(40)
+        ) + "endmodule self_Example\n"
+        self.assertIn("F101", self.rules_for("src/a.f90", body))
+
+    def test_f101_does_not_apply_to_the_backend_directories(self):
+        body = "\nmodule self_Example\n  implicit none\n" + "".join(
+            "  integer :: v%d = 0\n" % n for n in range(40)
+        ) + "endmodule self_Example\n"
+        self.assertNotIn("F101", self.rules_for("src/gpu/a.f90", body))
+
     def test_f102_reports_a_long_comment_line(self):
         body = MODULE_BODY.replace("    this%n = 0", "    ! " + "x" * 140 + "\n    this%n = 0")
         self.assertIn("F102", self.rules_for("src/a.f90", body))

@@ -28,8 +28,10 @@ pull request changes, scoring each changed file in full.
 ### F001, the license banner
 
 Every source file opens with the 25 line BSD-3 banner, ruled above and below by a
-line of forward slashes. The canonical text is `.github/license-header.txt`;
-copy it rather than retyping it.
+line of forward slashes. The canonical text is `.github/license-header.txt`.
+Copy it from there rather than from a neighbouring source file, because eighteen
+files in the tree carry a banner that has been truncated or corrupted and
+copying one of those reproduces the damage.
 
 The banner is compared against that file rather than probed for a marker string,
 because a substring test does not notice a banner that has been truncated or

@@ -44,6 +44,9 @@ QUOTES = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "
 # an END statement. The optional prefix covers typed function results such as
 # "real(prec) function Foo(...)".
 PROGRAM = re.compile(r"^\s*program\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE)
+SUBMODULE = re.compile(
+    r"^\s*submodule\s*\([^)]*\)\s*([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE
+)
 CONTAINS = re.compile(r"^\s*contains\s*$", re.IGNORECASE)
 PROGRAM_CLOSE = re.compile(r"^\s*end\s*program\b", re.IGNORECASE)
 PROCEDURE = re.compile(
@@ -340,7 +343,7 @@ def check_implicit_none(source, found):
     """F007: implicit none appears in every program unit.
 
     CLAUDE.md section 2 requires it in all program units, which means modules,
-    main programs, and every procedure. Parts of the source predate the
+    submodules, main programs, and every procedure. Parts of the source predate the
     requirement, so this rule reports genuine pre-existing gaps as well as new
     ones.
     """
@@ -348,6 +351,8 @@ def check_implicit_none(source, found):
         code, _ = split_comment(text)
         for pattern, closer, kind in (
             (MODULE, re.compile(r"^\s*end\s*module\b", re.IGNORECASE), "module"),
+            (SUBMODULE,
+             re.compile(r"^\s*end\s*submodule\b", re.IGNORECASE), "submodule"),
             (PROGRAM, PROGRAM_CLOSE, "program"),
         ):
             match = pattern.match(code)

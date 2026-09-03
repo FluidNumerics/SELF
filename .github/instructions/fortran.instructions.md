@@ -36,8 +36,10 @@ each rule and names the check that enforces it.
 - Declaration order inside a procedure: `implicit none`, then
   `class(X),intent(inout) :: this`, then the remaining dummy arguments in
   argument order, then the `! Local` marker, then locals.
-- Every file opens with the 25 line BSD-3 banner. Copy it verbatim from an
-  existing file.
+- Every file opens with the 25 line BSD-3 banner. Copy it from
+  `.github/license-header.txt`, not from a neighbouring source file: eighteen
+  files in the tree carry a truncated or corrupted banner, and F001 rejects any
+  copy of one.
 - Run `fprettify` with `fprettify.config` before committing; do not hand format.
 
 ## Naming

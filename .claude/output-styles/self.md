@@ -43,8 +43,10 @@ Comments use `!`. FORD docstrings use the post mark `!!` on the line **after**
 the module statement, procedure signature, or declaration being documented. The
 pre mark `!>` is not used here. Never put markdown inside a comment.
 
-Every file opens with the 25 line BSD-3 license banner. Copy it verbatim from a
-neighbouring file.
+Every file opens with the 25 line BSD-3 license banner. Copy it from
+`.github/license-header.txt`, which is the canonical text. Do not copy it from a
+neighbouring source file: eighteen files in the tree carry a banner that has been
+truncated or corrupted, and copying one of those propagates the damage.
 
 `implicit none` goes at module scope and again in every procedure, after the
 docstring and before the dummy declarations. Every dummy argument carries an
