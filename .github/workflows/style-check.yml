@@ -46,14 +46,24 @@ jobs:
             # Only the files this change touches are scored, so that the two
             # subdirectory groups gate independently and a documentation only
             # change never runs the Fortran checks.
+            # Every value that originates outside the workflow, including the
+            # base ref and the changed file names, is passed through the
+            # environment rather than interpolated into the script. A "${{ }}"
+            # expression is substituted into the shell source before bash runs
+            # it, so a branch or a file named src/$(command).f90 would otherwise
+            # execute as the script is parsed.
             - name: Collect the changed files
               id: changed
+              env:
+                EVENT_NAME: ${{ github.event_name }}
+                BASE_REF: ${{ github.base_ref }}
+                EVENT_BEFORE: ${{ github.event.before }}
               run: |
-                if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+                if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+                    git fetch --no-tags --depth=1 origin "${BASE_REF}"
                     base=$(git merge-base FETCH_HEAD HEAD)
                 else
-                    base="${{ github.event.before }}"
+                    base="${EVENT_BEFORE}"
                     if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
                         base=$(git rev-parse HEAD~1)
                     fi
@@ -66,13 +76,17 @@ jobs:
                 markdown=$(echo "${changed}" | grep -E '^(docs/.*|[^/]*)\.md$' || true)
                 nav=$(echo "${changed}" | grep -E '^mkdocs\.yml$' || true)
 
+                # A heredoc delimiter that a file name could contain would let a
+                # crafted name close the block early and inject further outputs,
+                # so the delimiter is randomized per run.
+                delimiter="EOF_$(openssl rand -hex 16)"
                 {
-                  echo "fortran<<EOF"
+                  echo "fortran<<${delimiter}"
                   echo "${fortran}"
-                  echo "EOF"
-                  echo "markdown<<EOF"
+                  echo "${delimiter}"
+                  echo "markdown<<${delimiter}"
                   echo "${markdown}"
-                  echo "EOF"
+                  echo "${delimiter}"
                   echo "nav=${nav:+yes}"
                   echo "base=${base}"
                 } >> "${GITHUB_OUTPUT}"
@@ -85,30 +99,36 @@ jobs:
                 python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v
 
             - name: Check Fortran style (src/, test/, examples/)
+              env:
+                CHANGED: ${{ steps.changed.outputs.fortran }}
               run: |
-                files="${{ steps.changed.outputs.fortran }}"
-                if [[ -z "${files}" ]]; then
+                mapfile -t files < <(printf '%s\n' "${CHANGED}" | sed '/^$/d')
+                if [[ ${#files[@]} -eq 0 ]]; then
                     echo "No Fortran files changed; skipping."
                     exit 0
                 fi
-                python3 .github/scripts/style_check.py --files ${files}
+                python3 .github/scripts/style_check.py --files "${files[@]}"
 
             - name: Check documentation style (docs/)
               if: always()
+              env:
+                CHANGED: ${{ steps.changed.outputs.markdown }}
               run: |
-                files="${{ steps.changed.outputs.markdown }}"
-                if [[ -z "${files}" ]]; then
+                mapfile -t files < <(printf '%s\n' "${CHANGED}" | sed '/^$/d')
+                if [[ ${#files[@]} -eq 0 ]]; then
                     echo "No documentation pages changed; skipping."
                     exit 0
                 fi
-                python3 .github/scripts/docs_style_check.py --files ${files}
+                python3 .github/scripts/docs_style_check.py --files "${files[@]}"
 
             # Editing the navigation can orphan a page the change never touches,
             # so reachability is rechecked across every page whenever mkdocs.yml
             # moves. Only D006 runs, leaving the rest of the backlog alone.
             - name: Check documentation reachability (mkdocs.yml)
               if: always() && steps.changed.outputs.nav == 'yes'
+              env:
+                BASE: ${{ steps.changed.outputs.base }}
               run: |
-                git show "${{ steps.changed.outputs.base }}:mkdocs.yml" > /tmp/base-mkdocs.yml
+                git show "${BASE}:mkdocs.yml" > /tmp/base-mkdocs.yml
                 python3 .github/scripts/docs_style_check.py --nav-only \
                     --baseline-mkdocs /tmp/base-mkdocs.yml

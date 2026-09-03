@@ -31,12 +31,16 @@ REQUIRED_SECTIONS = ("Scope", "Out of scope", "Issues resolved", "Tests introduc
 ALLOW_EMPTY_ANSWER = {"Out of scope": ("none", "nothing", "n/a")}
 
 PLACEHOLDERS = ("n/a", "na", "none", "tbd", "todo", "-", ".", "xxx")
+# Only a bare "#123" or a github.com issue URL closes an issue. A URL on any
+# other host cannot, so accepting one would pass a description that links
+# nothing GitHub can act on.
+ISSUE_REFERENCE = r"(?:#\d+|https?://(?:www\.)?github\.com/[\w.-]+/[\w.-]+/issues/\d+)"
 CLOSING_KEYWORD = re.compile(
-    r"\b(clos(?:e|es|ed)|fix(?:e[sd])?|resolv(?:e|es|ed))\b\s*:?\s*"
-    r"(?:#\d+|https?://\S+/issues/\d+)",
+    r"\b(clos(?:e|es|ed)|fix(?:e[sd])?|resolv(?:e|es|ed))\b\s*:?\s*" + ISSUE_REFERENCE,
     re.IGNORECASE,
 )
-BARE_ISSUE = re.compile(r"(?:#\d+|https?://\S+/issues/\d+)")
+BARE_ISSUE = re.compile(ISSUE_REFERENCE, re.IGNORECASE)
+FOREIGN_ISSUE_URL = re.compile(r"https?://\S+/issues/\d+", re.IGNORECASE)
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$")
 
@@ -44,27 +48,34 @@ HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$")
 def sections(body):
     """Split a pull request body into a mapping of heading to section text.
 
-    HTML comments are removed first so that the guidance carried by the
-    template does not count as an answer.
+    A section runs until the next heading at the same level or higher, so a
+    subsection nested under a required heading stays part of that heading's
+    answer instead of replacing it. HTML comments are removed first so that
+    the guidance carried by the template does not count as an answer.
     """
     text = HTML_COMMENT.sub("", body or "")
     found = {}
-    current = None
+    open_sections = []
     tracker = FenceTracker()
     for line in text.splitlines():
         if tracker.feed(line):
-            # A heading inside a fenced block is sample text, not a section, so
-            # a code example cannot stand in for an answer.
-            if current is not None:
-                found[current].append(line)
+            for name in open_sections:
+                found[name[1]].append(line)
             continue
         match = None if tracker.inside else HEADING.match(line)
         if match:
-            current = match.group(1).strip()
-            found.setdefault(current, [])
+            level = len(line.strip()) - len(line.strip().lstrip("#"))
+            title = match.group(1).strip()
+            # Close every section this heading is a sibling or child of.
+            open_sections = [s for s in open_sections if s[0] < level]
+            found.setdefault(title, [])
+            open_sections.append((level, title))
+            # A nested heading is part of its parent's answer as well.
+            for parent_level, parent in open_sections[:-1]:
+                found[parent].append(line)
             continue
-        if current is not None:
-            found[current].append(line)
+        for _, name in open_sections:
+            found[name].append(line)
     return {name: "\n".join(lines).strip() for name, lines in found.items()}
 
 
@@ -111,7 +122,13 @@ def check(body, labels, skip_label):
             continue
 
         if name == "Issues resolved" and not CLOSING_KEYWORD.search(content):
-            if BARE_ISSUE.search(content):
+            if FOREIGN_ISSUE_URL.search(content) and not BARE_ISSUE.search(content):
+                problems.append(
+                    "'## Issues resolved' links an issue on another host; "
+                    "GitHub can only close an issue in this repository, so "
+                    "reference it as 'Fixes #123'"
+                )
+            elif BARE_ISSUE.search(content):
                 problems.append(
                     "'## Issues resolved' references an issue but without a "
                     "closing keyword; write 'Fixes #123' so the issue closes on "

@@ -469,6 +469,27 @@ class TestPullRequestBody(unittest.TestCase):
         body = "## Scope\n<!-- describe the scope -->\n" + COMPLETE_BODY.split("## Out of scope")[1]
         self.assertTrue(any("'## Scope'" in p for p in self.problems(body)))
 
+    def test_nested_subheading_stays_inside_its_section(self):
+        body = COMPLETE_BODY.replace(
+            "Adds a thing.", "### Files changed\n\n- `src/a.f90`, the new routine"
+        )
+        self.assertEqual(self.problems(body), [])
+
+    def test_a_subheading_does_not_leak_into_the_next_section(self):
+        body = COMPLETE_BODY.replace("Adds a thing.", "### Detail\n\nSome detail.")
+        # Out of scope must still be read from its own heading, not from Detail.
+        self.assertEqual(self.problems(body), [])
+
+    def test_foreign_issue_url_is_rejected(self):
+        body = COMPLETE_BODY.replace("Fixes #185", "Fixes https://example.com/issues/1")
+        self.assertTrue(any("another host" in p for p in self.problems(body)))
+
+    def test_github_issue_url_is_accepted(self):
+        body = COMPLETE_BODY.replace(
+            "Fixes #185", "Fixes https://github.com/FluidNumerics/SELF/issues/185"
+        )
+        self.assertEqual(self.problems(body), [])
+
     def test_skip_label_bypasses_every_check(self):
         self.assertEqual(self.problems("", labels=("skip-pr-checks",)), [])
 
