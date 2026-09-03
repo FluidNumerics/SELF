@@ -1,0 +1,92 @@
+name: style-check
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'examples/**'
+      - 'docs/**'
+      - '*.md'
+      - 'mkdocs.yml'
+      - '.github/scripts/**'
+      - '.github/style-rules.json'
+      - '.github/workflows/style-check.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'examples/**'
+      - 'docs/**'
+      - '*.md'
+      - 'mkdocs.yml'
+      - '.github/scripts/**'
+      - '.github/style-rules.json'
+      - '.github/workflows/style-check.yml'
+
+jobs:
+    style:
+        name: style-check
+        runs-on: ubuntu-22.04
+        strategy:
+            fail-fast: false
+        defaults:
+            run:
+              shell: bash
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+
+            # Only the files this change touches are scored, so that the two
+            # subdirectory groups gate independently and a documentation only
+            # change never runs the Fortran checks.
+            - name: Collect the changed files
+              id: changed
+              run: |
+                if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+                    base=$(git merge-base FETCH_HEAD HEAD)
+                else
+                    base="${{ github.event.before }}"
+                    if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+                        base=$(git rev-parse HEAD~1)
+                    fi
+                fi
+                changed=$(git diff --name-only --diff-filter=d "${base}" HEAD)
+                echo "Changed files:"
+                echo "${changed}"
+
+                fortran=$(echo "${changed}" | grep -E '^(src|test|examples)/.*\.f90$' || true)
+                markdown=$(echo "${changed}" | grep -E '^(docs/.*|[^/]*)\.md$' || true)
+
+                {
+                  echo "fortran<<EOF"
+                  echo "${fortran}"
+                  echo "EOF"
+                  echo "markdown<<EOF"
+                  echo "${markdown}"
+                  echo "EOF"
+                } >> "${GITHUB_OUTPUT}"
+
+            - name: Check Fortran style (src/, test/, examples/)
+              run: |
+                files="${{ steps.changed.outputs.fortran }}"
+                if [[ -z "${files}" ]]; then
+                    echo "No Fortran files changed; skipping."
+                    exit 0
+                fi
+                python3 .github/scripts/style_check.py --files ${files}
+
+            - name: Check documentation style (docs/)
+              if: always()
+              run: |
+                files="${{ steps.changed.outputs.markdown }}"
+                if [[ -z "${files}" ]]; then
+                    echo "No documentation pages changed; skipping."
+                    exit 0
+                fi
+                python3 .github/scripts/docs_style_check.py --files ${files}

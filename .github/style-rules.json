@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "Thresholds for the SELF deterministic style checks.",
+    "Every limit is calibrated against the tree at f3e1e57c, the last commit",
+    "before the first AI assisted contribution, so that hand written SELF source",
+    "and documentation satisfy it. Do not raise a limit to make a new",
+    "contribution pass; change the contribution.",
+    "Rule descriptions live in docs/Contributing/StyleGuide.md."
+  ],
+  "fortran": {
+    "disabled": [],
+    "metrics": {
+      "F101": {
+        "min": 0.05,
+        "applies_to": [
+          "src/"
+        ],
+        "excludes": [
+          "src/cpu/",
+          "src/gpu/",
+          "src/apu/"
+        ]
+      },
+      "F102": {
+        "max": 132
+      }
+    }
+  },
+  "docs": {
+    "disabled": [],
+    "docs_dir": "docs",
+    "skip_directories": [
+      "ford",
+      "assets",
+      "img"
+    ],
+    "max_heading_level": 4,
+    "metrics": {
+      "min_prose_lines": 20,
+      "D100": {
+        "max": 14.0
+      }
+    },
+    "skip_files": [
+      "self.md",
+      "docs/self.md",
+      "LICENSE.md",
+      "AUTHORS.md"
+    ],
+    "_skip_files_comment": "self.md is the FORD project configuration, not a documentation page."
+  }
+}

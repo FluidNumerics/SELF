@@ -53,7 +53,7 @@ Do NOT introduce:
 - `implicit none` required in all program units
 - Explicit `intent(in|out|inout)` on all dummy arguments
 - Lowercase keywords preferred
-- Line length ≤ 100 characters
+- Line length ≤ 132 characters (matches `line-length` in `fprettify.config`)
 
 ---
 
@@ -227,6 +227,41 @@ If a change could affect:
 - Parallel behavior
 
 STOP and ask for clarification.
+
+---
+
+## 14. Style and Scope Enforcement
+
+Formatting, style, and pull request scope are enforced by checked-in tooling.
+Read these before making a change:
+
+- `docs/Contributing/StyleGuide.md` is the source of truth for coding and
+  documentation style. Every rule has an identifier that a check failure names.
+- `.claude/output-styles/self.md` is the matching Claude Code output style.
+  Select it with `/output-style self`.
+- `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md`
+  carry the same rules for Copilot, scoped per directory.
+
+The deterministic checks are calibrated against commit `f3e1e57c`, the last
+commit before the first AI assisted contribution:
+
+```shell
+python3 .github/scripts/style_check.py       # src/, test/, examples/
+python3 .github/scripts/docs_style_check.py  # docs/ and the root pages
+```
+
+Thresholds live in `.github/style-rules.json`. They are set from the reference
+tree, so do not raise one to make a change pass.
+
+Parts of the existing source predate these rules and fail them today, most
+notably `implicit none` (F007). That is a known backlog, not a licence to
+disable a rule. Do not reformat or restyle source you were not asked to change;
+fixing the backlog is separate work.
+
+Every pull request fills in `.github/PULL_REQUEST_TEMPLATE.md`: what is in
+scope, what is knowingly left out, which filed issue is resolved, and which
+tests were added and why. Record a problem you found but did not fix under
+"Out of scope" rather than fixing it opportunistically.
 
 ---
 
