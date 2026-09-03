@@ -69,7 +69,7 @@ Do NOT introduce:
 ### Floating-Point Behavior
 - Bitwise reproducibility may be required
 - Preserve operation ordering in loops
-- Avoid algebraic “simplifications” unless mathematically justified
+- Avoid algebraic "simplifications" unless mathematically justified
 
 ### Array Semantics
 - Do NOT replace explicit loops with array syntax unless equivalence is proven
@@ -188,7 +188,7 @@ Do NOT:
 - Convert procedural code to OO Fortran
 - Replace MPI with coarrays
 - Introduce external dependencies
-- “Modernize” syntax without benefit
+- "Modernize" syntax without benefit
 - Delete legacy code without explanation
 
 ---
