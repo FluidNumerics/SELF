@@ -3,7 +3,7 @@
 ! Maintainers : support@fluidnumerics.com
 ! Official Repository : https://github.com/FluidNumerics/self/
 !
-! Copyright © 2026 Fluid Numerics LLC
+! Copyright © 2024 Fluid Numerics LLC
 !
 ! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 !
@@ -14,6 +14,13 @@
 !
 ! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
 !    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -30,10 +37,11 @@ program test
 !! What this covers that the DG tests do not: the exchange is checked directly,
 !! rather than through a derivative that averages the two traces (and would
 !! therefore be insensitive to the neighbor trace being wrong in a way that is
-!! symmetric). Several variables are carried so that the per-variable offset of
-!! the MPI message tag -- tag = |globalSideId| + nUniqueSides*(ivar-1) -- is
-!! exercised as well; a mesh with invalid global face ids mispairs those
-!! messages.
+!! symmetric). Several variables are carried, each with a different function, so
+!! that a message pairing the wrong variables shows up as a trace mismatch. Note
+!! that MPIExchangeAsync_MappedScalar3D_t computes a per-variable tag but passes
+!! |globalSideId| to MPI, so what separates the variables here is that both ranks
+!! post them in the same order; the 2-D exchange passes the per-variable tag.
 !!
 !! The mesh and variable count are also chosen so that the exchange posts more
 !! messages than there are unique faces in the mesh (see the comment on the mesh
@@ -75,6 +83,7 @@ contains
     integer :: bcids(1:6)
     integer :: iel,iside,ivar,i,j,e2,r2
     integer :: nRemoteSides,nRemoteSidesGlobal,ierror
+    integer :: msgCountMax
     real(prec) :: maxError,maxErrorGlobal
 
     bcids(1:6) = [SELF_BC_PRESCRIBED, & ! Bottom
@@ -178,10 +187,18 @@ contains
     ! single message and keeps its own persistent request array, so it neither
     ! fills decomp%msgCount nor has a per-side scratch to overrun; the trace
     ! assertion above is what covers the exchange there.
-    if(mesh%decomp%mpiEnabled .and. mesh%decomp%msgCount <= mesh%nUniqueSides) then
-      print*,"FAIL: the exchange posted ",mesh%decomp%msgCount," messages for ", &
-        mesh%nUniqueSides," unique faces; it no longer exercises the request scratch"
-      r = 1
+    !
+    ! Reduce over the ranks rather than testing each one: which rank carries the
+    ! overrun depends on how the elements were dealt out, and SELF_MPIEXEC_NUMPROCS
+    ! is configurable, so a given rank may legitimately post fewer messages.
+    if(mesh%decomp%mpiEnabled) then
+      call MPI_Allreduce(mesh%decomp%msgCount,msgCountMax,1,MPI_INTEGER, &
+                         MPI_MAX,mesh%decomp%mpiComm,ierror)
+      if(msgCountMax <= mesh%nUniqueSides) then
+        print*,"FAIL: the busiest rank posted ",msgCountMax," messages for ", &
+          mesh%nUniqueSides," unique faces; the test no longer exercises the request scratch"
+        r = 1
+      endif
     endif
 #endif
 
