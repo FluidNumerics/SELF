@@ -197,7 +197,7 @@ contains
               call MPI_IRECV(this%extBoundary(:,:,s1,e1,ivar), &
                              (this%interp%N+1)*(this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
-                             r2,globalSideId, &
+                             r2,tag, &
                              mesh%decomp%mpiComm, &
                              mesh%decomp%requests(msgCount),iError)
 
@@ -205,7 +205,7 @@ contains
               call MPI_ISEND(this%boundary(:,:,s1,e1,ivar), &
                              (this%interp%N+1)*(this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
-                             r2,globalSideId, &
+                             r2,tag, &
                              mesh%decomp%mpiComm, &
                              mesh%decomp%requests(msgCount),iError)
             endif

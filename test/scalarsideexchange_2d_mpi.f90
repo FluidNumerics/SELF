@@ -38,10 +38,11 @@ program test
 !! rather than through a derivative that averages the two traces (and would
 !! therefore be insensitive to the neighbor trace being wrong in a way that is
 !! symmetric). Several variables are carried, each with a different function, so
-!! that a message pairing the wrong variables shows up as a trace mismatch. In
-!! 2-D that also exercises the per-variable offset of the MPI message tag,
-!! tag = |globalSideId| + nUniqueSides*(ivar-1); the 3-D exchange passes
-!! |globalSideId| itself and separates the variables by posting order instead.
+!! that a message pairing the wrong variables shows up as a trace mismatch. That
+!! is what covers the per-variable offset of the MPI message tag,
+!! tag = |globalSideId| + nUniqueSides*(ivar-1): a stride that fails to separate
+!! the variables lands one variable's trace in another's buffer, and the two
+!! functions disagree.
 !!
 !! The mesh and variable count are also chosen so that the exchange posts more
 !! messages than there are unique edges in the mesh (see the comment on the mesh
