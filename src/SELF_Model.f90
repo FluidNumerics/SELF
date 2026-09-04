@@ -164,6 +164,7 @@ module SELF_Model
     procedure :: ReportEntropy => ReportEntropy_Model
     procedure :: ReportMetrics => ReportMetrics_Model
     procedure :: ReportUserMetrics => ReportUserMetrics_Model
+    procedure :: ReportUnmappedBoundaries => ReportUnmappedBoundaries_Model
     procedure :: CalculateEntropy => CalculateEntropy_Model
 
     procedure(UpdateSolution),deferred :: UpdateSolution
@@ -585,6 +586,21 @@ contains
     if(.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine ReportUserMetrics_Model
 
+  subroutine ReportUnmappedBoundaries_Model(this)
+    !! Reports mesh boundary faces that carry a boundary condition id for which
+    !! no boundary condition has been registered. The exterior state on such a
+    !! face is never written by any boundary condition method, so the Riemann
+    !! solver consumes whatever `extBoundary` last held.
+    !!
+    !! The base model carries neither a mesh nor the boundary condition lists,
+    !! so this default does nothing. The DG model classes override it; see
+    !! MapBoundaryConditions in SELF_DGModel{1,2,3}D_t, which counts the
+    !! offending faces.
+    implicit none
+    class(Model),intent(inout) :: this
+    if(.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
+  endsubroutine ReportUnmappedBoundaries_Model
+
   ! ////////////////////////////////////// !
   !       Time Integrators                 !
 
@@ -611,6 +627,11 @@ contains
     real(prec) :: t1,t2
     character(len=:),allocatable :: str
     character(len=20) :: modelTime
+
+    ! Warn (once) about boundary faces whose boundary condition id matches no
+    ! registered boundary condition. The count is established by
+    ! MapBoundaryConditions at Init and after every Regrid.
+    call this%ReportUnmappedBoundaries()
 
     this%dt = dt
     targetTime = tn

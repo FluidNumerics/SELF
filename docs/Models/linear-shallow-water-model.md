@@ -189,9 +189,18 @@ The details for this implementation can be found in [self_LinearShallowWater2D_t
 ### Boundary Conditions
 When initializing the mesh for your 2D Linear Shallow Water Equations solver, you can change the boundary conditions to 
 
-* `SELF_BC_Radiation` to set the external state on model boundaries to 0 in the Riemann solver
-* `SELF_BC_NoNormalFlow` to set the external normal velocity to the negative of the interior normal velocity and prolong the density, pressure, and tangential velocity (free slip). This effectively creates a reflecting boundary condition.
-* `SELF_BC_Prescribed` to set a prescribed external state.
+* `SELF_BC_NONORMALFLOW` to set the external normal velocity to the negative of the interior normal velocity and prolong the density, pressure, and tangential velocity (free slip). This effectively creates a reflecting boundary condition.
+* `SELF_BC_RADIATION` to set the external state on model boundaries to 0 in the Riemann solver.
+* `SELF_BC_PRESCRIBED` to set a prescribed external state.
+
+!!! warning "Only `SELF_BC_NONORMALFLOW` is registered on every backend"
+    `AdditionalInit_LinearShallowWater2D_t` registers `SELF_BC_NONORMALFLOW` only. The GPU
+    class additionally registers `SELF_BC_RADIATION`, and nothing registers
+    `SELF_BC_PRESCRIBED` — you supply that yourself by extending the model, as in the
+    [boundary condition guide](boundary-conditions.md). Tagging a boundary with an id this
+    model does not register leaves the exterior state at zero, which for this system is close
+    to (but not the same as) radiation. The first `ForwardStep` now warns when that happens;
+    see [Diagnosing unhandled boundaries](boundary-conditions.md#diagnosing-unhandled-boundaries).
 
 As an example, when using the built-in structured mesh generator, you can do the following
 

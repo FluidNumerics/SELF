@@ -32,7 +32,7 @@ In this model, the $x$ and $y$ directions are similar to longitude and lattitude
 
 ### Model Domain
 
-The physical domain is defined by $\vec{x} \in [0, 1]\times[0,1]$. We use the `StructuredMesh` routine to create a domain with 20 × 20 elements that are dimensioned 0.05 × 0.05 . Model boundaries are all tagged with the `SELF_BC_NO_NORMAL_FLOW` flag to implement no normal flow boundary conditions.
+The physical domain is defined by $\vec{x} \in [0, 1]\times[0,1]$. We use the `StructuredMesh` routine to create a domain with 20 × 20 elements that are dimensioned 0.05 × 0.05 . Model boundaries are all tagged with the `SELF_BC_NONORMALFLOW` flag to implement no normal flow boundary conditions.
 
 Within each element, all variables are approximated by a Lagrange interpolating polynomial of degree 7. The interpolation knots are the Legendre-Gauss points.
 

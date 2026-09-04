@@ -257,13 +257,22 @@ contains
     integer,intent(in) :: bcid
     ! Local
     integer :: iSide,iEl,e2
+    logical :: skipMortars
+
+    skipMortars = this%nMortars > 0
 
     do iEl = 1,this%nElem
       do iSide = 1,4
 
         e2 = this%sideInfo(3,iSide,iEl)
 
-        if(e2 == 0) then
+        ! Mortar sides carry sideInfo(3) = 0 but are interior faces, with sideInfo(1)
+        ! holding the mortar index; they never take a physical boundary condition. The
+        ! HOPr reader copies sideInfo(1) verbatim from the file, where it is the HOPr
+        ! side type and may be nonzero on an ordinary face, so sideInfo(1) is only a
+        ! mortar marker on a mesh that actually carries mortars. Same test as the
+        ! unmapped-boundary scan in SELF_DGModel{2,3}D_t.
+        if(e2 == 0 .and. .not.(skipMortars .and. this%sideInfo(1,iSide,iEl) /= 0)) then
           this%sideInfo(5,iSide,iEl) = bcid
         endif
 
@@ -343,6 +352,11 @@ contains
     allocate(nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nGlobalElem))
     allocate(globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nGlobalElem))
     allocate(sideInfo(1:5,1:4,1:nGlobalElem))
+    ! Row 1 is the HOPr side type, which SELF repurposes as the mortar index; a
+    ! structured mesh has no mortars, so it must read as 0 rather than as whatever
+    ! the allocation happened to pick up. The mortar and periodic builders already
+    ! zero the whole table for the same reason.
+    sideInfo(1,1:4,1:nGlobalElem) = 0
 
     do tj = 1,nTileY
       do ti = 1,nTileX

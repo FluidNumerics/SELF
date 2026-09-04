@@ -7,3 +7,18 @@ repos:
         language: system
         types: [fortran]
         args: ["--config-file", "./fprettify.config", "--case", "1", "1", "1", "1"]
+
+      - id: fortran-style
+        name: fortran style
+        entry: python3 .github/scripts/style_check.py --files
+        language: system
+        files: ^(src|test|examples)/.*\.f90$
+        pass_filenames: true
+
+      - id: docs-style
+        name: documentation style
+        entry: python3 .github/scripts/docs_style_check.py --files
+        language: system
+        files: ^(docs/.*|[^/]*)\.md$
+        exclude: ^docs/ford/
+        pass_filenames: true
