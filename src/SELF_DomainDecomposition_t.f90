@@ -58,6 +58,8 @@ module SELF_DomainDecomposition_t
     procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition_t
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
     procedure :: ReserveMessages => ReserveMessages_DomainDecomposition_t
+    procedure :: CountRemoteSides => CountRemoteSides_DomainDecomposition_t
+    procedure :: CountRemoteMortarSides => CountRemoteMortarSides_DomainDecomposition_t
 
     procedure,public :: FinalizeMPIExchangeAsync
 
@@ -233,9 +235,15 @@ contains
   !! unique side), but an exchange posts a send and a receive per rank-remote side
   !! *per variable* -- and, for vectors, per direction. The message count is
   !! therefore a multiple of the side count that the mesh cannot know, and a
-  !! solution with enough variables overruns the scratch. Each exchange reserves
-  !! its own worst case before posting; the call is a comparison once the scratch
-  !! is large enough.
+  !! solution with enough variables overruns the scratch. Each exchange counts the
+  !! sides it will message (CountRemoteSides / CountRemoteMortarSides) and reserves
+  !! from that count before posting; the call is a comparison once the scratch is
+  !! large enough.
+  !!
+  !! Reserving from the rank-remote side count rather than from the local side
+  !! count matters at scale: the remote sides are the partition boundary, while the
+  !! local sides are the whole subdomain, and each entry carries an
+  !! MPI_STATUS_SIZE row of `stats` with it.
   !!
   !! No message may be in flight when this is called: the scratch is reallocated,
   !! not grown in place. Every exchange posts and then waits (through
@@ -255,6 +263,72 @@ contains
     this%maxMsg = nMsg
 
   endsubroutine ReserveMessages_DomainDecomposition_t
+
+  integer function CountRemoteSides_DomainDecomposition_t(this,sideInfo,nElem,nSidesPerElem) result(nRemote)
+  !! Counts the conforming sides of the local elements whose neighbor element is
+  !! owned by another rank -- the sides an exchange sends and receives over MPI.
+  !!
+  !! The scan is over the side table alone (a few integers per side), which is
+  !! negligible next to packing and sending the traces those sides carry, and it
+  !! stays correct when the mesh is re-partitioned under adaptive refinement.
+  !!
+  !!  Input
+  !!    - sideInfo : the mesh sideInfo array, (1:5, 1:nSidesPerElem, 1:nElem)
+  !!    - nElem : number of local elements
+  !!    - nSidesPerElem : 4 for 2-D (quadrilateral), 6 for 3-D (hexahedral)
+    implicit none
+    class(DomainDecomposition_t),intent(in) :: this
+    integer,intent(in) :: nElem
+    integer,intent(in) :: nSidesPerElem
+    integer,intent(in) :: sideInfo(1:5,1:nSidesPerElem,1:nElem)
+    ! Local
+    integer :: e1,s1,e2
+
+    nRemote = 0
+    do e1 = 1,nElem
+      do s1 = 1,nSidesPerElem
+        e2 = sideInfo(3,s1,e1) ! Neighbor element (global id); 0 on a boundary or mortar side
+        if(e2 > 0) then
+          if(this%elemToRank(e2) /= this%rankId) nRemote = nRemote+1
+        endif
+      enddo
+    enddo
+
+  endfunction CountRemoteSides_DomainDecomposition_t
+
+  integer function CountRemoteMortarSides_DomainDecomposition_t(this,mortarInfo,nMortars,nSub) result(nRemote)
+  !! Counts the mortar sub-sides this rank exchanges over MPI: those where exactly
+  !! one of the big side and the sub-side is owned by this rank. A mortar entirely
+  !! on one rank is served from memory, and one entirely on other ranks is not this
+  !! rank's to carry.
+  !!
+  !!  Input
+  !!    - mortarInfo : the mesh mortarInfo array, null on a mesh with no mortars.
+  !!      Sub-side k has its small element id at row 2*k+1, in both the 2-D
+  !!      (1:8,:) and 3-D (1:14,:) layouts.
+  !!    - nMortars : number of mortar interfaces in the (replicated) mortar table
+  !!    - nSub : sub-sides per mortar, 2 in 2-D (sub-edges) and 4 in 3-D (sub-faces)
+    implicit none
+    class(DomainDecomposition_t),intent(in) :: this
+    integer,pointer,intent(in) :: mortarInfo(:,:)
+    integer,intent(in) :: nMortars
+    integer,intent(in) :: nSub
+    ! Local
+    integer :: m,k
+    logical :: bigIsLocal,smallIsLocal
+
+    nRemote = 0
+    if(.not. associated(mortarInfo)) return
+
+    do m = 1,nMortars
+      bigIsLocal = this%elemToRank(mortarInfo(1,m)) == this%rankId
+      do k = 1,nSub
+        smallIsLocal = this%elemToRank(mortarInfo(2*k+1,m)) == this%rankId
+        if(bigIsLocal .neqv. smallIsLocal) nRemote = nRemote+1
+      enddo
+    enddo
+
+  endfunction CountRemoteMortarSides_DomainDecomposition_t
 
   subroutine SetElemToRank_DomainDecomposition_t(this,nElem)
     implicit none
@@ -340,6 +414,7 @@ contains
   endsubroutine ElemToRank
 
   subroutine FinalizeMPIExchangeAsync(mpiHandler)
+    implicit none
     class(DomainDecomposition_t),intent(inout) :: mpiHandler
     ! Local
     integer :: ierror

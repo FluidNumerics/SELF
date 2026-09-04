@@ -172,10 +172,10 @@ contains
     integer :: iError
     integer :: msgCount
 
-    ! A send and a receive per rank-remote face, per variable. The scratch was sized
-    ! by the mesh, which does not know nvar, so reserve the worst case -- every face
-    ! remote -- before posting.
-    call mesh%decomp%ReserveMessages(2*6*this%nvar*this%nElem)
+    ! A send and a receive per rank-remote face, per variable. The mesh sized the
+    ! scratch without knowing nvar, so reserve from the face count this exchange
+    ! will actually message.
+    call mesh%decomp%ReserveMessages(2*this%nvar*mesh%decomp%CountRemoteSides(mesh%sideInfo,mesh%nElem,6))
 
     msgCount = 0
 
@@ -482,8 +482,8 @@ contains
     integer :: iError
     integer :: msgCount
 
-    ! At most a send and a receive per sub-face (4 per mortar), per variable.
-    call mesh%decomp%ReserveMessages(2*4*this%nvar*mesh%nMortars)
+    ! A send and a receive per rank-crossing sub-face, per variable.
+    call mesh%decomp%ReserveMessages(2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,4))
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)

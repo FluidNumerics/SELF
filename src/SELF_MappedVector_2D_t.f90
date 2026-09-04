@@ -166,7 +166,7 @@ contains
     integer :: msgCount
 
     ! A send and a receive per rank-remote edge, per variable and direction.
-    call mesh%decomp%ReserveMessages(2*4*2*this%nvar*this%nElem)
+    call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%decomp%CountRemoteSides(mesh%sideInfo,mesh%nElem,4))
 
     msgCount = 0
 
@@ -345,8 +345,8 @@ contains
     integer :: iError
     integer :: msgCount
 
-    ! At most a send and a receive per sub-edge (2 per mortar), per variable and direction.
-    call mesh%decomp%ReserveMessages(2*2*2*this%nvar*mesh%nMortars)
+    ! A send and a receive per rank-crossing sub-edge, per variable and direction.
+    call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
@@ -560,8 +560,8 @@ contains
     integer :: iError
     integer :: msgCount
 
-    ! One message per sub-edge (2 per mortar), per variable.
-    call mesh%decomp%ReserveMessages(2*this%nvar*mesh%nMortars)
+    ! One message per rank-crossing sub-edge, per variable.
+    call mesh%decomp%ReserveMessages(this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)

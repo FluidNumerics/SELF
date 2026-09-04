@@ -441,8 +441,8 @@ contains
     real(prec),pointer :: boundary(:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:)
 
-    ! At most a send and a receive per sub-edge (2 per mortar), per variable.
-    call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%nMortars)
+    ! A send and a receive per rank-crossing sub-edge, per variable.
+    call mesh%decomp%ReserveMessages(2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
