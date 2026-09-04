@@ -1352,6 +1352,7 @@ contains
   contains
 
     subroutine grow_bc_table(tbl)
+      implicit none
       character(LEN=255),allocatable,intent(inout) :: tbl(:)
       character(LEN=255),allocatable :: tmp(:)
       integer :: oldSize
@@ -1363,6 +1364,7 @@ contains
     endsubroutine grow_bc_table
 
     subroutine grow_string_table(tbl)
+      implicit none
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable,intent(inout) :: tbl(:)
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: tmp(:)
       integer :: oldSize
