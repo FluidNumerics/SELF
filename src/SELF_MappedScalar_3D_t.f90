@@ -172,6 +172,11 @@ contains
     integer :: iError
     integer :: msgCount
 
+    ! A send and a receive per rank-remote face, per variable. The mesh sized the
+    ! scratch without knowing nvar, so reserve from the face count this exchange
+    ! will actually message.
+    call mesh%decomp%ReserveMessages(2*this%nvar*mesh%decomp%CountRemoteSides(mesh%sideInfo,mesh%nElem,6))
+
     msgCount = 0
 
     do ivar = 1,this%nvar
@@ -192,7 +197,7 @@ contains
               call MPI_IRECV(this%extBoundary(:,:,s1,e1,ivar), &
                              (this%interp%N+1)*(this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
-                             r2,globalSideId, &
+                             r2,tag, &
                              mesh%decomp%mpiComm, &
                              mesh%decomp%requests(msgCount),iError)
 
@@ -200,7 +205,7 @@ contains
               call MPI_ISEND(this%boundary(:,:,s1,e1,ivar), &
                              (this%interp%N+1)*(this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
-                             r2,globalSideId, &
+                             r2,tag, &
                              mesh%decomp%mpiComm, &
                              mesh%decomp%requests(msgCount),iError)
             endif
@@ -476,6 +481,9 @@ contains
     integer :: offset
     integer :: iError
     integer :: msgCount
+
+    ! A send and a receive per rank-crossing sub-face, per variable.
+    call mesh%decomp%ReserveMessages(2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,4))
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)

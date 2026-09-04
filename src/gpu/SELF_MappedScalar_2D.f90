@@ -441,6 +441,9 @@ contains
     real(prec),pointer :: boundary(:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:)
 
+    ! A send and a receive per rank-crossing sub-edge, per variable.
+    call mesh%decomp%ReserveMessages(2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
+
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
     call c_f_pointer(this%boundary_gpu,boundary,[this%interp%N+1,4,this%nelem,this%nvar])

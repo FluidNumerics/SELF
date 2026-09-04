@@ -110,6 +110,7 @@ add_fortran_tests (
     "vectorboundaryinterp_3d_constant.f90"
     "mesh2d_setup.f90"
     "mesh2d_uniformstructured.f90"
+    "mesh2d_globalsideids.f90"
     "mesh2d_reset_bc_mortar.f90"
     "mesh3d_reset_bc_mortar.f90"
     "mesh2d_uniform_refine.f90"
@@ -213,6 +214,7 @@ add_fortran_tests (
     "mesh3d_read_guard_badconnectivity.f90"
     "mesh3d_setup.f90"
     "mesh3d_uniformstructured.f90"
+    "mesh3d_globalsideids.f90"
     "mappedscalarderivative_1d_constant.f90"
     "mappedscalarbrderivative_1d_constant.f90"
     "mappedscalardgderivative_1d_constant.f90"
@@ -330,6 +332,7 @@ add_fortran_tests (
     "points_dirac_delta_2d_nvar_mismatch.f90"
     "points_dirac_delta_3d_nvar_mismatch.f90"
     "domaindecomposition_two_meshes.f90"
+    "domaindecomposition_message_reserve.f90"
     )
 
 # Mark the four DiracDelta guard tests as expected-to-fail: each program
@@ -415,7 +418,9 @@ set_tests_properties(
     mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)
 
-add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
+add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
+                       "scalarsideexchange_3d_mpi.f90"
+                       "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_sideexchange_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_structuredmesh_mpi.f90"
                        "mappedscalarbrgradient_2d_linear_mpi.f90"

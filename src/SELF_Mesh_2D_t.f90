@@ -476,14 +476,14 @@ contains
                 sideinfo(5,4,iel) = bcids(4) ! Boundary condition id; eastern boundary set from the user input
               else ! interior tile, but western most edge of the tile
                 e2 = nxPerTile+nxPerTile*(j-1+nyPerTile*(ti-2+nTilex*(tj-1))) ! Neigbor element, easternnmost element in tile to the west
-                sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+                sideinfo(2,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
                 sideinfo(3,4,iel) = e2
                 sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
                 sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
               endif
             else ! interior to the tile
               e2 = i-1+nxPerTile*(j-1+nyPerTile*(ti-1+nTilex*(tj-1))) ! Neigbor element, inside same tile, to the west
-              sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+              sideinfo(2,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
               sideinfo(3,4,iel) = e2
               sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
               sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
@@ -897,7 +897,6 @@ contains
     integer :: nUniqueSides3D
     integer :: nLocalNodes2D
     integer :: nLocalSides2D
-    integer :: nUniqueSides2D
     integer :: nGeo,nBCs
     integer :: eid,lsid,iSide
     integer :: i,j,nid
@@ -993,13 +992,20 @@ contains
 
     ! Now we need to convert from 3-D to 2-D !
     nLocalSides2D = nLocalSides3D-2*nLocalElems
-    nUniqueSides2D = nUniqueSides3D-2*nGlobalElem ! Remove the "top" and "bottom" faces
     nLocalNodes2D = nLocalNodes2D-nLocalElems*nGeo*(nGeo+1)**2 ! Remove the third dimension
 
     print*,__FILE__//' : Rank ',this%decomp%rankId+1,' Allocating memory for mesh'
     print*,__FILE__//' : Rank ',this%decomp%rankId+1,' n local sides  : ',nLocalSides2D
     call this%Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
-    this%nUniqueSides = nUniqueSides2D ! Store the number of sides in the global mesh
+    ! The surviving edges keep the global side ids the 3-D file gave them -- dropping
+    ! the "top" and "bottom" faces removes them from the mesh but not from the id
+    ! space -- so the id space, not a 2-D edge count, is what belongs here.
+    ! nUniqueSides is the MPI tag stride (tag = |globalSideId| + nUniqueSides*(ivar-1)),
+    ! and a stride smaller than the largest id in use makes two variables on two
+    ! different edges share a tag. Renumbering the edges densely would be tidier, but
+    ! each rank reads only its own slice of the file and so cannot derive a globally
+    ! consistent numbering without an extra collective.
+    this%nUniqueSides = nUniqueSides3D
 
     ! Copy data from local arrays into this
     !  elemInfo(1:6,iEl)
@@ -1352,6 +1358,7 @@ contains
   contains
 
     subroutine grow_bc_table(tbl)
+      implicit none
       character(LEN=255),allocatable,intent(inout) :: tbl(:)
       character(LEN=255),allocatable :: tmp(:)
       integer :: oldSize
@@ -1363,6 +1370,7 @@ contains
     endsubroutine grow_bc_table
 
     subroutine grow_string_table(tbl)
+      implicit none
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable,intent(inout) :: tbl(:)
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: tmp(:)
       integer :: oldSize
