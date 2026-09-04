@@ -48,7 +48,7 @@ program test
 
 contains
 
-  integer function CheckGlobalSideIds(mesh,label,contiguousIds) result(r)
+  integer function CheckGlobalSideIds(mesh,label,denseIds) result(r)
     !! Asserts, for a mesh whose elements are all rank-local:
     !!
     !!   1. every side slot carries a non-zero global edge id,
@@ -56,15 +56,15 @@ contains
     !!      edge id by exactly one,
     !!   3. the neighbor's side slot names this element back and carries the same
     !!      edge id (up to sign; HOPr signs the id to mark master/slave),
-    !!   4. when `contiguousIds` is set, the ids are exactly 1..nUniqueSides.
-    !!
-    !! `contiguousIds` is false only for HOPr 2-D meshes: those are read from an
-    !! extruded 3-D file and keep the 3-D file's edge ids, which run past the
-    !! 2-D nUniqueSides that Read_HOPr derives.
+    !!   4. every id lies within 1..nUniqueSides -- nUniqueSides is the stride the
+    !!      MPI tag is built on, so an id at or past it makes two variables on two
+    !!      different sides share a tag,
+    !!   5. when `denseIds` is set, every id in 1..nUniqueSides is used. A mesh read
+    !!      from a HOPr file inherits the file's id space and may leave gaps in it.
     implicit none
     type(Mesh2D),intent(in) :: mesh
     character(*),intent(in) :: label
-    logical,intent(in) :: contiguousIds
+    logical,intent(in) :: denseIds
     ! Local
     integer :: e1,e2,s1,s2,i,maxid
     integer,allocatable :: idcount(:)
@@ -81,9 +81,10 @@ contains
     enddo
 
     maxid = maxval(abs(mesh%sideInfo(2,1:4,1:mesh%nElem)))
-    if(contiguousIds .and. maxid /= mesh%nUniqueSides) then
+    if(maxid > mesh%nUniqueSides) then
       print*,"FAIL ("//label//"): largest global edge id ",maxid, &
-        " does not match nUniqueSides ",mesh%nUniqueSides
+        " is past nUniqueSides ",mesh%nUniqueSides,", so the MPI tag stride does not", &
+        " separate the variables"
       return
     endif
 
@@ -144,7 +145,12 @@ contains
       enddo
     enddo
 
-    if(contiguousIds) then
+    if(denseIds) then
+      if(maxid /= mesh%nUniqueSides) then
+        print*,"FAIL ("//label//"): largest global edge id ",maxid, &
+          " does not match nUniqueSides ",mesh%nUniqueSides
+        return
+      endif
       do i = 1,maxid
         if(idcount(i) == 0) then
           print*,"FAIL ("//label//"): global edge id ",i," is never used"
@@ -203,8 +209,9 @@ contains
     ri = CheckGlobalSideIds(meshCircle,"HOHQMesh Circle.mesh",.true.)
     r = max(r,ri)
 
-    ! HOPr meshes carry their edge ids in the file; see the note on
-    ! `contiguousIds` above for why the range is not asserted here.
+    ! HOPr meshes carry their edge ids in the file. A 2-D mesh comes from an
+    ! extruded 3-D file, so its ids are the file's and skip the dropped z-faces:
+    ! within nUniqueSides, but not dense (see #189).
     call meshHopr%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
     ri = CheckGlobalSideIds(meshHopr,"HOPr Block2D_mesh.h5",.false.)
     r = max(r,ri)
