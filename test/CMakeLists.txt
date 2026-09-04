@@ -332,6 +332,7 @@ add_fortran_tests (
     "points_dirac_delta_2d_nvar_mismatch.f90"
     "points_dirac_delta_3d_nvar_mismatch.f90"
     "domaindecomposition_two_meshes.f90"
+    "domaindecomposition_message_reserve.f90"
     )
 
 # Mark the four DiracDelta guard tests as expected-to-fail: each program
