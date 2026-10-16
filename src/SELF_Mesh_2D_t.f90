@@ -93,6 +93,8 @@ module SELF_Mesh_2D_t
   integer,parameter :: selfSide2D_North = 3
   integer,parameter :: selfSide2D_West = 4
 
+  private :: StructuredElementId2D
+
   ! Mesh format is set up similar to the HOPr format
   ! See https://hopr-project.org/externals/MeshFormat.pdf
 
@@ -144,6 +146,8 @@ module SELF_Mesh_2D_t
 
     generic,public :: StructuredMesh => UniformStructuredMesh_Mesh2D_t
     procedure,private :: UniformStructuredMesh_Mesh2D_t
+    generic,public :: PeriodicStructuredMesh => UniformPeriodicMesh_Mesh2D_t
+    procedure,private :: UniformPeriodicMesh_Mesh2D_t
     procedure,public :: SimpleMortarMesh => SimpleMortarMesh_Mesh2D_t
     procedure,public :: DoubleMortarMesh => DoubleMortarMesh_Mesh2D_t
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D_t
@@ -517,6 +521,278 @@ contains
     call this%UpdateDevice()
 
   endsubroutine UniformStructuredMesh_Mesh2D_t
+
+  pure function StructuredElementId2D(gx,gy,nxPerTile,nyPerTile,nTileX) result(eid)
+  !! Maps the global position (gx,gy) of an element in a tiled structured mesh, with
+  !! gx in [1,nX] and gy in [1,nY], to the tile-ordered element id that
+  !! UniformStructuredMesh assigns to it,
+  !!
+  !!   eid = i + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTileX*(tj-1)))
+  !!
+  !! where gx = i + nxPerTile*(ti-1) and gy = j + nyPerTile*(tj-1).
+    implicit none
+    integer,intent(in) :: gx,gy
+    integer,intent(in) :: nxPerTile,nyPerTile,nTileX
+    integer :: eid
+    ! Local
+    integer :: i,j,ti,tj
+
+    ti = (gx-1)/nxPerTile+1
+    i = gx-(ti-1)*nxPerTile
+    tj = (gy-1)/nyPerTile+1
+    j = gy-(tj-1)*nyPerTile
+    eid = i+nxPerTile*(j-1+nyPerTile*(ti-1+nTileX*(tj-1)))
+
+  endfunction StructuredElementId2D
+
+  subroutine UniformPeriodicMesh_Mesh2D_t(this,nxPerTile,nyPerTile,nTileX,nTileY,dx,dy, &
+                                          periodicX,periodicY,bcids,comm)
+  !!
+  !! Create a structured quadrilateral mesh that is periodic in x, in y, in both or in
+  !! neither, and store it in SELF's unstructured mesh format. Element geometry and
+  !! ordering are identical to UniformStructuredMesh; only the connectivity differs.
+  !! The mesh covers [0,Lx] x [0,Ly] with Lx = dx*nX, Ly = dy*nY, nX = nxPerTile*nTileX
+  !! and nY = nyPerTile*nTileY elements.
+  !!
+  !! When periodicX is true, the east edge of the element at global position (nX,gy)
+  !! and the west edge of the element at (1,gy) are wired as one interior edge, so a
+  !! field u satisfies u(0,y) = u(Lx,y) through the side exchange. periodicY does the
+  !! same for the south and north edges. A periodic direction has no domain boundary
+  !! and its entries of bcids are ignored.
+  !!
+  !!  Input
+  !!    - this : Fresh/empty mesh2d_t object
+  !!    - nxPerTile, nyPerTile : Number of elements per tile in x and y (>= 1)
+  !!    - nTileX, nTileY : Number of tiles in x and y (>= 1)
+  !!    - dx, dy : Element widths in x and y (> 0, in the length unit of the model)
+  !!    - periodicX, periodicY : Periodic flags for the x and y directions
+  !!    - bcids(1:4) : Boundary condition ids for the south, east, north and west sides
+  !!      of the domain. Only the sides of a non-periodic direction use them.
+  !!    - comm (optional) : Externally managed MPI communicator (Fortran integer handle)
+  !!
+  !!  Output
+  !!    - this : mesh2d_t object with nGeo = 1 and uniformly spaced geometry nodes
+  !!
+  !! Connectivity follows UniformPeriodicMesh_Mesh3D_t. Every interior edge, including a
+  !! periodic one, joins an edge whose trace coordinate runs in the same direction as
+  !! its neighbor's, so the flip is 0 throughout and RecalculateFlip is not needed.
+  !!
+  !! Global side ids are assigned analytically and are dense in 1..nUniqueSides, with
+  !! the two sides of a periodic pair sharing one id. With nLx = nX in a periodic x
+  !! direction and nX+1 otherwise (likewise nLy), the vertical edge on grid line
+  !! L = 0..nX in row gy has id
+  !!
+  !!   periodic x :   modulo(L-1,nX)+1 + nX*(gy-1)
+  !!   walled x   :   L+1 + (nX+1)*(gy-1)
+  !!
+  !! and the horizontal edge on grid line L = 0..nY in column gx has id
+  !! nLx*nY + modulo(L-1,nY)+1 + nY*(gx-1) or nLx*nY + L+1 + (nY+1)*(gx-1). Hence
+  !! nUniqueSides = nLx*nY + nLy*nX, which for a mesh that is periodic in neither
+  !! direction equals the count UniformStructuredMesh reports.
+  !!
+  !! A periodic direction with a single element (nX = 1 or nY = 1) makes an element its
+  !! own neighbor across that direction. Both of its edges then carry the same id, which
+  !! is consistent with the convention but leaves nothing for the exchange to send.
+  !!
+    implicit none
+    class(Mesh2D_t),intent(out) :: this
+    integer,intent(in) :: nxPerTile
+    integer,intent(in) :: nyPerTile
+    integer,intent(in) :: nTileX
+    integer,intent(in) :: nTileY
+    real(prec),intent(in) :: dx
+    real(prec),intent(in) :: dy
+    logical,intent(in) :: periodicX
+    logical,intent(in) :: periodicY
+    integer,intent(in) :: bcids(1:4)
+    integer,intent(in),optional :: comm
+    ! Local
+    integer :: nX,nY,nGeo,nBCs
+    integer :: nGlobalElem
+    integer :: nUniqueSides
+    integer :: nLx,nLy
+    integer :: nLocalElems
+    integer :: nLocalSides
+    integer :: nLocalNodes
+    real(prec),allocatable :: nodeCoords(:,:,:,:)
+    integer,allocatable :: globalNodeIDs(:,:,:)
+    integer,allocatable :: sideInfo(:,:,:)
+    integer :: i,j,ti,tj
+    integer :: ix,iy,iel
+    integer :: ni,nj
+    integer :: e1,e2
+    integer :: gx,gy,gxm,gxp,gym,gyp
+
+    if(nxPerTile < 1 .or. nyPerTile < 1 .or. nTileX < 1 .or. nTileY < 1) then
+      error stop "UniformPeriodicMesh_Mesh2D_t : element and tile counts must be at least 1"
+    endif
+    if(dx <= 0.0_prec .or. dy <= 0.0_prec) then
+      error stop "UniformPeriodicMesh_Mesh2D_t : element widths dx and dy must be positive"
+    endif
+
+    call this%decomp%init(comm)
+
+    nX = nTileX*nxPerTile
+    nY = nTileY*nyPerTile
+    nGeo = 1 ! Force the geometry to be linear
+    nBCs = 4 ! Same boundary condition table size as UniformStructuredMesh
+
+    if(periodicX) then
+      nLx = nX ! the grid lines x = 0 and x = Lx are one line
+    else
+      nLx = nX+1
+    endif
+    if(periodicY) then
+      nLy = nY
+    else
+      nLy = nY+1
+    endif
+
+    nGlobalElem = nX*nY
+    nUniqueSides = nLx*nY+nLy*nX
+
+    allocate(nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nGlobalElem))
+    allocate(globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nGlobalElem))
+    allocate(sideInfo(1:5,1:4,1:nGlobalElem))
+    sideInfo = 0
+
+    ! Node coordinates and global node IDs (identical to UniformStructuredMesh)
+    do tj = 1,nTileY
+      do ti = 1,nTileX
+        do j = 1,nyPerTile
+          iy = j+nyPerTile*(tj-1)
+          do i = 1,nxPerTile
+            iel = i+nxPerTile*(j-1+nyPerTile*(ti-1+nTilex*(tj-1)))
+            ix = i+nxPerTile*(ti-1)
+            do nj = 1,nGeo+1
+              do ni = 1,nGeo+1
+                nodeCoords(1,ni,nj,iel) = real(ni-1+ix-1,prec)*dx
+                nodeCoords(2,ni,nj,iel) = real(nj-1+iy-1,prec)*dy
+                globalNodeIDs(ni,nj,iel) = ni-1+i+(nxPerTile+1)*( &
+                                           nj-1+j-1+(nyPerTile+1)*( &
+                                           ti-1+nTileX*(tj-1)))
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+    ! Edge information
+    !  sideInfo(1:5,iSide,iEl)
+    !    1 - Side Type (0; a structured mesh has no mortars)
+    !    2 - Global Side ID (shared by both sides of an interior or periodic edge)
+    !    3 - Neighbor Element ID (0 on a domain boundary)
+    !    4 - 10*( neighbor local side ) + flip (flip is 0 throughout)
+    !    5 - Boundary Condition ID (0 on an interior edge)
+    do gy = 1,nY
+      do gx = 1,nX
+
+        iel = StructuredElementId2D(gx,gy,nxPerTile,nyPerTile,nTileX)
+
+        ! +/- neighbor positions with periodic wrap (1..n)
+        gxp = modulo(gx,nX)+1
+        gxm = modulo(gx-2,nX)+1
+        gyp = modulo(gy,nY)+1
+        gym = modulo(gy-2,nY)+1
+
+        ! South (side 1) lies on horizontal grid line gy-1, east (side 2) on vertical
+        ! line gx, north (side 3) on horizontal line gy and west (side 4) on vertical
+        ! line gx-1.
+        sideInfo(2,1,iel) = HorizontalEdgeId(gy-1,gx)
+        sideInfo(2,2,iel) = VerticalEdgeId(gx,gy)
+        sideInfo(2,3,iel) = HorizontalEdgeId(gy,gx)
+        sideInfo(2,4,iel) = VerticalEdgeId(gx-1,gy)
+
+        ! South <-> north side of the -y neighbor
+        if(gy > 1 .or. periodicY) then
+          sideInfo(3,1,iel) = StructuredElementId2D(gx,gym,nxPerTile,nyPerTile,nTileX)
+          sideInfo(4,1,iel) = 10*selfSide2D_North
+        else
+          sideInfo(5,1,iel) = bcids(1)
+        endif
+
+        ! East <-> west side of the +x neighbor
+        if(gx < nX .or. periodicX) then
+          sideInfo(3,2,iel) = StructuredElementId2D(gxp,gy,nxPerTile,nyPerTile,nTileX)
+          sideInfo(4,2,iel) = 10*selfSide2D_West
+        else
+          sideInfo(5,2,iel) = bcids(2)
+        endif
+
+        ! North <-> south side of the +y neighbor
+        if(gy < nY .or. periodicY) then
+          sideInfo(3,3,iel) = StructuredElementId2D(gx,gyp,nxPerTile,nyPerTile,nTileX)
+          sideInfo(4,3,iel) = 10*selfSide2D_South
+        else
+          sideInfo(5,3,iel) = bcids(3)
+        endif
+
+        ! West <-> east side of the -x neighbor
+        if(gx > 1 .or. periodicX) then
+          sideInfo(3,4,iel) = StructuredElementId2D(gxm,gy,nxPerTile,nyPerTile,nTileX)
+          sideInfo(4,4,iel) = 10*selfSide2D_East
+        else
+          sideInfo(5,4,iel) = bcids(4)
+        endif
+
+      enddo
+    enddo
+
+    call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
+
+    e1 = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    e2 = this%decomp%offsetElem(this%decomp%rankId+2)
+    nLocalElems = e2-e1+1
+
+    nLocalSides = nLocalElems*4
+    nLocalNodes = nLocalElems*4
+    call this%Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
+    this%nUniqueSides = nUniqueSides
+    this%quadrature = UNIFORM
+
+    this%nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nLocalElems) = nodeCoords(1:2,1:nGeo+1,1:nGeo+1,e1:e2)
+    this%globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nLocalElems) = globalNodeIDs(1:nGeo+1,1:nGeo+1,e1:e2)
+    this%sideInfo(1:5,1:4,1:nLocalElems) = sideInfo(1:5,1:4,e1:e2)
+
+    deallocate(nodeCoords)
+    deallocate(globalNodeIDs)
+    deallocate(sideInfo)
+
+    call this%UpdateDevice()
+
+  contains
+
+    integer function VerticalEdgeId(L,row) result(id)
+    !! Global id of the edge on vertical grid line L (0..nX) in element row `row`.
+      implicit none
+      integer,intent(in) :: L
+      integer,intent(in) :: row
+
+      if(periodicX) then
+        id = modulo(L-1,nX)+1+nX*(row-1)
+      else
+        id = L+1+(nX+1)*(row-1)
+      endif
+
+    endfunction VerticalEdgeId
+
+    integer function HorizontalEdgeId(L,col) result(id)
+    !! Global id of the edge on horizontal grid line L (0..nY) in element column `col`.
+    !! The horizontal edges are numbered after all nLx*nY vertical ones.
+      implicit none
+      integer,intent(in) :: L
+      integer,intent(in) :: col
+
+      if(periodicY) then
+        id = nLx*nY+modulo(L-1,nY)+1+nY*(col-1)
+      else
+        id = nLx*nY+L+1+(nY+1)*(col-1)
+      endif
+
+    endfunction HorizontalEdgeId
+
+  endsubroutine UniformPeriodicMesh_Mesh2D_t
 
   subroutine SimpleMortarMesh_Mesh2D_t(this,dx,bcids,comm)
   !!

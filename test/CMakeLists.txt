@@ -215,6 +215,8 @@ add_fortran_tests (
     "mesh3d_setup.f90"
     "mesh3d_uniformstructured.f90"
     "mesh3d_globalsideids.f90"
+    "mesh2d_periodicstructured.f90"
+    "mappedscalarbrgradient_2d_periodic.f90"
     "mappedscalarderivative_1d_constant.f90"
     "mappedscalarbrderivative_1d_constant.f90"
     "mappedscalardgderivative_1d_constant.f90"
@@ -453,7 +455,8 @@ add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
                        "structuredmesh_external_comm_2d.f90"
                        "structuredmesh_external_comm_3d.f90"
                        "structuredmesh_subcomm_2d.f90"
-                       "read_hopr_external_comm_2d.f90" )
+                       "read_hopr_external_comm_2d.f90"
+                       "mappedscalarbrgradient_2d_periodic_mpi.f90" )
 
 # Temporal order-of-accuracy test for the low-storage Runge-Kutta integrators. One executable
 # (which carries a device kernel for its time-dependent prescribed boundary condition on GPU
