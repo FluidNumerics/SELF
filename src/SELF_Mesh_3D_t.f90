@@ -443,6 +443,7 @@ contains
 
   pure function elementid(i,j,k,ti,tj,tk,nxpertile,nypertile,nzpertile, &
                           ntilex,ntiley,ntilez) result(eid)
+    implicit none
     integer,intent(in) :: i,j,k
     integer,intent(in) :: ti,tj,tk
     integer,intent(in) :: nxpertile,nypertile,nzpertile
@@ -460,6 +461,7 @@ contains
   !! Map a global element position (gx,gy,gz), with gx in [1,nX] etc., to the
   !! tile-ordered element id used throughout the structured mesh. This is the
   !! inverse of the (i,ti) decomposition: gx = i + nxpertile*(ti-1).
+    implicit none
     integer,intent(in) :: gx,gy,gz
     integer,intent(in) :: nxpertile,nypertile,nzpertile
     integer,intent(in) :: ntilex,ntiley,ntilez
@@ -2008,6 +2010,7 @@ contains
 
     subroutine sort4(a,b)
       !! Ascending insertion sort of four integers
+      implicit none
       integer,intent(in) :: a(1:4)
       integer,intent(out) :: b(1:4)
       integer :: m,n,tmp
@@ -2025,6 +2028,7 @@ contains
     endsubroutine sort4
 
     subroutine grow_bc_table(tbl)
+      implicit none
       character(LEN=255),allocatable,intent(inout) :: tbl(:)
       character(LEN=255),allocatable :: tmp(:)
       integer :: oldSize
@@ -2036,6 +2040,7 @@ contains
     endsubroutine grow_bc_table
 
     subroutine grow_string_table(tbl)
+      implicit none
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable,intent(inout) :: tbl(:)
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: tmp(:)
       integer :: oldSize
