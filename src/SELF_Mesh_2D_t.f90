@@ -1537,6 +1537,8 @@ contains
       offset = 0
     endif
 
+    call this%decomp%EnsureExchangeGraph(this%sideInfo,this%nElem,4, &
+                                         this%mortarInfo,this%nMortars,2)
     msgCount = 0
     do e1 = 1,this%nElem
       do s1 = 1,4
@@ -1590,7 +1592,7 @@ contains
                              1, &
                              MPI_INTEGER, &
                              neighborRank,tag, &
-                             this%decomp%mpiComm, &
+                             this%decomp%exchangeComm, &
                              requests(msgCount),iError)
 
               ! Send nid1(l) from this rank to nid2(l) on the other rank
@@ -1599,7 +1601,7 @@ contains
                              1, &
                              MPI_INTEGER, &
                              neighborRank,tag, &
-                             this%decomp%mpiComm, &
+                             this%decomp%exchangeComm, &
                              requests(msgCount),iError)
 
             enddo
