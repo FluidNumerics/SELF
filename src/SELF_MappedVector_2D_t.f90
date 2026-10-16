@@ -166,6 +166,7 @@ contains
     integer :: msgCount
 
     ! A send and a receive per rank-remote edge, per variable and direction.
+    call mesh%decomp%EnsureExchangeGraph(mesh%sideInfo,mesh%nElem,4,mesh%mortarInfo,mesh%nMortars,2)
     call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%decomp%CountRemoteSides(mesh%sideInfo,mesh%nElem,4))
 
     msgCount = 0
@@ -191,7 +192,7 @@ contains
                                (this%interp%N+1), &
                                mesh%decomp%mpiPrec, &
                                r2,tag, &
-                               mesh%decomp%mpiComm, &
+                               mesh%decomp%exchangeComm, &
                                mesh%decomp%requests(msgCount),iError)
 
                 msgCount = msgCount+1
@@ -199,7 +200,7 @@ contains
                                (this%interp%N+1), &
                                mesh%decomp%mpiPrec, &
                                r2,tag, &
-                               mesh%decomp%mpiComm, &
+                               mesh%decomp%exchangeComm, &
                                mesh%decomp%requests(msgCount),iError)
               endif
             endif
@@ -346,6 +347,7 @@ contains
     integer :: msgCount
 
     ! A send and a receive per rank-crossing sub-edge, per variable and direction.
+    call mesh%decomp%EnsureExchangeGraph(mesh%sideInfo,mesh%nElem,4,mesh%mortarInfo,mesh%nMortars,2)
     call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0
@@ -374,7 +376,7 @@ contains
                              (this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
                              rS,tag, &
-                             mesh%decomp%mpiComm, &
+                             mesh%decomp%exchangeComm, &
                              mesh%decomp%requests(msgCount),iError)
 
               msgCount = msgCount+1
@@ -382,7 +384,7 @@ contains
                              (this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
                              rS,tag, &
-                             mesh%decomp%mpiComm, &
+                             mesh%decomp%exchangeComm, &
                              mesh%decomp%requests(msgCount),iError)
 
             elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
@@ -392,7 +394,7 @@ contains
                              (this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
                              rB,tag, &
-                             mesh%decomp%mpiComm, &
+                             mesh%decomp%exchangeComm, &
                              mesh%decomp%requests(msgCount),iError)
 
               msgCount = msgCount+1
@@ -400,7 +402,7 @@ contains
                              (this%interp%N+1), &
                              mesh%decomp%mpiPrec, &
                              rB,tag, &
-                             mesh%decomp%mpiComm, &
+                             mesh%decomp%exchangeComm, &
                              mesh%decomp%requests(msgCount),iError)
 
             endif
@@ -561,6 +563,7 @@ contains
     integer :: msgCount
 
     ! One message per rank-crossing sub-edge, per variable.
+    call mesh%decomp%EnsureExchangeGraph(mesh%sideInfo,mesh%nElem,4,mesh%mortarInfo,mesh%nMortars,2)
     call mesh%decomp%ReserveMessages(this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0
@@ -587,7 +590,7 @@ contains
                            (this%interp%N+1), &
                            mesh%decomp%mpiPrec, &
                            rS,tag, &
-                           mesh%decomp%mpiComm, &
+                           mesh%decomp%exchangeComm, &
                            mesh%decomp%requests(msgCount),iError)
 
           elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
@@ -597,7 +600,7 @@ contains
                            (this%interp%N+1), &
                            mesh%decomp%mpiPrec, &
                            rB,tag, &
-                           mesh%decomp%mpiComm, &
+                           mesh%decomp%exchangeComm, &
                            mesh%decomp%requests(msgCount),iError)
 
           endif

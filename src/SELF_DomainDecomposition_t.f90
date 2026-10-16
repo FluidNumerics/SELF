@@ -45,8 +45,13 @@ module SELF_DomainDecomposition_t
     integer :: nElem
     integer :: maxMsg
     integer :: msgCount
+    integer :: exchangeComm = MPI_COMM_NULL
+    integer :: nExchangeNeighbors = 0
+    logical :: exchangeCommOwned = .false.
+    logical :: exchangeGraphReady = .false.
     integer,pointer,dimension(:) :: elemToRank
     integer,pointer,dimension(:) :: offSetElem
+    integer,allocatable :: exchangeNeighbors(:)
     integer,allocatable :: requests(:)
     integer,allocatable :: stats(:,:)
 
@@ -57,11 +62,14 @@ module SELF_DomainDecomposition_t
 
     procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition_t
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
+    procedure,public :: EnsureExchangeGraph => EnsureExchangeGraph_DomainDecomposition_t
     procedure :: ReserveMessages => ReserveMessages_DomainDecomposition_t
     procedure :: CountRemoteSides => CountRemoteSides_DomainDecomposition_t
     procedure :: CountRemoteMortarSides => CountRemoteMortarSides_DomainDecomposition_t
 
     procedure,public :: FinalizeMPIExchangeAsync
+
+    procedure,private :: ResetExchangeGraph => ResetExchangeGraph_DomainDecomposition_t
 
   endtype DomainDecomposition_t
 
@@ -158,6 +166,10 @@ contains
     this%rankId = 0
     this%nRanks = 1
     this%nElem = 0
+    this%nExchangeNeighbors = 0
+    this%exchangeComm = MPI_COMM_NULL
+    this%exchangeCommOwned = .false.
+    this%exchangeGraphReady = .false.
     this%mpiEnabled = .false.
     this%ownsMpi = .false.
 
@@ -189,6 +201,8 @@ contains
     implicit none
     class(DomainDecomposition_t),intent(inout) :: this
 
+    call this%ResetExchangeGraph()
+
     if(associated(this%offSetElem)) then
       deallocate(this%offSetElem)
     endif
@@ -214,6 +228,7 @@ contains
     integer,intent(in) :: nGlobalElem
     integer,intent(in) :: maxMsg
 
+    call this%ResetExchangeGraph()
     call this%setElemToRank(nGlobalElem)
     if(allocated(this%requests)) deallocate(this%requests)
     if(allocated(this%stats)) deallocate(this%stats)
@@ -226,6 +241,125 @@ contains
       this%offSetElem(this%rankId+2)-this%offSetElem(this%rankId+1)
 
   endsubroutine GenerateDecomposition_DomainDecomposition_t
+
+  subroutine ResetExchangeGraph_DomainDecomposition_t(this)
+    implicit none
+    class(DomainDecomposition_t),intent(inout) :: this
+    ! Local
+    integer :: ierror
+
+    if(this%exchangeCommOwned .and. this%exchangeComm /= MPI_COMM_NULL) then
+      call MPI_Comm_free(this%exchangeComm,ierror)
+    endif
+    this%exchangeComm = MPI_COMM_NULL
+    this%exchangeCommOwned = .false.
+    this%exchangeGraphReady = .false.
+    this%nExchangeNeighbors = 0
+    if(allocated(this%exchangeNeighbors)) deallocate(this%exchangeNeighbors)
+
+  endsubroutine ResetExchangeGraph_DomainDecomposition_t
+
+  subroutine EnsureExchangeGraph_DomainDecomposition_t(this,sideInfo,nElem, &
+                                                       nSidesPerElem,mortarInfo, &
+                                                       nMortars,nSub)
+  !! Build the sparse neighbor graph used by halo point-to-point exchanges. The
+  !! graph is derived from conforming remote sides plus mortar interfaces and is
+  !! created once per decomposition/mesh topology.
+    implicit none
+    class(DomainDecomposition_t),intent(inout) :: this
+    integer,intent(in) :: nElem
+    integer,intent(in) :: nSidesPerElem
+    integer,intent(in) :: sideInfo(1:5,1:nSidesPerElem,1:nElem)
+    integer,pointer,intent(in),optional :: mortarInfo(:,:)
+    integer,intent(in) :: nMortars
+    integer,intent(in) :: nSub
+    ! Local
+    integer :: e1,s1,e2Global,neighborRank
+    integer :: m,k,bigElem,smallElem,bigRank,smallRank
+    integer :: nNeighbors,i,ierror
+    logical :: bigIsLocal,smallIsLocal
+    logical,allocatable :: isNeighbor(:)
+    integer,allocatable :: sources(:),destinations(:)
+
+    if(this%exchangeGraphReady) return
+
+    if(.not. this%mpiEnabled .or. this%nRanks <= 1) then
+      this%exchangeComm = this%mpiComm
+      this%exchangeCommOwned = .false.
+      this%exchangeGraphReady = .true.
+      this%nExchangeNeighbors = 0
+      return
+    endif
+
+    allocate(isNeighbor(0:this%nRanks-1))
+    isNeighbor = .false.
+
+    do e1 = 1,nElem
+      do s1 = 1,nSidesPerElem
+        e2Global = sideInfo(3,s1,e1)
+        if(e2Global > 0 .and. e2Global <= this%nElem) then
+          neighborRank = this%elemToRank(e2Global)
+          if(neighborRank /= this%rankId) isNeighbor(neighborRank) = .true.
+        endif
+      enddo
+    enddo
+
+    if(present(mortarInfo)) then
+      if(associated(mortarInfo)) then
+        do m = 1,nMortars
+          bigElem = mortarInfo(1,m)
+          if(bigElem <= 0 .or. bigElem > this%nElem) cycle
+          bigRank = this%elemToRank(bigElem)
+          bigIsLocal = bigRank == this%rankId
+          do k = 1,nSub
+            smallElem = mortarInfo(2*k+1,m)
+            if(smallElem <= 0 .or. smallElem > this%nElem) cycle
+            smallRank = this%elemToRank(smallElem)
+            smallIsLocal = smallRank == this%rankId
+            if(bigIsLocal .neqv. smallIsLocal) then
+              neighborRank = merge(smallRank,bigRank,bigIsLocal)
+              if(neighborRank /= this%rankId) isNeighbor(neighborRank) = .true.
+            endif
+          enddo
+        enddo
+      endif
+    endif
+
+    nNeighbors = count(isNeighbor)
+    allocate(this%exchangeNeighbors(1:max(1,nNeighbors)))
+    this%nExchangeNeighbors = nNeighbors
+    nNeighbors = 0
+    do i = 0,this%nRanks-1
+      if(isNeighbor(i)) then
+        nNeighbors = nNeighbors+1
+        this%exchangeNeighbors(nNeighbors) = i
+      endif
+    enddo
+
+    allocate(sources(1:max(1,this%nExchangeNeighbors)))
+    allocate(destinations(1:max(1,this%nExchangeNeighbors)))
+    if(this%nExchangeNeighbors > 0) then
+      sources(1:this%nExchangeNeighbors) = this%exchangeNeighbors
+      destinations(1:this%nExchangeNeighbors) = this%exchangeNeighbors
+    endif
+
+    call MPI_Dist_graph_create_adjacent(this%mpiComm, &
+                                        this%nExchangeNeighbors, &
+                                        sources, &
+                                        MPI_UNWEIGHTED, &
+                                        this%nExchangeNeighbors, &
+                                        destinations, &
+                                        MPI_UNWEIGHTED, &
+                                        MPI_INFO_NULL, &
+                                        .false., &
+                                        this%exchangeComm, &
+                                        ierror)
+    this%exchangeCommOwned = .true.
+    this%exchangeGraphReady = .true.
+
+    deallocate(sources,destinations,isNeighbor)
+
+  endsubroutine EnsureExchangeGraph_DomainDecomposition_t
 
   subroutine ReserveMessages_DomainDecomposition_t(this,nMsg)
   !! Ensures the non-blocking request and status scratch can hold `nMsg` messages
