@@ -1,0 +1,110 @@
+#  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#
+#  Maintainers : support@fluidnumerics.com
+#  Official Repository : https://github.com/FluidNumerics/self/
+#
+#  Copyright © 2024 Fluid Numerics LLC
+#
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+#
+#  1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+#
+#  2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+#     the documentation and/or other materials provided with the distribution.
+#
+#  3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+#  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+#  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+# Package configuration for SELF. A downstream project uses it with
+#
+#   find_package(SELF CONFIG REQUIRED)
+#   target_link_libraries(myapp PRIVATE SELF::self)
+#
+# SELF::self carries the installed module directory, the preprocessor
+# definitions SELF was built with, and its MPI, HDF5 and FEQ-Parse
+# dependencies, which are found again here on the consumer's machine.
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# How this installation of SELF was configured. These are informational; the
+# matching preprocessor definitions are already on SELF::self.
+set(SELF_VERSION_STRING "@PROJECT_VERSION@")
+set(SELF_DOUBLE_PRECISION @SELF_ENABLE_DOUBLE_PRECISION@)
+set(SELF_ENABLE_MULTITHREADING @SELF_ENABLE_MULTITHREADING@)
+set(SELF_ENABLE_GPU @SELF_ENABLE_GPU@)
+set(SELF_ENABLE_APU @SELF_ENABLE_APU@)
+set(SELF_GPU_BACKEND "@SELF_ACTIVE_GPU_BACKEND@")
+set(SELF_COMPILE_DEFINITIONS "@SELF_INTERFACE_DEFINITIONS@")
+set(SELF_Fortran_COMPILER "@CMAKE_Fortran_COMPILER@")
+set(SELF_Fortran_COMPILER_ID "@CMAKE_Fortran_COMPILER_ID@")
+set(SELF_Fortran_COMPILER_VERSION "@CMAKE_Fortran_COMPILER_VERSION@")
+
+# Fortran module files are only readable by the compiler that wrote them.
+if(CMAKE_Fortran_COMPILER_ID AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL SELF_Fortran_COMPILER_ID)
+  message(WARNING "SELF was built with the ${SELF_Fortran_COMPILER_ID} Fortran compiler, "
+                  "but this project uses ${CMAKE_Fortran_COMPILER_ID}. "
+                  "The SELF module files will most likely not be readable.")
+endif()
+
+find_dependency(MPI COMPONENTS Fortran)
+find_dependency(HDF5 COMPONENTS Fortran)
+
+# FEQ-Parse. The releases SELF is tested with (2.2.x) install a library and a
+# module file but no CMake package, so SELF locates it with find_library. A
+# feq-parse that does ship a package configuration is used when present;
+# otherwise the library is searched for first where SELF found it at build
+# time and then on the usual CMake search paths.
+if(NOT TARGET SELF::feqparse)
+  find_package(feq-parse CONFIG QUIET)
+  set(_self_feqparse_target "")
+  foreach(_self_candidate feq-parse::feqparse feqparse::feqparse feqparse)
+    if(NOT _self_feqparse_target AND TARGET ${_self_candidate})
+      set(_self_feqparse_target ${_self_candidate})
+    endif()
+  endforeach()
+
+  if(_self_feqparse_target)
+    add_library(SELF::feqparse INTERFACE IMPORTED)
+    set_target_properties(SELF::feqparse PROPERTIES
+      INTERFACE_LINK_LIBRARIES ${_self_feqparse_target})
+  else()
+    find_library(SELF_FEQPARSE_LIBRARY NAMES feqparse
+                 HINTS "@SELF_FEQPARSE_LIBRARY_DIR@")
+    find_path(SELF_FEQPARSE_INCLUDE_DIR NAMES feqparse.mod
+              HINTS "@FEQPARSE_INCLUDE_DIRS@")
+    if(NOT SELF_FEQPARSE_LIBRARY OR NOT SELF_FEQPARSE_INCLUDE_DIR)
+      set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE
+          "SELF requires FEQ-Parse; libfeqparse or feqparse.mod was not found. Add its install prefix to CMAKE_PREFIX_PATH.")
+      set(${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)
+      return()
+    endif()
+    add_library(SELF::feqparse UNKNOWN IMPORTED)
+    set_target_properties(SELF::feqparse PROPERTIES
+      IMPORTED_LOCATION "${SELF_FEQPARSE_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${SELF_FEQPARSE_INCLUDE_DIR}")
+  endif()
+  unset(_self_feqparse_target)
+  unset(_self_candidate)
+endif()
+
+# The GPU and APU backends link the HIP or CUDA runtime.
+if(SELF_GPU_BACKEND STREQUAL "HIP")
+  find_dependency(hip)
+elseif(SELF_GPU_BACKEND STREQUAL "CUDA")
+  find_dependency(CUDAToolkit)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/SELFTargets.cmake")
+
+check_required_components(SELF)

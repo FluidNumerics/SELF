@@ -71,25 +71,86 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
 add_library(self SHARED ${SELF_FSRC} ${SELF_BACKEND_CPPSRC} ${SELF_BACKEND_FSRC})
 #set_target_properties(self PROPERTIES OUTPUT_NAME "self") 
+# The absolute library and include paths that SELF's own build has always used
+# are wrapped in BUILD_INTERFACE, so the build of libself and of the in-tree tests
+# is unchanged. The installed package replaces them with imported targets that
+# SELFConfig.cmake re-resolves on the consumer's machine (see cmake/SELFConfig.cmake.in).
 target_link_libraries(self PUBLIC
-                        ${FEQPARSE_LIBRARIES}
+                        "$<BUILD_INTERFACE:${FEQPARSE_LIBRARIES}>"
+                        "$<INSTALL_INTERFACE:SELF::feqparse>"
                         HDF5::HDF5
-                        ${MPI_Fortran_LIBRARIES}
+                        "$<BUILD_INTERFACE:${MPI_Fortran_LIBRARIES}>"
+                        "$<INSTALL_INTERFACE:MPI::MPI_Fortran>"
                         ${BACKEND_LIBRARIES})
 
 target_include_directories(self PUBLIC
-                        ${FEQPARSE_INCLUDE_DIRS}
-                        ${HDF5_INCLUDE_DIRS}
-                        ${MPI_Fortran_INCLUDE_DIRS})
+                        "$<BUILD_INTERFACE:${FEQPARSE_INCLUDE_DIRS}>"
+                        "$<BUILD_INTERFACE:${HDF5_INCLUDE_DIRS}>"
+                        "$<BUILD_INTERFACE:${MPI_Fortran_INCLUDE_DIRS}>")
 
-target_compile_options(self PUBLIC -fPIC)    
+# Consumers find SELF's .mod files here, in the build tree or the install tree.
+target_include_directories(self INTERFACE
+                        $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
+                        $<INSTALL_INTERFACE:include>)
+
+# SELF itself is compiled with these switches through the global CMAKE_Fortran_FLAGS
+# set in the top level CMakeLists.txt. The installed target hands the same switches
+# to consumers, so that code which tests them sees the configuration libself was
+# built with. They are INSTALL_INTERFACE only, so the in-tree tests and examples,
+# which already receive them from the global flags, are compiled exactly as before.
+set(SELF_INTERFACE_DEFINITIONS "")
+if(SELF_ENABLE_DOUBLE_PRECISION)
+    list(APPEND SELF_INTERFACE_DEFINITIONS DOUBLE_PRECISION)
+endif()
+if(SELF_ENABLE_MULTITHREADING)
+    list(APPEND SELF_INTERFACE_DEFINITIONS MULTITHREADING)
+endif()
+if(SELF_ENABLE_GPU)
+    list(APPEND SELF_INTERFACE_DEFINITIONS ENABLE_GPU)
+elseif(SELF_ENABLE_APU)
+    list(APPEND SELF_INTERFACE_DEFINITIONS ENABLE_APU)
+endif()
+if(SELF_ACTIVE_GPU_BACKEND STREQUAL "HIP")
+    list(APPEND SELF_INTERFACE_DEFINITIONS HAVE_HIP)
+elseif(SELF_ACTIVE_GPU_BACKEND STREQUAL "CUDA")
+    list(APPEND SELF_INTERFACE_DEFINITIONS HAVE_CUDA)
+endif()
+if(SELF_INTERFACE_DEFINITIONS)
+    target_compile_definitions(self INTERFACE "$<INSTALL_INTERFACE:${SELF_INTERFACE_DEFINITIONS}>")
+endif()
+
+target_compile_options(self PUBLIC -fPIC)
 
 set_target_properties(self PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties(self PROPERTIES PUBLIC_HEADER ${SELF_HEADERS})
 
 install(TARGETS self
+        EXPORT SELFTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include)
+
+# CMake package: find_package(SELF CONFIG) then link SELF::self.
+include(CMakePackageConfigHelpers)
+set(SELF_INSTALL_CMAKEDIR lib/cmake/SELF)
+
+install(EXPORT SELFTargets
+        NAMESPACE SELF::
+        DESTINATION ${SELF_INSTALL_CMAKEDIR})
+
+# Recorded in SELFConfig.cmake as the first place to look for FEQ-Parse.
+get_filename_component(SELF_FEQPARSE_LIBRARY_DIR "${FEQPARSE_LIBRARIES}" DIRECTORY)
+
+configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/SELFConfig.cmake.in
+                              ${CMAKE_CURRENT_BINARY_DIR}/SELFConfig.cmake
+                              INSTALL_DESTINATION ${SELF_INSTALL_CMAKEDIR})
+
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/SELFConfigVersion.cmake
+                                 VERSION ${PROJECT_VERSION}
+                                 COMPATIBILITY SameMajorVersion)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SELFConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/SELFConfigVersion.cmake
+        DESTINATION ${SELF_INSTALL_CMAKEDIR})

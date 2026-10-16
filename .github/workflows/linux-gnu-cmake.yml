@@ -151,6 +151,17 @@ jobs:
           files: /home/runner/work/coverage.info
           flags: github-serial-ctests
 
+      - name: Build an external project against the installed package
+        shell: spack-bash {0}
+        run: |
+          spack env activate ./share/spack-env/
+          cmake --install ./build --prefix /home/runner/work/self-install
+          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} \
+          cmake -S ./test/external_consumer -B ./build-consumer \
+                -DCMAKE_PREFIX_PATH=/home/runner/work/self-install
+          cmake --build ./build-consumer
+          ctest --output-on-failure --test-dir ./build-consumer
+
       - name: Run memory checks with Valgrind (only Linux and GNU compilers)
         if: ${{ matrix.memcheck }}
         run: |
