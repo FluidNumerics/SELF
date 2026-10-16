@@ -218,6 +218,7 @@ add_fortran_tests (
     "mesh2d_periodicstructured.f90"
     "mappedscalarbrgradient_2d_periodic.f90"
     "mesh3d_extruded_connectivity.f90"
+    "mesh3d_extruded_hohqmesh.f90"
     "mesh3d_extruded_guard_mortar.f90"
     "mesh3d_extruded_guard_levels.f90"
     "mesh3d_extruded_guard_top.f90"

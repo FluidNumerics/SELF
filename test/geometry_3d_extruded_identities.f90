@@ -54,6 +54,20 @@ program test
 !! property: J a^zeta_z is the curl form of J_2, which equals the determinant J_2 only
 !! when the 2-D products are resolved (N >= 2 nGeo) or the surface element is affine.
 !!
+!! The column sweeps rely on three weaker properties, which hold to round-off for every
+!! N because each one only involves products that are linear in zeta or constant along
+!! a vertical grid line:
+!!
+!!   (a) the vertical components of J a^xi and J a^eta vanish;
+!!   (b) J a^zeta_z is constant along every vertical grid line, inside an element and
+!!       from layer to layer of a column (it depends on X and Y only);
+!!   (c) the slope components J a^zeta_x and J a^zeta_y are continuous across the faces
+!!       between layers (they are linear in zeta inside a layer, and the two layers
+!!       evaluate them on the same level surface).
+!!
+!! The test also reports (d), J - J a^zeta_z Z_zeta, with J the determinant SEMHex
+!! stores; it is the vertical part of I0.
+!!
 !! The test asserts every identity to round-off, 100 N**4 eps relative, where that
 !! analysis says it is exact, and prints the measured truncation error where it is not. Cases: a structured
 !! (affine, nGeo = 1) surface and the curved HOHQMesh Circle surface (nGeo = 7), each
@@ -137,6 +151,9 @@ contains
     real(prec) :: scaleJa,scaleJ2,scaleJ,zzeta,res
     ! Errors, (1) on flat elements and (2) on sloping elements
     real(prec) :: errG1(1:2),errG2(1:2),errI0h(1:2),errI0z(1:2)
+    ! Column-sweep properties (a), (b), (c) and the Jacobian consistency (d), absolute
+    real(prec) :: errA,errB,errC,errD,scaleS,top,bot
+    integer :: ii,c
 
     r = 0
     nGeo = surf%nGeo
@@ -210,6 +227,54 @@ contains
       enddo
     enddo
 
+    ! Properties the column sweeps rely on, measured on every element for every N:
+    !  (a) the vertical components of J a^xi and J a^eta vanish;
+    !  (b) J a^zeta_z, as stored, does not vary along a vertical grid line, neither
+    !      with the zeta node inside an element nor from layer to layer of a column;
+    !  (c) the slope components J a^zeta_x, J a^zeta_y are continuous across the
+    !      faces between layers. Both traces are extrapolated here from the interior
+    !      with the interpolant's boundary matrix, before SEMHex flips the sign of the
+    !      stored bottom-face trace;
+    !  (d) J, which SEMHex stores as the determinant of the covariant basis, against
+    !      J a^zeta_z Z_zeta (reported only; it is the vertical part of I0).
+    errA = 0.0_prec
+    errB = 0.0_prec
+    errC = 0.0_prec
+    errD = 0.0_prec
+    scaleS = maxval(abs(geom3%dsdx%interior(:,:,:,:,1,1:2,3)))
+    do e2 = 1,surf%nElem
+      do k = 1,nz
+        e3 = (e2-1)*nz+k
+        do kk = 1,N+1
+          do j = 1,N+1
+            do i = 1,N+1
+              errA = max(errA,abs(geom3%dsdx%interior(i,j,kk,e3,1,3,1)), &
+                         abs(geom3%dsdx%interior(i,j,kk,e3,1,3,2)))
+              errB = max(errB,abs(geom3%dsdx%interior(i,j,kk,e3,1,3,3)- &
+                                  geom3%dsdx%interior(i,j,1,(e2-1)*nz+1,1,3,3)))
+              errD = max(errD,abs(geom3%J%interior(i,j,kk,e3,1)- &
+                                  geom3%dsdx%interior(i,j,kk,e3,1,3,3)*geom3%dxds%interior(i,j,kk,e3,1,3,3)))
+            enddo
+          enddo
+        enddo
+        if(k < nz) then
+          do c = 1,2
+            do j = 1,N+1
+              do i = 1,N+1
+                top = 0.0_prec
+                bot = 0.0_prec
+                do ii = 1,N+1
+                  top = top+interp%bMatrix(ii,2)*geom3%dsdx%interior(i,j,ii,e3,1,c,3)
+                  bot = bot+interp%bMatrix(ii,1)*geom3%dsdx%interior(i,j,ii,e3+1,1,c,3)
+                enddo
+                errC = max(errC,abs(top-bot))
+              enddo
+            enddo
+          enddo
+        endif
+      enddo
+    enddo
+
     errG1 = errG1/scaleJa
     errG2 = errG2/scaleJ2
     errI0h = errI0h/scaleJ
@@ -217,6 +282,16 @@ contains
 
     print'(A,A,A,I0,A,I0,A,L1,A,I0,A,I0,A,ES10.3)',"Case ",label,": N = ",N,", nGeo = ",nGeo,", N >= 2 nGeo : ",resolved, &
       ", flat elements ",nElems(1),", sloping elements ",nElems(2),", round-off threshold ",tolerance
+    print'(A,ES12.4,A,ES12.4)',"    (a) |Ja^xi_z|,|Ja^eta_z|      max abs ",errA,", relative ",errA/scaleJa
+    print'(A,ES12.4,A,ES12.4)',"    (b) Ja^zeta_z along a column   max abs ",errB,", relative ",errB/scaleJ2
+    ! (c) is relative to the slope magnitude, or to J_2 on flat levels where there is none
+    scaleS = max(scaleS,scaleJ2)
+    print'(A,ES12.4,A,ES12.4)',"    (c) Ja^zeta_x,y jump at levels max abs ",errC,", relative ",errC/scaleS
+    print'(A,ES12.4,A,ES12.4)',"    (d) J - Ja^zeta_z Z_zeta       max abs ",errD,", relative ",errD/scaleJ
+    call Report(r,tolerance,"(a)             ",errA/scaleJa,.true.)
+    call Report(r,tolerance,"(b)             ",errB/scaleJ2,.true.)
+    call Report(r,tolerance,"(c)             ",errC/scaleS,.true.)
+    call Report(r,tolerance,"(d)             ",errD/scaleJ,resolved)
     if(nElems(1) > 0) then
       call Report(r,tolerance,"flat    G1      ",errG1(1),.true.)
       call Report(r,tolerance,"flat    I0 x,y  ",errI0h(1),.true.)

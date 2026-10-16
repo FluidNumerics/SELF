@@ -1,0 +1,35 @@
+%
+% Seamount basin: a circle of radius 2 over the bottom f(x,y).
+%
+\begin{CONTROL_INPUT}
+   \begin{RUN_PARAMETERS}
+      mesh file name   = Seamount2D.mesh
+      plot file name   = none
+      stats file name  = none
+      mesh file format = ISM
+      polynomial order = 4
+      plot file format = skeleton
+   \end{RUN_PARAMETERS}
+   \begin{BACKGROUND_GRID}
+      background grid size = [0.75,0.75,0.75]
+   \end{BACKGROUND_GRID}
+   \begin{SPRING_SMOOTHER}
+      smoothing            = ON
+      smoothing type       = LinearAndCrossBarSpring
+      number of iterations = 25
+   \end{SPRING_SMOOTHER}
+\end{CONTROL_INPUT}
+\begin{MODEL}
+\begin{OUTER_BOUNDARY}
+   \begin{CIRCULAR_ARC}
+      name        = wall
+      units       = degrees
+      center      = [0.0,0.0,0.0]
+      radius      = 2.0
+      start angle = 0.0
+      end angle   = 360.0
+   \end{CIRCULAR_ARC}
+\end{OUTER_BOUNDARY}
+
+\end{MODEL}
+\end{FILE}

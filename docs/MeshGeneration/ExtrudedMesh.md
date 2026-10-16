@@ -171,7 +171,17 @@ We therefore have the following, which the test `geometry_3d_extruded_identities
 - With $N \ge 2N_{geo}$, the discrete metric terms satisfy the three identities to round-off: $J\vec{a}^\xi$ and $J\vec{a}^\eta$ have no vertical component and equal $Z_\zeta$ times the surface contravariant vectors, $J\vec{a}^\zeta_z = J_2$, and $\sum_i J\vec{a}^i D_i Z = J\hat{z}$.
 - On an element with flat levels, $Z_\zeta$ is constant over the element, so the statements about $J\vec{a}^\xi$ and $J\vec{a}^\eta$ and the horizontal components of $\sum_i J\vec{a}^i D_i Z$ hold to round-off for every $N$.
 - The vertical statements, $J\vec{a}^\zeta_z = J_2$ and the vertical component of $\sum_i J\vec{a}^i D_i Z = J\hat{z}$, compare the curl form of $J_2$ with the determinant $J_2$, and they hold to round-off only for $N \ge 2N_{geo}$ or an affine surface element, also on flat levels.
+- Three weaker properties hold to round-off for every $N$, because each involves only products that are linear in $\zeta$ or constant along a vertical grid line: the vertical components of $J\vec{a}^\xi$ and $J\vec{a}^\eta$ vanish; the stored $J\vec{a}^\zeta_z$ is the same at every node of a vertical grid line, inside an element and from layer to layer; and the slope components $J\vec{a}^\zeta_x$, $J\vec{a}^\zeta_y$ are continuous across the faces between layers.
 - Otherwise the identities hold to truncation error. On the curved Circle surface ($N_{geo} = 7$) with sigma levels at $N = 7$, the measured relative error of the horizontal statements is about $2\times 10^{-9}$ and that of the vertical ones about $3\times 10^{-11}$.
+
+### Relation to HOHQMesh extrusion
+
+HOHQMesh can also sweep a quad mesh upward over a bottom topography `f(x,y)` to a flat top at height $H$ (the `SIMPLE_EXTRUSION` and `TOPOGRAPHY` blocks).
+It spreads the topography over the whole column, placing level $j$ at $z_j = f\,(1 - j/n_z) + H\, j/n_z$, and it writes the elements layer by layer.
+With $z' = z - H$ and $h = H - f$ these are the sigma levels $\sigma_j = j/n_z - 1$, so `ExtrudedSigmaLevels` with those $\sigma_j$ reproduces HOHQMesh's corner nodes and bottom topography, after reordering its elements column by column.
+The interior nodes differ: the ISM file carries curved face data only for faces on the topography or on a curved boundary, so the faces of the upper layers inside the domain are rebuilt from their corners when the file is read.
+The `share/mesh/Seamount` fixtures and the test `mesh3d_extruded_hohqmesh` show both.
+`ExtrudedMesh` builds the mesh in memory instead, which is what an adaptive run needs when it rebuilds the columns above a refined surface.
 
 ### Current limitations
 
