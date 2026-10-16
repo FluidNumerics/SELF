@@ -147,6 +147,7 @@ contains
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
+    this%nLayers = 0
     call this%decomp%Free()
 
     call gpuCheck(hipFree(this%sideInfo_gpu))

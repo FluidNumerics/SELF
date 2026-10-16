@@ -57,6 +57,7 @@ module SELF_DomainDecomposition
     procedure :: Free => Free_DomainDecomposition
 
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
+    procedure :: GenerateDecompositionFromOffsets => GenerateDecompositionFromOffsets_DomainDecomposition
 
     procedure :: BuildHaloExchange => BuildHaloExchange_DomainDecomposition
 
@@ -181,6 +182,26 @@ contains
     call gpuCheck(hipMemcpy(this%elemToRank_gpu,c_loc(this%elemToRank),sizeof(this%elemToRank),hipMemcpyHostToDevice))
 
   endsubroutine SetElemToRank_DomainDecomposition
+
+  subroutine GenerateDecompositionFromOffsets_DomainDecomposition(this,offsetElem,maxMsg)
+  !! Device-aware wrapper of GenerateDecompositionFromOffsets_DomainDecomposition_t: builds
+  !! the host decomposition from the prescribed offsets, then mirrors elemToRank to the
+  !! device, as SetElemToRank does for the balanced decomposition.
+    implicit none
+    class(DomainDecomposition),intent(inout) :: this
+    integer,intent(in) :: offsetElem(1:this%nRanks+1)
+    integer,intent(in) :: maxMsg
+
+    if(associated(this%elemToRank)) then
+      call gpuCheck(hipFree(this%elemToRank_gpu))
+    endif
+
+    call this%DomainDecomposition_t%GenerateDecompositionFromOffsets(offsetElem,maxMsg)
+
+    call gpuCheck(hipMalloc(this%elemToRank_gpu,sizeof(this%elemToRank)))
+    call gpuCheck(hipMemcpy(this%elemToRank_gpu,c_loc(this%elemToRank),sizeof(this%elemToRank),hipMemcpyHostToDevice))
+
+  endsubroutine GenerateDecompositionFromOffsets_DomainDecomposition
 
   subroutine BuildHaloExchange_DomainDecomposition(this,sideInfo,nElem,nSidesPerElem)
   !! Build the aggregated halo exchange tables for the mesh this domain

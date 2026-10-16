@@ -217,6 +217,14 @@ add_fortran_tests (
     "mesh3d_globalsideids.f90"
     "mesh2d_periodicstructured.f90"
     "mappedscalarbrgradient_2d_periodic.f90"
+    "mesh3d_extruded_connectivity.f90"
+    "mesh3d_extruded_guard_mortar.f90"
+    "mesh3d_extruded_guard_levels.f90"
+    "mesh3d_extruded_guard_top.f90"
+    "mesh3d_extruded_guard_hybriddepth.f90"
+    "geometry_3d_extruded_identities.f90"
+    "mappedscalarsideexchange_3d_extruded.f90"
+    "mappedvectordgdivergence_3d_extruded.f90"
     "mappedscalarderivative_1d_constant.f90"
     "mappedscalarbrderivative_1d_constant.f90"
     "mappedscalardgderivative_1d_constant.f90"
@@ -379,6 +387,10 @@ set_tests_properties(
     meshrefine_3d_guard_multirank
     quadtree_2d_guard_multirank
     octree_3d_guard_multirank
+    mesh3d_extruded_guard_mortar
+    mesh3d_extruded_guard_levels
+    mesh3d_extruded_guard_top
+    mesh3d_extruded_guard_hybriddepth
     transfer_plan_2d_guard_badleaf
     transfer_plan_3d_guard_badleaf
     transfer_plan_2d_guard_snapshot
@@ -456,7 +468,9 @@ add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
                        "structuredmesh_external_comm_3d.f90"
                        "structuredmesh_subcomm_2d.f90"
                        "read_hopr_external_comm_2d.f90"
-                       "mappedscalarbrgradient_2d_periodic_mpi.f90" )
+                       "mappedscalarbrgradient_2d_periodic_mpi.f90"
+                       "mappedscalarsideexchange_3d_extruded_mpi.f90"
+                       "mappedvectordgdivergence_3d_extruded_mpi.f90" )
 
 # Temporal order-of-accuracy test for the low-storage Runge-Kutta integrators. One executable
 # (which carries a device kernel for its time-dependent prescribed boundary condition on GPU
