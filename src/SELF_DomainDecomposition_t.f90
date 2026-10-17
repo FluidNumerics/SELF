@@ -56,6 +56,7 @@ module SELF_DomainDecomposition_t
     procedure :: Free => Free_DomainDecomposition_t
 
     procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition_t
+    procedure :: GenerateDecompositionFromOffsets => GenerateDecompositionFromOffsets_DomainDecomposition_t
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
     procedure :: ReserveMessages => ReserveMessages_DomainDecomposition_t
     procedure :: CountRemoteSides => CountRemoteSides_DomainDecomposition_t
@@ -226,6 +227,63 @@ contains
       this%offSetElem(this%rankId+2)-this%offSetElem(this%rankId+1)
 
   endsubroutine GenerateDecomposition_DomainDecomposition_t
+
+  subroutine GenerateDecompositionFromOffsets_DomainDecomposition_t(this,offsetElem,maxMsg)
+  !! Builds the decomposition from a prescribed contiguous partition rather than from
+  !! the balanced one GenerateDecomposition computes. Rank r-1 (r = 1..nRanks) owns
+  !! global elements offsetElem(r)+1 .. offsetElem(r+1), and the global element count
+  !! is offsetElem(nRanks+1).
+  !!
+  !! A mesh derived from another mesh uses this to inherit its parent's partition. An
+  !! extruded 3-D mesh, for instance, keeps every column of nz elements on the rank
+  !! that owns the column's surface element by passing nz times the surface mesh's
+  !! offsets; the balanced partition of nz*nElem2D elements would in general split a
+  !! column.
+  !!
+  !!  Input
+  !!    - offsetElem(1:nRanks+1) : element offsets, with offsetElem(1) = 0 and
+  !!      non-decreasing entries
+  !!    - maxMsg : initial size of the non-blocking request scratch; exchanges grow it
+  !!      as needed through ReserveMessages
+    implicit none
+    class(DomainDecomposition_t),intent(inout) :: this
+    integer,intent(in) :: offsetElem(1:this%nRanks+1)
+    integer,intent(in) :: maxMsg
+    ! Local
+    integer :: iel,r
+
+    if(offsetElem(1) /= 0) then
+      error stop "GenerateDecompositionFromOffsets : offsetElem(1) must be 0"
+    endif
+    do r = 1,this%nRanks
+      if(offsetElem(r+1) < offsetElem(r)) then
+        error stop "GenerateDecompositionFromOffsets : offsetElem must be non-decreasing"
+      endif
+    enddo
+
+    this%offsetElem(1:this%nRanks+1) = offsetElem(1:this%nRanks+1)
+    this%nElem = offsetElem(this%nRanks+1)
+
+    if(associated(this%elemToRank)) deallocate(this%elemToRank)
+    allocate(this%elemToRank(1:this%nElem))
+    do iel = 1,this%nElem
+      call ElemToRank(this%nRanks, &
+                      this%offSetElem, &
+                      iel, &
+                      this%elemToRank(iel))
+    enddo
+
+    if(allocated(this%requests)) deallocate(this%requests)
+    if(allocated(this%stats)) deallocate(this%stats)
+
+    allocate(this%requests(1:maxMsg))
+    allocate(this%stats(MPI_STATUS_SIZE,1:maxMsg))
+    this%maxMsg = maxMsg
+
+    print*,__FILE__//" : Rank ",this%rankId+1," : n_elements = ", &
+      this%offSetElem(this%rankId+2)-this%offSetElem(this%rankId+1)
+
+  endsubroutine GenerateDecompositionFromOffsets_DomainDecomposition_t
 
   subroutine ReserveMessages_DomainDecomposition_t(this,nMsg)
   !! Ensures the non-blocking request and status scratch can hold `nMsg` messages

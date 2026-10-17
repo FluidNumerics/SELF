@@ -32,6 +32,7 @@ module SELF_Mesh_3D_t
   use SELF_SupportRoutines
   use SELF_HDF5
   use SELF_Mesh
+  use SELF_Mesh_2D_t,only:Mesh2D_t
   use SELF_DomainDecomposition
 
   ! External Libs !
@@ -148,6 +149,15 @@ module SELF_Mesh_3D_t
     integer :: nMaterials = 0
     integer,allocatable :: elemMaterial(:)
     character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: materialNames(:)
+    ! Layer count of a mesh built by ExtrudedMesh, and 0 for every other mesh.
+    !
+    ! An extruded mesh stores its elements column by column: local element
+    ! e3 = (e2-1)*nLayers + k is layer k (k = 1 at the bottom) of the column above local
+    ! element e2 of the surface Mesh2D it was built from, and the same rule maps global
+    ! ids. A column therefore never straddles two ranks, and the surface element and
+    ! layer of an element follow from its id alone:
+    !   e2 = (e3-1)/nLayers + 1 ,  k = e3 - (e2-1)*nLayers
+    integer :: nLayers = 0
 
   contains
 
@@ -163,6 +173,8 @@ module SELF_Mesh_3D_t
     generic,public :: PeriodicStructuredMesh => UniformPeriodicMesh_Mesh3D_t
     procedure,private :: UniformPeriodicMesh_Mesh3D_t
 
+    procedure,public :: ExtrudedMesh => ExtrudedMesh_Mesh3D_t
+
     procedure,public :: Read_HOPr => Read_HOPr_Mesh3D_t
     procedure,public :: Read_HOHQMesh => Read_HOHQMesh_Mesh3D_t
 
@@ -175,6 +187,8 @@ module SELF_Mesh_3D_t
   endtype Mesh3D_t
 
   integer,private :: CGNStoSELFflip(1:6,1:6,1:4)
+
+  private :: GeometryNodes1D
 
   ! This table maps the primary side, secondary side, and CGNS flip values
   ! to indexing flips that are used in SELF.
@@ -365,6 +379,7 @@ contains
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
+    this%nLayers = 0
     call this%decomp%Free()
 
   endsubroutine Free_Mesh3D_t
@@ -443,6 +458,7 @@ contains
 
   pure function elementid(i,j,k,ti,tj,tk,nxpertile,nypertile,nzpertile, &
                           ntilex,ntiley,ntilez) result(eid)
+    implicit none
     integer,intent(in) :: i,j,k
     integer,intent(in) :: ti,tj,tk
     integer,intent(in) :: nxpertile,nypertile,nzpertile
@@ -460,6 +476,7 @@ contains
   !! Map a global element position (gx,gy,gz), with gx in [1,nX] etc., to the
   !! tile-ordered element id used throughout the structured mesh. This is the
   !! inverse of the (i,ti) decomposition: gx = i + nxpertile*(ti-1).
+    implicit none
     integer,intent(in) :: gx,gy,gz
     integer,intent(in) :: nxpertile,nypertile,nzpertile
     integer,intent(in) :: ntilex,ntiley,ntilez
@@ -1493,6 +1510,408 @@ contains
 
   endsubroutine UniformPeriodicMesh_Mesh3D_t
 
+  subroutine GeometryNodes1D(nGeo,quadrature,nodes)
+  !! Returns the nGeo+1 one-dimensional geometry node positions, in [-1,1], of a mesh
+  !! whose node coordinates are sampled on `quadrature` points. These are the points
+  !! GenerateFromMesh interpolates the node coordinates from (see Lagrange_t%Init), so
+  !! a coordinate sampled here is reproduced exactly by the geometry interpolant.
+    implicit none
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: quadrature
+    real(prec),intent(out) :: nodes(1:nGeo+1)
+    ! Local
+    real(prec) :: weights(1:nGeo+1)
+
+    if(quadrature == GAUSS .or. quadrature == GAUSS_LOBATTO) then
+      call LegendreQuadrature(nGeo,nodes,weights,quadrature)
+    elseif(quadrature == CHEBYSHEV_GAUSS .or. quadrature == CHEBYSHEV_GAUSS_LOBATTO) then
+      call ChebyshevQuadrature(nGeo,nodes,weights,quadrature)
+    elseif(quadrature == UNIFORM) then
+      nodes = UniformPoints(-1.0_prec,1.0_prec,0,nGeo)
+    else
+      error stop "GeometryNodes1D : unrecognized mesh quadrature type"
+    endif
+
+  endsubroutine GeometryNodes1D
+
+  subroutine ExtrudedMesh_Mesh3D_t(this,mesh2d,zLevels,bottomBC,topBC)
+  !! Builds a layered hexahedral mesh by extruding a surface mesh downward through
+  !! nz = size(zLevels,3)-1 layers bounded by the level surfaces z_0 < z_1 < ... < z_nz.
+  !!
+  !! Element k (k = 1..nz) of the column above surface element Q is the map
+  !!
+  !!   x(xi,eta,zeta) = ( X(xi,eta), Y(xi,eta), Z(xi,eta,zeta) )
+  !!
+  !! where (X,Y) is Q's isoparametric map of degree nGeo and, at every geometry node
+  !! (xi_i,eta_j),
+  !!
+  !!   Z(xi_i,eta_j,zeta) = (1-zeta)/2 z_{k-1}(xi_i,eta_j) + (1+zeta)/2 z_k(xi_i,eta_j).
+  !!
+  !! The horizontal coordinates do not depend on zeta, so lines of constant (xi,eta)
+  !! are vertical, and Z is linear in zeta within a layer. The 3-D mesh keeps the 2-D
+  !! nGeo and quadrature: its node coordinates are sampled on the same nGeo+1 points
+  !! in all three directions, so they form the usual (1:3,1:nGeo+1,1:nGeo+1,1:nGeo+1,
+  !! 1:nElem) array and the linear vertical map is represented exactly. The two
+  !! endpoint weights are exact in floating point, so the top face of layer k and the
+  !! bottom face of layer k+1 are sampled from the same z_k and agree bitwise.
+  !!
+  !!  Input
+  !!    - this : Fresh/empty Mesh3D_t object. The result is an ordinary Mesh3D, so it
+  !!      works with SEMHex, the mapped data types and the DG models unchanged.
+  !!    - mesh2d : The surface mesh, already built and decomposed (any Mesh2D: structured,
+  !!      periodic structured, HOPr or HOHQMesh, with nGeo >= 1). It must be conforming:
+  !!      a mesh with mortar edges (nMortars > 0) is rejected, since the anisotropic 3-D
+  !!      mortar it would need is not implemented.
+  !!    - zLevels(1:nGeo+1,1:nGeo+1,0:nz,1:mesh2d%nElem) : Level heights z_k at the
+  !!      geometry nodes of each rank-local surface element, in the length unit of the
+  !!      mesh coordinates, positive upward. Required: nz >= 1, z_k strictly increasing
+  !!      in k at every node, and z_nz = 0 exactly (a flat top at the reference sea
+  !!      surface). The levels must also be continuous across lateral faces, i.e. two
+  !!      elements must give the same z_k at a shared node. That holds whenever the
+  !!      levels are computed pointwise from a continuous bathymetry sampled at the
+  !!      geometry nodes, as ExtrudedSigmaLevels and ExtrudedHybridLevels do; it is not
+  !!      checked here, because the neighbor of a lateral face may be on another rank.
+  !!    - bottomBC : Boundary condition id of the bottom face of every column (z = z_0)
+  !!    - topBC : Boundary condition id of the top face of every column (z = 0)
+  !!
+  !!  Output
+  !!    - this : Mesh3D_t object with nLayers = nz and nz*mesh2d%nElem local elements
+  !!
+  !! Ordering and decomposition. Local element e3 = (e2-1)*nz + k is layer k of local
+  !! surface element e2, and global ids follow the same rule. The 3-D decomposition is
+  !! the 2-D one expanded by nz (offsetElem3D = nz*offsetElem2D), so a column is never
+  !! split across ranks and the local surface element e2 of an extruded element is
+  !! element e2 of the caller's mesh2d. The surface mesh is not copied; keep it alive if
+  !! column operators need its geometry.
+  !!
+  !! Connectivity. The 2-D sides 1..4 (south, east, north, west) become the lateral
+  !! faces 2..5 of the 3-D element, and faces 1 and 6 are the bottom and top. A lateral
+  !! face inherits the neighbor, neighbor side and boundary id of its 2-D edge, in the
+  !! same layer. Its trace coordinates are (edge coordinate, zeta) on both sides
+  !! (BoundaryInterp: faces 2,4 -> (xi1,xi3), faces 3,5 -> (xi2,xi3)) and zeta runs
+  !! upward in both elements, so the SELF face flip equals the 2-D edge flip: 0 maps to
+  !! face flip 0 (i2 = i, j2 = j) and 1 maps to face flip 1 (i2 = N-i, j2 = j). Bottom
+  !! and top faces between layers are conforming with flip 0.
+  !!
+  !! Global side ids are unique across ranks and serve as MPI message tags. The lateral
+  !! face of layer k on the 2-D edge with id g has id sign(g)*((|g|-1)*nz + k), so the
+  !! HOPr master/slave sign of the 2-D id is preserved. The horizontal faces of the
+  !! column above global surface element E are numbered after all lateral ones,
+  !! nz*nUniqueSides2D + (E-1)*(nz+1) + l for level l-1 (l = 1..nz+1), and
+  !!
+  !!   nUniqueSides = nz*nUniqueSides2D + nGlobalElem2D*(nz+1).
+  !!
+  !! The node ids (globalNodeIDs) and elemInfo are zeroed: the solver does not use
+  !! them, and the flips are set directly rather than through RecalculateFlip.
+    implicit none
+    class(Mesh3D_t),intent(out) :: this
+    class(Mesh2D_t),intent(in) :: mesh2d
+    real(prec),intent(in) :: zLevels(1:,1:,0:,1:)
+    integer,intent(in) :: bottomBC
+    integer,intent(in) :: topBC
+    ! Local
+    integer :: nz,nGeo,nElem2D,nElem3D,nRanks
+    integer :: nGlobalElem2D,nUniqueSides2D,nUniqueSides3D,nHorizontalBase
+    integer :: e2,e3,k,s,i,j,nk
+    integer :: E2global,E2neighbor,g,s2,flip
+    integer,allocatable :: offsetElem3D(:)
+    real(prec) :: zeta(1:mesh2d%nGeo+1)
+
+    nGeo = mesh2d%nGeo
+    nElem2D = mesh2d%nElem
+    nz = size(zLevels,3)-1
+
+    ! ---- Validate the surface mesh and the levels ----
+    if(.not. mesh2d%decomp%initialized) then
+      error stop "ExtrudedMesh : the surface mesh has no domain decomposition; build it first"
+    endif
+    if(mesh2d%nMortars > 0) then
+      error stop "ExtrudedMesh : the surface mesh has nonconforming (mortar) edges, "// &
+        "which need anisotropic 3-D mortars that are not implemented"
+    endif
+    if(nz < 1) then
+      error stop "ExtrudedMesh : zLevels must carry at least two levels (nz >= 1)"
+    endif
+    if(size(zLevels,1) /= nGeo+1 .or. size(zLevels,2) /= nGeo+1) then
+      error stop "ExtrudedMesh : zLevels must be dimensioned (1:nGeo+1,1:nGeo+1,0:nz,1:nElem2D)"
+    endif
+    if(size(zLevels,4) /= nElem2D) then
+      error stop "ExtrudedMesh : the last dimension of zLevels must equal the local surface element count"
+    endif
+    do e2 = 1,nElem2D
+      do j = 1,nGeo+1
+        do i = 1,nGeo+1
+          if(zLevels(i,j,nz,e2) /= 0.0_prec) then
+            error stop "ExtrudedMesh : the top level zLevels(:,:,nz,:) must be exactly 0"
+          endif
+          do k = 1,nz
+            if(.not.(zLevels(i,j,k,e2) > zLevels(i,j,k-1,e2))) then
+              error stop "ExtrudedMesh : zLevels must be strictly increasing in the level index"
+            endif
+          enddo
+        enddo
+      enddo
+    enddo
+
+    nRanks = mesh2d%decomp%nRanks
+    nGlobalElem2D = mesh2d%decomp%offsetElem(nRanks+1)
+    if(nElem2D /= mesh2d%decomp%offsetElem(mesh2d%decomp%rankId+2)- &
+       mesh2d%decomp%offsetElem(mesh2d%decomp%rankId+1)) then
+      ! The columns inherit the surface partition, so the surface mesh must hold
+      ! exactly the elements its decomposition assigns to this rank.
+      error stop "ExtrudedMesh : the surface mesh does not hold the elements its decomposition assigns to this rank"
+    endif
+    nUniqueSides2D = mesh2d%nUniqueSides
+    do e2 = 1,nElem2D
+      do s = 1,4
+        g = mesh2d%sideInfo(2,s,e2)
+        if(g == 0 .or. abs(g) > nUniqueSides2D) then
+          error stop "ExtrudedMesh : every surface edge needs a global side id in 1..nUniqueSides"
+        endif
+        if(mesh2d%sideInfo(3,s,e2) > 0) then
+          flip = mesh2d%sideInfo(4,s,e2)-10*(mesh2d%sideInfo(4,s,e2)/10)
+          if(flip /= 0 .and. flip /= 1) then
+            error stop "ExtrudedMesh : a surface edge flip must be 0 or 1"
+          endif
+        endif
+      enddo
+    enddo
+
+    nElem3D = nz*nElem2D
+    nHorizontalBase = nz*nUniqueSides2D
+    nUniqueSides3D = nHorizontalBase+nGlobalElem2D*(nz+1)
+
+    ! ---- Decomposition: the surface partition, expanded by nz ----
+    call this%decomp%Init(comm=mesh2d%decomp%mpiComm)
+    allocate(offsetElem3D(1:nRanks+1))
+    offsetElem3D(1:nRanks+1) = nz*mesh2d%decomp%offsetElem(1:nRanks+1)
+    call this%decomp%GenerateDecompositionFromOffsets(offsetElem3D,nUniqueSides3D)
+    deallocate(offsetElem3D)
+
+    call this%Init(nGeo,nElem3D,6*nElem3D,nElem3D*(nGeo+1)**3,mesh2d%nBCs)
+    this%nGlobalElem = nz*nGlobalElem2D
+    this%nUniqueSides = nUniqueSides3D ! GLOBAL side id space on every rank (the MPI tag stride)
+    this%quadrature = mesh2d%quadrature
+    this%nLayers = nz
+
+    if(mesh2d%nBCs > 0) then
+      this%BCType(1:4,1:mesh2d%nBCs) = mesh2d%BCType(1:4,1:mesh2d%nBCs)
+      this%BCNames(1:mesh2d%nBCs) = mesh2d%BCNames(1:mesh2d%nBCs)
+    endif
+
+    if(allocated(mesh2d%materialNames) .and. allocated(mesh2d%elemMaterial)) then
+      deallocate(this%materialNames)
+      allocate(this%materialNames(1:mesh2d%nMaterials))
+      this%nMaterials = mesh2d%nMaterials
+      this%materialNames(1:mesh2d%nMaterials) = mesh2d%materialNames(1:mesh2d%nMaterials)
+      do e2 = 1,nElem2D
+        do k = 1,nz
+          this%elemMaterial((e2-1)*nz+k) = mesh2d%elemMaterial(e2)
+        enddo
+      enddo
+    endif
+
+    this%globalNodeIDs = 0 ! node ids are unused by the solver (flips are set directly)
+    this%elemInfo = 0
+
+    ! ---- Geometry: vertical lines of constant (xi,eta), linear in zeta per layer ----
+    call GeometryNodes1D(nGeo,mesh2d%quadrature,zeta)
+    if(mesh2d%quadrature == GAUSS_LOBATTO .or. mesh2d%quadrature == CHEBYSHEV_GAUSS_LOBATTO .or. &
+       mesh2d%quadrature == UNIFORM) then
+      ! The end nodes lie on the faces. Pin them to -1 and 1 so that the end weights
+      ! below are exactly 0 and 1 and each face is sampled from one level alone.
+      zeta(1) = -1.0_prec
+      zeta(nGeo+1) = 1.0_prec
+    endif
+
+    do e2 = 1,nElem2D
+      do k = 1,nz
+        e3 = (e2-1)*nz+k
+        do nk = 1,nGeo+1
+          do j = 1,nGeo+1
+            do i = 1,nGeo+1
+              this%nodeCoords(1,i,j,nk,e3) = mesh2d%nodeCoords(1,i,j,e2)
+              this%nodeCoords(2,i,j,nk,e3) = mesh2d%nodeCoords(2,i,j,e2)
+              this%nodeCoords(3,i,j,nk,e3) = 0.5_prec*(1.0_prec-zeta(nk))*zLevels(i,j,k-1,e2)+ &
+                                             0.5_prec*(1.0_prec+zeta(nk))*zLevels(i,j,k,e2)
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+    ! ---- Connectivity ----
+    !  sideInfo(1:5,iSide,iEl)
+    !    1 - Side Type (0; the mesh has no mortars)
+    !    2 - Global Side ID
+    !    3 - Neighbor Element ID (global; 0 on a domain boundary)
+    !    4 - 10*( neighbor local side ) + flip
+    !    5 - Boundary Condition ID (0 on an interior face)
+    this%sideInfo = 0
+    do e2 = 1,nElem2D
+      E2global = mesh2d%decomp%offsetElem(mesh2d%decomp%rankId+1)+e2
+      do k = 1,nz
+        e3 = (e2-1)*nz+k
+
+        ! Lateral faces: 2-D side s is 3-D face s+1 (south, east, north, west)
+        do s = 1,4
+          g = mesh2d%sideInfo(2,s,e2)
+          this%sideInfo(2,s+1,e3) = sign(1,g)*((abs(g)-1)*nz+k)
+          E2neighbor = mesh2d%sideInfo(3,s,e2)
+          if(E2neighbor > 0) then
+            s2 = mesh2d%sideInfo(4,s,e2)/10
+            flip = mesh2d%sideInfo(4,s,e2)-10*s2
+            this%sideInfo(3,s+1,e3) = (E2neighbor-1)*nz+k
+            this%sideInfo(4,s+1,e3) = 10*(s2+1)+flip
+          endif
+          this%sideInfo(5,s+1,e3) = mesh2d%sideInfo(5,s,e2)
+        enddo
+
+        ! Bottom face, on level k-1 of the column
+        this%sideInfo(2,selfSide3D_Bottom,e3) = nHorizontalBase+(E2global-1)*(nz+1)+k
+        if(k == 1) then
+          this%sideInfo(5,selfSide3D_Bottom,e3) = bottomBC
+        else
+          this%sideInfo(3,selfSide3D_Bottom,e3) = (E2global-1)*nz+k-1
+          this%sideInfo(4,selfSide3D_Bottom,e3) = 10*selfSide3D_Top
+        endif
+
+        ! Top face, on level k of the column
+        this%sideInfo(2,selfSide3D_Top,e3) = nHorizontalBase+(E2global-1)*(nz+1)+k+1
+        if(k == nz) then
+          this%sideInfo(5,selfSide3D_Top,e3) = topBC
+        else
+          this%sideInfo(3,selfSide3D_Top,e3) = (E2global-1)*nz+k+1
+          this%sideInfo(4,selfSide3D_Top,e3) = 10*selfSide3D_Bottom
+        endif
+
+      enddo
+    enddo
+
+    call this%UpdateDevice()
+
+  endsubroutine ExtrudedMesh_Mesh3D_t
+
+  subroutine ExtrudedHybridLevels(h,depths,sigma,zLevels)
+  !! Fills the level heights for ExtrudedMesh with nzFlat = size(depths) flat
+  !! interfaces near the surface over nzS = size(sigma)-1 terrain-following layers.
+  !! With d_0 = 0 and d_F = depths(nzFlat) (d_F = 0 when nzFlat = 0), the nz = nzS+nzFlat
+  !! levels at every geometry node are
+  !!
+  !!   z_k        = -( (1+sigma_k) d_F - sigma_k h ) ,  k = 0..nzS
+  !!   z_{nzS+m}  = -d_{nzFlat-m} ,                    m = 1..nzFlat
+  !!
+  !! so z_0 = -h, z_nzS = -d_F, z_nz = 0, and the layers between z = -d_F and the
+  !! bottom follow the terrain with the stretching sigma. The form used for z_k makes
+  !! z_0 = -h and z_nzS = -d_F exact in floating point. With nzFlat = 0 this is the
+  !! sigma coordinate z_k = sigma_k h (see ExtrudedSigmaLevels); with a constant h it
+  !! gives flat z-levels throughout.
+  !!
+  !! The levels are evaluated pointwise from h, so they are continuous across lateral
+  !! faces exactly when h is: two elements that share a geometry node must be given the
+  !! same h there, as they are when h is sampled from one bathymetry function at the
+  !! mesh's node coordinates.
+  !!
+  !!  Input
+  !!    - h(1:nGeo+1,1:nGeo+1,1:nElem2D) : Water depth at the surface geometry nodes, in
+  !!      the length unit of the mesh, with h > d_F (> 0) everywhere
+  !!    - depths(1:nzFlat) : Depths of the flat interfaces below the surface, same unit,
+  !!      0 < d_1 < ... < d_nzFlat < min(h). May be empty.
+  !!    - sigma(0:nzS) : Terrain-following stretching, nzS >= 1, sigma(0) = -1,
+  !!      sigma(nzS) = 0, strictly increasing
+  !!
+  !!  Output
+  !!    - zLevels(1:nGeo+1,1:nGeo+1,0:nz,1:nElem2D) : Level heights, nz = nzS+nzFlat
+    implicit none
+    real(prec),intent(in) :: h(1:,1:,1:)
+    real(prec),intent(in) :: depths(1:)
+    real(prec),intent(in) :: sigma(0:)
+    real(prec),intent(out) :: zLevels(1:,1:,0:,1:)
+    ! Local
+    integer :: nzFlat,nzS,nz,i,j,k,m,e
+    real(prec) :: dF
+
+    nzFlat = size(depths)
+    nzS = size(sigma)-1
+    nz = nzS+nzFlat
+
+    if(nzS < 1) then
+      error stop "ExtrudedHybridLevels : sigma must carry at least two values (one terrain-following layer)"
+    endif
+    if(sigma(0) /= -1.0_prec .or. sigma(nzS) /= 0.0_prec) then
+      error stop "ExtrudedHybridLevels : sigma must run from sigma(0) = -1 to sigma(nzS) = 0"
+    endif
+    do k = 1,nzS
+      if(.not.(sigma(k) > sigma(k-1))) then
+        error stop "ExtrudedHybridLevels : sigma must be strictly increasing"
+      endif
+    enddo
+    if(nzFlat > 0) then
+      if(.not.(depths(1) > 0.0_prec)) then
+        error stop "ExtrudedHybridLevels : the flat interface depths must be positive"
+      endif
+      do m = 2,nzFlat
+        if(.not.(depths(m) > depths(m-1))) then
+          error stop "ExtrudedHybridLevels : the flat interface depths must be strictly increasing"
+        endif
+      enddo
+      dF = depths(nzFlat)
+    else
+      dF = 0.0_prec
+    endif
+    if(size(zLevels,1) /= size(h,1) .or. size(zLevels,2) /= size(h,2) .or. &
+       size(zLevels,3) /= nz+1 .or. size(zLevels,4) /= size(h,3)) then
+      error stop "ExtrudedHybridLevels : zLevels must be dimensioned (1:nGeo+1,1:nGeo+1,0:nz,1:nElem2D)"
+    endif
+    if(size(h) > 0) then
+      if(.not.(minval(h) > dF)) then
+        error stop "ExtrudedHybridLevels : the depth h must exceed the deepest flat interface (and 0)"
+      endif
+    endif
+
+    do e = 1,size(h,3)
+      do j = 1,size(h,2)
+        do i = 1,size(h,1)
+          do k = 0,nzS
+            zLevels(i,j,k,e) = -((1.0_prec+sigma(k))*dF-sigma(k)*h(i,j,e))
+          enddo
+          do m = 1,nzFlat-1
+            zLevels(i,j,nzS+m,e) = -depths(nzFlat-m)
+          enddo
+          zLevels(i,j,nz,e) = 0.0_prec
+        enddo
+      enddo
+    enddo
+
+  endsubroutine ExtrudedHybridLevels
+
+  subroutine ExtrudedSigmaLevels(h,sigma,zLevels)
+  !! Fills the level heights for ExtrudedMesh with terrain-following (sigma) levels,
+  !!
+  !!   z_k = sigma_k h ,  k = 0..nz ,
+  !!
+  !! at every geometry node, so z_0 = -h and z_nz = 0. This is ExtrudedHybridLevels with
+  !! no flat interfaces. The levels are continuous across lateral faces when h is (see
+  !! ExtrudedHybridLevels).
+  !!
+  !!  Input
+  !!    - h(1:nGeo+1,1:nGeo+1,1:nElem2D) : Water depth at the surface geometry nodes, in
+  !!      the length unit of the mesh, h > 0
+  !!    - sigma(0:nz) : nz >= 1, sigma(0) = -1, sigma(nz) = 0, strictly increasing
+  !!
+  !!  Output
+  !!    - zLevels(1:nGeo+1,1:nGeo+1,0:nz,1:nElem2D) : Level heights
+    implicit none
+    real(prec),intent(in) :: h(1:,1:,1:)
+    real(prec),intent(in) :: sigma(0:)
+    real(prec),intent(out) :: zLevels(1:,1:,0:,1:)
+    ! Local
+    real(prec) :: noDepths(1:0)
+
+    call ExtrudedHybridLevels(h,noDepths,sigma,zLevels)
+
+  endsubroutine ExtrudedSigmaLevels
+
   subroutine Read_HOPr_Mesh3D_t(this,meshFile,comm)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     implicit none
@@ -2008,6 +2427,7 @@ contains
 
     subroutine sort4(a,b)
       !! Ascending insertion sort of four integers
+      implicit none
       integer,intent(in) :: a(1:4)
       integer,intent(out) :: b(1:4)
       integer :: m,n,tmp
@@ -2025,6 +2445,7 @@ contains
     endsubroutine sort4
 
     subroutine grow_bc_table(tbl)
+      implicit none
       character(LEN=255),allocatable,intent(inout) :: tbl(:)
       character(LEN=255),allocatable :: tmp(:)
       integer :: oldSize
@@ -2036,6 +2457,7 @@ contains
     endsubroutine grow_bc_table
 
     subroutine grow_string_table(tbl)
+      implicit none
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable,intent(inout) :: tbl(:)
       character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: tmp(:)
       integer :: oldSize

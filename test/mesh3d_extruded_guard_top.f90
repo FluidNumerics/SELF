@@ -1,0 +1,52 @@
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+!
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
+!
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+
+program test
+!! ExtrudedMesh must reject a top level that is not exactly z = 0, the flat sea
+!! surface an extruded mesh is built under.
+!! This is a WILL_FAIL test: it passes when the program aborts.
+
+  use SELF_Constants
+  use SELF_Mesh_2D
+  use SELF_Mesh_3D
+
+  implicit none
+
+  type(Mesh2D) :: surf
+  type(Mesh3D) :: mesh
+  real(prec) :: zLevels(1:2,1:2,0:1,1:4)
+
+  call surf%StructuredMesh(2,2,1,1,0.5_prec,0.5_prec,[1,1,1,1])
+  zLevels(:,:,0,:) = -1.0_prec
+  zLevels(:,:,1,:) = 0.0_prec
+  zLevels(1,2,1,2) = 1.0e-3_prec
+  call mesh%ExtrudedMesh(surf,zLevels,1,1)
+
+  ! Unreachable when the guard works; exiting cleanly here would make
+  ! the WILL_FAIL test fail.
+  print*,"FAIL: ExtrudedMesh accepted a top level that is not z = 0"
+
+endprogram test
