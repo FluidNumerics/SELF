@@ -231,6 +231,15 @@ add_fortran_tests (
     "vertical_sweep_3d.f90"
     "column_operators_3d_guard_notextruded.f90"
     "column_operators_3d_guard_gauss.f90"
+    "column_operators_3d_guard_layers.f90"
+    "column_operators_3d_guard_geometry.f90"
+    "column_operators_3d_guard_degree.f90"
+    "column_operators_3d_guard_uninit.f90"
+    "column_operators_3d_guard_fielddegree.f90"
+    "column_operators_3d_guard_volumeelems.f90"
+    "column_operators_3d_guard_surfaceelems.f90"
+    "column_operators_3d_guard_nvar.f90"
+    "column_operators_3d_guard_sweepshape.f90"
     "mappedscalarderivative_1d_constant.f90"
     "mappedscalarbrderivative_1d_constant.f90"
     "mappedscalardgderivative_1d_constant.f90"
@@ -399,6 +408,15 @@ set_tests_properties(
     mesh3d_extruded_guard_hybriddepth
     column_operators_3d_guard_notextruded
     column_operators_3d_guard_gauss
+    column_operators_3d_guard_layers
+    column_operators_3d_guard_geometry
+    column_operators_3d_guard_degree
+    column_operators_3d_guard_uninit
+    column_operators_3d_guard_fielddegree
+    column_operators_3d_guard_volumeelems
+    column_operators_3d_guard_surfaceelems
+    column_operators_3d_guard_nvar
+    column_operators_3d_guard_sweepshape
     transfer_plan_2d_guard_badleaf
     transfer_plan_3d_guard_badleaf
     transfer_plan_2d_guard_snapshot
