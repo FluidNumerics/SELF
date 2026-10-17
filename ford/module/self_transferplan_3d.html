@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_TransferPlan_3D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_TransferPlan_3D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.7% of total for modules and submodules.">196 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_TransferPlan_3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_transferplan_3d.f90.html'>SELF_TransferPlan_3D.f90</a></li>
+     <li class="active">SELF_TransferPlan_3D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#variable-self_transfer_copy~2">SELF_TRANSFER_COPY</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#variable-self_transfer_prolong~2">SELF_TRANSFER_PROLONG</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#variable-self_transfer_restrict~2">SELF_TRANSFER_RESTRICT</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#type-transferplan3d">TransferPlan3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-applytransferplan~2">ApplyTransferPlan</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-applytransferplanrange~2">ApplyTransferPlanRange</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-applytransferplanwindow~2">ApplyTransferPlanWindow</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-buildtransferplan~2">BuildTransferPlan</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-free_transferplan3d">Free_TransferPlan3D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>Old-leaf -&gt; new-leaf solution transfer plan for one adaptation epoch of the 3-D oct-forest:
+the driver layer of AMR Stage 3 that connects the element-local transfer operators
+(SELF_SolutionTransfer_3D) to the forest mutation (SELF_OctreeMesh_3D).</p>
+<p>One adaptation epoch mutates the forest between two leaf configurations:</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">nOld</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">forest</span><span class="o">%</span><span class="nv">nLeaves</span><span class="w"> </span><span class="c1">; oldLeaf = forest%leaf(1:nOld)   ! snapshot BEFORE mutating</span>
+<span class="k">call</span><span class="w"> </span><span class="nl">forest</span><span class="o">%</span><span class="nv">AdaptFromFlags</span><span class="ss">(</span><span class="nv">flag</span><span class="ss">)</span><span class="w">                        </span><span class="o">!</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">most</span><span class="w"> </span><span class="nv">one</span><span class="w"> </span><span class="nv">call</span>,<span class="w"> </span><span class="k">then</span>
+<span class="k">call</span><span class="w"> </span><span class="nl">forest</span><span class="o">%</span><span class="nv">Balance2to1</span><span class="ss">()</span><span class="w">                               </span><span class="o">!</span><span class="w"> </span><span class="nv">any</span><span class="w"> </span><span class="nv">number</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">further</span>
+<span class="w">                                                        </span><span class="o">!</span><span class="w"> </span><span class="nv">refinements</span><span class="w"> </span><span class="ss">(</span><span class="nv">RefineNode</span><span class="w"> </span><span class="nv">too</span><span class="ss">)</span>
+<span class="k">call</span><span class="w"> </span><span class="nl">BuildTransferPlan</span><span class="ss">(</span><span class="nv">forest</span>,<span class="nv">nOld</span>,<span class="nv">oldLeaf</span>,<span class="nv">plan</span><span class="ss">)</span><span class="w">        </span><span class="o">!</span><span class="w"> </span><span class="nv">AFTER</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">last</span><span class="w"> </span><span class="nv">mutation</span>
+</code></pre></div>
+
+<p>Solution element index = leaf-list position (the element ordering EmitMesh produces), so the
+plan records, for every new leaf, where its data comes from in the old element ordering:</p>
+<p>SELF_TRANSFER_COPY     : the leaf survived unchanged; copy old element sourceElem.
+  SELF_TRANSFER_PROLONG  : the leaf descends from old leaf sourceElem; interpolate the old
+                           element's degree-N polynomial down the octree path (one step per
+                           level, so depth &gt; 1 handles a fresh child that 2:1 balancing
+                           refined again in the same epoch). Exact, no loss.
+  SELF_TRANSFER_RESTRICT : the leaf is (an ancestor of) a coarsened family; L2-project the
+                           eight old children family(1:8) onto their parent, then prolong
+                           down depth &gt;= 0 further steps (depth &gt; 0 occurs when a
+                           just-coarsened parent is immediately re-refined by 2:1
+                           balancing). Conservative.</p>
+<p>The reconstruction is possible after the fact because forest node ids are stable: refinement
+only appends nodes and coarsening only detaches children, whose level/parent/octant entries
+persist. Each new leaf therefore ascends its parent chain until it meets either an old leaf
+or a node holding a complete eight-child old-leaf family; anything else means the snapshot
+does not describe the epoch that produced the forest, and the builder stops with an error.</p>
+<p>ApplyTransferPlan executes the plan on nodal data u(1:N+1,1:N+1,1:N+1,1:nElem,1:nVar) (the
+layout of MappedScalar3D %interior; units are those of the transferred fields) and inherits
+the Stage-3 operator identities: prolongation is exact polynomial interpolation and
+restriction is the conservative L2 projection, so the Jacobian-weighted cell integral of
+every variable is conserved and a refine-then-coarsen round trip is the identity to
+roundoff. Transfer runs once per adaptation epoch, between time steps; it is not a per-step
+hot path.</p>
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    <li><a href='../module/self_solutiontransfer_3d.html'>SELF_SolutionTransfer_3D</a></li>
+    <li><a href='../module/self_octreemesh_3d.html'>SELF_OctreeMesh_3D</a></li>
+    <li><a href='../module/self_lagrange.html'>SELF_Lagrange</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_transferplan_3d~~UsesGraph Pages: 1 -->
+<svg id="moduleself_transferplan_3dUsesGraph" width="641pt" height="254pt"
+ viewBox="0.00 0.00 641.00 253.58" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_transferplan_3d~~UsesGraph" class="graph" transform="scale(0.33 0.33) rotate(0) translate(4 759.1)">
+<title>module~~self_transferplan_3d~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-759.1 1925,-759.1 1925,4 -4,4"/>
+<!-- module~self_transferplan_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node1" class="node">
+<title>module~self_transferplan_3d</title>
+<polygon fill="none" stroke="black" points="1921,-690.05 1792,-690.05 1792,-666.05 1921,-666.05 1921,-690.05"/>
+<text text-anchor="middle" x="1856.5" y="-675.65" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_TransferPlan_3D</text>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node2" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node2"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="231,-479.05 135,-479.05 135,-455.05 231,-455.05 231,-479.05"/>
+<text text-anchor="middle" x="183" y="-464.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge1" class="edge">
+<title>module~self_transferplan_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1003,-743.05C671.93,-749.51 538.76,-795.23 272,-599.05 232.7,-570.15 205.66,-518.05 192.72,-488.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="195.88,-487.16 188.74,-479.33 189.43,-489.9 195.88,-487.16"/>
+</g>
+<!-- module~self_solutiontransfer_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node3" class="node">
+<title>module~self_solutiontransfer_3d</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node3"><a xlink:href=".././module/self_solutiontransfer_3d.html" xlink:title="SELF_SolutionTransfer_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="871.5,-715.05 721.5,-715.05 721.5,-691.05 871.5,-691.05 871.5,-715.05"/>
+<text text-anchor="middle" x="796.5" y="-700.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SolutionTransfer_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_3d&#45;&gt;module~self_solutiontransfer_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge3" class="edge">
+<title>module~self_transferplan_3d&#45;&gt;module~self_solutiontransfer_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1415,-698.05C1233.42,-672.84 1188.27,-738.89 1005,-743.05"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1003,-743.05C947.61,-744.13 885.32,-729.74 843.99,-717.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="844.79,-714.51 834.21,-715.06 842.82,-721.23 844.79,-714.51"/>
+</g>
+<!-- module~self_octreemesh_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node4" class="node">
+<title>module~self_octreemesh_3d</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node4"><a xlink:href=".././module/self_octreemesh_3d.html" xlink:title="SELF_OctreeMesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1756,-670.05 1629,-670.05 1629,-646.05 1756,-646.05 1756,-670.05"/>
+<text text-anchor="middle" x="1692.5" y="-655.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_OctreeMesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_3d&#45;&gt;module~self_octreemesh_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge4" class="edge">
+<title>module~self_transferplan_3d&#45;&gt;module~self_octreemesh_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1791.94,-670.2C1783.46,-669.16 1774.72,-668.08 1766.11,-667.01"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1766.44,-663.53 1756.08,-665.77 1765.58,-670.47 1766.44,-663.53"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node5" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node5"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="672,-595.05 578,-595.05 578,-571.05 672,-571.05 672,-595.05"/>
+<text text-anchor="middle" x="625" y="-580.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_3d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge2" class="edge">
+<title>module~self_transferplan_3d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1791.99,-688.19C1706.4,-700.21 1549.47,-716.44 1417,-698.05"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1415,-698.05C1298,-678.62 1278.1,-621.05 1159.5,-621.05 1159.5,-621.05 1159.5,-621.05 1003,-621.05 871.46,-621.05 838.52,-613.47 708,-597.05 699.66,-596 690.87,-594.7 682.27,-593.33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="682.73,-589.86 672.3,-591.68 681.59,-596.76 682.73,-589.86"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node6" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node6"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-393.05 5,-393.05 5,-369.05 89,-369.05 89,-393.05"/>
+<text text-anchor="middle" x="47" y="-378.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge5" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M163.09,-454.91C140.24,-440.25 101.63,-415.47 75.5,-398.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="77.12,-395.58 66.82,-393.13 73.34,-401.47 77.12,-395.58"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node10" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node10"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-564.05 0,-564.05 0,-540.05 94,-540.05 94,-564.05"/>
+<text text-anchor="middle" x="47" y="-549.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge6" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M162.8,-479.23C140.01,-493.68 101.84,-517.9 75.81,-534.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="73.73,-531.58 67.16,-539.89 77.48,-537.49 73.73,-531.58"/>
+</g>
+<!-- module~self_solutiontransfer_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge7" class="edge">
+<title>module~self_solutiontransfer_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M730.12,-691C640.11,-673.33 473.78,-636.78 338.5,-585.05"/>
+</g>
+<!-- module~self_solutiontransfer_3d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge8" class="edge">
+<title>module~self_solutiontransfer_3d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M726.42,-691.01C719.96,-688.55 713.7,-685.6 708,-682.05 691.48,-671.75 659.4,-629.52 640.64,-603.66"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="643.28,-601.35 634.6,-595.27 637.6,-605.43 643.28,-601.35"/>
+</g>
+<!-- module~self_octreemesh_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge12" class="edge">
+<title>module~self_octreemesh_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1628.92,-663.98C1572.99,-667.93 1489.01,-670.53 1417,-659.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1415,-659.05C1375,-651.58 1369.62,-634.31 1330,-625.05 1098.83,-571.02 1034.5,-596.82 797.5,-583.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M795.5,-583.05C739.96,-579.15 727.48,-566.73 672,-562.05 630.37,-558.53 619.43,-556.63 578,-562.05 538.56,-567.2 531.28,-584.41 491.5,-585.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M489.5,-585.05C422.39,-584.72 401.86,-607.17 338.5,-585.05"/>
+</g>
+<!-- module~self_octreemesh_3d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge10" class="edge">
+<title>module~self_octreemesh_3d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M795.5,-583.05C757.86,-580.86 715.43,-580.86 682.44,-581.41"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="682.02,-577.92 672.08,-581.61 682.15,-584.92 682.02,-577.92"/>
+</g>
+<!-- module~self_refinementprimitives_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node8" class="node">
+<title>module~self_refinementprimitives_3d</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node8"><a xlink:href=".././module/self_refinementprimitives_3d.html" xlink:title="SELF_RefinementPrimitives_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="885,-673.05 708,-673.05 708,-649.05 885,-649.05 885,-673.05"/>
+<text text-anchor="middle" x="796.5" y="-658.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementPrimitives_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_octreemesh_3d&#45;&gt;module~self_refinementprimitives_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge11" class="edge">
+<title>module~self_octreemesh_3d&#45;&gt;module~self_refinementprimitives_3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1415,-659.05C1232.79,-634.07 1017.49,-643.47 895.27,-652.39"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="894.9,-648.9 885.19,-653.14 895.42,-655.88 894.9,-648.9"/>
+</g>
+<!-- module~self_mesh_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node9" class="node">
+<title>module~self_mesh_3d</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node9"><a xlink:href=".././module/self_mesh_3d.html" xlink:title="SELF_Mesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1593,-250.05 1502,-250.05 1502,-226.05 1593,-226.05 1593,-250.05"/>
+<text text-anchor="middle" x="1547.5" y="-235.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_octreemesh_3d&#45;&gt;module~self_mesh_3d -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge9" class="edge">
+<title>module~self_octreemesh_3d&#45;&gt;module~self_mesh_3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1687.37,-645.93C1667.52,-587.61 1581.69,-335.53 1555.87,-259.71"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1559.18,-258.55 1552.64,-250.21 1552.55,-260.81 1559.18,-258.55"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge13" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M577.71,-583.92C552.26,-584.36 520.14,-584.84 491.5,-585.05"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge16" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M584.48,-595.11C518.87,-613.35 383.64,-643.38 272,-619.05 204.18,-604.26 179.41,-602.8 130,-554.05 86.05,-510.68 62.7,-439.14 53.2,-403.17"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="56.53,-402.05 50.69,-393.21 49.74,-403.76 56.53,-402.05"/>
+</g>
+<!-- module~self_gpu -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node7" class="node">
+<title>module~self_gpu</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node7"><a xlink:href=".././module/self_gpu.html" xlink:title="SELF_GPU">
+<polygon fill="#337ab7" stroke="#337ab7" points="523,-135.05 458,-135.05 458,-111.05 523,-111.05 523,-135.05"/>
+<text text-anchor="middle" x="490.5" y="-120.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_gpu -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge14" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M621.35,-571.02C611.92,-528.54 578.52,-381.72 542,-263.05 528.93,-220.57 510.62,-171.96 500.02,-144.65"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="503.26,-143.32 496.36,-135.28 496.74,-145.86 503.26,-143.32"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge15" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M608.08,-595.09C566.51,-625.76 450.12,-706.49 338.5,-737.05"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node11" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node11"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="542,-557.05 439,-557.05 439,-533.05 542,-533.05 542,-557.05"/>
+<text text-anchor="middle" x="490.5" y="-542.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge17" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M582.08,-571.02C569.75,-567.49 556.12,-563.58 543.26,-559.89"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="544.18,-556.52 533.61,-557.12 542.25,-563.25 544.18,-556.52"/>
+</g>
+<!-- module~self_gpu&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge18" class="edge">
+<title>module~self_gpu&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M336.5,-157.05C205.61,-167.15 97.75,-307.4 61.27,-360.7"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="58.34,-358.78 55.66,-369.03 64.15,-362.69 58.34,-358.78"/>
+</g>
+<!-- module~self_gpu_enums -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node12" class="node">
+<title>module~self_gpu_enums</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node12"><a xlink:href=".././module/self_gpu_enums.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="236,-139.05 130,-139.05 130,-115.05 236,-115.05 236,-139.05"/>
+<text text-anchor="middle" x="183" y="-124.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu&#45;&gt;module~self_gpu_enums -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge19" class="edge">
+<title>module~self_gpu&#45;&gt;module~self_gpu_enums</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M457.8,-133C427.53,-141.83 380.43,-153.81 338.5,-157.05"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M336.5,-157.05C299.28,-159.92 257.74,-150.93 227.43,-142.05"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="228.19,-138.62 217.61,-139.06 226.15,-145.32 228.19,-138.62"/>
+</g>
+<!-- module~self_refinementprimitives_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge20" class="edge">
+<title>module~self_refinementprimitives_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M749.81,-648.99C668.17,-627.53 504.52,-584.95 491.5,-585.05"/>
+</g>
+<!-- module~self_refinementprimitives_3d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge21" class="edge">
+<title>module~self_refinementprimitives_3d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M744.43,-649.01C732.19,-645.28 719.38,-640.64 708,-635.05 690.29,-626.34 688.62,-619.7 672,-609.05 667.37,-606.08 662.38,-603.07 657.45,-600.21"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="659.18,-597.16 648.76,-595.25 655.71,-603.25 659.18,-597.16"/>
+</g>
+<!-- module~self_mesh_3d&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge22" class="edge">
+<title>module~self_mesh_3d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1538.12,-225.81C1512.18,-189.02 1428.97,-79.03 1330,-31.05 1261.14,2.33 1235.04,5.21 1159.5,-7.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-7.05C1088.19,-15.68 1074.77,-48.39 1005,-45.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1003,-45.05C775.3,-34.15 719.41,-11.99 491.5,-7.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M489.5,-7.05C420.32,-5.08 407.7,-45.05 338.5,-45.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M336.5,-45.05C244.33,-45.05 200.21,-4.34 130,-64.05 84.25,-102.95 58.16,-293.56 50.44,-358.97"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="46.96,-358.67 49.29,-369.01 53.91,-359.47 46.96,-358.67"/>
+</g>
+<!-- module~self_mesh_3d&#45;&gt;module~self_gpu -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge23" class="edge">
+<title>module~self_mesh_3d&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-7.05C1119.17,-13.89 1123.1,-44.46 1087,-59.05 1035.84,-79.72 660.05,-110.12 533.19,-119.9"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="532.8,-116.42 523.1,-120.67 533.34,-123.39 532.8,-116.42"/>
+</g>
+<!-- module~self_mesh_3d_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node15" class="node">
+<title>module~self_mesh_3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node15"><a xlink:href=".././module/self_mesh_3d_t.html" xlink:title="SELF_Mesh_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1466,-250.05 1366,-250.05 1366,-226.05 1466,-226.05 1466,-250.05"/>
+<text text-anchor="middle" x="1416" y="-235.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge24" class="edge">
+<title>module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1501.93,-238.05C1493.62,-238.05 1484.82,-238.05 1476.16,-238.05"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1476.08,-234.55 1466.08,-238.05 1476.08,-241.55 1476.08,-234.55"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge25" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M460.37,-557.07C423.09,-571.72 360.66,-593.52 338.5,-585.05"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M336.5,-585.05C280.44,-563.61 228.1,-514.32 201.77,-486.7"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="204.14,-484.12 194.75,-479.21 199.03,-488.9 204.14,-484.12"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge27" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M475.71,-557.14C459.57,-570.41 431.42,-590.91 403,-599.05 347.03,-615.08 327.05,-618.01 272,-599.05 168.8,-563.5 89.49,-449.23 60.23,-401.89"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="63.09,-399.85 54.91,-393.11 57.1,-403.47 63.09,-399.85"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge29" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M485.59,-557.1C472.41,-595.19 425.51,-712.01 338.5,-737.05"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M336.5,-737.05C247.71,-762.6 205.85,-765.81 130,-713.05 82.16,-679.77 60.57,-610 52.33,-574.23"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="55.71,-573.34 50.18,-564.3 48.87,-574.81 55.71,-573.34"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node13" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node13"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="403,-323.05 272,-323.05 272,-299.05 403,-299.05 403,-323.05"/>
+<text text-anchor="middle" x="337.5" y="-308.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge26" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M482.68,-532.76C472.36,-513.86 452.56,-476.36 439,-443.05 419.44,-395.01 439.65,-368.74 403,-332.05 401.91,-330.95 400.76,-329.92 399.56,-328.94"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="401.28,-325.88 391.03,-323.2 397.38,-331.69 401.28,-325.88"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node14" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node14"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="374,-365.05 301,-365.05 301,-341.05 374,-341.05 374,-365.05"/>
+<text text-anchor="middle" x="337.5" y="-350.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge28" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M482.67,-532.97C469.01,-509.25 436.72,-455.4 403,-415.05 389.97,-399.45 373.41,-383.6 360.33,-371.83"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="362.51,-369.08 352.7,-365.07 357.86,-374.32 362.51,-369.08"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node16" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node16"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="389.5,-538.05 285.5,-538.05 285.5,-514.05 389.5,-514.05 389.5,-538.05"/>
+<text text-anchor="middle" x="337.5" y="-523.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge30" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M438.8,-538.67C426.29,-537.1 412.76,-535.39 399.81,-533.76"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="399.94,-530.25 389.58,-532.48 399.07,-537.2 399.94,-530.25"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node17" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-365.05 156,-365.05 156,-341.05 210,-341.05 210,-365.05"/>
+<text text-anchor="middle" x="183" y="-350.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge31" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M477.94,-532.8C454.29,-508.59 397.63,-454.73 338.5,-429.05"/>
+</g>
+<!-- module~self_gpu_enums&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge32" class="edge">
+<title>module~self_gpu_enums&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M148.31,-139.17C141.57,-142.81 135.03,-147.39 130,-153.05 75.54,-214.37 56.47,-314.54 50.47,-358.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="46.99,-358.45 49.22,-368.81 53.94,-359.32 46.99,-358.45"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge33" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M287.17,-323.15C281.77,-325.6 276.58,-328.54 272,-332.05 251.39,-347.85 214.38,-411.74 195.61,-445.66"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="192.36,-444.3 190.61,-454.75 198.5,-447.67 192.36,-444.3"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge34" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M294.82,-299.03C261.8,-292.15 216.06,-288.75 184,-311.05"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge35" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M320.18,-365.25C293.35,-385.3 239.78,-425.35 208.42,-448.79"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="206.12,-446.15 200.2,-454.94 210.31,-451.75 206.12,-446.15"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge38" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M300.72,-341.71C257.2,-328.15 188.89,-307.65 184,-311.05"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge36" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M300.75,-353.05C276.67,-353.05 245,-353.05 220.72,-353.05"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="220.47,-349.55 210.47,-353.05 220.47,-356.55 220.47,-349.55"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node18" class="node">
+<title>mpi</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node18"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-97.05 156,-97.05 156,-73.05 210,-73.05 210,-97.05"/>
+<text text-anchor="middle" x="183" y="-82.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge37" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M300.68,-348.67C290.02,-345.64 279.27,-340.55 272,-332.05 205.93,-254.72 299.36,-185.62 236,-106.05 231.68,-100.62 225.74,-96.59 219.41,-93.6"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="220.6,-90.31 210.02,-89.91 218.05,-96.82 220.6,-90.31"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge39" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1003,-505.05C911.73,-501.64 888.76,-501.51 797.5,-505.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M795.5,-505.05C740.3,-507.19 727.06,-495.52 672,-491.05 516.51,-478.42 332.57,-471.55 241.31,-468.68"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="241.28,-465.18 231.17,-468.37 241.06,-472.18 241.28,-465.18"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge45" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M795.5,-505.05C738.99,-507.24 680.72,-542.72 649.38,-565.07"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="647.29,-562.26 641.28,-570.98 651.42,-567.91 647.29,-562.26"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge46" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1411.55,-225.87C1400.31,-188.9 1360.75,-78.48 1281,-45.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1279,-45.05C1230.02,-24.52 1212.21,-38.5 1159.5,-45.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-45.05C1090.24,-53.41 1072.7,-48.29 1005,-45.05"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge40" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1410.71,-250.33C1390.79,-304.95 1302.17,-522.34 1159.5,-505.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-505.05C1125.73,-507.76 916.17,-421.79 885,-415.05 690.14,-372.88 619.44,-451.83 439,-367.05 418.8,-357.56 422.11,-343.58 403,-332.05 400.04,-330.26 396.9,-328.61 393.68,-327.08"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="394.98,-323.83 384.41,-323.1 392.22,-330.26 394.98,-323.83"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge44" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-505.05C1090.27,-513.64 1072.5,-511.18 1005,-505.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1003,-505.05C854.69,-491.58 819.37,-474.42 672,-453.05 591.91,-441.43 571.83,-438.87 491.5,-429.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M489.5,-429.05C441.6,-420.1 392.32,-390.79 363.59,-371.3"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="365.23,-368.17 355.02,-365.35 361.24,-373.92 365.23,-368.17"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge47" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M795.5,-505.05C720.22,-507.97 700.35,-492.91 626,-505.05"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge48" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M489.5,-429.05C423.53,-416.73 400.06,-455.78 338.5,-429.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M336.5,-429.05C293.72,-410.47 245.78,-385.94 215.27,-369.84"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="216.86,-366.73 206.38,-365.13 213.58,-372.91 216.86,-366.73"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node19" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node19"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1194,-97.05 1123,-97.05 1123,-73.05 1194,-73.05 1194,-97.05"/>
+<text text-anchor="middle" x="1158.5" y="-82.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge42" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1279,-45.05C1246.47,-31.42 1207.53,-50.81 1183.14,-67.05"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1181.06,-64.23 1174.86,-72.82 1185.06,-69.98 1181.06,-64.23"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node20" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node20"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1330,-250.05 1230,-250.05 1230,-226.05 1330,-226.05 1330,-250.05"/>
+<text text-anchor="middle" x="1280" y="-235.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge41" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1365.86,-238.05C1357.58,-238.05 1348.9,-238.05 1340.39,-238.05"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1340.13,-234.55 1330.13,-238.05 1340.13,-241.55 1340.13,-234.55"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node21" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node21"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1087,-135.05 921,-135.05 921,-111.05 1087,-111.05 1087,-135.05"/>
+<text text-anchor="middle" x="1004" y="-120.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge43" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-45.05C1118.86,-49.85 1120.7,-77.55 1087,-97.05 1080.02,-101.09 1072.33,-104.58 1064.54,-107.58"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1063.27,-104.32 1055.04,-110.99 1065.63,-110.91 1063.27,-104.32"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge49" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M305.27,-513.97C281.94,-504.94 249.84,-492.52 224.52,-482.73"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="225.78,-479.46 215.19,-479.11 223.25,-485.99 225.78,-479.46"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge50" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M285.25,-530.67C234.4,-535.25 156.66,-542.26 104.16,-546.99"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="103.66,-543.52 94.01,-547.9 104.28,-550.49 103.66,-543.52"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge53" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1144.77,-97.43C1131.22,-110.17 1108.76,-130.09 1087,-144.05 1003.33,-197.71 980.83,-213.66 885,-240.05 715.64,-286.68 664.99,-304.56 491.5,-277.05"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M489.5,-277.05C423.39,-265.18 395.54,-235.58 338.5,-271.05"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge51" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1126.84,-72.96C1096.47,-61.96 1048.33,-47.12 1005,-45.05"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge52" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1122.9,-93.67C1105.22,-98.07 1083.25,-103.55 1063.07,-108.58"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1062.2,-105.19 1053.34,-111 1063.89,-111.98 1062.2,-105.19"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge54" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M795.5,-315.05C719.52,-301.34 703.17,-355.26 626,-353.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M624,-353.05C556.14,-351.1 558.32,-289.05 491.5,-277.05"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge59" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-391.05C1132.41,-396.03 730.06,-478.1 708,-491.05 677.94,-508.69 652.94,-541.13 638.72,-562.39"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="635.64,-560.72 633.14,-571.02 641.51,-564.52 635.64,-560.72"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge60" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-391.05C1084.37,-403.61 950.85,-232.26 885,-198.05 810.9,-159.56 783.71,-170.27 708,-135.05 647.32,-106.81 635.57,-93.18 578,-59.05 539.41,-36.17 536.14,-11.45 491.5,-7.05"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge55" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M624,-353.05C565.14,-351.36 550.25,-357.06 491.5,-353.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M489.5,-353.05C469.28,-351.67 421.45,-337.67 384.99,-326.2"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="385.64,-322.74 375.05,-323.05 383.52,-329.41 385.64,-322.74"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge57" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M489.5,-353.05C454.29,-350.64 414.35,-350.77 384.4,-351.43"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="384.15,-347.93 374.24,-351.68 384.33,-354.93 384.15,-347.93"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge61" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1003,-391.05C958.27,-386.99 803.35,-403.76 708,-445.05 666.56,-462.99 670.58,-497.83 626,-505.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M624,-505.05C546.94,-514.13 457.68,-519.95 399.77,-523.1"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="399.49,-519.61 389.69,-523.64 399.86,-526.6 399.49,-519.61"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge62" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-391.05C1090.7,-402.52 1072.68,-394.63 1005,-391.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1003,-391.05C905.76,-385.91 892.3,-337.32 797.5,-315.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M795.5,-315.05C681.56,-288.28 372.27,-196.68 272,-257.05 242.7,-274.69 260.1,-300.78 236,-325.05 231.1,-329.99 225.14,-334.27 219.03,-337.91"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="217.2,-334.92 210.08,-342.77 220.54,-341.07 217.2,-334.92"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge56" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1269.62,-226.04C1249.22,-199.92 1200.6,-137.66 1175.34,-105.33"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1178.08,-103.15 1169.17,-97.42 1172.56,-107.46 1178.08,-103.15"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge58" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1275.38,-250.24C1264.52,-284.04 1228.6,-377.34 1159.5,-391.05"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1157.5,-391.05C1078.88,-406.65 1128.17,-293.82 1087,-225.05 1068.44,-194.03 1041.28,-162.18 1023.38,-142.5"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1025.9,-140.08 1016.55,-135.1 1020.76,-144.82 1025.9,-140.08"/>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge63" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M920.76,-126.15C883.08,-126.57 837.91,-125.67 797.5,-121.05"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M795.5,-121.05C713.48,-111.67 705.54,-67.18 626,-45.05"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M624,-45.05C564.98,-28.62 552.47,-13.06 491.5,-7.05"/>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;iso_fortran_env -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge66" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M795.5,-121.05C736.71,-114.33 323.81,-190.46 272,-219.05 222.46,-246.39 230.45,-278.74 184,-311.05"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M182,-311.05C161.43,-325.13 147.38,-314.19 130,-332.05 115.5,-346.94 72.06,-477.74 54.99,-530.31"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="51.61,-529.41 51.86,-540 58.27,-531.56 51.61,-529.41"/>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;mpi -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge65" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;mpi</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M624,-45.05C500.93,-9.83 466.21,-74.32 338.5,-83.05"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M336.5,-83.05C296.9,-85.5 251.42,-85.77 220.5,-85.57"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="220.23,-82.06 210.2,-85.48 220.17,-89.06 220.23,-82.06"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_node22" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_transferplan_3d~~UsesGraph_node22"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="884,-231.05 709,-231.05 709,-207.05 884,-207.05 884,-231.05"/>
+<text text-anchor="middle" x="796.5" y="-216.65" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge64" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M976.97,-135.21C940.3,-152.34 873.33,-183.62 832.38,-202.75"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="830.89,-199.59 823.32,-206.99 833.86,-205.93 830.89,-199.59"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge67" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-201.05C497.71,-167.59 449.56,-202.24 338.5,-271.05"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M336.5,-271.05C311.12,-286.83 294.35,-270.2 272,-290.05 241.63,-317.02 253.94,-337.61 236,-374.05 223.55,-399.35 207.49,-427.49 196.53,-446.12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="193.4,-444.54 191.31,-454.93 199.42,-448.11 193.4,-444.54"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge71" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M776.33,-231.28C755.86,-245.44 724.19,-270.75 708,-301.05 661.72,-387.66 709.65,-428.35 672,-519.05 665.33,-535.12 653.94,-551.01 644.16,-562.94"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="641.23,-560.99 637.42,-570.87 646.56,-565.52 641.23,-560.99"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge69" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M708.76,-215.03C681.91,-212.41 652.45,-208.1 626,-201.05"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-201.05C600.87,-194.88 594.26,-190.62 578,-173.05 553.97,-147.08 568.35,-125.66 542,-102.05 524.14,-86.04 513.38,-92.87 491.5,-83.05"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M489.5,-83.05C426.36,-54.71 407.7,-45.05 338.5,-45.05"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge68" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M760.71,-231.08C712.29,-247.32 621.56,-275.97 542,-291.05 499.74,-299.06 451.89,-303.97 413.21,-306.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="412.79,-303.44 403.08,-307.66 413.31,-310.42 412.79,-303.44"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_transferplan_3d~~UsesGraph_edge70" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M489.5,-83.05C428.27,-55.57 405.45,-78.47 338.5,-83.05"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_transferplan_3dUsesGraph = svgPanZoom('#moduleself_transferplan_3dUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_transferplan_3d~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_transferplan_3dUsedByGraph" width="641pt" height="216pt"
+ viewBox="0.00 0.00 641.00 215.81" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_transferplan_3d~~UsedByGraph" class="graph" transform="scale(0.54 0.54) rotate(0) translate(4 398)">
+<title>module~~self_transferplan_3d~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-398 1190,-398 1190,4 -4,4"/>
+<!-- module~self_transferplan_3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node1" class="node">
+<title>module~self_transferplan_3d</title>
+<polygon fill="none" stroke="black" points="129,-186 0,-186 0,-162 129,-162 129,-186"/>
+<text text-anchor="middle" x="64.5" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_TransferPlan_3D</text>
+</g>
+<!-- module~self_dgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node2" class="node">
+<title>module~self_dgmodel3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node2"><a xlink:href=".././module/self_dgmodel3d_t.html" xlink:title="SELF_DGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="281,-186 165,-186 165,-162 281,-162 281,-186"/>
+<text text-anchor="middle" x="223" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_transferplan_3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge1" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_transferplan_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M164.61,-174C156.43,-174 147.91,-174 139.46,-174"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="139.22,-170.5 129.22,-174 139.22,-177.5 139.22,-170.5"/>
+</g>
+<!-- module~self_dgmodel3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node3" class="node">
+<title>module~self_dgmodel3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node3"><a xlink:href=".././module/self_dgmodel3d.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="440,-228 333,-228 333,-204 440,-204 440,-228"/>
+<text text-anchor="middle" x="386.5" y="-213.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d&#45;&gt;module~self_transferplan_3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge2" class="edge">
+<title>module~self_dgmodel3d&#45;&gt;module~self_transferplan_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M332.72,-212.66C287.92,-209.42 222.02,-203.7 165,-195 152.61,-193.11 139.43,-190.65 126.86,-188.08"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="127.44,-184.63 116.94,-186.01 126.01,-191.48 127.44,-184.63"/>
+</g>
+<!-- module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge4" class="edge">
+<title>module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M339.22,-203.96C320.81,-199.18 299.45,-193.62 280.16,-188.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="280.85,-185.17 270.29,-186.04 279.08,-191.94 280.85,-185.17"/>
+</g>
+<!-- module~self_amrcontroller_3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node4" class="node">
+<title>module~self_amrcontroller_3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node4"><a xlink:href=".././module/self_amrcontroller_3d.html" xlink:title="SELF_AMRController_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="456,-144 317,-144 317,-120 456,-120 456,-144"/>
+<text text-anchor="middle" x="386.5" y="-129.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_AMRController_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_3d&#45;&gt;module~self_transferplan_3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge3" class="edge">
+<title>module~self_amrcontroller_3d&#45;&gt;module~self_transferplan_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M316.72,-136.54C273.1,-139.92 215.56,-145.28 165,-153 152.61,-154.89 139.43,-157.35 126.86,-159.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="126.01,-156.52 116.94,-161.99 127.44,-163.37 126.01,-156.52"/>
+</g>
+<!-- module~self_amrcontroller_3d&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge5" class="edge">
+<title>module~self_amrcontroller_3d&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M339.22,-144.04C320.81,-148.82 299.45,-154.38 280.16,-159.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="279.08,-156.06 270.29,-161.96 280.85,-162.83 279.08,-156.06"/>
+</g>
+<!-- module~self_dgmodel3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node5" class="node">
+<title>module~self_dgmodel3d~2</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node5"><a xlink:href=".././module/self_dgmodel3d~2.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="440,-186 333,-186 333,-162 440,-162 440,-186"/>
+<text text-anchor="middle" x="386.5" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge6" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M332.62,-174C319.5,-174 305.26,-174 291.54,-174"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="291.18,-170.5 281.18,-174 291.18,-177.5 291.18,-170.5"/>
+</g>
+<!-- module~self_nulldgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node6" class="node">
+<title>module~self_nulldgmodel3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node6"><a xlink:href=".././module/self_nulldgmodel3d_t.html" xlink:title="self_NullDGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="641,-352 511,-352 511,-328 641,-328 641,-352"/>
+<text text-anchor="middle" x="576" y="-337.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge7" class="edge">
+<title>module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M556.68,-327.88C523.5,-305.94 453.29,-259.51 414.57,-233.9"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="416.17,-230.76 405.89,-228.16 412.3,-236.6 416.17,-230.76"/>
+</g>
+<!-- module~self_advection_diffusion_3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node7" class="node">
+<title>module~self_advection_diffusion_3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node7"><a xlink:href=".././module/self_advection_diffusion_3d_t.html" xlink:title="self_advection_diffusion_3d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="660,-268 492,-268 492,-244 660,-244 660,-268"/>
+<text text-anchor="middle" x="576" y="-253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge9" class="edge">
+<title>module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M518.74,-244C497.14,-239.39 472.35,-234.1 450.17,-229.37"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="450.7,-225.9 440.19,-227.24 449.24,-232.75 450.7,-225.9"/>
+</g>
+<!-- module~self_ecdgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node8" class="node">
+<title>module~self_ecdgmodel3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node8"><a xlink:href=".././module/self_ecdgmodel3d_t.html" xlink:title="SELF_ECDGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="641,-188 511,-188 511,-164 641,-164 641,-188"/>
+<text text-anchor="middle" x="576" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge10" class="edge">
+<title>module~self_ecdgmodel3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M518.74,-188C497.14,-192.61 472.35,-197.9 450.17,-202.63"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="449.24,-199.25 440.19,-204.76 450.7,-206.1 449.24,-199.25"/>
+</g>
+<!-- module~self_lineareuler3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node9" class="node">
+<title>module~self_lineareuler3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node9"><a xlink:href=".././module/self_lineareuler3d_t.html" xlink:title="self_LinearEuler3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="637,-66 515,-66 515,-42 637,-42 637,-66"/>
+<text text-anchor="middle" x="576" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge8" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M565.15,-66.05C537.88,-99.33 462.98,-190.39 456,-195 453.44,-196.69 450.73,-198.26 447.93,-199.7"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="446.38,-196.55 438.74,-203.89 449.29,-202.92 446.38,-196.55"/>
+</g>
+<!-- module~self_nulldgmodel3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node10" class="node">
+<title>module~self_nulldgmodel3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node10"><a xlink:href=".././module/self_nulldgmodel3d.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="836,-394 715,-394 715,-370 836,-370 836,-394"/>
+<text text-anchor="middle" x="775.5" y="-379.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge11" class="edge">
+<title>module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M717.9,-369.96C694.66,-365.02 667.58,-359.26 643.41,-354.12"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="644.11,-350.69 633.6,-352.04 642.66,-357.54 644.11,-350.69"/>
+</g>
+<!-- module~self_nulldgmodel3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node11" class="node">
+<title>module~self_nulldgmodel3d~2</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node11"><a xlink:href=".././module/self_nulldgmodel3d~2.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="836,-352 715,-352 715,-328 836,-328 836,-352"/>
+<text text-anchor="middle" x="775.5" y="-337.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge12" class="edge">
+<title>module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M714.98,-340C694.97,-340 672.39,-340 651.38,-340"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="651.22,-336.5 641.22,-340 651.22,-343.5 651.22,-336.5"/>
+</g>
+<!-- module~self_advection_diffusion_3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node12" class="node">
+<title>module~self_advection_diffusion_3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node12"><a xlink:href=".././module/self_advection_diffusion_3d.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="855,-310 696,-310 696,-286 855,-286 855,-310"/>
+<text text-anchor="middle" x="775.5" y="-295.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge13" class="edge">
+<title>module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M717.9,-285.96C694.66,-281.02 667.58,-275.26 643.41,-270.12"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="644.11,-266.69 633.6,-268.04 642.66,-273.54 644.11,-266.69"/>
+</g>
+<!-- module~self_ecdgmodel3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node13" class="node">
+<title>module~self_ecdgmodel3d~2</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node13"><a xlink:href=".././module/self_ecdgmodel3d~2.html" xlink:title="SELF_ECDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="836,-146 715,-146 715,-122 836,-122 836,-146"/>
+<text text-anchor="middle" x="775.5" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d~2&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge15" class="edge">
+<title>module~self_ecdgmodel3d~2&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M717.9,-146.04C694.66,-150.98 667.58,-156.74 643.41,-161.88"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="642.66,-158.46 633.6,-163.96 644.11,-165.31 642.66,-158.46"/>
+</g>
+<!-- module~self_advection_diffusion_3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node14" class="node">
+<title>module~self_advection_diffusion_3d~2</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node14"><a xlink:href=".././module/self_advection_diffusion_3d~2.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="855,-268 696,-268 696,-244 855,-244 855,-268"/>
+<text text-anchor="middle" x="775.5" y="-253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge14" class="edge">
+<title>module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M695.88,-256C687.45,-256 678.82,-256 670.24,-256"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="670.21,-252.5 660.21,-256 670.21,-259.5 670.21,-252.5"/>
+</g>
+<!-- module~self_esatmo3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node15" class="node">
+<title>module~self_esatmo3d~2</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node15"><a xlink:href=".././module/self_esatmo3d~2.html" xlink:title="SELF_ESAtmo3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1173.5,-230 1073.5,-230 1073.5,-206 1173.5,-206 1173.5,-230"/>
+<text text-anchor="middle" x="1123.5" y="-215.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo3d~2&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge16" class="edge">
+<title>module~self_esatmo3d~2&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1073.41,-217.58C993.89,-216.45 832.11,-212.3 696,-197 679.94,-195.2 662.78,-192.58 646.62,-189.8"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="647.17,-186.34 636.72,-188.05 645.96,-193.23 647.17,-186.34"/>
+</g>
+<!-- module~self_esatmo3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node21" class="node">
+<title>module~self_esatmo3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node21"><a xlink:href=".././module/self_esatmo3d_t.html" xlink:title="SELF_ESAtmo3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1012.5,-188 903.5,-188 903.5,-164 1012.5,-164 1012.5,-188"/>
+<text text-anchor="middle" x="958" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo3d~2&#45;&gt;module~self_esatmo3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge25" class="edge">
+<title>module~self_esatmo3d~2&#45;&gt;module~self_esatmo3d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1075.65,-205.96C1056.92,-201.15 1035.18,-195.57 1015.58,-190.54"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1016.42,-187.14 1005.86,-188.04 1014.67,-193.92 1016.42,-187.14"/>
+</g>
+<!-- module~self_ecadvection3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node16" class="node">
+<title>module~self_ecadvection3d~2</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node16"><a xlink:href=".././module/self_ecadvection3d~2.html" xlink:title="SELF_ECAdvection3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1186,-104 1061,-104 1061,-80 1186,-80 1186,-104"/>
+<text text-anchor="middle" x="1123.5" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection3d~2&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge17" class="edge">
+<title>module~self_ecadvection3d~2&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1060.8,-86.77C976.66,-81.48 822,-78.39 696,-113 661.57,-122.46 625.87,-143.05 602.67,-158.13"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="600.51,-155.36 594.12,-163.8 604.39,-161.19 600.51,-155.36"/>
+</g>
+<!-- module~self_ecadvection3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node20" class="node">
+<title>module~self_ecadvection3d_t</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node20"><a xlink:href=".././module/self_ecadvection3d_t.html" xlink:title="SELF_ECAdvection3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1025,-146 891,-146 891,-122 1025,-122 1025,-146"/>
+<text text-anchor="middle" x="958" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection3d~2&#45;&gt;module~self_ecadvection3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge23" class="edge">
+<title>module~self_ecadvection3d~2&#45;&gt;module~self_ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1075.65,-104.04C1056.92,-108.85 1035.18,-114.43 1015.58,-119.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1014.67,-116.08 1005.86,-121.96 1016.42,-122.86 1014.67,-116.08"/>
+</g>
+<!-- module~self_ecdgmodel3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node17" class="node">
+<title>module~self_ecdgmodel3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node17"><a xlink:href=".././module/self_ecdgmodel3d.html" xlink:title="SELF_ECDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="836,-188 715,-188 715,-164 836,-164 836,-188"/>
+<text text-anchor="middle" x="775.5" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge18" class="edge">
+<title>module~self_ecdgmodel3d&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M714.98,-176C694.97,-176 672.39,-176 651.38,-176"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="651.22,-172.5 641.22,-176 651.22,-179.5 651.22,-172.5"/>
+</g>
+<!-- module~self_lineareuler3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node18" class="node">
+<title>module~self_lineareuler3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node18"><a xlink:href=".././module/self_lineareuler3d.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="832,-66 719,-66 719,-42 832,-42 832,-66"/>
+<text text-anchor="middle" x="775.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge19" class="edge">
+<title>module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M718.96,-54C696.8,-54 671.02,-54 647.55,-54"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="647.31,-50.5 637.31,-54 647.31,-57.5 647.31,-50.5"/>
+</g>
+<!-- module~self_lineareuler3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node19" class="node">
+<title>module~self_lineareuler3d~2</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node19"><a xlink:href=".././module/self_lineareuler3d~2.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="832,-24 719,-24 719,0 832,0 832,-24"/>
+<text text-anchor="middle" x="775.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge20" class="edge">
+<title>module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M718.96,-23.81C695.49,-28.8 667.98,-34.65 643.44,-39.87"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="642.55,-36.48 633.49,-41.99 644,-43.33 642.55,-36.48"/>
+</g>
+<!-- module~self_ecadvection3d_t&#45;&gt;module~self_ecdgmodel3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge21" class="edge">
+<title>module~self_ecadvection3d_t&#45;&gt;module~self_ecdgmodel3d~2</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M890.81,-134C876.26,-134 860.81,-134 846.13,-134"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="846.11,-130.5 836.11,-134 846.11,-137.5 846.11,-130.5"/>
+</g>
+<!-- module~self_esatmo3d_t&#45;&gt;module~self_ecdgmodel3d~2 -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge22" class="edge">
+<title>module~self_esatmo3d_t&#45;&gt;module~self_ecdgmodel3d~2</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M905.28,-163.96C884.32,-159.09 859.95,-153.42 838.08,-148.33"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="838.76,-144.89 828.23,-146.04 837.18,-151.71 838.76,-144.89"/>
+</g>
+<!-- module~self_ecadvection3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node22" class="node">
+<title>module~self_ecadvection3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node22"><a xlink:href=".././module/self_ecadvection3d.html" xlink:title="SELF_ECAdvection3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1186,-146 1061,-146 1061,-122 1186,-122 1186,-146"/>
+<text text-anchor="middle" x="1123.5" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection3d&#45;&gt;module~self_ecadvection3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge24" class="edge">
+<title>module~self_ecadvection3d&#45;&gt;module~self_ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1060.69,-134C1052.46,-134 1043.94,-134 1035.5,-134"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1035.27,-130.5 1025.27,-134 1035.27,-137.5 1035.27,-130.5"/>
+</g>
+<!-- module~self_esatmo3d -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_node23" class="node">
+<title>module~self_esatmo3d</title>
+<g id="a_module~~self_transferplan_3d~~UsedByGraph_node23"><a xlink:href=".././module/self_esatmo3d.html" xlink:title="SELF_ESAtmo3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1173.5,-188 1073.5,-188 1073.5,-164 1173.5,-164 1173.5,-188"/>
+<text text-anchor="middle" x="1123.5" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo3d&#45;&gt;module~self_esatmo3d_t -->
+<g id="module~~self_transferplan_3d~~UsedByGraph_edge26" class="edge">
+<title>module~self_esatmo3d&#45;&gt;module~self_esatmo3d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1073.44,-176C1057.55,-176 1039.69,-176 1022.89,-176"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1022.59,-172.5 1012.59,-176 1022.59,-179.5 1022.59,-172.5"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_transferplan_3dUsedByGraph = svgPanZoom('#moduleself_transferplan_3dUsedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#variable-self_transfer_copy~2">SELF_TRANSFER_COPY</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#variable-self_transfer_prolong~2">SELF_TRANSFER_PROLONG</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#variable-self_transfer_restrict~2">SELF_TRANSFER_RESTRICT</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#type-transferplan3d">TransferPlan3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-applytransferplan~2">ApplyTransferPlan</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-applytransferplanrange~2">ApplyTransferPlanRange</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-applytransferplanwindow~2">ApplyTransferPlanWindow</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-buildtransferplan~2">BuildTransferPlan</a>
+      <a class="list-group-item" href="../module/self_transferplan_3d.html#proc-free_transferplan3d">Free_TransferPlan3D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    <section>
+    <h2>Variables</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-self_transfer_copy~2"></span>integer,</td>
+<td>public,</td>  <td>parameter</td><td>::</td>
+  <td><strong>SELF_TRANSFER_COPY</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-self_transfer_prolong~2"></span>integer,</td>
+<td>public,</td>  <td>parameter</td><td>::</td>
+  <td><strong>SELF_TRANSFER_PROLONG</strong></td><td> =</td><td>1</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-self_transfer_restrict~2"></span>integer,</td>
+<td>public,</td>  <td>parameter</td><td>::</td>
+  <td><strong>SELF_TRANSFER_RESTRICT</strong></td><td> =</td><td>2</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-transferplan3d"></span><h3>type, public :: <a href='../type/transferplan3d.html'>TransferPlan3D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-depth~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>depth</strong>(:)</td><td></td><td></td><td><p>(nNew) number of prolongation steps below the source</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-family~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>family</strong>(:,:)</td><td></td><td></td><td><p>(8,nNew) old element index per child octant (RESTRICT)</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-maxdepth~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>maxDepth</strong></td><td> =</td><td>0</td><td><p>largest prolongation depth in the plan</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nnew~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nNew</strong></td><td> =</td><td>0</td><td><p>new element count (= forest%nLeaves at build time)</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nold~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nOld</strong></td><td> =</td><td>0</td><td><p>old (pre-epoch) element count</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-path~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>path</strong>(:,:)</td><td></td><td></td><td><p>(&gt;=maxDepth,nNew) octant taken at each step, top-down</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-sourceelem~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>sourceElem</strong>(:)</td><td></td><td></td><td><p>(nNew) old element index (COPY/PROLONG; 0 otherwise)</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-sourcekind~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>sourceKind</strong>(:)</td><td></td><td></td><td><p>(nNew) SELF_TRANSFER_COPY / PROLONG / RESTRICT</p></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/transferplan3d.html#boundprocedure-free~14'>Free</a></strong>  => Free_TransferPlan3D </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-applytransferplan~2"></span><h3>public subroutine <a href='../proc/applytransferplan~2.html'>ApplyTransferPlan</a>(plan, interp, nVar, uOld, uNew)</h3></div>
+  <div class="panel-body">
+       
+<p>Execute a transfer plan on nodal element data: uNew(:,:,:,li,:) receives old element
+data copied, prolonged (exact interpolation), or restricted (conservative L2 projection)
+according to plan entry li. interp must be the solution interpolant the data lives on
+(its mortar operators drive the transfer). Runs once per adaptation epoch - not a
+per-time-step hot path - so clarity is preferred over fused loops here.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan3d.html'>TransferPlan3D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uOld</strong>(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:plan%nOld,1:nVar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uNew</strong>(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:plan%nNew,1:nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-applytransferplanrange~2"></span><h3>public subroutine <a href='../proc/applytransferplanrange~2.html'>ApplyTransferPlanRange</a>(plan, interp, nVar, uOld, eFirst, eLast, uNew)</h3></div>
+  <div class="panel-body">
+       
+<p>Execute the contiguous sub-range eFirst..eLast of a transfer plan: uNew(:,:,:,k,:)
+receives the data of new element eFirst+k-1. uOld is the full (global) old field; the
+output is only the requested slice. This is the gather-then-slice (AMR Stage-5 v1)
+decomposed-mesh entry point: each rank passes its own contiguous range of the new
+element ordering and a gathered global old solution, and fills exactly its rank-local
+storage. ApplyTransferPlanWindow is the point-to-point (v2) entry point, which needs
+only the sub-range of the old field the requested new range actually references; this
+routine is that one over the whole old field, so the two are bit-identical by
+construction rather than by inspection.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan3d.html'>TransferPlan3D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uOld</strong>(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:plan%nOld,1:nVar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eFirst</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uNew</strong>(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:eLast-eFirst+1,1:nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-applytransferplanwindow~2"></span><h3>public subroutine <a href='../proc/applytransferplanwindow~2.html'>ApplyTransferPlanWindow</a>(plan, interp, nVar, uOld, oldFirst, oldLast, eFirst, eLast, uNew)</h3></div>
+  <div class="panel-body">
+       
+<p>Execute the contiguous sub-range eFirst..eLast of a transfer plan against a WINDOW of
+the old field: uOld holds old elements oldFirst..oldLast only, indexed in the global old
+element numbering that plan%sourceElem and plan%family use, rather than the whole global
+field. uNew(:,:,:,k,:) receives the data of new element eFirst+k-1.</p><a href="../proc/applytransferplanwindow~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan3d.html'>TransferPlan3D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uOld</strong>(1:interp%N+1,1:interp%N+1,1:interp%N+1,oldFirst:oldLast,1:nVar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>oldFirst</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>oldLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eFirst</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>uNew</strong>(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:eLast-eFirst+1,1:nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-buildtransferplan~2"></span><h3>public subroutine <a href='../proc/buildtransferplan~2.html'>BuildTransferPlan</a>(forest, nOld, oldLeaf, plan)</h3></div>
+  <div class="panel-body">
+       
+<p>Build the old-&gt;new transfer plan for the adaptation epoch that took the forest from the
+leaf configuration (nOld, oldLeaf) - a snapshot of (forest%nLeaves, forest%leaf) taken
+before mutating - to its current leaf configuration. See the module documentation for the
+allowed mutations within one epoch. The plan is valid until the forest is mutated again.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/octreemesh3d.html'>OctreeMesh3D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>forest</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nOld</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>oldLeaf</strong>(1:nOld)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan3d.html'>TransferPlan3D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_transferplan3d"></span><h3>public subroutine <a href='../proc/free_transferplan3d.html'>Free_TransferPlan3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/transferplan3d.html'>TransferPlan3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-10-17 12:40            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

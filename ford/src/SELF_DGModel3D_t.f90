@@ -1,0 +1,1286 @@
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+!
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
+!
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+
+module SELF_DGModel3D_t
+
+  use SELF_SupportRoutines
+  use SELF_Metadata
+  use SELF_Geometry_3D
+  use SELF_Mesh_3D
+  use SELF_MappedScalar_3D
+  use SELF_MappedVector_3D
+  use SELF_HDF5
+  use HDF5
+  use FEQParse
+  use SELF_Model
+  use SELF_BoundaryConditions
+  use SELF_TransferPlan_3D
+  use SELF_SolutionMigration
+  use iso_fortran_env,only:int64
+
+  implicit none
+
+  type,extends(Model) :: DGModel3D_t
+    type(MappedScalar3D)   :: solution
+    type(MappedVector3D)   :: solutionGradient
+    type(MappedVector3D)   :: flux
+    type(MappedScalar3D)   :: source
+    type(MappedScalar3D)   :: fluxDivergence
+    type(MappedScalar3D)   :: dSdt
+    type(MappedScalar3D)   :: workSol
+    ! Host staging for the pre-regrid solution (see StageSolutionForTransfer)
+    real(prec),allocatable :: transferStage(:,:,:,:,:)
+    !! Migrated old-element window, held between MigrateOldWindow and ApplyTransferPlan on the
+    !! multi-rank path: the contiguous run of OLD elements this rank's new element range
+    !! references. Flat, because it is viewed through a rank-remapped pointer whose element lower
+    !! bound is the window's first GLOBAL old element index - the numbering the transfer plan
+    !! uses. Persistent and grow-only, so a settled adapting run allocates nothing here. The GPU
+    !! backend overrides the migration and keeps the window in device memory instead, leaving
+    !! this unallocated.
+    real(prec),allocatable :: winStage(:)
+    integer :: winStageFirst = 0 !! global old index of winStage's first element
+    integer :: winStageN = 0 !! window element count; 0 means no window is migrated
+    type(Mesh3D),pointer   :: mesh
+    type(SEMHex),pointer  :: geometry
+    type(BoundaryConditionList) :: hyperbolicBCs
+    type(BoundaryConditionList) :: parabolicBCs
+    !! Mesh boundary faces whose sideInfo(5) boundary condition id matches no registered
+    !! boundary condition, counted over the whole domain by MapBoundaryConditions and summed
+    !! across ranks. Nothing writes solution%extBoundary on such a face, so the Riemann solver
+    !! reads zeros at t = 0 and stale values afterwards. ReportUnmappedBoundaries warns about
+    !! them once, from the top of ForwardStep.
+    integer :: nUnmappedBoundaries = 0
+    !! The first unregistered bcid found, and meaningful only when nUnmappedBoundaries > 0:
+    !! -1 is itself a legal bcid, so it cannot double as an "absent" marker.
+    integer :: unmappedBoundaryID = -1
+    logical :: unmappedBoundariesReported = .false.
+
+  contains
+
+    procedure :: Init => Init_DGModel3D_t
+    procedure :: SetMetadata => SetMetadata_DGModel3D_t
+    procedure :: Free => Free_DGModel3D_t
+    procedure :: Regrid => Regrid_DGModel3D_t
+    procedure :: StageSolutionForTransfer => StageSolutionForTransfer_DGModel3D_t
+    procedure :: ApplyTransferPlan => ApplyTransferPlan_DGModel3D_t
+    procedure :: MigrateOldWindow => MigrateOldWindow_DGModel3D_t
+    procedure :: DownloadOldWindow => DownloadOldWindow_DGModel3D_t
+    procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel3D_t
+    procedure :: ReportUnmappedBoundaries => ReportUnmappedBoundaries_DGModel3D_t
+
+    procedure :: CalculateEntropy => CalculateEntropy_DGModel3D_t
+    procedure :: BoundaryFlux => BoundaryFlux_DGModel3D_t
+    procedure :: FluxMethod => fluxmethod_DGModel3D_t
+    procedure :: SourceMethod => sourcemethod_DGModel3D_t
+    procedure :: SetBoundaryCondition => setboundarycondition_DGModel3D_t
+    procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel3D_t
+    procedure :: ReportMetrics => ReportMetrics_DGModel3D_t
+
+    procedure :: UpdateSolution => UpdateSolution_DGModel3D_t
+
+    procedure :: UpdateGRK2 => UpdateGRK2_DGModel3D_t
+    procedure :: UpdateGRK3 => UpdateGRK3_DGModel3D_t
+    procedure :: UpdateGRK4 => UpdateGRK4_DGModel3D_t
+
+    procedure :: CalculateSolutionGradient => CalculateSolutionGradient_DGModel3D_t
+    procedure :: CalculateTendency => CalculateTendency_DGModel3D_t
+
+    generic :: SetSolution => SetSolutionFromChar_DGModel3D_t, &
+      SetSolutionFromEqn_DGModel3D_t
+    procedure,private :: SetSolutionFromChar_DGModel3D_t
+    procedure,private :: SetSolutionFromEqn_DGModel3D_t
+
+    procedure :: ReadModel => Read_DGModel3D_t
+    procedure :: WriteModel => Write_DGModel3D_t
+    procedure :: WriteTecplot => WriteTecplot_DGModel3D_t
+
+  endtype DGModel3D_t
+
+contains
+
+  subroutine Init_DGModel3D_t(this,mesh,geometry)
+    implicit none
+    class(DGModel3D_t),intent(out) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+    ! Local
+    this%mesh => mesh
+    this%geometry => geometry
+    call this%SetNumberOfVariables()
+
+    ! Default the number of time-stepped variables to nvar. Models that carry
+    ! auxiliary/diagnostic variables may set this%nstepped < nvar inside
+    ! SetNumberOfVariables to exclude the trailing variables from time integration.
+    if(this%nstepped <= 0 .or. this%nstepped > this%nvar) this%nstepped = this%nvar
+
+    call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%workSol%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%dSdt%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%solutionGradient%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%flux%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%source%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%fluxDivergence%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+
+    call this%solution%AssociateGeometry(geometry)
+    call this%solutionGradient%AssociateGeometry(geometry)
+    call this%flux%AssociateGeometry(geometry)
+    call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%hyperbolicBCs%Init()
+    call this%parabolicBCs%Init()
+
+    call this%AdditionalInit()
+
+    call this%MapBoundaryConditions()
+
+    call this%SetMetadata()
+
+  endsubroutine Init_DGModel3D_t
+
+  subroutine SetMetadata_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: ivar
+    character(LEN=3) :: ivarChar
+    character(LEN=25) :: varname
+
+    do ivar = 1,this%nvar
+      write(ivarChar,'(I3.3)') ivar
+      varname = "solution"//trim(ivarChar)
+      call this%solution%SetName(ivar,varname)
+      call this%solution%SetUnits(ivar,"[null]")
+    enddo
+
+  endsubroutine SetMetadata_DGModel3D_t
+
+  subroutine Free_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+
+    call this%solution%Free()
+    call this%workSol%Free()
+    call this%dSdt%Free()
+    call this%solutionGradient%Free()
+    call this%flux%Free()
+    call this%source%Free()
+    call this%fluxDivergence%Free()
+    call this%hyperbolicBCs%Free()
+    call this%parabolicBCs%Free()
+    call this%AdditionalFree()
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
+    if(allocated(this%winStage)) deallocate(this%winStage)
+    this%winStageFirst = 0
+    this%winStageN = 0
+
+  endsubroutine Free_DGModel3D_t
+
+  subroutine Regrid_DGModel3D_t(this,mesh,geometry)
+    !! Rebind a live model to a new mesh/geometry pair (AMR regrid). The mesh-sized solution
+    !! storage is reallocated and the boundary-condition registrations and maps are rebuilt
+    !! for the new mesh, while everything that is not mesh-sized is preserved: the time state
+    !! (t, dt, entropy, IO counter), the time-integrator selection, configuration flags, and
+    !! any model-specific parameters (Init is intent(out) and would reset all of these).
+    !! nvar/nstepped are unchanged - the model solves the same equations on a new mesh.
+    !!
+    !! The solution interior is left UNINITIALIZED: the caller transfers the solution from the
+    !! previous mesh (e.g. ApplyTransferPlan on a BuildTransferPlan mapping) and then calls
+    !! solution%UpdateDevice. Regrid runs once per adaptation epoch, between time steps; it is
+    !! not a per-step hot path.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+
+    if(.not. associated(this%mesh)) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : Regrid called on a model that has not been initialized.'
+      stop 1
+    endif
+
+    ! Free everything sized by the old mesh, mirroring Free (AdditionalFree releases any
+    ! model-specific mesh-sized state so AdditionalInit can rebuild it below).
+    ! Boundary-condition registrations are rebuilt because the boundary face set changes with
+    ! the mesh. The mesh-sized fields are NOT freed: they are resized in place below, which
+    ! reuses their storage whenever the new element count fits.
+    call this%hyperbolicBCs%Free()
+    call this%parabolicBCs%Free()
+    call this%AdditionalFree()
+
+    ! Rebuild on the new mesh, mirroring the mesh-sized portion of Init.
+    this%mesh => mesh
+    this%geometry => geometry
+
+    ! Resize rather than Free + Init. Init is intent(out), so it would reset the whole object,
+    ! reallocate every array, zero it, reconstruct the equation parsers and - on GPU builds -
+    ! upload the zeros, all of which the adaptive loop then discards (the 2-D AMR work
+    ! attributed over half of an adaptation to exactly that cycle).
+    call this%solution%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%workSol%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%dSdt%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%solutionGradient%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%flux%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%source%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%fluxDivergence%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+
+    call this%solution%AssociateGeometry(geometry)
+    call this%solutionGradient%AssociateGeometry(geometry)
+    call this%flux%AssociateGeometry(geometry)
+    call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%hyperbolicBCs%Init()
+    call this%parabolicBCs%Init()
+
+    call this%AdditionalInit()
+
+    call this%MapBoundaryConditions()
+
+    call this%SetMetadata()
+
+  endsubroutine Regrid_DGModel3D_t
+
+  subroutine StageSolutionForTransfer_DGModel3D_t(this)
+    !! Preserve the current solution ahead of a regrid, so that Regrid may release the storage
+    !! it lives in. Pair with ApplyTransferPlan, which consumes the staged copy:
+    !!
+    !!     call model%StageSolutionForTransfer()
+    !!     call model%Regrid(newMesh,newGeom)
+    !!     call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+    !!
+    !! This base implementation stages on the host, which on a GPU build means a
+    !! device-to-host copy of the whole field; a device-resident staging override is the 3-D
+    !! analogue of the 2-D Stage 6a optimization.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: Np,nEl
+
+    Np = this%solution%interp%N+1
+    nEl = this%solution%nElem
+
+    call this%solution%UpdateHost()
+
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
+    allocate(this%transferStage(1:Np,1:Np,1:Np,1:nEl,1:this%nvar))
+    this%transferStage(1:Np,1:Np,1:Np,1:nEl,1:this%nvar) = &
+      this%solution%interior(1:Np,1:Np,1:Np,1:nEl,1:this%nvar)
+
+  endsubroutine StageSolutionForTransfer_DGModel3D_t
+
+  subroutine ApplyTransferPlan_DGModel3D_t(this,plan,interp,eFirst,eLast,uGlobal,oldFirst)
+    !! Transfer the staged pre-regrid solution onto the regridded mesh through plan, filling the
+    !! rank-local element range [eFirst,eLast] of the new solution.
+    !!
+    !! uGlobal is optional and supplies old-field data the caller has already assembled; when
+    !! absent the locally staged copy from StageSolutionForTransfer is used, which is the whole
+    !! field on a single rank. oldFirst is the global old element index of uGlobal's first
+    !! element: absent (or 1) means uGlobal is the whole global old field (the Stage-5 v1
+    !! allgather path), while the point-to-point migration (v2) passes the window it received
+    !! together with the window's first global old element index.
+    !!
+    !! [eFirst,eLast] must be this rank's WHOLE new element range, so that eLast-eFirst+1 equals
+    !! solution%nElem. The portable apply below writes uNew as an exactly-shaped array, so a
+    !! sub-range of a larger field would place every variable after the first at the wrong stride;
+    !! the device kernel is indifferent, because it is told the field's element stride separately.
+    !! Do not rely on that difference - the contract is the whole range on both backends.
+    !!
+    !! This base implementation runs the portable host transfer and uploads the result; a
+    !! device-resident transfer override is the 3-D analogue of the 2-D Stage 6a optimization.
+    implicit none
+    ! target on this: the migrated window is a flat component and the windowed apply is fed
+    ! through a pointer remapped onto it (below), which requires the target attribute here.
+    class(DGModel3D_t),intent(inout),target :: this
+    ! target: a device override takes c_loc of the plan's arrays to upload them, which requires
+    ! the POINTER or TARGET attribute. Declared here too so any override's characteristics match.
+    type(TransferPlan3D),intent(in),target :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    real(prec),intent(in),optional,contiguous :: uGlobal(:,:,:,:,:)
+    integer,intent(in),optional :: oldFirst
+    ! Local
+    integer :: o1,o2,Np,perElem
+    real(prec),pointer :: uWin(:,:,:,:,:)
+
+    if(present(uGlobal)) then
+      o1 = 1
+      if(present(oldFirst)) o1 = oldFirst
+      o2 = o1+size(uGlobal,4)-1
+      call ApplyTransferPlanWindow(plan,interp,this%nvar,uGlobal,o1,o2,eFirst,eLast, &
+                                   this%solution%interior)
+    elseif(this%winStageN > 0) then
+      if(allocated(this%transferStage)) then
+        ! Two sources for one apply. The GPU override rejects the same combination; keeping the
+        ! guard rails symmetric between the backends is the point, not the reachability - the
+        ! controller never stages and migrates in the same epoch.
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : ApplyTransferPlan has both a staged local field and a migrated window.'
+        stop 1
+      endif
+      ! The multi-rank path: MigrateOldWindow left this rank's window of the old field in
+      ! winStage. This is the same windowed apply as the uGlobal branch above, reading model
+      ! state rather than a caller-supplied array, which is what lets the GPU backend hold the
+      ! window in device memory and override only the migration and the apply.
+      Np = interp%N+1
+      perElem = Np*Np*Np
+      o1 = this%winStageFirst
+      o2 = o1+this%winStageN-1
+      uWin(1:Np,1:Np,1:Np,o1:o2,1:this%nvar) => this%winStage(1:perElem*this%winStageN*this%nvar)
+      call ApplyTransferPlanWindow(plan,interp,this%nvar,uWin,o1,o2,eFirst,eLast, &
+                                   this%solution%interior)
+      uWin => null()
+    else
+      if(.not. allocated(this%transferStage)) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : ApplyTransferPlan called without a staged solution or a migrated window.'
+        stop 1
+      endif
+      call ApplyTransferPlanRange(plan,interp,this%nvar,this%transferStage,eFirst,eLast, &
+                                  this%solution%interior)
+    endif
+
+    call this%solution%UpdateDevice()
+
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
+    ! The window buffer is retained (grow-only) but its marker is cleared, so a second apply
+    ! without a fresh migration fails the guard rather than reusing a stale window.
+    this%winStageN = 0
+
+  endsubroutine ApplyTransferPlan_DGModel3D_t
+
+  subroutine MigrateOldWindow_DGModel3D_t(this,winFirst,winLast,wFirst,wLast, &
+                                          nBytesRecv,nBytesSent,nElemRemote)
+    !! Migrate the pre-regrid solution into this rank's old-element window, ready for a windowed
+    !! ApplyTransferPlan. Call it BEFORE Regrid, which releases the storage the sends read:
+    !!
+    !!     call model%MigrateOldWindow(winFirst,winLast,wFirst,wLast,...)
+    !!     call model%Regrid(newMesh,newGeom)
+    !!     call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+    !!
+    !! [wFirst,wLast] is this rank's window of GLOBAL old element indices, normalized so that
+    !! wFirst > wLast means empty; winFirst/winLast are the same for every rank, which is what
+    !! lets each end of a pair derive the shared schedule without communicating (see
+    !! SELF_SolutionMigration). A rank with an empty window must still call this, because its
+    !! peers may need old elements it owns.
+    !!
+    !! This base implementation migrates into host memory, which on a GPU build means a
+    !! device-to-host copy of the local field first; the GPU backend overrides it to assemble the
+    !! window in device memory and receive into it directly.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    integer,intent(in) :: winFirst(:) !! (1:nRanks) window lower bounds, from PlanWindows
+    integer,intent(in) :: winLast(:) !! (1:nRanks) window upper bounds
+    integer,intent(in) :: wFirst !! this rank's window (wFirst > wLast if empty)
+    integer,intent(in) :: wLast
+    integer(int64),intent(inout) :: nBytesRecv
+    integer(int64),intent(inout) :: nBytesSent
+    integer(int64),intent(inout) :: nElemRemote
+    ! Local
+    integer :: perElem,nWinElem,nWin
+
+    perElem = (this%solution%interp%N+1)*(this%solution%interp%N+1)*(this%solution%interp%N+1)
+    nWinElem = max(wLast-wFirst+1,0)
+
+    ! Grow-only, and never zero-sized: a one-element floor keeps the actual argument below valid
+    ! even for an empty window, which is the case for a rank that owns no new elements.
+    nWin = perElem*max(nWinElem,1)*this%nvar
+    if(allocated(this%winStage)) then
+      if(size(this%winStage) < nWin) deallocate(this%winStage)
+    endif
+    if(.not. allocated(this%winStage)) allocate(this%winStage(1:nWin))
+
+    call this%solution%UpdateHost()
+    call ExchangeOldWindowFlat(this%mesh%decomp,perElem,this%nvar,this%solution%nElem, &
+                               this%solution%interior,winFirst,winLast,wFirst,wLast, &
+                               this%winStage,nBytesRecv,nBytesSent,nElemRemote)
+
+    this%winStageFirst = wFirst
+    this%winStageN = nWinElem
+
+  endsubroutine MigrateOldWindow_DGModel3D_t
+
+  subroutine DownloadOldWindow_DGModel3D_t(this,wFirst,wLast,uWin)
+    !! Copy the migrated window into a host array, for the SELF_AMR_MIGRATE_VERIFY diagnostic.
+    !! Diagnostic-only and off the default path: on a GPU build the override is a device-to-host
+    !! transfer of the whole window, which is exactly the traffic the device path exists to avoid.
+    !!
+    !! The comparison this feeds is BITWISE, and must stay that way. Migration is pure data
+    !! movement - host and device copies, MPI byte transfers - so no arithmetic touches these
+    !! values and exactness is available. That is unlike the transfer APPLY, which agrees between
+    !! host and device only to round-off because the device compiler contracts its
+    !! multiply-accumulates into FMAs. The two are checked by different switches for that reason.
+    implicit none
+    class(DGModel3D_t),intent(in) :: this
+    integer,intent(in) :: wFirst
+    integer,intent(in) :: wLast
+    ! target: the GPU override takes c_loc of this to download the window in one memcpy.
+    real(prec),intent(out),target,contiguous :: uWin(:,:,:,:,:) !! (Np,Np,Np,nWinElem,nvar)
+    ! Local
+    integer :: Np,perElem,nWinElem,i,j,k,e,iv,p,off
+
+    nWinElem = max(wLast-wFirst+1,0)
+    if(nWinElem == 0) return
+
+    Np = this%solution%interp%N+1
+    perElem = Np*Np*Np
+    if(size(uWin,4) /= nWinElem .or. size(uWin,5) /= this%nvar) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : DownloadOldWindow given a buffer that does not match the window.'
+      stop 1
+    endif
+    if(this%winStageN /= nWinElem .or. this%winStageFirst /= wFirst) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : DownloadOldWindow called without a matching migrated window.'
+      stop 1
+    endif
+
+    do iv = 1,this%nvar
+      do e = 1,nWinElem
+        off = perElem*((e-1)+nWinElem*(iv-1))
+        p = 0
+        do k = 1,Np
+          do j = 1,Np
+            do i = 1,Np
+              p = p+1
+              uWin(i,j,k,e,iv) = this%winStage(off+p)
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+  endsubroutine DownloadOldWindow_DGModel3D_t
+
+  subroutine ReportMetrics_DGModel3D_t(this)
+    !! Base method for reporting the entropy of a model
+    !! to stdout. Only override this procedure if additional
+    !! reporting is needed. Alternatively, if you think
+    !! additional reporting would be valuable for all models,
+    !! open a pull request with modifications to this base
+    !! method.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    character(len=20) :: modelTime
+    character(len=20) :: minv,maxv
+    character(len=:),allocatable :: str
+    integer :: ivar
+
+    ! Copy the time and entropy to a string
+    write(modelTime,"(ES16.7E3)") this%t
+
+    do ivar = 1,this%nvar
+      write(maxv,"(ES16.7E3)") maxval(this%solution%interior(:,:,:,:,ivar))
+      write(minv,"(ES16.7E3)") minval(this%solution%interior(:,:,:,:,ivar))
+
+      ! Write the output to STDOUT
+      open(output_unit,ENCODING='utf-8')
+      write(output_unit,'(1x, A," : ")',ADVANCE='no') __FILE__
+      str = 'tᵢ ='//trim(modelTime)
+      write(output_unit,'(A)',ADVANCE='no') str
+      str = '  |  min('//trim(this%solution%meta(ivar)%name)// &
+            '), max('//trim(this%solution%meta(ivar)%name)//') = '// &
+            minv//" , "//maxv
+      write(output_unit,'(A)',ADVANCE='yes') str
+    enddo
+
+    call this%ReportUserMetrics()
+
+  endsubroutine ReportMetrics_DGModel3D_t
+
+  subroutine SetSolutionFromEqn_DGModel3D_t(this,eqn)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    type(EquationParser),intent(in) :: eqn(1:this%solution%nVar)
+    ! Local
+    integer :: iVar
+
+    ! Copy the equation parser
+    do iVar = 1,this%solution%nVar
+      call this%solution%SetEquation(ivar,eqn(iVar)%equation)
+    enddo
+
+    call this%solution%SetInteriorFromEquation(this%geometry,this%t)
+
+    call this%solution%BoundaryInterp()
+
+  endsubroutine SetSolutionFromEqn_DGModel3D_t
+
+  subroutine SetSolutionFromChar_DGModel3D_t(this,eqnChar)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    character(*),intent(in) :: eqnChar(1:this%solution%nVar)
+    ! Local
+    integer :: iVar
+
+    do iVar = 1,this%solution%nVar
+      call this%solution%SetEquation(ivar,trim(eqnChar(iVar)))
+    enddo
+
+    call this%solution%SetInteriorFromEquation(this%geometry,this%t)
+
+    call this%solution%BoundaryInterp()
+
+  endsubroutine SetSolutionFromChar_DGModel3D_t
+
+  subroutine UpdateSolution_DGModel3D_t(this,dt)
+    !! Computes a solution update as , where dt is either provided through the interface
+    !! or taken as the Model's stored time step size (model % dt)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    real(prec),optional,intent(in) :: dt
+    ! Local
+    real(prec) :: dtLoc
+    integer :: i,j,k,iVar,iEl
+
+    if(present(dt)) then
+      dtLoc = dt
+    else
+      dtLoc = this%dt
+    endif
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+
+      this%solution%interior(i,j,k,iEl,iVar) = &
+        this%solution%interior(i,j,k,iEl,iVar)+ &
+        dtLoc*this%dSdt%interior(i,j,k,iEl,iVar)
+
+    enddo
+
+  endsubroutine UpdateSolution_DGModel3D_t
+
+  subroutine UpdateGRK2_DGModel3D_t(this,m)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    integer,intent(in) :: m
+    ! Local
+    integer :: i,j,k,iVar,iEl
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+
+      this%workSol%interior(i,j,k,iEl,iVar) = rk2_a(m)* &
+                                              this%workSol%interior(i,j,k,iEl,iVar)+ &
+                                              this%dSdt%interior(i,j,k,iEl,iVar)
+
+      this%solution%interior(i,j,k,iEl,iVar) = &
+        this%solution%interior(i,j,k,iEl,iVar)+ &
+        rk2_g(m)*this%dt*this%workSol%interior(i,j,k,iEl,iVar)
+
+    enddo
+
+  endsubroutine UpdateGRK2_DGModel3D_t
+
+  subroutine UpdateGRK3_DGModel3D_t(this,m)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    integer,intent(in) :: m
+    ! Local
+    integer :: i,j,k,iVar,iEl
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+
+      this%workSol%interior(i,j,k,iEl,iVar) = rk3_a(m)* &
+                                              this%workSol%interior(i,j,k,iEl,iVar)+ &
+                                              this%dSdt%interior(i,j,k,iEl,iVar)
+
+      this%solution%interior(i,j,k,iEl,iVar) = &
+        this%solution%interior(i,j,k,iEl,iVar)+ &
+        rk3_g(m)*this%dt*this%workSol%interior(i,j,k,iEl,iVar)
+
+    enddo
+
+  endsubroutine UpdateGRK3_DGModel3D_t
+
+  subroutine UpdateGRK4_DGModel3D_t(this,m)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    integer,intent(in) :: m
+    ! Local
+    integer :: i,j,k,iVar,iEl
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+
+      this%workSol%interior(i,j,k,iEl,iVar) = rk4_a(m)* &
+                                              this%workSol%interior(i,j,k,iEl,iVar)+ &
+                                              this%dSdt%interior(i,j,k,iEl,iVar)
+
+      this%solution%interior(i,j,k,iEl,iVar) = &
+        this%solution%interior(i,j,k,iEl,iVar)+ &
+        rk4_g(m)*this%dt*this%workSol%interior(i,j,k,iEl,iVar)
+
+    enddo
+
+  endsubroutine UpdateGRK4_DGModel3D_t
+
+  subroutine CalculateSolutionGradient_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+
+    call this%solution%AverageSides()
+
+    call this%solution%MappedDGGradient(this%solutionGradient%interior)
+
+    ! interpolate the solutiongradient to the element boundaries
+    call this%solutionGradient%BoundaryInterp()
+
+    ! perform the side exchange to populate the
+    ! solutionGradient % extBoundary attribute
+    call this%solutionGradient%SideExchange(this%mesh)
+
+    ! populate the solutionGradient % extBoundary attribute on
+    ! nonconforming (mortar) interfaces
+    if(this%mesh%nMortars > 0) then
+      call this%solutionGradient%MortarExchange(this%mesh)
+    endif
+
+  endsubroutine CalculateSolutionGradient_DGModel3D_t
+
+  subroutine CalculateEntropy_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: iel,i,j,k,ierror
+    real(prec) :: e,jac
+    real(prec) :: s(1:this%nvar)
+
+    e = 0.0_prec
+    do iel = 1,this%geometry%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+            jac = abs(this%geometry%J%interior(i,j,k,iel,1))
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            e = e+this%entropy_func(s)*jac* &
+                this%solution%interp%qWeights(i)* &
+                this%solution%interp%qWeights(j)* &
+                this%solution%interp%qWeights(k)
+          enddo
+        enddo
+      enddo
+    enddo
+
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(e, &
+                         this%entropy, &
+                         1, &
+                         this%mesh%decomp%mpiPrec, &
+                         MPI_SUM, &
+                         this%mesh%decomp%mpiComm, &
+                         iError)
+    else
+      this%entropy = e
+    endif
+
+  endsubroutine CalculateEntropy_DGModel3D_t
+
+  subroutine fluxmethod_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i,j,k
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem)
+
+      s = this%solution%interior(i,j,k,iel,1:this%nvar)
+      dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+      this%flux%interior(i,j,k,iel,1:this%nvar,1:3) = this%flux3d(s,dsdx)
+
+    enddo
+
+  endsubroutine fluxmethod_DGModel3D_t
+
+  subroutine BoundaryFlux_DGModel3D_t(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
+    real(prec) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: nhat(1:3),nmag
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:6,iel=1:this%mesh%nElem)
+      ! Get the boundary normals on cell edges from the mesh geometry
+      nhat = this%geometry%nHat%boundary(i,j,k,iEl,1,1:3)
+      sL = this%solution%boundary(i,j,k,iel,1:this%nvar) ! interior solution
+      sR = this%solution%extboundary(i,j,k,iel,1:this%nvar) ! exterior solution
+      dsdx = this%solutiongradient%avgboundary(i,j,k,iel,1:this%nvar,1:3)
+      nmag = this%geometry%nScale%boundary(i,j,k,iEl,1)
+
+      this%flux%boundaryNormal(i,j,k,iEl,1:this%nvar) = this%riemannflux3d(sL,sR,dsdx,nhat)*nmag
+
+    enddo
+
+  endsubroutine BoundaryFlux_DGModel3D_t
+
+  subroutine sourcemethod_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem)
+
+      s = this%solution%interior(i,j,k,iel,1:this%nvar)
+      dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+      this%source%interior(i,j,k,iel,1:this%nvar) = this%source3d(s,dsdx)
+
+    enddo
+
+  endsubroutine sourcemethod_DGModel3D_t
+
+  subroutine MapBoundaryConditions_DGModel3D_t(this)
+    !! Scan the mesh sideInfo and populate the elements/sides
+    !! arrays for each registered boundary condition.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    type(BoundaryCondition),pointer :: bcnode
+    integer :: iEl,k,e2,bcid
+    integer :: count,n
+    integer :: nUnmapped,idUnmapped,iError
+    integer :: idRank,srcRank
+    logical :: skipMortars
+    integer,allocatable :: elems(:),sds(:)
+
+    ! Mortar faces carry sideInfo(3) = 0 but are interior faces; sideInfo(1) holds the mortar
+    ! index (see SELF_Mesh_3D_t). They must be excluded from every pass below, forward and
+    ! reverse alike: a model may legitimately register bcid 0, and a mortar face carries
+    ! sideInfo(5) = 0, so a forward pass matching on sideInfo(5) alone would put interior faces
+    ! into that condition's list and SetBoundaryCondition would then overwrite what the mortar
+    ! exchange had just written. The HOPr reader copies sideInfo(1) verbatim from the file,
+    ! where it is the HOPr side type and may be nonzero on an ordinary face, so sideInfo(1) is
+    ! only a mortar marker on a mesh that actually carries mortars.
+    skipMortars = this%mesh%nMortars > 0
+
+    ! Map hyperbolic BCs
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      count = 0
+      do iEl = 1,this%mesh%nElem
+        do k = 1,6
+          e2 = this%mesh%sideInfo(3,k,iEl)
+          bcid = this%mesh%sideInfo(5,k,iEl)
+          if(skipMortars .and. this%mesh%sideInfo(1,k,iEl) /= 0) cycle
+          if(e2 == 0 .and. bcid == bc%bcid) count = count+1
+        enddo
+      enddo
+
+      if(count > 0) then
+        allocate(elems(count),sds(count))
+        n = 0
+        do iEl = 1,this%mesh%nElem
+          do k = 1,6
+            e2 = this%mesh%sideInfo(3,k,iEl)
+            bcid = this%mesh%sideInfo(5,k,iEl)
+            if(skipMortars .and. this%mesh%sideInfo(1,k,iEl) /= 0) cycle
+            if(e2 == 0 .and. bcid == bc%bcid) then
+              n = n+1
+              elems(n) = iEl
+              sds(n) = k
+            endif
+          enddo
+        enddo
+        call this%hyperbolicBCs%PopulateBoundaries(bc%bcid,count,elems,sds)
+        deallocate(elems,sds)
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition and each one loops over its own nBoundaries, so a stale
+        ! element/side list would keep this condition writing faces it no longer owns once
+        ! the mesh is re-tagged - and the unmapped tally below would then describe something
+        ! other than what runs. Clearing nBoundaries also parks the GPU wrappers, which guard
+        ! on the same field, so the device arrays are never read while stale.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
+      endif
+      bc => bc%next
+    enddo
+
+    ! Map parabolic BCs
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      count = 0
+      do iEl = 1,this%mesh%nElem
+        do k = 1,6
+          e2 = this%mesh%sideInfo(3,k,iEl)
+          bcid = this%mesh%sideInfo(5,k,iEl)
+          if(skipMortars .and. this%mesh%sideInfo(1,k,iEl) /= 0) cycle
+          if(e2 == 0 .and. bcid == bc%bcid) count = count+1
+        enddo
+      enddo
+
+      if(count > 0) then
+        allocate(elems(count),sds(count))
+        n = 0
+        do iEl = 1,this%mesh%nElem
+          do k = 1,6
+            e2 = this%mesh%sideInfo(3,k,iEl)
+            bcid = this%mesh%sideInfo(5,k,iEl)
+            if(skipMortars .and. this%mesh%sideInfo(1,k,iEl) /= 0) cycle
+            if(e2 == 0 .and. bcid == bc%bcid) then
+              n = n+1
+              elems(n) = iEl
+              sds(n) = k
+            endif
+          enddo
+        enddo
+        call this%parabolicBCs%PopulateBoundaries(bc%bcid,count,elems,sds)
+        deallocate(elems,sds)
+      else
+        ! Drop any mapping left by a previous call. SetBoundaryCondition dispatches every
+        ! registered condition and each one loops over its own nBoundaries, so a stale
+        ! element/side list would keep this condition writing faces it no longer owns once
+        ! the mesh is re-tagged - and the unmapped tally below would then describe something
+        ! other than what runs. Clearing nBoundaries also parks the GPU wrappers, which guard
+        ! on the same field, so the device arrays are never read while stale.
+        bc%nBoundaries = 0
+        if(allocated(bc%elements)) deallocate(bc%elements)
+        if(allocated(bc%sides)) deallocate(bc%sides)
+      endif
+      bc => bc%next
+    enddo
+
+    ! Reverse check. Both loops above iterate over registrations, so a boundary face whose
+    ! bcid matches no registration is never enumerated and its exterior state is never
+    ! written. Count those faces here: the sideInfo scan is already what this routine costs,
+    ! and it runs at Init and after every Regrid, never inside the time loop.
+    !
+    nUnmapped = 0
+    idUnmapped = -1
+    do iEl = 1,this%mesh%nElem
+      do k = 1,6
+        e2 = this%mesh%sideInfo(3,k,iEl)
+        if(e2 /= 0) cycle ! interior or rank-shared: sideInfo(3) holds a global element id
+        if(skipMortars .and. this%mesh%sideInfo(1,k,iEl) /= 0) cycle
+        bcid = this%mesh%sideInfo(5,k,iEl)
+        ! Only the HYPERBOLIC list decides whether the face is handled. SetBoundaryCondition
+        ! dispatches that list alone and it is what writes solution%extBoundary, the trace the
+        ! Riemann solver consumes; the parabolic list writes solutionGradient%extBoundary
+        ! through SetGradientBoundaryCondition. A bcid registered only parabolically therefore
+        ! leaves the solution trace unwritten - exactly the failure this scan exists to catch.
+        bcnode => this%hyperbolicBCs%GetBCForID(bcid)
+        if(associated(bcnode)) cycle
+        nUnmapped = nUnmapped+1
+        ! Keep the FIRST offender, not the largest: a bcid is any integer, so a max()
+        ! against a sentinel would never report one that sits below the sentinel.
+        if(nUnmapped == 1) idUnmapped = bcid
+      enddo
+    enddo
+
+    ! Each rank owns a slice of the mesh, so a bcid that appears nowhere here may still be
+    ! present on another rank. Every rank reaches this routine on both the Init and the Regrid
+    ! path, so the collective is safe.
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(nUnmapped,this%nUnmappedBoundaries,1,MPI_INTEGER, &
+                         MPI_SUM,this%mesh%decomp%mpiComm,iError)
+      ! A bcid is any integer, so no value can serve as an "absent" sentinel in a reduction
+      ! over the id itself. Agree on the lowest-numbered rank that actually has an offender
+      ! and take its id from there; a rank with none bids nRanks and so never wins.
+      if(nUnmapped > 0) then
+        idRank = this%mesh%decomp%rankId
+      else
+        idRank = this%mesh%decomp%nRanks
+      endif
+      call mpi_allreduce(idRank,srcRank,1,MPI_INTEGER,MPI_MIN, &
+                         this%mesh%decomp%mpiComm,iError)
+      if(srcRank < this%mesh%decomp%nRanks) then
+        this%unmappedBoundaryID = idUnmapped
+        call mpi_bcast(this%unmappedBoundaryID,1,MPI_INTEGER,srcRank, &
+                       this%mesh%decomp%mpiComm,iError)
+      else
+        this%unmappedBoundaryID = -1
+      endif
+    else
+      this%nUnmappedBoundaries = nUnmapped
+      this%unmappedBoundaryID = idUnmapped
+    endif
+    ! Regrid remaps onto a new mesh, so a mesh that is still mis-tagged warns again.
+    this%unmappedBoundariesReported = .false.
+
+  endsubroutine MapBoundaryConditions_DGModel3D_t
+
+  subroutine ReportUnmappedBoundaries_DGModel3D_t(this)
+    !! Warn, once, about mesh boundary faces whose bcid has no registered boundary
+    !! condition. MapBoundaryConditions establishes the count; ForwardStep calls this.
+    !!
+    !! This is deliberately a warning and not an error. An exterior state of zero is a
+    !! meaningful condition for some systems - for linear Euler it is effectively a
+    !! radiation condition - so the run is allowed to continue.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+
+    if(this%nUnmappedBoundaries <= 0) return
+    if(this%unmappedBoundariesReported) return
+    this%unmappedBoundariesReported = .true.
+    ! The count is already global; one rank reports it.
+    if(this%mesh%decomp%rankId /= 0) return
+
+    print*,__FILE__,' : Warning : ',this%nUnmappedBoundaries, &
+      ' mesh boundary faces carry a bcid with no boundary condition registered on'// &
+      ' hyperbolicBCs.'
+    print*,__FILE__,' : Warning : One such bcid is ',this%unmappedBoundaryID
+    print*,__FILE__,' : Warning : A registration on parabolicBCs alone does not count:'// &
+      ' that list is dispatched by SetGradientBoundaryCondition and writes'// &
+      ' solutionGradient%extBoundary, not the solution trace the Riemann solver reads.'
+    print*,__FILE__,' : Warning : Nothing writes the exterior state on those faces, so the'// &
+      ' Riemann solver uses solution%extBoundary as it stands - zero on the first step, and'// &
+      ' the previous step values afterwards.'
+    print*,__FILE__,' : Warning : Register a boundary condition for that bcid on'// &
+      ' hyperbolicBCs in'// &
+      ' AdditionalInit, or re-tag the mesh faces (see mesh%ResetBoundaryConditionType).'
+
+  endsubroutine ReportUnmappedBoundaries_DGModel3D_t
+
+  subroutine setboundarycondition_DGModel3D_t(this)
+    !! Apply registered boundary conditions for the solution.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    procedure(SELF_bcMethod),pointer :: apply_bc
+
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      apply_bc => bc%bcMethod
+      call apply_bc(bc,this)
+      bc => bc%next
+    enddo
+
+  endsubroutine setboundarycondition_DGModel3D_t
+
+  subroutine setgradientboundarycondition_DGModel3D_t(this)
+    !! Apply registered boundary conditions for the solution gradient.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    procedure(SELF_bcMethod),pointer :: apply_bc
+
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      apply_bc => bc%bcMethod
+      call apply_bc(bc,this)
+      bc => bc%next
+    enddo
+
+  endsubroutine setgradientboundarycondition_DGModel3D_t
+
+  subroutine CalculateTendency_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iVar,iEl
+
+    call this%solution%BoundaryInterp()
+    call this%solution%SideExchange(this%mesh)
+
+    ! populate the solution % extBoundary attribute on nonconforming
+    ! (mortar) interfaces
+    if(this%mesh%nMortars > 0) then
+      call this%solution%MortarExchange(this%mesh)
+    endif
+
+    call this%PreTendencyHook() ! User-supplied
+    call this%SetBoundaryCondition() ! User-supplied
+
+    if(this%gradient_enabled) then
+      call this%solution%AverageSides()
+      call this%CalculateSolutionGradient()
+      call this%SetGradientBoundaryCondition() ! User-supplied
+      call this%solutionGradient%AverageSides()
+    endif
+
+    call this%SourceMethod() ! User supplied
+    call this%BoundaryFlux() ! User supplied
+
+    ! On mortar interfaces, replace the big face's surface-flux integrand with the
+    ! projection of the small faces' integrands so that the interface is conservative
+    if(this%mesh%nMortars > 0) then
+      call this%flux%MortarFluxCollect(this%mesh)
+    endif
+
+    call this%FluxMethod() ! User supplied
+
+    call this%flux%MappedDGDivergence(this%fluxDivergence%interior)
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+
+      this%dSdt%interior(i,j,k,iEl,iVar) = &
+        this%source%interior(i,j,k,iEl,iVar)- &
+        this%fluxDivergence%interior(i,j,k,iEl,iVar)
+
+    enddo
+
+  endsubroutine CalculateTendency_DGModel3D_t
+
+  subroutine Write_DGModel3D_t(this,fileName)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    character(*),optional,intent(in) :: fileName
+    ! Local
+    integer(HID_T) :: fileId
+    character(LEN=self_FileNameLength) :: pickupFile
+    character(13) :: timeStampString
+
+    if(present(filename)) then
+      pickupFile = filename
+    else
+      write(timeStampString,'(I13.13)') this%ioIterate
+      pickupFile = 'solution.'//timeStampString//'.h5'
+    endif
+
+    print*,__FILE__//" : Writing pickup file : "//trim(pickupFile)
+
+    if(this%mesh%decomp%mpiEnabled) then
+
+      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%mesh%decomp%mpiComm)
+
+      ! Write the interpolant to the file
+      call this%solution%interp%WriteHDF5(fileId)
+
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
+      ! Write the model state to file
+      call CreateGroup_HDF5(fileId,'/controlgrid')
+      call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
+                                   this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
+
+      ! Write the geometry to file
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry', &
+                                     this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
+
+      ! -- END : writing solution on control grid -- !
+
+      call Close_HDF5(fileId)
+
+    else
+
+      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+
+      ! Write the interpolant to the file
+      call this%solution%interp%WriteHDF5(fileId)
+
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
+
+      ! Write the model state to file
+      call CreateGroup_HDF5(fileId,'/controlgrid')
+      call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
+
+      ! Write the geometry to file
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry')
+      ! -- END : writing solution on control grid -- !
+
+      call Close_HDF5(fileId)
+
+    endif
+
+  endsubroutine Write_DGModel3D_t
+
+  subroutine Read_DGModel3D_t(this,fileName)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    character(*),intent(in) :: fileName
+    ! Local
+    integer(HID_T) :: fileId
+    integer(HID_T) :: solOffset(1:4)
+    integer :: firstElem,ivar
+    character(LEN=:),allocatable :: dsetName
+
+    if(this%mesh%decomp%mpiEnabled) then
+      call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
+                     this%mesh%decomp%mpiComm)
+    else
+      call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
+    endif
+
+    if(this%mesh%decomp%mpiEnabled) then
+      firstElem = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1)
+      solOffset(1:4) = (/0,0,0,firstElem/)
+    endif
+
+    ! A variable whose dataset is absent keeps the value it was initialized
+    ! with; see Read_DGModel2D_t for why the check is here.
+    do ivar = 1,this%solution%nvar
+      dsetName = '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name)
+      if(.not. DatasetExists_HDF5(fileId,dsetName)) then
+        print*,__FILE__," : Pickup file holds no ",trim(dsetName), &
+          " - keeping the initialized value for this variable."
+        cycle
+      endif
+      if(this%mesh%decomp%mpiEnabled) then
+        call ReadArray_HDF5(fileId,dsetName, &
+                            this%solution%interior(:,:,:,:,ivar),solOffset)
+      else
+        call ReadArray_HDF5(fileId,dsetName, &
+                            this%solution%interior(:,:,:,:,ivar))
+      endif
+    enddo
+
+    call Close_HDF5(fileId)
+
+    ! Publish the restored solution to the device. Read_DGModel1D_t has always
+    ! done this; without it a GPU build restarts from whatever the device
+    ! happened to hold (zeros, after Init) and silently discards the pickup
+    ! file - the first device-to-host copy of the run, in CalculateEntropy or
+    ! the first tendency evaluation, overwrites everything just read. This is
+    ! the counterpart of the UpdateHost() that Write_DGModel3D_t performs before
+    ! writing, and is a no-op on a CPU build.
+    call this%solution%UpdateDevice()
+
+  endsubroutine Read_DGModel3D_t
+
+  subroutine WriteTecplot_DGModel3D_t(this,filename)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    character(*),intent(in),optional :: filename
+    ! Local
+    character(8) :: zoneID
+    integer :: fUnit
+    integer :: iEl,i,j,k,iVar
+    character(LEN=self_FileNameLength) :: tecFile
+    character(LEN=self_TecplotHeaderLength) :: tecHeader
+    character(LEN=self_FormatLength) :: fmat
+    character(13) :: timeStampString
+    character(5) :: rankString
+    type(Scalar3D) :: solution
+    type(Vector3D) :: solutionGradient
+    type(Vector3D) :: x
+    type(Lagrange),target :: interp
+
+    if(present(filename)) then
+      tecFile = filename
+    else
+      write(timeStampString,'(I13.13)') this%ioIterate
+
+      if(this%mesh%decomp%mpiEnabled) then
+        write(rankString,'(I5.5)') this%mesh%decomp%rankId
+        tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
+      else
+        tecFile = 'solution.'//timeStampString//'.tec'
+      endif
+
+    endif
+
+    ! Create an interpolant for the uniform grid
+    call interp%Init(this%solution%interp%M, &
+                     this%solution%interp%targetNodeType, &
+                     this%solution%interp%N, &
+                     this%solution%interp%controlNodeType)
+
+    call solution%Init(interp, &
+                       this%solution%nVar,this%solution%nElem)
+
+    call solutionGradient%Init(interp, &
+                               this%solution%nVar,this%solution%nElem)
+
+    call x%Init(interp,1,this%solution%nElem)
+
+    ! Map the mesh positions to the target grid
+    call this%geometry%x%GridInterp(x%interior)
+
+    call this%solution%UpdateHost()
+    call this%solutionGradient%UpdateHost()
+
+    ! Map the solution to the target grid
+    call this%solution%GridInterp(solution%interior)
+
+    ! Map the solution to the target grid
+    call this%solutionGradient%GridInterp(solutionGradient%interior)
+
+    open(UNIT=NEWUNIT(fUnit), &
+         FILE=trim(tecFile), &
+         FORM='formatted', &
+         STATUS='replace')
+
+    tecHeader = 'VARIABLES = "X", "Y", "Z"'
+    do iVar = 1,this%solution%nVar
+      tecHeader = trim(tecHeader)//', "'//trim(this%solution%meta(iVar)%name)//'"'
+    enddo
+
+    do iVar = 1,this%solution%nVar
+      tecHeader = trim(tecHeader)//', "d/dx('//trim(this%solution%meta(iVar)%name)//')"'
+    enddo
+
+    do iVar = 1,this%solution%nVar
+      tecHeader = trim(tecHeader)//', "d/dy('//trim(this%solution%meta(iVar)%name)//')"'
+    enddo
+
+    write(fUnit,*) trim(tecHeader)
+
+    ! Create format statement
+    write(fmat,*) 3*this%solution%nvar+3
+    fmat = '('//trim(fmat)//'(ES16.7E3,1x))'
+
+    do iEl = 1,this%solution%nElem
+
+      ! TO DO :: Get the global element ID
+      write(zoneID,'(I8.8)') iEl
+      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%solution%interp%M+1, &
+        ', J=',this%solution%interp%M+1
+
+      do k = 1,this%solution%interp%M+1
+        do j = 1,this%solution%interp%M+1
+          do i = 1,this%solution%interp%M+1
+
+            write(fUnit,fmat) x%interior(i,j,k,iEl,1,1), &
+              x%interior(i,j,k,iEl,1,2), &
+              x%interior(i,j,k,iEl,1,3), &
+              solution%interior(i,j,k,iEl,1:this%solution%nvar), &
+              solutionGradient%interior(i,j,k,iEl,1:this%solution%nvar,1), &
+              solutionGradient%interior(i,j,k,iEl,1:this%solution%nvar,2), &
+              solutionGradient%interior(i,j,k,iEl,1:this%solution%nvar,3)
+
+          enddo
+        enddo
+      enddo
+
+    enddo
+
+    close(UNIT=fUnit)
+
+    call x%Free()
+    call solution%Free()
+    call interp%Free()
+
+  endsubroutine WriteTecplot_DGModel3D_t
+
+endmodule SELF_DGModel3D_t

@@ -1,0 +1,2510 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="SELF Documentation">
+      
+      
+        <meta name="author" content="Fluid Numerics">
+      
+      
+      
+        <link rel="prev" href="../StructuredMesh/">
+      
+      
+        <link rel="next" href="../../Learning/SpectralApproximations/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Periodic and Extruded Meshes - Spectral Element Library in Fortran</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#periodic-and-extruded-meshes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-header__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spectral Element Library in Fortran
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Periodic and Extruded Meshes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-nav__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    Spectral Element Library in Fortran
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/building-with-self/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Applications with SELF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/multi-gpu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Multiple GPUs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Burgers Equation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Burgers Equation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/BurgersEquation1D/TravelingShock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traveling Shock
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Euler (2D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWaveReflection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave reflection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spherical sound wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PerfectlyMatchedLayer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perfectly Matched Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (3D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Euler (3D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spherical sound wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Shallow Water (2D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Shallow Water (2D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/LinearShallowWater.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reflecting wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/KelvinWaves/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kelvin waves
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/PlanetaryRossbyWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Planetary Rossby wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/boundary-conditions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Boundary Conditions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/burgers-equation-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Viscous Burgers Equation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-2d-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-2d-pml-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D) with PML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-3d-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (3D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-shallow-water-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Shallow Water (2D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/model-hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Hooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/nonconforming-mortar-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nonconforming (Mortar) Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Generation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Mesh Generation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../StructuredMesh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Structured Mesh Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Periodic and Extruded Meshes
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Periodic and Extruded Meshes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#per-axis-periodic-2-d-structured-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-axis periodic 2-D structured meshes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extruded-3-d-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extruded 3-D meshes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extruded 3-D meshes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-map-of-an-extruded-element" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The map of an extruded element
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-levels-from-a-bathymetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the levels from a bathymetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#element-ordering-and-domain-decomposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Element ordering and domain decomposition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connectivity-flips-and-global-side-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connectivity, flips and global side ids
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metric-identities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metric identities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relation-to-hohqmesh-extrusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relation to HOHQMesh extrusion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learning
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/SpectralApproximations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spectral Approximations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/DifferentialGeometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Differential Geometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/ProvableStability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provable Stability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/AdaptiveMeshRefinement/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adaptive Mesh Refinement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Code
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/SoftwareArchitecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/BoundaryConditions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Boundary Condition System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/PointSampling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Off-Grid Point Sampling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/dependencies.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ford/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/StyleGuide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/Documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/AMR2D-Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR (2D) Design Proposal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/AMR3D-Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR (3D) Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/Mortar2D-Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mortar (2D) Design Proposal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#per-axis-periodic-2-d-structured-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-axis periodic 2-D structured meshes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extruded-3-d-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extruded 3-D meshes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extruded 3-D meshes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-map-of-an-extruded-element" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The map of an extruded element
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-levels-from-a-bathymetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the levels from a bathymetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#element-ordering-and-domain-decomposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Element ordering and domain decomposition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connectivity-flips-and-global-side-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connectivity, flips and global side ids
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metric-identities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metric identities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relation-to-hohqmesh-extrusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relation to HOHQMesh extrusion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="periodic-and-extruded-meshes">Periodic and Extruded Meshes<a class="headerlink" href="#periodic-and-extruded-meshes" title="Permanent link">#</a></h1>
+<p>This page covers two mesh constructors that are used together to build layered volume meshes, such as those of a hydrostatic ocean model.
+The first builds a 2-D structured mesh that is periodic in either horizontal direction.
+The second extrudes any 2-D mesh downward through a stack of level surfaces into a 3-D mesh of hexahedra, whose columns follow the bathymetry.</p>
+<h2 id="per-axis-periodic-2-d-structured-meshes">Per-axis periodic 2-D structured meshes<a class="headerlink" href="#per-axis-periodic-2-d-structured-meshes" title="Permanent link">#</a></h2>
+<p><code>Mesh2D % PeriodicStructuredMesh</code> builds the same tiled, uniformly spaced mesh as <code>Mesh2D % StructuredMesh</code> and differs only in its connectivity.
+Each direction has its own periodic flag.
+When <code>periodicX</code> is true, the east edge of the last column of elements and the west edge of the first column are wired as one interior edge, so the side exchange delivers the neighbor trace across <span class="arithmatex">\(x = 0 \equiv x = L_x\)</span>.
+The <code>periodicY</code> flag does the same for the south and north edges.
+The <code>bcids</code> array is still given in the order south, east, north, west, and only the entries of a non-periodic direction are used.</p>
+<div class="language-fortran highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">  </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh2D</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcids</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="n">bcids</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">SELF_BC_NONORMALFLOW</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"> </span><span class="c">! south wall</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                </span><span class="n">SELF_BC_NONORMALFLOW</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"> </span><span class="c">! east (unused, periodic)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="n">SELF_BC_NONORMALFLOW</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"> </span><span class="c">! north wall</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">                </span><span class="n">SELF_BC_NONORMALFLOW</span><span class="p">]</span><span class="w">   </span><span class="c">! west (unused, periodic)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="c">! A channel of 16 x 8 elements, periodic in x and walled in y</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="k">call </span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">PeriodicStructuredMesh</span><span class="p">(</span><span class="n">nxPerTile</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">nyPerTile</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">                                     </span><span class="n">nTileX</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">nTileY</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">                                     </span><span class="n">dx</span><span class="o">=</span><span class="mf">0.0625_prec</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="o">=</span><span class="mf">0.125_prec</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">                                     </span><span class="n">periodicX</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.,</span><span class="w"> </span><span class="n">periodicY</span><span class="o">=</span><span class="p">.</span><span class="n">false</span><span class="p">.,</span><span class="w"> </span><span class="p">&amp;</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">                                     </span><span class="n">bcids</span><span class="o">=</span><span class="n">bcids</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The connectivity follows the triply periodic <code>Mesh3D % PeriodicStructuredMesh</code>.
+Every interior edge, wrapped or not, joins two edges whose trace coordinates run in the same direction, so every flip is zero.
+The global side ids are assigned from the grid position of each edge and are dense in <span class="arithmatex">\(1,\dots,\)</span> <code>nUniqueSides</code>, with the two sides of a periodic edge sharing one id.
+With <span class="arithmatex">\(n_{Lx} = n_x\)</span> in a periodic <span class="arithmatex">\(x\)</span> direction and <span class="arithmatex">\(n_x+1\)</span> otherwise, and likewise <span class="arithmatex">\(n_{Ly}\)</span>, there are <span class="arithmatex">\(n_{Lx} n_y + n_{Ly} n_x\)</span> unique edges.
+With neither direction periodic, the mesh is identical to the one <code>StructuredMesh</code> builds.</p>
+<h2 id="extruded-3-d-meshes">Extruded 3-D meshes<a class="headerlink" href="#extruded-3-d-meshes" title="Permanent link">#</a></h2>
+<p><code>Mesh3D % ExtrudedMesh</code> turns a 2-D surface mesh into a 3-D mesh of <code>nz</code> layers.
+The surface mesh can be any conforming <code>Mesh2D</code>: structured, periodic structured, read from HOPr, or read from HOHQMesh, with straight or curved isoparametric elements of any geometry degree <span class="arithmatex">\(N_{geo}\)</span>.
+The result is an ordinary <code>Mesh3D</code>, so the geometry, the mapped data types and the DG models use it unchanged.</p>
+<h3 id="the-map-of-an-extruded-element">The map of an extruded element<a class="headerlink" href="#the-map-of-an-extruded-element" title="Permanent link">#</a></h3>
+<p>The column above a surface element <span class="arithmatex">\(Q\)</span> is cut into <span class="arithmatex">\(n_z\)</span> layers by the level surfaces</p>
+<div class="arithmatex">\[
+-h = z_0(x,y) &lt; z_1(x,y) &lt; \dots &lt; z_{n_z}(x,y) = 0 .
+\]</div>
+<p>Let <span class="arithmatex">\((X(\xi,\eta), Y(\xi,\eta))\)</span> be the isoparametric map of <span class="arithmatex">\(Q\)</span>.
+Element <span class="arithmatex">\(k\)</span> of the column has the map</p>
+<div class="arithmatex">\[
+\vec{x}(\xi,\eta,\zeta) = \big(X(\xi,\eta),\ Y(\xi,\eta),\ Z(\xi,\eta,\zeta)\big), \qquad
+Z = \tfrac{1-\zeta}{2}\, z_{k-1} + \tfrac{1+\zeta}{2}\, z_k ,
+\]</div>
+<p>where <span class="arithmatex">\(Z\)</span> is evaluated at the <span class="arithmatex">\(N_{geo}+1\)</span> geometry nodes of <span class="arithmatex">\(Q\)</span> in each horizontal direction.
+The horizontal coordinates do not depend on <span class="arithmatex">\(\zeta\)</span>, so lines of constant <span class="arithmatex">\((\xi,\eta)\)</span> are vertical.
+The 3-D mesh keeps the geometry degree and the geometry node type of the surface mesh.
+Its node coordinates are sampled on the same <span class="arithmatex">\(N_{geo}+1\)</span> points in all three directions, which represents the linear vertical map exactly.
+At the end nodes of a Lobatto-type or uniform node set the two weights are exactly 0 and 1, so the top face of layer <span class="arithmatex">\(k\)</span> and the bottom face of layer <span class="arithmatex">\(k+1\)</span> are sampled from the same <span class="arithmatex">\(z_k\)</span> and agree bitwise.</p>
+<p>You give the levels at the surface geometry nodes, as <code>zLevels(1:nGeo+1,1:nGeo+1,0:nz,1:nElem2D)</code> for the elements of the surface mesh that this rank holds, in the length unit of the mesh coordinates and positive upward.
+The constructor stops with an error unless <code>nz</code> is at least 1, the levels increase strictly with the level index at every node, and the top level is exactly zero.
+The flat top is the reference sea surface the linear free surface condition is applied on.</p>
+<p>The levels must also be continuous across lateral faces: two surface elements that share a geometry node must be given the same <span class="arithmatex">\(z_k\)</span> there.
+This holds whenever the levels are computed pointwise from a bathymetry function sampled at the node coordinates of the surface mesh, as the two helpers below do.
+The constructor cannot check it, because the neighbor across a lateral face may be on another rank.</p>
+<h3 id="building-the-levels-from-a-bathymetry">Building the levels from a bathymetry<a class="headerlink" href="#building-the-levels-from-a-bathymetry" title="Permanent link">#</a></h3>
+<p>Two helpers fill <code>zLevels</code> from the water depth <code>h(1:nGeo+1,1:nGeo+1,1:nElem2D)</code> at the surface geometry nodes, with <span class="arithmatex">\(h &gt; 0\)</span>.</p>
+<p><code>ExtrudedSigmaLevels(h, sigma, zLevels)</code> builds terrain-following levels <span class="arithmatex">\(z_k = \sigma_k h\)</span> from a stretching <code>sigma(0:nz)</code> with <span class="arithmatex">\(\sigma_0 = -1\)</span>, <span class="arithmatex">\(\sigma_{n_z} = 0\)</span>, increasing strictly.</p>
+<p><code>ExtrudedHybridLevels(h, depths, sigma, zLevels)</code> places <span class="arithmatex">\(n_F\)</span> flat interfaces at the depths <span class="arithmatex">\(0 &lt; d_1 &lt; \dots &lt; d_{n_F}\)</span> below the surface and <span class="arithmatex">\(n_S\)</span> terrain-following layers between <span class="arithmatex">\(z = -d_{n_F}\)</span> and the sea floor below them.
+With <span class="arithmatex">\(d_0 = 0\)</span> and <span class="arithmatex">\(d_F = d_{n_F}\)</span>, the <span class="arithmatex">\(n_z = n_S + n_F\)</span> levels are</p>
+<div class="arithmatex">\[
+z_k = -\big((1+\sigma_k)\, d_F - \sigma_k h\big), \quad k = 0,\dots,n_S, \qquad
+z_{n_S+m} = -d_{n_F-m}, \quad m = 1,\dots,n_F .
+\]</div>
+<p>The deepest flat interface must lie above the sea floor everywhere, <span class="arithmatex">\(d_F &lt; \min h\)</span>, and the helper stops with an error otherwise.
+With no flat interfaces this reduces to the sigma levels, and with a constant <span class="arithmatex">\(h\)</span> it gives flat <span class="arithmatex">\(z\)</span>-levels throughout.</p>
+<div class="language-fortran highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="w">  </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh2D</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">surface</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh3D</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">h</span><span class="p">(:,:,:),</span><span class="n">zLevels</span><span class="p">(:,:,:,:)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGeo</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="k">call </span><span class="n">surface</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Read_HOPr</span><span class="p">(</span><span class="s2">&quot;basin_mesh.h5&quot;</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="n">nGeo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">surface</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nGeo</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="c">! Sample the bathymetry at the surface geometry nodes</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="k">allocate</span><span class="p">(</span><span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">surface</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="p">))</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="k">do </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">surface</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">      </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">        </span><span class="n">h</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">depth</span><span class="p">(</span><span class="n">surface</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">e</span><span class="p">),</span><span class="n">surface</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">e</span><span class="p">))</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">      </span><span class="k">enddo</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="k">    enddo</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="k">  enddo</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="c">! Two flat layers in the upper 100 m over four terrain-following layers</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="k">allocate</span><span class="p">(</span><span class="n">zLevels</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">surface</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="p">))</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">  </span><span class="k">call </span><span class="n">ExtrudedHybridLevels</span><span class="p">(</span><span class="n">h</span><span class="p">,[</span><span class="mi">5</span><span class="mf">0.0_prec</span><span class="p">,</span><span class="mi">10</span><span class="mf">0.0_prec</span><span class="p">],</span><span class="w"> </span><span class="p">&amp;</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">                            </span><span class="p">[</span><span class="o">-</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="o">-</span><span class="mf">0.6_prec</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3_prec</span><span class="p">,</span><span class="o">-</span><span class="mf">0.1_prec</span><span class="p">,</span><span class="mf">0.0_prec</span><span class="p">],</span><span class="n">zLevels</span><span class="p">)</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">  </span><span class="k">call </span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">ExtrudedMesh</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span><span class="n">zLevels</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">                           </span><span class="n">bottomBC</span><span class="o">=</span><span class="n">SELF_BC_NONORMALFLOW</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">                           </span><span class="n">topBC</span><span class="o">=</span><span class="n">SELF_BC_PRESCRIBED</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="element-ordering-and-domain-decomposition">Element ordering and domain decomposition<a class="headerlink" href="#element-ordering-and-domain-decomposition" title="Permanent link">#</a></h3>
+<p>Elements are stored column by column.
+Local element <span class="arithmatex">\(e_3 = (e_2-1)\, n_z + k\)</span> is layer <span class="arithmatex">\(k\)</span> of the column above local surface element <span class="arithmatex">\(e_2\)</span>, with <span class="arithmatex">\(k = 1\)</span> at the bottom, and global element ids follow the same rule.
+The mesh records the layer count in <code>mesh % nLayers</code>, and the surface element and layer of an element follow from its id alone, <span class="arithmatex">\(e_2 = \lfloor (e_3-1)/n_z \rfloor + 1\)</span> and <span class="arithmatex">\(k = e_3 - (e_2-1)\, n_z\)</span>.</p>
+<p>The 3-D decomposition is the surface decomposition expanded by <span class="arithmatex">\(n_z\)</span>: rank <span class="arithmatex">\(r\)</span> owns the columns above the surface elements it owns, and <code>offsetElem</code> is <span class="arithmatex">\(n_z\)</span> times the surface offsets.
+A column is therefore never split across ranks, and the local surface element <span class="arithmatex">\(e_2\)</span> of a column is element <span class="arithmatex">\(e_2\)</span> of the surface mesh you passed in.
+The surface mesh is not copied, so keep it if your column operators need its geometry.</p>
+<p>The HOHQMesh reader keeps every element on every rank rather than decomposing the mesh, and <code>ExtrudedMesh</code> stops with an error when the surface mesh does not hold exactly the elements its decomposition assigns to the rank.
+For a parallel run, read the surface from HOPr or build it with one of the structured constructors.</p>
+<h3 id="connectivity-flips-and-global-side-ids">Connectivity, flips and global side ids<a class="headerlink" href="#connectivity-flips-and-global-side-ids" title="Permanent link">#</a></h3>
+<p>The 2-D sides south, east, north and west (1 to 4) become the lateral faces 2 to 5 of the hexahedron, and faces 1 and 6 are the bottom and the top.
+A lateral face takes the neighbor, the neighbor side and the boundary condition id of its surface edge, in the same layer.
+The bottom face of layer 1 takes <code>bottomBC</code>, the top face of layer <span class="arithmatex">\(n_z\)</span> takes <code>topBC</code>, and the faces between layers are interior.</p>
+<p>The flip of a lateral face follows from its trace coordinates.
+<code>BoundaryInterp</code> orders the nodes of the south and north faces by <span class="arithmatex">\((\xi, \zeta)\)</span> and those of the east and west faces by <span class="arithmatex">\((\eta, \zeta)\)</span>, so on both sides of a lateral face the first trace coordinate is the coordinate along the surface edge and the second is <span class="arithmatex">\(\zeta\)</span>, which points upward in both elements.
+A surface edge flip of 0 therefore becomes face flip 0, and a surface edge flip of 1, an edge whose two sides run in opposite directions, becomes face flip 1, which reverses the first index and keeps the second.
+The faces between layers have flip 0.</p>
+<p>Global side ids are the MPI message tags of the side exchange, so they must be unique and agree across ranks.
+The lateral face of layer <span class="arithmatex">\(k\)</span> on the surface edge with id <span class="arithmatex">\(g\)</span> has id <span class="arithmatex">\(\mathrm{sign}(g)\big((|g|-1)\, n_z + k\big)\)</span>, which keeps the sign HOPr uses to mark the two sides of an edge.
+The <span class="arithmatex">\(n_z + 1\)</span> horizontal faces of the column above global surface element <span class="arithmatex">\(E\)</span> are numbered after all lateral faces, as <span class="arithmatex">\(n_z\, n_{s,2D} + (E-1)(n_z+1) + l\)</span> for level <span class="arithmatex">\(l-1\)</span>.
+Here <span class="arithmatex">\(n_{s,2D}\)</span> is the <code>nUniqueSides</code> of the surface mesh, and the extruded mesh has</p>
+<div class="arithmatex">\[
+n_{s,3D} = n_z\, n_{s,2D} + n_{E,2D}\,(n_z + 1)
+\]</div>
+<p>unique side ids, where <span class="arithmatex">\(n_{E,2D}\)</span> is the global number of surface elements.</p>
+<h3 id="metric-identities">Metric identities<a class="headerlink" href="#metric-identities" title="Permanent link">#</a></h3>
+<p>For the extruded map the exact metric terms are</p>
+<div class="arithmatex">\[
+J\vec{a}^\xi = Z_\zeta\,(Y_\eta,\,-X_\eta,\,0), \qquad
+J\vec{a}^\eta = Z_\zeta\,(-Y_\xi,\,X_\xi,\,0), \qquad
+J\vec{a}^\zeta = \big(Y_\xi Z_\eta - Z_\xi Y_\eta,\ Z_\xi X_\eta - X_\xi Z_\eta,\ J_2\big),
+\]</div>
+<p>with <span class="arithmatex">\(J_2 = X_\xi Y_\eta - X_\eta Y_\xi\)</span> the Jacobian of the surface element.
+<code>SEMHex</code> computes <span class="arithmatex">\(J\vec{a}^i\)</span> in Kopriva's curl-invariant form and <span class="arithmatex">\(J\)</span> as the determinant of the covariant basis.
+The curl form differentiates products of two interpolated factors, and the products are of degree <span class="arithmatex">\(2N_{geo}\)</span> in each horizontal reference coordinate.
+For instance, the horizontal components of <span class="arithmatex">\(J\vec{a}^\xi\)</span> contain <span class="arithmatex">\(\partial_\eta(Y Z_\zeta)\)</span>, which the derivative matrix reproduces only when <span class="arithmatex">\(Y Z_\zeta\)</span> is resolved.
+We therefore have the following, which the test <code>geometry_3d_extruded_identities</code> checks.</p>
+<ul>
+<li>With <span class="arithmatex">\(N \ge 2N_{geo}\)</span>, the discrete metric terms satisfy the three identities to round-off: <span class="arithmatex">\(J\vec{a}^\xi\)</span> and <span class="arithmatex">\(J\vec{a}^\eta\)</span> have no vertical component and equal <span class="arithmatex">\(Z_\zeta\)</span> times the surface contravariant vectors, <span class="arithmatex">\(J\vec{a}^\zeta_z = J_2\)</span>, and <span class="arithmatex">\(\sum_i J\vec{a}^i D_i Z = J\hat{z}\)</span>.</li>
+<li>On an element with flat levels, <span class="arithmatex">\(Z_\zeta\)</span> is constant over the element, so the statements about <span class="arithmatex">\(J\vec{a}^\xi\)</span> and <span class="arithmatex">\(J\vec{a}^\eta\)</span> and the horizontal components of <span class="arithmatex">\(\sum_i J\vec{a}^i D_i Z\)</span> hold to round-off for every <span class="arithmatex">\(N\)</span>.</li>
+<li>The vertical statements, <span class="arithmatex">\(J\vec{a}^\zeta_z = J_2\)</span> and the vertical component of <span class="arithmatex">\(\sum_i J\vec{a}^i D_i Z = J\hat{z}\)</span>, compare the curl form of <span class="arithmatex">\(J_2\)</span> with the determinant <span class="arithmatex">\(J_2\)</span>, and they hold to round-off only for <span class="arithmatex">\(N \ge 2N_{geo}\)</span> or an affine surface element, also on flat levels.</li>
+<li>Three weaker properties hold to round-off for every <span class="arithmatex">\(N\)</span>, because each involves only products that are linear in <span class="arithmatex">\(\zeta\)</span> or constant along a vertical grid line: the vertical components of <span class="arithmatex">\(J\vec{a}^\xi\)</span> and <span class="arithmatex">\(J\vec{a}^\eta\)</span> vanish; the stored <span class="arithmatex">\(J\vec{a}^\zeta_z\)</span> is the same at every node of a vertical grid line, inside an element and from layer to layer; and the slope components <span class="arithmatex">\(J\vec{a}^\zeta_x\)</span>, <span class="arithmatex">\(J\vec{a}^\zeta_y\)</span> are continuous across the faces between layers.</li>
+<li>Otherwise the identities hold to truncation error. On the curved Circle surface (<span class="arithmatex">\(N_{geo} = 7\)</span>) with sigma levels at <span class="arithmatex">\(N = 7\)</span>, the measured relative error of the horizontal statements is about <span class="arithmatex">\(2\times 10^{-9}\)</span> and that of the vertical ones about <span class="arithmatex">\(3\times 10^{-11}\)</span>.</li>
+</ul>
+<h3 id="relation-to-hohqmesh-extrusion">Relation to HOHQMesh extrusion<a class="headerlink" href="#relation-to-hohqmesh-extrusion" title="Permanent link">#</a></h3>
+<p>HOHQMesh can also sweep a quad mesh upward over a bottom topography <code>f(x,y)</code> to a flat top at height <span class="arithmatex">\(H\)</span> (the <code>SIMPLE_EXTRUSION</code> and <code>TOPOGRAPHY</code> blocks).
+It spreads the topography over the whole column, placing level <span class="arithmatex">\(j\)</span> at <span class="arithmatex">\(z_j = f\,(1 - j/n_z) + H\, j/n_z\)</span>, and it writes the elements layer by layer.
+With <span class="arithmatex">\(z' = z - H\)</span> and <span class="arithmatex">\(h = H - f\)</span> these are the sigma levels <span class="arithmatex">\(\sigma_j = j/n_z - 1\)</span>, so <code>ExtrudedSigmaLevels</code> with those <span class="arithmatex">\(\sigma_j\)</span> reproduces HOHQMesh's corner nodes and bottom topography, after reordering its elements column by column.
+The interior nodes differ: the ISM file carries curved face data only for faces on the topography or on a curved boundary, so the faces of the upper layers inside the domain are rebuilt from their corners when the file is read.
+The <code>share/mesh/Seamount</code> fixtures and the test <code>mesh3d_extruded_hohqmesh</code> show both.
+<code>ExtrudedMesh</code> builds the mesh in memory instead, which is what an adaptive run needs when it rebuilds the columns above a refined surface.</p>
+<h3 id="current-limitations">Current limitations<a class="headerlink" href="#current-limitations" title="Permanent link">#</a></h3>
+<p>A surface mesh with nonconforming (mortar) edges is rejected.
+A lateral face between columns at different refinement levels needs an anisotropic mortar, the 2-D mortar in the horizontal tensored with the identity in <span class="arithmatex">\(\zeta\)</span>, which SELF does not provide yet.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>

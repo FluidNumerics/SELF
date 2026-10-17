@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>ExtrudedMesh_Mesh3D_t &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>ExtrudedMesh_Mesh3D_t
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.6% of total for procedures.">149 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_3D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_mesh_3d_t.f90.html'>SELF_Mesh_3D_t.f90</a></li>
+     <li><a href='../module/self_mesh_3d_t.html'>SELF_Mesh_3D_t</a></li>
+     <li class="active">ExtrudedMesh_Mesh3D_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/extrudedmesh_mesh3d_t.html#src">ExtrudedMesh_Mesh3D_t</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine ExtrudedMesh_Mesh3D_t(this, mesh2d, zLevels, bottomBC, topBC)</h2>
+    
+
+    <p>Builds a layered hexahedral mesh by extruding a surface mesh downward through
+nz = size(zLevels,3)-1 layers bounded by the level surfaces z_0 &lt; z_1 &lt; ... &lt; z_nz.</p>
+<p>Element k (k = 1..nz) of the column above surface element Q is the map</p>
+<p>x(xi,eta,zeta) = ( X(xi,eta), Y(xi,eta), Z(xi,eta,zeta) )</p>
+<p>where (X,Y) is Q's isoparametric map of degree nGeo and, at every geometry node
+(xi_i,eta_j),</p>
+<p>Z(xi_i,eta_j,zeta) = (1-zeta)/2 z_{k-1}(xi_i,eta_j) + (1+zeta)/2 z_k(xi_i,eta_j).</p>
+<p>The horizontal coordinates do not depend on zeta, so lines of constant (xi,eta)
+are vertical, and Z is linear in zeta within a layer. The 3-D mesh keeps the 2-D
+nGeo and quadrature: its node coordinates are sampled on the same nGeo+1 points
+in all three directions, so they form the usual (1:3,1:nGeo+1,1:nGeo+1,1:nGeo+1,
+1:nElem) array and the linear vertical map is represented exactly. The two
+endpoint weights are exact in floating point, so the top face of layer k and the
+bottom face of layer k+1 are sampled from the same z_k and agree bitwise.</p>
+<p>Input
+   - this : Fresh/empty Mesh3D_t object. The result is an ordinary Mesh3D, so it
+     works with SEMHex, the mapped data types and the DG models unchanged.
+   - mesh2d : The surface mesh, already built and decomposed (any Mesh2D: structured,
+     periodic structured, HOPr or HOHQMesh, with nGeo &gt;= 1). It must be conforming:
+     a mesh with mortar edges (nMortars &gt; 0) is rejected, since the anisotropic 3-D
+     mortar it would need is not implemented.
+   - zLevels(1:nGeo+1,1:nGeo+1,0:nz,1:mesh2d%nElem) : Level heights z_k at the
+     geometry nodes of each rank-local surface element, in the length unit of the
+     mesh coordinates, positive upward. Required: nz &gt;= 1, z_k strictly increasing
+     in k at every node, and z_nz = 0 exactly (a flat top at the reference sea
+     surface). The levels must also be continuous across lateral faces, i.e. two
+     elements must give the same z_k at a shared node. That holds whenever the
+     levels are computed pointwise from a continuous bathymetry sampled at the
+     geometry nodes, as ExtrudedSigmaLevels and ExtrudedHybridLevels do; it is not
+     checked here, because the neighbor of a lateral face may be on another rank.
+   - bottomBC : Boundary condition id of the bottom face of every column (z = z_0)
+   - topBC : Boundary condition id of the top face of every column (z = 0)</p>
+<p>Output
+   - this : Mesh3D_t object with nLayers = nz and nz*mesh2d%nElem local elements</p>
+<p>Ordering and decomposition. Local element e3 = (e2-1)<em>nz + k is layer k of local
+surface element e2, and global ids follow the same rule. The 3-D decomposition is
+the 2-D one expanded by nz (offsetElem3D = nz</em>offsetElem2D), so a column is never
+split across ranks and the local surface element e2 of an extruded element is
+element e2 of the caller's mesh2d. The surface mesh is not copied; keep it alive if
+column operators need its geometry.</p>
+<p>Connectivity. The 2-D sides 1..4 (south, east, north, west) become the lateral
+faces 2..5 of the 3-D element, and faces 1 and 6 are the bottom and top. A lateral
+face inherits the neighbor, neighbor side and boundary id of its 2-D edge, in the
+same layer. Its trace coordinates are (edge coordinate, zeta) on both sides
+(BoundaryInterp: faces 2,4 -&gt; (xi1,xi3), faces 3,5 -&gt; (xi2,xi3)) and zeta runs
+upward in both elements, so the SELF face flip equals the 2-D edge flip: 0 maps to
+face flip 0 (i2 = i, j2 = j) and 1 maps to face flip 1 (i2 = N-i, j2 = j). Bottom
+and top faces between layers are conforming with flip 0.</p>
+<p>Global side ids are unique across ranks and serve as MPI message tags. The lateral
+face of layer k on the 2-D edge with id g has id sign(g)<em>((|g|-1)</em>nz + k), so the
+HOPr master/slave sign of the 2-D id is preserved. The horizontal faces of the
+column above global surface element E are numbered after all lateral ones,
+nz<em>nUniqueSides2D + (E-1)</em>(nz+1) + l for level l-1 (l = 1..nz+1), and</p>
+<p>nUniqueSides = nz<em>nUniqueSides2D + nGlobalElem2D</em>(nz+1).</p>
+<p>The node ids (globalNodeIDs) and elemInfo are zeroed: the solver does not use
+them, and the flips are set directly rather than through RecalculateFlip.</p>
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-this~254"></span>class(<a href='../type/mesh3d_t.html'>Mesh3D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh2d"></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh2d</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-zlevels~2"></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>zLevels</strong>(1:,1:,0:,1:)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bottombc"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bottomBC</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-topbc"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>topBC</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~extrudedmesh_mesh3d_t~~CallsGraph Pages: 1 -->
+<svg id="procextrudedmesh_mesh3d_tCallsGraph" width="641pt" height="125pt"
+ viewBox="0.00 0.00 641.00 125.34" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph" class="graph" transform="scale(0.79 0.79) rotate(0) translate(4 154)">
+<title>proc~~extrudedmesh_mesh3d_t~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-154 804,-154 804,4 -4,4"/>
+<!-- proc~extrudedmesh_mesh3d_t -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node1" class="node">
+<title>proc~extrudedmesh_mesh3d_t</title>
+<polygon fill="none" stroke="black" points="145,-66 0,-66 0,-42 145,-42 145,-66"/>
+<text text-anchor="middle" x="72.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50">ExtrudedMesh_Mesh3D_t</text>
+</g>
+<!-- proc~geometrynodes1d -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node2" class="node">
+<title>proc~geometrynodes1d</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node2"><a xlink:href=".././proc/geometrynodes1d.html" xlink:title="GeometryNodes1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="295,-66 181,-66 181,-42 295,-42 295,-66"/>
+<text text-anchor="middle" x="238" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">GeometryNodes1D</text>
+</a>
+</g>
+</g>
+<!-- proc~extrudedmesh_mesh3d_t&#45;&gt;proc~geometrynodes1d -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge1" class="edge">
+<title>proc~extrudedmesh_mesh3d_t&#45;&gt;proc~geometrynodes1d</title>
+<path fill="none" stroke="#ff0000" d="M145.21,-54C153.63,-54 162.19,-54 170.54,-54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="170.58,-57.5 180.58,-54 170.58,-50.5 170.58,-57.5"/>
+</g>
+<!-- proc~legendrequadrature -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node3" class="node">
+<title>proc~legendrequadrature</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node3"><a xlink:href=".././proc/legendrequadrature.html" xlink:title="LegendreQuadrature">
+<polygon fill="#d9534f" stroke="#d9534f" points="459,-108 335,-108 335,-84 459,-84 459,-108"/>
+<text text-anchor="middle" x="397" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreQuadrature</text>
+</a>
+</g>
+</g>
+<!-- proc~geometrynodes1d&#45;&gt;proc~legendrequadrature -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge2" class="edge">
+<title>proc~geometrynodes1d&#45;&gt;proc~legendrequadrature</title>
+<path fill="none" stroke="#ff0000" d="M283.99,-66.04C301.81,-70.8 322.46,-76.33 341.15,-81.33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="340.44,-84.76 351,-83.96 342.25,-78 340.44,-84.76"/>
+</g>
+<!-- proc~chebyshevquadrature -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node4" class="node">
+<title>proc~chebyshevquadrature</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node4"><a xlink:href=".././proc/chebyshevquadrature.html" xlink:title="ChebyshevQuadrature">
+<polygon fill="#d9534f" stroke="#d9534f" points="463,-66 331,-66 331,-42 463,-42 463,-66"/>
+<text text-anchor="middle" x="397" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ChebyshevQuadrature</text>
+</a>
+</g>
+</g>
+<!-- proc~geometrynodes1d&#45;&gt;proc~chebyshevquadrature -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge3" class="edge">
+<title>proc~geometrynodes1d&#45;&gt;proc~chebyshevquadrature</title>
+<path fill="none" stroke="#ff0000" d="M295.24,-54C303.52,-54 312.17,-54 320.76,-54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="320.8,-57.5 330.8,-54 320.8,-50.5 320.8,-57.5"/>
+</g>
+<!-- proc~uniformpoints -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node5" class="node">
+<title>proc~uniformpoints</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node5"><a xlink:href=".././proc/uniformpoints.html" xlink:title="UniformPoints">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="440.5,-24 353.5,-24 353.5,0 440.5,0 440.5,-24"/>
+<text text-anchor="middle" x="397" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UniformPoints</text>
+</a>
+</g>
+</g>
+<!-- proc~geometrynodes1d&#45;&gt;proc~uniformpoints -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge4" class="edge">
+<title>proc~geometrynodes1d&#45;&gt;proc~uniformpoints</title>
+<path fill="none" stroke="#ff0000" d="M283.99,-41.96C302.59,-36.99 324.27,-31.19 343.58,-26.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="344.68,-29.35 353.43,-23.39 342.87,-22.59 344.68,-29.35"/>
+</g>
+<!-- proc~legendregausslobatto -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node6" class="node">
+<title>proc~legendregausslobatto</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node6"><a xlink:href=".././proc/legendregausslobatto.html" xlink:title="LegendreGaussLobatto">
+<polygon fill="#d9534f" stroke="#d9534f" points="639,-150 503,-150 503,-126 639,-126 639,-150"/>
+<text text-anchor="middle" x="571" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreGaussLobatto</text>
+</a>
+</g>
+</g>
+<!-- proc~legendrequadrature&#45;&gt;proc~legendregausslobatto -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge5" class="edge">
+<title>proc~legendrequadrature&#45;&gt;proc~legendregausslobatto</title>
+<path fill="none" stroke="#ff0000" d="M447.29,-108.04C467.08,-112.87 490.07,-118.48 510.76,-123.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="510.16,-126.99 520.7,-125.96 511.82,-120.19 510.16,-126.99"/>
+</g>
+<!-- proc~legendregauss -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node9" class="node">
+<title>proc~legendregauss</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node9"><a xlink:href=".././proc/legendregauss.html" xlink:title="LegendreGauss">
+<polygon fill="#d9534f" stroke="#d9534f" points="618.5,-108 523.5,-108 523.5,-84 618.5,-84 618.5,-108"/>
+<text text-anchor="middle" x="571" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreGauss</text>
+</a>
+</g>
+</g>
+<!-- proc~legendrequadrature&#45;&gt;proc~legendregauss -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge6" class="edge">
+<title>proc~legendrequadrature&#45;&gt;proc~legendregauss</title>
+<path fill="none" stroke="#ff0000" d="M459.13,-96C476.8,-96 496.01,-96 513.4,-96"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="513.4,-99.5 523.4,-96 513.4,-92.5 513.4,-99.5"/>
+</g>
+<!-- proc~chebyshevgauss -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node7" class="node">
+<title>proc~chebyshevgauss</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node7"><a xlink:href=".././proc/chebyshevgauss.html" xlink:title="ChebyshevGauss">
+<polygon fill="#d9534f" stroke="#d9534f" points="622.5,-66 519.5,-66 519.5,-42 622.5,-42 622.5,-66"/>
+<text text-anchor="middle" x="571" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ChebyshevGauss</text>
+</a>
+</g>
+</g>
+<!-- proc~chebyshevquadrature&#45;&gt;proc~chebyshevgauss -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge8" class="edge">
+<title>proc~chebyshevquadrature&#45;&gt;proc~chebyshevgauss</title>
+<path fill="none" stroke="#00ff00" d="M463.03,-54C478.18,-54 494.25,-54 509.21,-54"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="509.36,-57.5 519.36,-54 509.36,-50.5 509.36,-57.5"/>
+</g>
+<!-- proc~chebyshevgausslobatto -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node8" class="node">
+<title>proc~chebyshevgausslobatto</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node8"><a xlink:href=".././proc/chebyshevgausslobatto.html" xlink:title="ChebyshevGaussLobatto">
+<polygon fill="#d9534f" stroke="#d9534f" points="643,-24 499,-24 499,0 643,0 643,-24"/>
+<text text-anchor="middle" x="571" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ChebyshevGaussLobatto</text>
+</a>
+</g>
+</g>
+<!-- proc~chebyshevquadrature&#45;&gt;proc~chebyshevgausslobatto -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge7" class="edge">
+<title>proc~chebyshevquadrature&#45;&gt;proc~chebyshevgausslobatto</title>
+<path fill="none" stroke="#00ff00" d="M447.29,-41.96C467.08,-37.13 490.07,-31.52 510.76,-26.47"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="511.82,-29.81 520.7,-24.04 510.16,-23.01 511.82,-29.81"/>
+</g>
+<!-- proc~legendreqandl -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node10" class="node">
+<title>proc~legendreqandl</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node10"><a xlink:href=".././proc/legendreqandl.html" xlink:title="LegendreQandL">
+<polygon fill="#d9534f" stroke="#d9534f" points="788,-150 691,-150 691,-126 788,-126 788,-150"/>
+<text text-anchor="middle" x="739.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreQandL</text>
+</a>
+</g>
+</g>
+<!-- proc~legendregausslobatto&#45;&gt;proc~legendreqandl -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge9" class="edge">
+<title>proc~legendregausslobatto&#45;&gt;proc~legendreqandl</title>
+<path fill="none" stroke="#ff0000" d="M639.24,-138C653.05,-138 667.47,-138 680.9,-138"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="680.95,-141.5 690.95,-138 680.95,-134.5 680.95,-141.5"/>
+</g>
+<!-- proc~legendrepolynomial -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_node11" class="node">
+<title>proc~legendrepolynomial</title>
+<g id="a_proc~~extrudedmesh_mesh3d_t~~CallsGraph_node11"><a xlink:href=".././proc/legendrepolynomial.html" xlink:title="LegendrePolynomial">
+<polygon fill="#d9534f" stroke="#d9534f" points="800,-108 679,-108 679,-84 800,-84 800,-108"/>
+<text text-anchor="middle" x="739.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendrePolynomial</text>
+</a>
+</g>
+</g>
+<!-- proc~legendregauss&#45;&gt;proc~legendrepolynomial -->
+<g id="proc~~extrudedmesh_mesh3d_t~~CallsGraph_edge10" class="edge">
+<title>proc~legendregauss&#45;&gt;proc~legendrepolynomial</title>
+<path fill="none" stroke="#7f00ff" d="M618.82,-96C634.28,-96 651.81,-96 668.61,-96"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="668.94,-99.5 678.94,-96 668.94,-92.5 668.94,-99.5"/>
+</g>
+</g>
+</svg>
+</div><script>var panprocextrudedmesh_mesh3d_tCallsGraph = svgPanZoom('#procextrudedmesh_mesh3d_tCallsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/extrudedmesh_mesh3d_t.html#src">ExtrudedMesh_Mesh3D_t</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">ExtrudedMesh_Mesh3D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mesh2d</span><span class="p">,</span><span class="n">zLevels</span><span class="p">,</span><span class="n">bottomBC</span><span class="p">,</span><span class="n">topBC</span><span class="p">)</span>
+<span class="w">  </span><span class="c">!! Builds a layered hexahedral mesh by extruding a surface mesh downward through</span>
+<span class="w">  </span><span class="c">!! nz = size(zLevels,3)-1 layers bounded by the level surfaces z_0 &lt; z_1 &lt; ... &lt; z_nz.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! Element k (k = 1..nz) of the column above surface element Q is the map</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!   x(xi,eta,zeta) = ( X(xi,eta), Y(xi,eta), Z(xi,eta,zeta) )</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! where (X,Y) is Q's isoparametric map of degree nGeo and, at every geometry node</span>
+<span class="w">  </span><span class="c">!! (xi_i,eta_j),</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!   Z(xi_i,eta_j,zeta) = (1-zeta)/2 z_{k-1}(xi_i,eta_j) + (1+zeta)/2 z_k(xi_i,eta_j).</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! The horizontal coordinates do not depend on zeta, so lines of constant (xi,eta)</span>
+<span class="w">  </span><span class="c">!! are vertical, and Z is linear in zeta within a layer. The 3-D mesh keeps the 2-D</span>
+<span class="w">  </span><span class="c">!! nGeo and quadrature: its node coordinates are sampled on the same nGeo+1 points</span>
+<span class="w">  </span><span class="c">!! in all three directions, so they form the usual (1:3,1:nGeo+1,1:nGeo+1,1:nGeo+1,</span>
+<span class="w">  </span><span class="c">!! 1:nElem) array and the linear vertical map is represented exactly. The two</span>
+<span class="w">  </span><span class="c">!! endpoint weights are exact in floating point, so the top face of layer k and the</span>
+<span class="w">  </span><span class="c">!! bottom face of layer k+1 are sampled from the same z_k and agree bitwise.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!  Input</span>
+<span class="w">  </span><span class="c">!!    - this : Fresh/empty Mesh3D_t object. The result is an ordinary Mesh3D, so it</span>
+<span class="w">  </span><span class="c">!!      works with SEMHex, the mapped data types and the DG models unchanged.</span>
+<span class="w">  </span><span class="c">!!    - mesh2d : The surface mesh, already built and decomposed (any Mesh2D: structured,</span>
+<span class="w">  </span><span class="c">!!      periodic structured, HOPr or HOHQMesh, with nGeo &gt;= 1). It must be conforming:</span>
+<span class="w">  </span><span class="c">!!      a mesh with mortar edges (nMortars &gt; 0) is rejected, since the anisotropic 3-D</span>
+<span class="w">  </span><span class="c">!!      mortar it would need is not implemented.</span>
+<span class="w">  </span><span class="c">!!    - zLevels(1:nGeo+1,1:nGeo+1,0:nz,1:mesh2d%nElem) : Level heights z_k at the</span>
+<span class="w">  </span><span class="c">!!      geometry nodes of each rank-local surface element, in the length unit of the</span>
+<span class="w">  </span><span class="c">!!      mesh coordinates, positive upward. Required: nz &gt;= 1, z_k strictly increasing</span>
+<span class="w">  </span><span class="c">!!      in k at every node, and z_nz = 0 exactly (a flat top at the reference sea</span>
+<span class="w">  </span><span class="c">!!      surface). The levels must also be continuous across lateral faces, i.e. two</span>
+<span class="w">  </span><span class="c">!!      elements must give the same z_k at a shared node. That holds whenever the</span>
+<span class="w">  </span><span class="c">!!      levels are computed pointwise from a continuous bathymetry sampled at the</span>
+<span class="w">  </span><span class="c">!!      geometry nodes, as ExtrudedSigmaLevels and ExtrudedHybridLevels do; it is not</span>
+<span class="w">  </span><span class="c">!!      checked here, because the neighbor of a lateral face may be on another rank.</span>
+<span class="w">  </span><span class="c">!!    - bottomBC : Boundary condition id of the bottom face of every column (z = z_0)</span>
+<span class="w">  </span><span class="c">!!    - topBC : Boundary condition id of the top face of every column (z = 0)</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!  Output</span>
+<span class="w">  </span><span class="c">!!    - this : Mesh3D_t object with nLayers = nz and nz*mesh2d%nElem local elements</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! Ordering and decomposition. Local element e3 = (e2-1)*nz + k is layer k of local</span>
+<span class="w">  </span><span class="c">!! surface element e2, and global ids follow the same rule. The 3-D decomposition is</span>
+<span class="w">  </span><span class="c">!! the 2-D one expanded by nz (offsetElem3D = nz*offsetElem2D), so a column is never</span>
+<span class="w">  </span><span class="c">!! split across ranks and the local surface element e2 of an extruded element is</span>
+<span class="w">  </span><span class="c">!! element e2 of the caller's mesh2d. The surface mesh is not copied; keep it alive if</span>
+<span class="w">  </span><span class="c">!! column operators need its geometry.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! Connectivity. The 2-D sides 1..4 (south, east, north, west) become the lateral</span>
+<span class="w">  </span><span class="c">!! faces 2..5 of the 3-D element, and faces 1 and 6 are the bottom and top. A lateral</span>
+<span class="w">  </span><span class="c">!! face inherits the neighbor, neighbor side and boundary id of its 2-D edge, in the</span>
+<span class="w">  </span><span class="c">!! same layer. Its trace coordinates are (edge coordinate, zeta) on both sides</span>
+<span class="w">  </span><span class="c">!! (BoundaryInterp: faces 2,4 -&gt; (xi1,xi3), faces 3,5 -&gt; (xi2,xi3)) and zeta runs</span>
+<span class="w">  </span><span class="c">!! upward in both elements, so the SELF face flip equals the 2-D edge flip: 0 maps to</span>
+<span class="w">  </span><span class="c">!! face flip 0 (i2 = i, j2 = j) and 1 maps to face flip 1 (i2 = N-i, j2 = j). Bottom</span>
+<span class="w">  </span><span class="c">!! and top faces between layers are conforming with flip 0.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! Global side ids are unique across ranks and serve as MPI message tags. The lateral</span>
+<span class="w">  </span><span class="c">!! face of layer k on the 2-D edge with id g has id sign(g)*((|g|-1)*nz + k), so the</span>
+<span class="w">  </span><span class="c">!! HOPr master/slave sign of the 2-D id is preserved. The horizontal faces of the</span>
+<span class="w">  </span><span class="c">!! column above global surface element E are numbered after all lateral ones,</span>
+<span class="w">  </span><span class="c">!! nz*nUniqueSides2D + (E-1)*(nz+1) + l for level l-1 (l = 1..nz+1), and</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!   nUniqueSides = nz*nUniqueSides2D + nGlobalElem2D*(nz+1).</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! The node ids (globalNodeIDs) and elemInfo are zeroed: the solver does not use</span>
+<span class="w">  </span><span class="c">!! them, and the flips are set directly rather than through RecalculateFlip.</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Mesh3D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">Mesh2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh2d</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">zLevels</span><span class="p">(</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">0</span><span class="p">:,</span><span class="mi">1</span><span class="p">:)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bottomBC</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">topBC</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nz</span><span class="p">,</span><span class="n">nGeo</span><span class="p">,</span><span class="n">nElem2D</span><span class="p">,</span><span class="n">nElem3D</span><span class="p">,</span><span class="n">nRanks</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGlobalElem2D</span><span class="p">,</span><span class="n">nUniqueSides2D</span><span class="p">,</span><span class="n">nUniqueSides3D</span><span class="p">,</span><span class="n">nHorizontalBase</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">e2</span><span class="p">,</span><span class="n">e3</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">nk</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">E2global</span><span class="p">,</span><span class="n">E2neighbor</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">flip</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">offsetElem3D</span><span class="p">(:)</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">zeta</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">nGeo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nGeo</span>
+<span class="w">    </span><span class="n">nElem2D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nElem</span>
+<span class="w">    </span><span class="n">nz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">zLevels</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+
+<span class="w">    </span><span class="c">! ---- Validate the surface mesh and the levels ----</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">initialized</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : the surface mesh has no domain decomposition; build it first"</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nMortars</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : the surface mesh has nonconforming (mortar) edges, "</span><span class="o">//</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">        </span><span class="s2">"which need anisotropic 3-D mortars that are not implemented"</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">nz</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : zLevels must carry at least two levels (nz &gt;= 1)"</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">zLevels</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">zLevels</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : zLevels must be dimensioned (1:nGeo+1,1:nGeo+1,0:nz,1:nElem2D)"</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">zLevels</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">nElem2D</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : the last dimension of zLevels must equal the local surface element count"</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    do </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nElem2D</span>
+<span class="w">      </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">zLevels</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">nz</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">            error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : the top level zLevels(:,:,nz,:) must be exactly 0"</span>
+<span class="w">          </span><span class="k">endif</span>
+<span class="k">          do </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nz</span>
+<span class="w">            </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.(</span><span class="n">zLevels</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">zLevels</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">e2</span><span class="p">)))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">              error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : zLevels must be strictly increasing in the level index"</span>
+<span class="w">            </span><span class="k">endif</span>
+<span class="k">          enddo</span>
+<span class="k">        enddo</span>
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
+
+<span class="k">    </span><span class="n">nRanks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">nRanks</span>
+<span class="w">    </span><span class="n">nGlobalElem2D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">nRanks</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">nElem2D</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">       </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="c">! The columns inherit the surface partition, so the surface mesh must hold</span>
+<span class="w">      </span><span class="c">! exactly the elements its decomposition assigns to this rank.</span>
+<span class="w">      </span><span class="k">error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : the surface mesh does not hold the elements its decomposition assigns to this rank"</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    </span><span class="n">nUniqueSides2D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nUniqueSides</span>
+<span class="w">    </span><span class="k">do </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nElem2D</span>
+<span class="w">      </span><span class="k">do </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">        </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="nb">abs</span><span class="p">(</span><span class="n">g</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">nUniqueSides2D</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : every surface edge needs a global side id in 1..nUniqueSides"</span>
+<span class="w">        </span><span class="k">endif</span>
+<span class="k">        if</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          </span><span class="n">flip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">flip</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="n">flip</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">            error stop</span><span class="w"> </span><span class="s2">"ExtrudedMesh : a surface edge flip must be 0 or 1"</span>
+<span class="w">          </span><span class="k">endif</span>
+<span class="k">        endif</span>
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
+
+<span class="k">    </span><span class="n">nElem3D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nz</span><span class="o">*</span><span class="n">nElem2D</span>
+<span class="w">    </span><span class="n">nHorizontalBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nz</span><span class="o">*</span><span class="n">nUniqueSides2D</span>
+<span class="w">    </span><span class="n">nUniqueSides3D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nHorizontalBase</span><span class="o">+</span><span class="n">nGlobalElem2D</span><span class="o">*</span><span class="p">(</span><span class="n">nz</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c">! ---- Decomposition: the surface partition, expanded by nz ----</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">)</span>
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">offsetElem3D</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nRanks</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<span class="w">    </span><span class="n">offsetElem3D</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nRanks</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nz</span><span class="o">*</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nRanks</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">GenerateDecompositionFromOffsets</span><span class="p">(</span><span class="n">offsetElem3D</span><span class="p">,</span><span class="n">nUniqueSides3D</span><span class="p">)</span>
+<span class="w">    </span><span class="k">deallocate</span><span class="p">(</span><span class="n">offsetElem3D</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">nGeo</span><span class="p">,</span><span class="n">nElem3D</span><span class="p">,</span><span class="mi">6</span><span class="o">*</span><span class="n">nElem3D</span><span class="p">,</span><span class="n">nElem3D</span><span class="o">*</span><span class="p">(</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nBCs</span><span class="p">)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nGlobalElem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nz</span><span class="o">*</span><span class="n">nGlobalElem2D</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nUniqueSides</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nUniqueSides3D</span><span class="w"> </span><span class="c">! GLOBAL side id space on every rank (the MPI tag stride)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">quadrature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">quadrature</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nLayers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nz</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nBCs</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">this</span><span class="p">%</span><span class="n">BCType</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nBCs</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">BCType</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nBCs</span><span class="p">)</span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">BCNames</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nBCs</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">BCNames</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nBCs</span><span class="p">)</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="k">    if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">materialNames</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="nb">allocated</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">elemMaterial</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">materialNames</span><span class="p">)</span>
+<span class="w">      </span><span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">materialNames</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nMaterials</span><span class="p">))</span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">nMaterials</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nMaterials</span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">materialNames</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nMaterials</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">materialNames</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nMaterials</span><span class="p">)</span>
+<span class="w">      </span><span class="k">do </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nElem2D</span>
+<span class="w">        </span><span class="k">do </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nz</span>
+<span class="w">          </span><span class="n">this</span><span class="p">%</span><span class="n">elemMaterial</span><span class="p">((</span><span class="n">e2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nz</span><span class="o">+</span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">elemMaterial</span><span class="p">(</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">        </span><span class="k">enddo</span>
+<span class="k">      enddo</span>
+<span class="k">    endif</span>
+
+<span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">globalNodeIDs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c">! node ids are unused by the solver (flips are set directly)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">elemInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="w">    </span><span class="c">! ---- Geometry: vertical lines of constant (xi,eta), linear in zeta per layer ----</span>
+<span class="w">    </span><span class="k">call </span><span class="n">GeometryNodes1D</span><span class="p">(</span><span class="n">nGeo</span><span class="p">,</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">quadrature</span><span class="p">,</span><span class="n">zeta</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">quadrature</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS_LOBATTO</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">quadrature</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CHEBYSHEV_GAUSS_LOBATTO</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">       </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">quadrature</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UNIFORM</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="c">! The end nodes lie on the faces. Pin them to -1 and 1 so that the end weights</span>
+<span class="w">      </span><span class="c">! below are exactly 0 and 1 and each face is sampled from one level alone.</span>
+<span class="w">      </span><span class="n">zeta</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mf">1.0_prec</span>
+<span class="w">      </span><span class="n">zeta</span><span class="p">(</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0_prec</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="k">    do </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nElem2D</span>
+<span class="w">      </span><span class="k">do </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nz</span>
+<span class="w">        </span><span class="n">e3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">e2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nz</span><span class="o">+</span><span class="n">k</span>
+<span class="w">        </span><span class="k">do </span><span class="n">nk</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">          </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">            </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">              </span><span class="n">this</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">nk</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">              </span><span class="n">this</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">nk</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">              </span><span class="n">this</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">nk</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5_prec</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">-</span><span class="n">zeta</span><span class="p">(</span><span class="n">nk</span><span class="p">))</span><span class="o">*</span><span class="n">zLevels</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                             </span><span class="mf">0.5_prec</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="o">+</span><span class="n">zeta</span><span class="p">(</span><span class="n">nk</span><span class="p">))</span><span class="o">*</span><span class="n">zLevels</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">            </span><span class="k">enddo</span>
+<span class="k">          enddo</span>
+<span class="k">        enddo</span>
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
+
+<span class="w">    </span><span class="c">! ---- Connectivity ----</span>
+<span class="w">    </span><span class="c">!  sideInfo(1:5,iSide,iEl)</span>
+<span class="w">    </span><span class="c">!    1 - Side Type (0; the mesh has no mortars)</span>
+<span class="w">    </span><span class="c">!    2 - Global Side ID</span>
+<span class="w">    </span><span class="c">!    3 - Neighbor Element ID (global; 0 on a domain boundary)</span>
+<span class="w">    </span><span class="c">!    4 - 10*( neighbor local side ) + flip</span>
+<span class="w">    </span><span class="c">!    5 - Boundary Condition ID (0 on an interior face)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">do </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nElem2D</span>
+<span class="w">      </span><span class="n">E2global</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">mesh2d</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">e2</span>
+<span class="w">      </span><span class="k">do </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nz</span>
+<span class="w">        </span><span class="n">e3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">e2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nz</span><span class="o">+</span><span class="n">k</span>
+
+<span class="w">        </span><span class="c">! Lateral faces: 2-D side s is 3-D face s+1 (south, east, north, west)</span>
+<span class="w">        </span><span class="k">do </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">          </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">sign</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">g</span><span class="p">)</span><span class="o">*</span><span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">g</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nz</span><span class="o">+</span><span class="n">k</span><span class="p">)</span>
+<span class="w">          </span><span class="n">E2neighbor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">E2neighbor</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">            </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span>
+<span class="w">            </span><span class="n">flip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="n">s2</span>
+<span class="w">            </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">E2neighbor</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nz</span><span class="o">+</span><span class="n">k</span>
+<span class="w">            </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="p">(</span><span class="n">s2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">flip</span>
+<span class="w">          </span><span class="k">endif</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh2d</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">        </span><span class="k">enddo</span>
+
+<span class="w">        </span><span class="c">! Bottom face, on level k-1 of the column</span>
+<span class="w">        </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">selfSide3D_Bottom</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nHorizontalBase</span><span class="o">+</span><span class="p">(</span><span class="n">E2global</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nz</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">k</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">selfSide3D_Bottom</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bottomBC</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">selfSide3D_Bottom</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">E2global</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nz</span><span class="o">+</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">selfSide3D_Bottom</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="n">selfSide3D_Top</span>
+<span class="w">        </span><span class="k">endif</span>
+
+<span class="w">        </span><span class="c">! Top face, on level k of the column</span>
+<span class="w">        </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">selfSide3D_Top</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nHorizontalBase</span><span class="o">+</span><span class="p">(</span><span class="n">E2global</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nz</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">nz</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">selfSide3D_Top</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">topBC</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">selfSide3D_Top</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">E2global</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nz</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">          </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">selfSide3D_Top</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="n">selfSide3D_Bottom</span>
+<span class="w">        </span><span class="k">endif</span>
+
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
+
+<span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">UpdateDevice</span><span class="p">()</span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">ExtrudedMesh_Mesh3D_t</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-10-17 12:40            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
