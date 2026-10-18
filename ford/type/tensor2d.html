@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Tensor2D &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>Tensor2D
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.8% of total for derived types.</p>Including implementation: 154 statements,  0.2% of total for derived types.">15 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Tensor_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_tensor_2d.f90.html'>SELF_Tensor_2D.f90</a></li>
+     <li><a href='../module/self_tensor_2d.html'>SELF_Tensor_2D</a></li>
+     <li class="active">Tensor2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/tensor2d.html#variable-m~2">M</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-n~5">N</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-alloc_boundary~6">alloc_boundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-alloc_extboundary~6">alloc_extBoundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-alloc_interior~6">alloc_interior</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-backend~12">backend</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-boundary~4">boundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-boundary_gpu~7">boundary_gpu</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-eqn">eqn</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-extboundary">extBoundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-extboundary_gpu~2">extBoundary_gpu</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-interior~5">interior</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-interior_gpu~9">interior_gpu</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-interp~3">interp</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-meta">meta</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-nelem~6">nElem</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-nvar">nVar</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-pool_boundary~3">pool_boundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-pool_extboundary~3">pool_extBoundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-pool_interior~3">pool_interior</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-boundaryinterp~5">BoundaryInterp</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-determinant~4">Determinant</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-free~52">Free</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-init~48">Init</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-maparrays~3">MapArrays</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-resize~16">Resize</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setdescription">SetDescription</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setequation~27">SetEquation</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setname">SetName</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setunits">SetUnits</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-updatedevice~22">UpdateDevice</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-updatehost~20">UpdateHost</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/tensor2d.html#src">Tensor2D</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/tensor2d_t.html'>Tensor2D_t</a>) :: Tensor2D</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~tensor2d~~InheritsGraph Pages: 1 -->
+<svg id="typetensor2dInheritsGraph" width="641pt" height="97pt"
+ viewBox="0.00 0.00 641.00 96.80" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~tensor2d~~InheritsGraph" class="graph" transform="scale(0.62 0.62) rotate(0) translate(4 152)">
+<title>type~~tensor2d~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-152 1029,-152 1029,4 -4,4"/>
+<!-- type~tensor2d -->
+<g id="type~~tensor2d~~InheritsGraph_node1" class="node">
+<title>type~tensor2d</title>
+<polygon fill="none" stroke="black" points="1025,-148 963,-148 963,-124 1025,-124 1025,-148"/>
+<text text-anchor="middle" x="994" y="-133.6" font-family="Helvetica,sans-Serif" font-size="10.50">Tensor2D</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~tensor2d~~InheritsGraph_node2" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="63.5,-140 9.5,-140 9.5,-116 63.5,-116 63.5,-140"/>
+<text text-anchor="middle" x="36.5" y="-125.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~tensor2d&#45;&gt;c_ptr -->
+<g id="type~~tensor2d~~InheritsGraph_edge1" class="edge">
+<title>type~tensor2d&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M944,-136C897.56,-125.77 884.56,-136 837,-136 837,-136 837,-136 484,-136 331.46,-136 149.66,-131.27 73.67,-129.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="73.76,-125.59 63.67,-128.8 73.56,-132.59 73.76,-125.59"/>
+<text text-anchor="middle" x="707.5" y="-138.4" font-family="Helvetica,sans-Serif" font-size="9.50">interior_gpu, boundary_gpu, extBoundary_gpu</text>
+</g>
+<!-- type~tensor2d_t -->
+<g id="type~~tensor2d~~InheritsGraph_node3" class="node">
+<title>type~tensor2d_t</title>
+<g id="a_type~~tensor2d~~InheritsGraph_node3"><a xlink:href=".././type/tensor2d_t.html" xlink:title="Tensor2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="926,-98 855,-98 855,-74 926,-74 926,-98"/>
+<text text-anchor="middle" x="890.5" y="-83.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Tensor2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~tensor2d&#45;&gt;type~tensor2d_t -->
+<g id="type~~tensor2d~~InheritsGraph_edge2" class="edge">
+<title>type~tensor2d&#45;&gt;type~tensor2d_t</title>
+<path fill="none" stroke="#ff0000" d="M962.83,-137.99C956.87,-137.82 950.7,-137.25 945,-136"/>
+<path fill="none" stroke="#ff0000" d="M944,-136C939.54,-135.02 923.27,-119.08 910,-105.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="912.5,-103.01 903.04,-98.24 907.46,-107.87 912.5,-103.01"/>
+</g>
+<!-- type~self_dataobj -->
+<g id="type~~tensor2d~~InheritsGraph_node4" class="node">
+<title>type~self_dataobj</title>
+<g id="a_type~~tensor2d~~InheritsGraph_node4"><a xlink:href=".././type/self_dataobj.html" xlink:title="SELF_DataObj">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="751,-83 664,-83 664,-59 751,-59 751,-83"/>
+<text text-anchor="middle" x="707.5" y="-68.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataObj</text>
+</a>
+</g>
+</g>
+<!-- type~tensor2d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~tensor2d~~InheritsGraph_edge3" class="edge">
+<title>type~tensor2d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#00ffff" d="M854.6,-83.11C828.23,-80.92 791.57,-77.88 761.57,-75.4"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="761.52,-71.88 751.27,-74.54 760.94,-78.86 761.52,-71.88"/>
+</g>
+<!-- type~lagrange -->
+<g id="type~~tensor2d~~InheritsGraph_node5" class="node">
+<title>type~lagrange</title>
+<g id="a_type~~tensor2d~~InheritsGraph_node5"><a xlink:href=".././type/lagrange.html" xlink:title="Lagrange">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="517,-108 453,-108 453,-84 517,-84 517,-108"/>
+<text text-anchor="middle" x="485" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~lagrange -->
+<g id="type~~tensor2d~~InheritsGraph_edge4" class="edge">
+<title>type~self_dataobj&#45;&gt;type~lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M663.99,-75.82C624.47,-80.3 565.99,-86.93 526.97,-91.35"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="526.55,-87.88 517.01,-92.48 527.34,-94.84 526.55,-87.88"/>
+<text text-anchor="middle" x="564.5" y="-91.4" font-family="Helvetica,sans-Serif" font-size="9.50">interp</text>
+</g>
+<!-- type~metadata -->
+<g id="type~~tensor2d~~InheritsGraph_node6" class="node">
+<title>type~metadata</title>
+<g id="a_type~~tensor2d~~InheritsGraph_node6"><a xlink:href=".././type/metadata.html" xlink:title="Metadata">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="516.5,-66 453.5,-66 453.5,-42 516.5,-42 516.5,-66"/>
+<text text-anchor="middle" x="485" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Metadata</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~metadata -->
+<g id="type~~tensor2d~~InheritsGraph_edge5" class="edge">
+<title>type~self_dataobj&#45;&gt;type~metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M663.73,-67.08C638.98,-64.87 607.25,-62.13 579,-60 561.93,-58.71 543.08,-57.46 526.84,-56.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="526.79,-52.93 516.59,-55.81 526.35,-59.92 526.79,-52.93"/>
+<text text-anchor="middle" x="564.5" y="-62.4" font-family="Helvetica,sans-Serif" font-size="9.50">meta</text>
+</g>
+<!-- EquationParser -->
+<g id="type~~tensor2d~~InheritsGraph_node7" class="node">
+<title>EquationParser</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="532,-24 438,-24 438,0 532,0 532,-24"/>
+<text text-anchor="middle" x="485" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EquationParser</text>
+</g>
+<!-- type~self_dataobj&#45;&gt;EquationParser -->
+<g id="type~~tensor2d~~InheritsGraph_edge6" class="edge">
+<title>type~self_dataobj&#45;&gt;EquationParser</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M663.99,-59.62C628.95,-50.25 579.01,-36.89 540.94,-26.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="541.6,-23.25 531.04,-24.05 539.79,-30.02 541.6,-23.25"/>
+<text text-anchor="middle" x="564.5" y="-39.4" font-family="Helvetica,sans-Serif" font-size="9.50">eqn</text>
+</g>
+<!-- type~lagrange&#45;&gt;c_ptr -->
+<g id="type~~tensor2d~~InheritsGraph_edge7" class="edge">
+<title>type~lagrange&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M452.9,-94.65C386.11,-92.32 224.19,-89.73 91,-112 85.18,-112.97 79.1,-114.39 73.22,-115.98"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="72.21,-112.63 63.59,-118.78 74.17,-119.35 72.21,-112.63"/>
+<text text-anchor="middle" x="255.5" y="-114.4" font-family="Helvetica,sans-Serif" font-size="9.50">qWeights_gpu, iMatrix_gpu, dMatrix_gpu, dgMatrix_gpu, bMatrix_gpu</text>
+</g>
+<!-- type~lagrange_t -->
+<g id="type~~tensor2d~~InheritsGraph_node8" class="node">
+<title>type~lagrange_t</title>
+<g id="a_type~~tensor2d~~InheritsGraph_node8"><a xlink:href=".././type/lagrange_t.html" xlink:title="Lagrange_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="73,-90 0,-90 0,-66 73,-66 73,-90"/>
+<text text-anchor="middle" x="36.5" y="-75.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- type~lagrange&#45;&gt;type~lagrange_t -->
+<g id="type~~tensor2d~~InheritsGraph_edge8" class="edge">
+<title>type~lagrange&#45;&gt;type~lagrange_t</title>
+<path fill="none" stroke="#ff0000" d="M452.76,-93.89C442.34,-93.22 430.67,-92.53 420,-92 298.39,-85.97 154.9,-81.4 83.16,-79.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="83.21,-75.79 73.11,-79 83,-82.79 83.21,-75.79"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypetensor2dInheritsGraph = svgPanZoom('#typetensor2dInheritsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~tensor2d~~InheritedByGraph Pages: 1 -->
+<svg id="typetensor2dInheritedByGraph" width="641pt" height="175pt"
+ viewBox="0.00 0.00 641.00 175.24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~tensor2d~~InheritedByGraph" class="graph" transform="scale(0.31 0.31) rotate(0) translate(4 563)">
+<title>type~~tensor2d~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-563 2070,-563 2070,4 -4,4"/>
+<!-- type~tensor2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node1" class="node">
+<title>type~tensor2d</title>
+<polygon fill="none" stroke="black" points="62,-279 0,-279 0,-255 62,-255 62,-279"/>
+<text text-anchor="middle" x="31" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50">Tensor2D</text>
+</g>
+<!-- type~semquad -->
+<g id="type~~tensor2d~~InheritedByGraph_node2" class="node">
+<title>type~semquad</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node2"><a xlink:href=".././type/semquad.html" xlink:title="SEMQuad">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="214,-279 150,-279 150,-255 214,-255 214,-279"/>
+<text text-anchor="middle" x="182" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMQuad</text>
+</a>
+</g>
+</g>
+<!-- type~semquad&#45;&gt;type~tensor2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge1" class="edge">
+<title>type~semquad&#45;&gt;type~tensor2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M149.76,-267C127.21,-267 96.57,-267 72.2,-267"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="72.18,-263.5 62.18,-267 72.18,-270.5 72.18,-263.5"/>
+<text text-anchor="middle" x="106" y="-269.4" font-family="Helvetica,sans-Serif" font-size="9.50">dxds, dsdx</text>
+</g>
+<!-- type~mappedscalar2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node3" class="node">
+<title>type~mappedscalar2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node3"><a xlink:href=".././type/mappedscalar2d_t.html" xlink:title="MappedScalar2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="553,-321 440,-321 440,-297 553,-297 553,-321"/>
+<text text-anchor="middle" x="496.5" y="-306.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar2d_t&#45;&gt;type~semquad -->
+<g id="type~~tensor2d~~InheritedByGraph_edge2" class="edge">
+<title>type~mappedscalar2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M439.82,-305.88C386.21,-302.22 303.01,-294.81 232,-281 229.36,-280.49 226.66,-279.9 223.95,-279.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="224.73,-275.85 214.17,-276.77 223,-282.63 224.73,-275.85"/>
+<text text-anchor="middle" x="327" y="-306.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedvector2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node4" class="node">
+<title>type~mappedvector2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node4"><a xlink:href=".././type/mappedvector2d_t.html" xlink:title="MappedVector2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="553,-237 440,-237 440,-213 553,-213 553,-237"/>
+<text text-anchor="middle" x="496.5" y="-222.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedvector2d_t&#45;&gt;type~semquad -->
+<g id="type~~tensor2d~~InheritedByGraph_edge3" class="edge">
+<title>type~mappedvector2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M439.82,-228.12C386.21,-231.78 303.01,-239.19 232,-253 229.36,-253.51 226.66,-254.1 223.95,-254.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="223,-251.37 214.17,-257.23 224.73,-258.15 223,-251.37"/>
+<text text-anchor="middle" x="327" y="-255.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~amrcontroller2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node5" class="node">
+<title>type~amrcontroller2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node5"><a xlink:href=".././type/amrcontroller2d.html" xlink:title="AMRController2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="548,-279 445,-279 445,-255 548,-255 548,-279"/>
+<text text-anchor="middle" x="496.5" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">AMRController2D</text>
+</a>
+</g>
+</g>
+<!-- type~amrcontroller2d&#45;&gt;type~semquad -->
+<g id="type~~tensor2d~~InheritedByGraph_edge6" class="edge">
+<title>type~amrcontroller2d&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M444.94,-267C383.47,-267 280.92,-267 224.08,-267"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="224.02,-263.5 214.02,-267 224.02,-270.5 224.02,-263.5"/>
+<text text-anchor="middle" x="327" y="-269.4" font-family="Helvetica,sans-Serif" font-size="9.50">activeGeom, geomA, geomB, genGeom</text>
+</g>
+<!-- type~dgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node6" class="node">
+<title>type~dgmodel2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node6"><a xlink:href=".././type/dgmodel2d_t.html" xlink:title="DGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1124,-343 1039,-343 1039,-319 1124,-319 1124,-343"/>
+<text text-anchor="middle" x="1081.5" y="-328.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~semquad -->
+<g id="type~~tensor2d~~InheritedByGraph_edge4" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1038.71,-333.11C1021.74,-333.87 1001.94,-334.63 984,-335 742.26,-340.01 681.63,-338.87 440,-330 347.46,-326.6 316.11,-356.73 232,-318 217.6,-311.37 205.26,-298.46 196.57,-287.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="199.39,-285.21 190.66,-279.21 193.74,-289.35 199.39,-285.21"/>
+<text text-anchor="middle" x="594" y="-337.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedscalar2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node8" class="node">
+<title>type~mappedscalar2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node8"><a xlink:href=".././type/mappedscalar2d.html" xlink:title="MappedScalar2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="739,-279 635,-279 635,-255 739,-255 739,-279"/>
+<text text-anchor="middle" x="687" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mappedscalar2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge15" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mappedscalar2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1038.93,-327.9C954.52,-321.52 769.92,-307.09 757,-302 747.57,-298.29 747.77,-293.09 739,-288 736.18,-286.37 733.22,-284.8 730.19,-283.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="731.55,-280.07 721,-279.05 728.61,-286.43 731.55,-280.07"/>
+<text text-anchor="middle" x="870.5" y="-325.4" font-family="Helvetica,sans-Serif" font-size="9.50">solution, source, fluxDivergence, dSdt, workSol</text>
+</g>
+<!-- type~mappedvector2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node12" class="node">
+<title>type~mappedvector2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node12"><a xlink:href=".././type/mappedvector2d.html" xlink:title="MappedVector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="739,-237 635,-237 635,-213 739,-213 739,-237"/>
+<text text-anchor="middle" x="687" y="-222.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mappedvector2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge24" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mappedvector2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1057.25,-318.98C1038.03,-309.46 1009.81,-296.4 984,-288 904.65,-262.19 809.84,-244.16 749.28,-234.19"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="749.56,-230.69 739.13,-232.54 748.44,-237.6 749.56,-230.69"/>
+<text text-anchor="middle" x="870.5" y="-290.4" font-family="Helvetica,sans-Serif" font-size="9.50">solutionGradient, flux</text>
+</g>
+<!-- type~mappedtwopointvector2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node7" class="node">
+<title>type~mappedtwopointvector2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node7"><a xlink:href=".././type/mappedtwopointvector2d_t.html" xlink:title="MappedTwoPointVector2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1161,-110 1002,-110 1002,-86 1161,-86 1161,-110"/>
+<text text-anchor="middle" x="1081.5" y="-95.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedTwoPointVector2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedtwopointvector2d_t&#45;&gt;type~semquad -->
+<g id="type~~tensor2d~~InheritedByGraph_edge5" class="edge">
+<title>type~mappedtwopointvector2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001.78,-95.46C846.85,-93.47 494.6,-103.98 232,-225 220.31,-230.39 209.25,-239.39 200.61,-247.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="197.94,-245.41 193.4,-254.98 202.91,-250.33 197.94,-245.41"/>
+<text text-anchor="middle" x="594" y="-128.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedscalar2d&#45;&gt;type~mappedscalar2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge7" class="edge">
+<title>type~mappedscalar2d&#45;&gt;type~mappedscalar2d_t</title>
+<path fill="none" stroke="#ff0000" d="M655.33,-279.09C648.58,-281.9 641.51,-284.96 635,-288 616.81,-296.5 614.96,-306.78 595,-309"/>
+<path fill="none" stroke="#ff0000" d="M593,-309C583.46,-310.06 573.35,-310.65 563.42,-310.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="563.11,-307.42 553.16,-311.08 563.22,-314.41 563.11,-307.42"/>
+</g>
+<!-- type~dgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node9" class="node">
+<title>type~dgmodel2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node9"><a xlink:href=".././type/dgmodel2d.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1333,-385 1257,-385 1257,-361 1333,-361 1333,-385"/>
+<text text-anchor="middle" x="1295" y="-370.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge11" class="edge">
+<title>type~dgmodel2d&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#0066ff" d="M1256.9,-365.26C1244.8,-362.01 1231.51,-357.64 1220,-352 1205.87,-345.07 1207.16,-332.56 1191.5,-331"/>
+</g>
+<!-- type~mappedvector2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node10" class="node">
+<title>type~mappedvector2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node10"><a xlink:href=".././type/mappedvector2d~2.html" xlink:title="MappedVector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="739,-195 635,-195 635,-171 739,-171 739,-195"/>
+<text text-anchor="middle" x="687" y="-180.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedvector2d~2&#45;&gt;type~mappedvector2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge10" class="edge">
+<title>type~mappedvector2d~2&#45;&gt;type~mappedvector2d_t</title>
+<path fill="none" stroke="#cbff00" d="M655.33,-195.09C648.58,-197.9 641.51,-200.96 635,-204 616.81,-212.5 614.96,-222.78 595,-225"/>
+<path fill="none" stroke="#cbff00" d="M593,-225C583.46,-226.06 573.35,-226.65 563.42,-226.91"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="563.11,-223.42 553.16,-227.08 563.22,-230.41 563.11,-223.42"/>
+</g>
+<!-- type~mappedscalar2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node11" class="node">
+<title>type~mappedscalar2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node11"><a xlink:href=".././type/mappedscalar2d~2.html" xlink:title="MappedScalar2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="739,-321 635,-321 635,-297 739,-297 739,-321"/>
+<text text-anchor="middle" x="687" y="-306.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar2d~2&#45;&gt;type~mappedscalar2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge8" class="edge">
+<title>type~mappedscalar2d~2&#45;&gt;type~mappedscalar2d_t</title>
+<path fill="none" stroke="#ff0000" d="M634.87,-307.01C621.84,-307.05 607.88,-307.56 595,-309"/>
+</g>
+<!-- type~mappedvector2d&#45;&gt;type~mappedvector2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge9" class="edge">
+<title>type~mappedvector2d&#45;&gt;type~mappedvector2d_t</title>
+<path fill="none" stroke="#cbff00" d="M634.87,-223.01C621.84,-223.05 607.88,-223.56 595,-225"/>
+</g>
+<!-- type~dgmodel2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node13" class="node">
+<title>type~dgmodel2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node13"><a xlink:href=".././type/dgmodel2d~2.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1333,-343 1257,-343 1257,-319 1333,-319 1333,-343"/>
+<text text-anchor="middle" x="1295" y="-328.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge12" class="edge">
+<title>type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#0066ff" d="M1256.91,-332.77C1237.4,-333.25 1213.1,-333.15 1191.5,-331"/>
+<path fill="none" stroke="#0066ff" d="M1189.5,-331C1171.5,-329.21 1151.71,-328.78 1134.1,-328.94"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1133.95,-325.44 1124.01,-329.09 1134.06,-332.44 1133.95,-325.44"/>
+</g>
+<!-- type~mappedtwopointvector2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node14" class="node">
+<title>type~mappedtwopointvector2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node14"><a xlink:href=".././type/mappedtwopointvector2d.html" xlink:title="MappedTwoPointVector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1370,-190 1220,-190 1220,-166 1370,-166 1370,-190"/>
+<text text-anchor="middle" x="1295" y="-175.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedTwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedtwopointvector2d&#45;&gt;type~mappedtwopointvector2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge13" class="edge">
+<title>type~mappedtwopointvector2d&#45;&gt;type~mappedtwopointvector2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M1278.92,-165.94C1251.08,-143.71 1194.18,-98.49 1191.5,-98"/>
+</g>
+<!-- type~mappedtwopointvector2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node15" class="node">
+<title>type~mappedtwopointvector2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node15"><a xlink:href=".././type/mappedtwopointvector2d~2.html" xlink:title="MappedTwoPointVector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1370,-110 1220,-110 1220,-86 1370,-86 1370,-110"/>
+<text text-anchor="middle" x="1295" y="-95.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedTwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedtwopointvector2d~2&#45;&gt;type~mappedtwopointvector2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge14" class="edge">
+<title>type~mappedtwopointvector2d~2&#45;&gt;type~mappedtwopointvector2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M1219.8,-101.2C1210.23,-100.68 1200.6,-99.68 1191.5,-98"/>
+<path fill="none" stroke="#cc00ff" d="M1189.5,-98C1183.65,-96.92 1177.59,-96.11 1171.46,-95.52"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1171.35,-92 1161.11,-94.72 1170.81,-98.98 1171.35,-92"/>
+</g>
+<!-- type~esatmo2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node16" class="node">
+<title>type~esatmo2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node16"><a xlink:href=".././type/esatmo2d_t.html" xlink:title="ESAtmo2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1916.5,-77 1838.5,-77 1838.5,-53 1916.5,-53 1916.5,-77"/>
+<text text-anchor="middle" x="1877.5" y="-62.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d_t&#45;&gt;type~mappedscalar2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge16" class="edge">
+<title>type~esatmo2d_t&#45;&gt;type~mappedscalar2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1538,-91C1502.15,-86.84 1254.35,-145.95 1220,-157 1156.35,-177.46 1148.67,-208.49 1082.5,-218"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1080.5,-218C937.68,-235.74 892.08,-182.36 757,-232 747.49,-235.5 747.77,-240.91 739,-246 736.18,-247.63 733.22,-249.2 730.19,-250.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="728.61,-247.57 721,-254.95 731.55,-253.93 728.61,-247.57"/>
+<text text-anchor="middle" x="1418.5" y="-118.4" font-family="Helvetica,sans-Serif" font-size="9.50">diffDiv</text>
+</g>
+<!-- type~esatmo2d_t&#45;&gt;type~mappedvector2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge25" class="edge">
+<title>type~esatmo2d_t&#45;&gt;type~mappedvector2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1838.35,-76.78C1826.72,-80.23 1813.88,-83.9 1802,-87"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1801,-87C1688.74,-116.28 1655.79,-98.25 1540,-91"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1538,-91C1496.26,-86.07 1490.41,-66.22 1449,-59 1340.4,-40.07 1375.46,17.66 1002,-77 876.18,-108.89 857.51,-151.04 739,-204 735.32,-205.65 731.47,-207.32 727.6,-208.96"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="725.93,-205.87 718.06,-212.97 728.64,-212.33 725.93,-205.87"/>
+<text text-anchor="middle" x="1418.5" y="-61.4" font-family="Helvetica,sans-Serif" font-size="9.50">diffFlux</text>
+</g>
+<!-- type~ecdgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node34" class="node">
+<title>type~ecdgmodel2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node34"><a xlink:href=".././type/ecdgmodel2d.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1761,-139 1670,-139 1670,-115 1761,-115 1761,-139"/>
+<text text-anchor="middle" x="1715.5" y="-124.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge42" class="edge">
+<title>type~esatmo2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#b600ff" d="M1801,-87C1791.19,-89.56 1791.81,-95.99 1783,-101 1776.55,-104.66 1769.49,-108.04 1762.45,-111.05"/>
+<polygon fill="#b600ff" stroke="#b600ff" points="1760.86,-107.92 1752.92,-114.94 1763.5,-114.4 1760.86,-107.92"/>
+</g>
+<!-- type~advection_diffusion_2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node17" class="node">
+<title>type~advection_diffusion_2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node17"><a xlink:href=".././type/advection_diffusion_2d_t.html" xlink:title="advection_diffusion_2d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1611,-427 1467,-427 1467,-403 1611,-403 1611,-427"/>
+<text text-anchor="middle" x="1539" y="-412.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge20" class="edge">
+<title>type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#ffbf00" d="M1494.15,-402.99C1485.1,-400.25 1475.69,-397.19 1467,-394 1445.33,-386.04 1442.41,-370.15 1419.5,-373"/>
+</g>
+<!-- type~nulldgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node18" class="node">
+<title>type~nulldgmodel2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node18"><a xlink:href=".././type/nulldgmodel2d_t.html" xlink:title="NullDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1592,-385 1486,-385 1486,-361 1592,-361 1592,-385"/>
+<text text-anchor="middle" x="1539" y="-370.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge19" class="edge">
+<title>type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#ffbf00" d="M1485.91,-370.22C1465.18,-369.84 1441.14,-370.3 1419.5,-373"/>
+</g>
+<!-- type~lineareuler2d_pml_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node19" class="node">
+<title>type~lineareuler2d_pml_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node19"><a xlink:href=".././type/lineareuler2d_pml_t.html" xlink:title="LinearEuler2D_PML_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1777.5,-307 1653.5,-307 1653.5,-283 1777.5,-283 1777.5,-307"/>
+<text text-anchor="middle" x="1715.5" y="-292.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml_t&#45;&gt;type~mappedscalar2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge17" class="edge">
+<title>type~lineareuler2d_pml_t&#45;&gt;type~mappedscalar2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1653.08,-290.18C1645.31,-290.13 1637.46,-290.36 1630,-291"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1629,-291C1536.23,-298.95 1512.61,-291 1419.5,-291 1419.5,-291 1419.5,-291 1080.5,-291 936.59,-291 900.28,-290.45 757,-277 754.47,-276.76 751.89,-276.5 749.29,-276.21"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="749.52,-272.71 739.18,-275 748.69,-279.66 749.52,-272.71"/>
+<text text-anchor="middle" x="1295" y="-293.4" font-family="Helvetica,sans-Serif" font-size="9.50">sigma_x, sigma_y</text>
+</g>
+<!-- type~lineareuler2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node22" class="node">
+<title>type~lineareuler2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node22"><a xlink:href=".././type/lineareuler2d_t.html" xlink:title="LinearEuler2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1588,-343 1490,-343 1490,-319 1588,-319 1588,-343"/>
+<text text-anchor="middle" x="1539" y="-328.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml_t&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge39" class="edge">
+<title>type~lineareuler2d_pml_t&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff00da" d="M1629,-291C1618.9,-291.87 1619.86,-300.09 1611,-305 1604.14,-308.8 1596.61,-312.25 1589.1,-315.29"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="1587.72,-312.07 1579.65,-318.94 1590.24,-318.6 1587.72,-312.07"/>
+</g>
+<!-- type~linearshallowwater2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node20" class="node">
+<title>type~linearshallowwater2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node20"><a xlink:href=".././type/linearshallowwater2d_t.html" xlink:title="LinearShallowWater2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1610.5,-263 1467.5,-263 1467.5,-239 1610.5,-239 1610.5,-263"/>
+<text text-anchor="middle" x="1539" y="-248.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~mappedscalar2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge18" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~mappedscalar2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1477.73,-238.99C1390.34,-223.31 1223.46,-199.88 1082.5,-218"/>
+<text text-anchor="middle" x="1190.5" y="-213.4" font-family="Helvetica,sans-Serif" font-size="9.50">fCori</text>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge22" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#ffbf00" d="M1521.28,-263.13C1506.27,-274.42 1484.03,-292.14 1467,-310 1442.8,-335.38 1454.3,-368.66 1419.5,-373"/>
+<path fill="none" stroke="#ffbf00" d="M1417.5,-373C1393.09,-376.04 1365.7,-376.31 1343.11,-375.7"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1343.21,-372.21 1333.1,-375.37 1342.98,-379.2 1343.21,-372.21"/>
+</g>
+<!-- type~ecdgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node21" class="node">
+<title>type~ecdgmodel2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node21"><a xlink:href=".././type/ecdgmodel2d_t.html" xlink:title="ECDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1589,-190 1489,-190 1489,-166 1589,-166 1589,-190"/>
+<text text-anchor="middle" x="1539" y="-175.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge21" class="edge">
+<title>type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#ffbf00" d="M1518.54,-190.19C1503.63,-200 1482.97,-214.65 1467,-230 1417.06,-278 1427.65,-313.59 1370,-352 1361.92,-357.39 1352.45,-361.41 1343.05,-364.4"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1341.98,-361.07 1333.32,-367.17 1343.9,-367.8 1341.98,-361.07"/>
+</g>
+<!-- type~ecdgmodel2d_t&#45;&gt;type~mappedtwopointvector2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge26" class="edge">
+<title>type~ecdgmodel2d_t&#45;&gt;type~mappedtwopointvector2d</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1488.74,-178C1457.53,-178 1416.37,-178 1380.1,-178"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1380.02,-174.5 1370.01,-178 1380.01,-181.5 1380.02,-174.5"/>
+<text text-anchor="middle" x="1418.5" y="-180.4" font-family="Helvetica,sans-Serif" font-size="9.50">twoPointFlux</text>
+</g>
+<!-- type~lineareuler2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge23" class="edge">
+<title>type~lineareuler2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#ffbf00" d="M1494.15,-343.01C1485.1,-345.75 1475.69,-348.81 1467,-352 1445.33,-359.96 1442.41,-370.15 1419.5,-373"/>
+</g>
+<!-- type~esatmo2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node23" class="node">
+<title>type~esatmo2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node23"><a xlink:href=".././type/esatmo2d.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2053.5,-66 1984.5,-66 1984.5,-42 2053.5,-42 2053.5,-66"/>
+<text text-anchor="middle" x="2019" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d&#45;&gt;type~esatmo2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge27" class="edge">
+<title>type~esatmo2d&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1984.46,-51.16C1974.55,-51.08 1963.74,-51.75 1954,-54"/>
+</g>
+<!-- type~esatmo2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node24" class="node">
+<title>type~esatmo2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node24"><a xlink:href=".././type/esatmo2d~2.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2053.5,-24 1984.5,-24 1984.5,0 2053.5,0 2053.5,-24"/>
+<text text-anchor="middle" x="2019" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d~2&#45;&gt;type~esatmo2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge28" class="edge">
+<title>type~esatmo2d~2&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1986.76,-24.02C1981.61,-26.62 1976.49,-29.62 1972,-33 1962.18,-40.39 1965.98,-51.23 1954,-54"/>
+<path fill="none" stroke="#ff0000" d="M1953,-54C1944.58,-55.95 1935.53,-57.62 1926.75,-59.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1925.98,-55.61 1916.62,-60.57 1927.03,-62.53 1925.98,-55.61"/>
+</g>
+<!-- type~advection_diffusion_2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node25" class="node">
+<title>type~advection_diffusion_2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node25"><a xlink:href=".././type/advection_diffusion_2d.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1783,-559 1648,-559 1648,-535 1783,-535 1783,-559"/>
+<text text-anchor="middle" x="1715.5" y="-544.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge29" class="edge">
+<title>type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ffda00" d="M1653.47,-534.95C1645.4,-532.46 1637.37,-529.5 1630,-526"/>
+</g>
+<!-- type~advection_diffusion_2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node26" class="node">
+<title>type~advection_diffusion_2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node26"><a xlink:href=".././type/advection_diffusion_2d~2.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1783,-517 1648,-517 1648,-493 1783,-493 1783,-517"/>
+<text text-anchor="middle" x="1715.5" y="-502.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge30" class="edge">
+<title>type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ffda00" d="M1675.53,-517.06C1655.49,-522.83 1634.37,-528.08 1630,-526"/>
+<path fill="none" stroke="#ffda00" d="M1629,-526C1590.22,-507.58 1563.08,-463.01 1549.64,-436.29"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1552.66,-434.5 1545.17,-427.01 1546.36,-437.54 1552.66,-434.5"/>
+</g>
+<!-- type~nulldgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node27" class="node">
+<title>type~nulldgmodel2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node27"><a xlink:href=".././type/nulldgmodel2d.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1764,-475 1667,-475 1667,-451 1764,-451 1764,-475"/>
+<text text-anchor="middle" x="1715.5" y="-460.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge31" class="edge">
+<title>type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#48ff00" d="M1666.73,-452.58C1654.63,-449.55 1641.74,-445.97 1630,-442"/>
+</g>
+<!-- type~nulldgmodel2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node28" class="node">
+<title>type~nulldgmodel2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node28"><a xlink:href=".././type/nulldgmodel2d~2.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1764,-433 1667,-433 1667,-409 1764,-409 1764,-433"/>
+<text text-anchor="middle" x="1715.5" y="-418.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge32" class="edge">
+<title>type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#48ff00" d="M1681.32,-433.11C1661.96,-439.42 1639.52,-445.22 1630,-442"/>
+<path fill="none" stroke="#48ff00" d="M1629,-442C1607.41,-434.71 1627.67,-409.53 1611,-394 1608.07,-391.27 1604.8,-388.89 1601.31,-386.82"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="1602.79,-383.65 1592.29,-382.29 1599.65,-389.91 1602.79,-383.65"/>
+</g>
+<!-- type~lineareuler2d_pml -->
+<g id="type~~tensor2d~~InheritedByGraph_node29" class="node">
+<title>type~lineareuler2d_pml</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node29"><a xlink:href=".././type/lineareuler2d_pml.html" xlink:title="LinearEuler2D_PML">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1935,-307 1820,-307 1820,-283 1935,-283 1935,-307"/>
+<text text-anchor="middle" x="1877.5" y="-292.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml&#45;&gt;type~lineareuler2d_pml_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge33" class="edge">
+<title>type~lineareuler2d_pml&#45;&gt;type~lineareuler2d_pml_t</title>
+<path fill="none" stroke="#00ff91" d="M1819.85,-293.41C1813.81,-293.71 1807.77,-294.22 1802,-295"/>
+</g>
+<!-- type~lineareuler2d_pml~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node30" class="node">
+<title>type~lineareuler2d_pml~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node30"><a xlink:href=".././type/lineareuler2d_pml~2.html" xlink:title="LinearEuler2D_PML">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1935,-265 1820,-265 1820,-241 1935,-241 1935,-265"/>
+<text text-anchor="middle" x="1877.5" y="-250.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml~2&#45;&gt;type~lineareuler2d_pml_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge34" class="edge">
+<title>type~lineareuler2d_pml~2&#45;&gt;type~lineareuler2d_pml_t</title>
+<path fill="none" stroke="#00ff91" d="M1836.32,-265.02C1830.6,-267.55 1824.98,-270.53 1820,-274 1809.92,-281.03 1814.18,-293.35 1802,-295"/>
+<path fill="none" stroke="#00ff91" d="M1801,-295C1796.63,-295.59 1792.12,-296.05 1787.57,-296.38"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1787.34,-292.89 1777.56,-296.95 1787.74,-299.88 1787.34,-292.89"/>
+</g>
+<!-- type~linearshallowwater2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node31" class="node">
+<title>type~linearshallowwater2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node31"><a xlink:href=".././type/linearshallowwater2d.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1782.5,-265 1648.5,-265 1648.5,-241 1782.5,-241 1782.5,-265"/>
+<text text-anchor="middle" x="1715.5" y="-250.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge35" class="edge">
+<title>type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#0091ff" d="M1648.46,-250.69C1642.21,-250.93 1635.98,-251.35 1630,-252"/>
+</g>
+<!-- type~linearshallowwater2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node32" class="node">
+<title>type~linearshallowwater2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node32"><a xlink:href=".././type/linearshallowwater2d~2.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1782.5,-223 1648.5,-223 1648.5,-199 1782.5,-199 1782.5,-223"/>
+<text text-anchor="middle" x="1715.5" y="-208.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge36" class="edge">
+<title>type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#0091ff" d="M1665.55,-223.12C1659.41,-225.59 1653.4,-228.53 1648,-232 1637.94,-238.47 1641.89,-250.7 1630,-252"/>
+<path fill="none" stroke="#0091ff" d="M1629,-252C1626.29,-252.3 1623.52,-252.55 1620.73,-252.76"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1620.3,-249.28 1610.52,-253.35 1620.7,-256.26 1620.3,-249.28"/>
+</g>
+<!-- type~ecdgmodel2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node33" class="node">
+<title>type~ecdgmodel2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node33"><a xlink:href=".././type/ecdgmodel2d~2.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1761,-181 1670,-181 1670,-157 1761,-157 1761,-181"/>
+<text text-anchor="middle" x="1715.5" y="-166.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge38" class="edge">
+<title>type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#4800ff" d="M1669.97,-166.19C1657,-166.13 1642.87,-166.8 1630,-169"/>
+</g>
+<!-- type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge37" class="edge">
+<title>type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#4800ff" d="M1670,-137.25C1662.32,-140.06 1654.67,-143.59 1648,-148 1637.74,-154.78 1642.12,-166.93 1630,-169"/>
+<path fill="none" stroke="#4800ff" d="M1629,-169C1619.46,-170.63 1609.28,-172 1599.35,-173.14"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1598.69,-169.69 1589.13,-174.25 1599.45,-176.65 1598.69,-169.69"/>
+</g>
+<!-- type~lineareuler2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node35" class="node">
+<title>type~lineareuler2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node35"><a xlink:href=".././type/lineareuler2d.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1760,-349 1671,-349 1671,-325 1760,-325 1760,-349"/>
+<text text-anchor="middle" x="1715.5" y="-334.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge40" class="edge">
+<title>type~lineareuler2d&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff00da" d="M1677.67,-349.07C1659.39,-354.47 1639.27,-359.35 1630,-358"/>
+<path fill="none" stroke="#ff00da" d="M1629,-358C1620.66,-356.78 1619.04,-354.53 1611,-352 1604.66,-350.01 1597.98,-347.96 1591.36,-345.96"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="1592.33,-342.6 1581.75,-343.09 1590.32,-349.31 1592.33,-342.6"/>
+</g>
+<!-- type~lineareuler2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node36" class="node">
+<title>type~lineareuler2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node36"><a xlink:href=".././type/lineareuler2d~2.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1760,-391 1671,-391 1671,-367 1760,-367 1760,-391"/>
+<text text-anchor="middle" x="1715.5" y="-376.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge41" class="edge">
+<title>type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff00da" d="M1673.13,-366.99C1659.51,-363.5 1644.21,-360.07 1630,-358"/>
+</g>
+<!-- type~ecadvection2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_node37" class="node">
+<title>type~ecadvection2d_t</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node37"><a xlink:href=".././type/ecadvection2d_t.html" xlink:title="ECAdvection2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1929,-142 1826,-142 1826,-118 1929,-118 1929,-142"/>
+<text text-anchor="middle" x="1877.5" y="-127.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~tensor2d~~InheritedByGraph_edge43" class="edge">
+<title>type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#b600ff" d="M1825.88,-129.05C1808.5,-128.73 1788.98,-128.36 1771.29,-128.03"/>
+<polygon fill="#b600ff" stroke="#b600ff" points="1771.19,-124.52 1761.12,-127.84 1771.05,-131.52 1771.19,-124.52"/>
+</g>
+<!-- type~ecadvection2d -->
+<g id="type~~tensor2d~~InheritedByGraph_node38" class="node">
+<title>type~ecadvection2d</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node38"><a xlink:href=".././type/ecadvection2d.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2066,-150 1972,-150 1972,-126 2066,-126 2066,-150"/>
+<text text-anchor="middle" x="2019" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge44" class="edge">
+<title>type~ecadvection2d&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1971.81,-134.21C1965.81,-134.19 1959.75,-134.42 1954,-135"/>
+</g>
+<!-- type~ecadvection2d~2 -->
+<g id="type~~tensor2d~~InheritedByGraph_node39" class="node">
+<title>type~ecadvection2d~2</title>
+<g id="a_type~~tensor2d~~InheritedByGraph_node39"><a xlink:href=".././type/ecadvection2d~2.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2066,-108 1972,-108 1972,-84 2066,-84 2066,-108"/>
+<text text-anchor="middle" x="2019" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~tensor2d~~InheritedByGraph_edge45" class="edge">
+<title>type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1987.46,-108.07C1982.12,-110.7 1976.76,-113.7 1972,-117 1962.71,-123.45 1965.26,-133.86 1954,-135"/>
+<path fill="none" stroke="#ff0000" d="M1953,-135C1948.53,-135.45 1943.9,-135.69 1939.24,-135.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1939.06,-132.27 1929.03,-135.69 1939.01,-139.27 1939.06,-132.27"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypetensor2dInheritedByGraph = svgPanZoom('#typetensor2dInheritedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/tensor2d.html#variable-m~2">M</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-n~5">N</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-alloc_boundary~6">alloc_boundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-alloc_extboundary~6">alloc_extBoundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-alloc_interior~6">alloc_interior</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-backend~12">backend</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-boundary~4">boundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-boundary_gpu~7">boundary_gpu</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-eqn">eqn</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-extboundary">extBoundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-extboundary_gpu~2">extBoundary_gpu</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-interior~5">interior</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-interior_gpu~9">interior_gpu</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-interp~3">interp</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-meta">meta</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-nelem~6">nElem</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-nvar">nVar</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-pool_boundary~3">pool_boundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-pool_extboundary~3">pool_extBoundary</a>
+      <a class="list-group-item" href="../type/tensor2d.html#variable-pool_interior~3">pool_interior</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-boundaryinterp~5">BoundaryInterp</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-determinant~4">Determinant</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-free~52">Free</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-init~48">Init</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-maparrays~3">MapArrays</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-resize~16">Resize</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setdescription">SetDescription</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setequation~27">SetEquation</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setname">SetName</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-setunits">SetUnits</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-updatedevice~22">UpdateDevice</a>
+      <a class="list-group-item" href="../type/tensor2d.html#boundprocedure-updatehost~20">UpdateHost</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/tensor2d.html#src">Tensor2D</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-m~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>M</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-n~5"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-alloc_boundary~6"></span>integer(kind=c_size_t),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>alloc_boundary</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-alloc_extboundary~6"></span>integer(kind=c_size_t),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>alloc_extBoundary</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-alloc_interior~6"></span>integer(kind=c_size_t),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>alloc_interior</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-backend~12"></span>character(len=3),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>backend</strong></td><td> =</td><td>"gpu"</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundary~4"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:,:,:)</td><td>::</td>
+  <td><strong>boundary</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundary_gpu~7"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>boundary_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-eqn"></span>type(EquationParser),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>eqn</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-extboundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:,:,:)</td><td>::</td>
+  <td><strong>extBoundary</strong></td><td></td><td></td><td><p>High-water-mark backing store for the arrays above (AMR Stage 6b/6c; see SELF_DataPool).
+The public members are pointers remapped onto the leading part of these pools at the exact
+logical shape, so every extent, stride and shape() is unchanged while Resize can reuse the
+storage across an adaptation epoch. Nothing should index the pools directly.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-extboundary_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>extBoundary_gpu</strong></td><td></td><td></td><td><p>Bytes currently allocated for each device buffer, so Resize can reuse them (Stage 6b/6c).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interior~5"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:,:,:)</td><td>::</td>
+  <td><strong>interior</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interior_gpu~9"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>interior_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interp~3"></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>interp</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-meta"></span>type(<a href='../type/metadata.html'>Metadata</a>),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>meta</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem~6"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_boundary~3"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_boundary</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_extboundary~3"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_extBoundary</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_interior~3"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_interior</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-boundaryinterp~5"></span><h3>procedure, public :: <strong>BoundaryInterp</strong>  => <a href='../proc/boundaryinterp_tensor2d_t.html'>BoundaryInterp_Tensor2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/boundaryinterp_tensor2d_t.html'>BoundaryInterp_Tensor2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d_t.html'>Tensor2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-determinant~4"></span><h3>generic, public :: <strong>Determinant</strong>  => <a href='../type/tensor2d_t.html#boundprocedure-determinant_tensor2d_t'>Determinant_Tensor2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/determinant_tensor2d_t.html'>Determinant_Tensor2D_t</a>(this, det)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d_t.html'>Tensor2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>det</strong>(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~52"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_tensor2d.html'>Free_Tensor2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_tensor2d.html'>Free_Tensor2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d.html'>Tensor2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~48"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_tensor2d.html'>Init_Tensor2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_tensor2d.html'>Init_Tensor2D</a>(this, interp, nVar, nElem)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d.html'>Tensor2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-maparrays~3"></span><h3>procedure, public :: <strong>MapArrays</strong>  => <a href='../proc/maparrays_tensor2d_t.html'>MapArrays_Tensor2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/maparrays_tensor2d_t.html'>MapArrays_Tensor2D_t</a>(this, Np, nVar, nElem)</h3>
+<p>Size the backing pools for (Np,nVar,nElem) and remap the public arrays onto them at the
+exact logical shape. See SELF_DataPool for why this is done with pointer remapping rather
+than by over-allocating the element dimension.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d_t.html'>Tensor2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>Np</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-resize~16"></span><h3>procedure, public :: <strong>Resize</strong>  => <a href='../proc/resize_tensor2d.html'>Resize_Tensor2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/resize_tensor2d.html'>Resize_Tensor2D</a>(this, interp, nVar, nElem)</h3>
+<p>Rebind to a new element count, reusing host pools and device buffers where they fit.
+Deliberately does NOT call UpdateDevice: Init uploads freshly zeroed arrays, which is pure
+waste in the adaptive loop because the arrays are rewritten immediately after.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d.html'>Tensor2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setdescription"></span><h3>procedure, public :: <strong>SetDescription</strong>  => <a href='../proc/setdescription_dataobj.html'>SetDescription_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setdescription_dataobj.html'>SetDescription_DataObj</a>(this, ivar, description)</h3>
+<p>Set the description of the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>description</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setequation~27"></span><h3>generic, public :: <strong>SetEquation</strong>  => <a href='../type/self_dataobj.html#boundprocedure-setequation_dataobj'>SetEquation_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setequation_dataobj.html'>SetEquation_DataObj</a>(this, ivar, eqnChar)</h3>
+<p>Sets the equation parser for the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqnChar</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setname"></span><h3>procedure, public :: <strong>SetName</strong>  => <a href='../proc/setname_dataobj.html'>SetName_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setname_dataobj.html'>SetName_DataObj</a>(this, ivar, name)</h3>
+<p>Set the name of the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>name</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setunits"></span><h3>procedure, public :: <strong>SetUnits</strong>  => <a href='../proc/setunits_dataobj.html'>SetUnits_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setunits_dataobj.html'>SetUnits_DataObj</a>(this, ivar, units)</h3>
+<p>Set the units of the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>units</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatedevice~22"></span><h3>procedure, public :: <strong>UpdateDevice</strong>  => <a href='../proc/updatedevice_tensor2d.html'>UpdateDevice_Tensor2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatedevice_tensor2d.html'>UpdateDevice_Tensor2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d.html'>Tensor2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatehost~20"></span><h3>procedure, public :: <strong>UpdateHost</strong>  => <a href='../proc/updatehost_tensor2d.html'>UpdateHost_Tensor2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatehost_tensor2d.html'>UpdateHost_Tensor2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/tensor2d.html'>Tensor2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">Tensor2D_t</span><span class="p">),</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Tensor2D</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"gpu"</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">interior_gpu</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">boundary_gpu</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extBoundary_gpu</span>
+<span class="w">    </span><span class="c">!! Bytes currently allocated for each device buffer, so Resize can reuse them (Stage 6b/6c).</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_size_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">alloc_interior</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_size_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">alloc_boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_size_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">alloc_extBoundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_Tensor2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Resize</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Resize_Tensor2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_Tensor2D</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateHost</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateHost_Tensor2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateDevice</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateDevice_Tensor2D</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">Tensor2D</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-10-18 12:04            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

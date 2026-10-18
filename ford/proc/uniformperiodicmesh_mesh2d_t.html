@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>UniformPeriodicMesh_Mesh2D_t &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>UniformPeriodicMesh_Mesh2D_t
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.6% of total for procedures.">148 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_2D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_mesh_2d_t.f90.html'>SELF_Mesh_2D_t.f90</a></li>
+     <li><a href='../module/self_mesh_2d_t.html'>SELF_Mesh_2D_t</a></li>
+     <li class="active">UniformPeriodicMesh_Mesh2D_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/uniformperiodicmesh_mesh2d_t.html#src">UniformPeriodicMesh_Mesh2D_t</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine UniformPeriodicMesh_Mesh2D_t(this, nxPerTile, nyPerTile, nTileX, nTileY, dx, dy, periodicX, periodicY, bcids, comm)</h2>
+    
+
+    <p>Create a structured quadrilateral mesh that is periodic in x, in y, in both or in
+neither, and store it in SELF's unstructured mesh format. Element geometry and
+ordering are identical to UniformStructuredMesh; only the connectivity differs.
+The mesh covers [0,Lx] x [0,Ly] with Lx = dx<em>nX, Ly = dy</em>nY, nX = nxPerTile<em>nTileX
+and nY = nyPerTile</em>nTileY elements.</p>
+<p>When periodicX is true, the east edge of the element at global position (nX,gy)
+and the west edge of the element at (1,gy) are wired as one interior edge, so a
+field u satisfies u(0,y) = u(Lx,y) through the side exchange. periodicY does the
+same for the south and north edges. A periodic direction has no domain boundary
+and its entries of bcids are ignored.</p>
+<p>Input
+   - this : Fresh/empty mesh2d_t object
+   - nxPerTile, nyPerTile : Number of elements per tile in x and y (&gt;= 1)
+   - nTileX, nTileY : Number of tiles in x and y (&gt;= 1)
+   - dx, dy : Element widths in x and y (&gt; 0, in the length unit of the model)
+   - periodicX, periodicY : Periodic flags for the x and y directions
+   - bcids(1:4) : Boundary condition ids for the south, east, north and west sides
+     of the domain. Only the sides of a non-periodic direction use them.
+   - comm (optional) : Externally managed MPI communicator (Fortran integer handle)</p>
+<p>Output
+   - this : mesh2d_t object with nGeo = 1 and uniformly spaced geometry nodes</p>
+<p>Connectivity follows UniformPeriodicMesh_Mesh3D_t. Every interior edge, including a
+periodic one, joins an edge whose trace coordinate runs in the same direction as
+its neighbor's, so the flip is 0 throughout and RecalculateFlip is not needed.</p>
+<p>Global side ids are assigned analytically and are dense in 1..nUniqueSides, with
+the two sides of a periodic pair sharing one id. With nLx = nX in a periodic x
+direction and nX+1 otherwise (likewise nLy), the vertical edge on grid line
+L = 0..nX in row gy has id</p>
+<p>periodic x :   modulo(L-1,nX)+1 + nX<em>(gy-1)
+  walled x   :   L+1 + (nX+1)</em>(gy-1)</p>
+<p>and the horizontal edge on grid line L = 0..nY in column gx has id
+nLx<em>nY + modulo(L-1,nY)+1 + nY</em>(gx-1) or nLx<em>nY + L+1 + (nY+1)</em>(gx-1). Hence
+nUniqueSides = nLx<em>nY + nLy</em>nX, which for a mesh that is periodic in neither
+direction equals the count UniformStructuredMesh reports.</p>
+<p>A periodic direction with a single element (nX = 1 or nY = 1) makes an element its
+own neighbor across that direction. Both of its edges then carry the same id, which
+is consistent with the convention but leaves nothing for the exchange to send.</p>
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-this~376"></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nxpertile~4"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nxPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nypertile~4"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nyPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ntilex~4"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileX</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ntiley~3"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileY</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dx~7"></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dy~3"></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dy</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-periodicx"></span>logical,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>periodicX</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-periodicy"></span>logical,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>periodicY</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bcids~6"></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcids</strong>(1:4)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-comm~14"></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~uniformperiodicmesh_mesh2d_t~~CallsGraph Pages: 1 -->
+<svg id="procuniformperiodicmesh_mesh2d_tCallsGraph" width="364pt" height="32pt"
+ viewBox="0.00 0.00 364.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~uniformperiodicmesh_mesh2d_t~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~uniformperiodicmesh_mesh2d_t~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 360,-28 360,4 -4,4"/>
+<!-- proc~uniformperiodicmesh_mesh2d_t -->
+<g id="proc~~uniformperiodicmesh_mesh2d_t~~CallsGraph_node1" class="node">
+<title>proc~uniformperiodicmesh_mesh2d_t</title>
+<polygon fill="none" stroke="black" points="183,-24 0,-24 0,0 183,0 183,-24"/>
+<text text-anchor="middle" x="91.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">UniformPeriodicMesh_Mesh2D_t</text>
+</g>
+<!-- proc~structuredelementid2d -->
+<g id="proc~~uniformperiodicmesh_mesh2d_t~~CallsGraph_node2" class="node">
+<title>proc~structuredelementid2d</title>
+<g id="a_proc~~uniformperiodicmesh_mesh2d_t~~CallsGraph_node2"><a xlink:href=".././proc/structuredelementid2d.html" xlink:title="StructuredElementId2D">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="356,-24 219,-24 219,0 356,0 356,-24"/>
+<text text-anchor="middle" x="287.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">StructuredElementId2D</text>
+</a>
+</g>
+</g>
+<!-- proc~uniformperiodicmesh_mesh2d_t&#45;&gt;proc~structuredelementid2d -->
+<g id="proc~~uniformperiodicmesh_mesh2d_t~~CallsGraph_edge1" class="edge">
+<title>proc~uniformperiodicmesh_mesh2d_t&#45;&gt;proc~structuredelementid2d</title>
+<path fill="none" stroke="#ff0000" d="M183.25,-12C191.81,-12 200.42,-12 208.84,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="208.99,-15.5 218.99,-12 208.99,-8.5 208.99,-15.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/uniformperiodicmesh_mesh2d_t.html#src">UniformPeriodicMesh_Mesh2D_t</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">UniformPeriodicMesh_Mesh2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">nxPerTile</span><span class="p">,</span><span class="n">nyPerTile</span><span class="p">,</span><span class="n">nTileX</span><span class="p">,</span><span class="n">nTileY</span><span class="p">,</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                          </span><span class="n">periodicX</span><span class="p">,</span><span class="n">periodicY</span><span class="p">,</span><span class="n">bcids</span><span class="p">,</span><span class="n">comm</span><span class="p">)</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! Create a structured quadrilateral mesh that is periodic in x, in y, in both or in</span>
+<span class="w">  </span><span class="c">!! neither, and store it in SELF's unstructured mesh format. Element geometry and</span>
+<span class="w">  </span><span class="c">!! ordering are identical to UniformStructuredMesh; only the connectivity differs.</span>
+<span class="w">  </span><span class="c">!! The mesh covers [0,Lx] x [0,Ly] with Lx = dx*nX, Ly = dy*nY, nX = nxPerTile*nTileX</span>
+<span class="w">  </span><span class="c">!! and nY = nyPerTile*nTileY elements.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! When periodicX is true, the east edge of the element at global position (nX,gy)</span>
+<span class="w">  </span><span class="c">!! and the west edge of the element at (1,gy) are wired as one interior edge, so a</span>
+<span class="w">  </span><span class="c">!! field u satisfies u(0,y) = u(Lx,y) through the side exchange. periodicY does the</span>
+<span class="w">  </span><span class="c">!! same for the south and north edges. A periodic direction has no domain boundary</span>
+<span class="w">  </span><span class="c">!! and its entries of bcids are ignored.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!  Input</span>
+<span class="w">  </span><span class="c">!!    - this : Fresh/empty mesh2d_t object</span>
+<span class="w">  </span><span class="c">!!    - nxPerTile, nyPerTile : Number of elements per tile in x and y (&gt;= 1)</span>
+<span class="w">  </span><span class="c">!!    - nTileX, nTileY : Number of tiles in x and y (&gt;= 1)</span>
+<span class="w">  </span><span class="c">!!    - dx, dy : Element widths in x and y (&gt; 0, in the length unit of the model)</span>
+<span class="w">  </span><span class="c">!!    - periodicX, periodicY : Periodic flags for the x and y directions</span>
+<span class="w">  </span><span class="c">!!    - bcids(1:4) : Boundary condition ids for the south, east, north and west sides</span>
+<span class="w">  </span><span class="c">!!      of the domain. Only the sides of a non-periodic direction use them.</span>
+<span class="w">  </span><span class="c">!!    - comm (optional) : Externally managed MPI communicator (Fortran integer handle)</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!  Output</span>
+<span class="w">  </span><span class="c">!!    - this : mesh2d_t object with nGeo = 1 and uniformly spaced geometry nodes</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! Connectivity follows UniformPeriodicMesh_Mesh3D_t. Every interior edge, including a</span>
+<span class="w">  </span><span class="c">!! periodic one, joins an edge whose trace coordinate runs in the same direction as</span>
+<span class="w">  </span><span class="c">!! its neighbor's, so the flip is 0 throughout and RecalculateFlip is not needed.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! Global side ids are assigned analytically and are dense in 1..nUniqueSides, with</span>
+<span class="w">  </span><span class="c">!! the two sides of a periodic pair sharing one id. With nLx = nX in a periodic x</span>
+<span class="w">  </span><span class="c">!! direction and nX+1 otherwise (likewise nLy), the vertical edge on grid line</span>
+<span class="w">  </span><span class="c">!! L = 0..nX in row gy has id</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!!   periodic x :   modulo(L-1,nX)+1 + nX*(gy-1)</span>
+<span class="w">  </span><span class="c">!!   walled x   :   L+1 + (nX+1)*(gy-1)</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! and the horizontal edge on grid line L = 0..nY in column gx has id</span>
+<span class="w">  </span><span class="c">!! nLx*nY + modulo(L-1,nY)+1 + nY*(gx-1) or nLx*nY + L+1 + (nY+1)*(gx-1). Hence</span>
+<span class="w">  </span><span class="c">!! nUniqueSides = nLx*nY + nLy*nX, which for a mesh that is periodic in neither</span>
+<span class="w">  </span><span class="c">!! direction equals the count UniformStructuredMesh reports.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">  </span><span class="c">!! A periodic direction with a single element (nX = 1 or nY = 1) makes an element its</span>
+<span class="w">  </span><span class="c">!! own neighbor across that direction. Both of its edges then carry the same id, which</span>
+<span class="w">  </span><span class="c">!! is consistent with the convention but leaves nothing for the exchange to send.</span>
+<span class="w">  </span><span class="c">!!</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Mesh2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nxPerTile</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nyPerTile</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nTileX</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nTileY</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dx</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dy</span>
+<span class="w">    </span><span class="kt">logical</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">periodicX</span>
+<span class="w">    </span><span class="kt">logical</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">periodicY</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcids</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">optional</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">comm</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nX</span><span class="p">,</span><span class="n">nY</span><span class="p">,</span><span class="n">nGeo</span><span class="p">,</span><span class="n">nBCs</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGlobalElem</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nUniqueSides</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nLx</span><span class="p">,</span><span class="n">nLy</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nLocalElems</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nLocalSides</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nLocalNodes</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nodeCoords</span><span class="p">(:,:,:,:)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">globalNodeIDs</span><span class="p">(:,:,:)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sideInfo</span><span class="p">(:,:,:)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ti</span><span class="p">,</span><span class="n">tj</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">,</span><span class="n">iel</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ni</span><span class="p">,</span><span class="n">nj</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">e1</span><span class="p">,</span><span class="n">e2</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">gx</span><span class="p">,</span><span class="n">gy</span><span class="p">,</span><span class="n">gxm</span><span class="p">,</span><span class="n">gxp</span><span class="p">,</span><span class="n">gym</span><span class="p">,</span><span class="n">gyp</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">nxPerTile</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">nyPerTile</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">nTileX</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">nTileY</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      error stop</span><span class="w"> </span><span class="s2">"UniformPeriodicMesh_Mesh2D_t : element and tile counts must be at least 1"</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">dx</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">dy</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      error stop</span><span class="w"> </span><span class="s2">"UniformPeriodicMesh_Mesh2D_t : element widths dx and dy must be positive"</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">init</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">nX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nTileX</span><span class="o">*</span><span class="n">nxPerTile</span>
+<span class="w">    </span><span class="n">nY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nTileY</span><span class="o">*</span><span class="n">nyPerTile</span>
+<span class="w">    </span><span class="n">nGeo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="c">! Force the geometry to be linear</span>
+<span class="w">    </span><span class="n">nBCs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="c">! Same boundary condition table size as UniformStructuredMesh</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">periodicX</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">nLx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nX</span><span class="w"> </span><span class="c">! the grid lines x = 0 and x = Lx are one line</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      </span><span class="n">nLx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nX</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">    </span><span class="k">endif</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">periodicY</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">nLy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nY</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      </span><span class="n">nLy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nY</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="k">    </span><span class="n">nGlobalElem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nX</span><span class="o">*</span><span class="n">nY</span>
+<span class="w">    </span><span class="n">nUniqueSides</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nLx</span><span class="o">*</span><span class="n">nY</span><span class="o">+</span><span class="n">nLy</span><span class="o">*</span><span class="n">nX</span>
+
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGlobalElem</span><span class="p">))</span>
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">globalNodeIDs</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGlobalElem</span><span class="p">))</span>
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGlobalElem</span><span class="p">))</span>
+<span class="w">    </span><span class="n">sideInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="w">    </span><span class="c">! Node coordinates and global node IDs (identical to UniformStructuredMesh)</span>
+<span class="w">    </span><span class="k">do </span><span class="n">tj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nTileY</span>
+<span class="w">      </span><span class="k">do </span><span class="n">ti</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nTileX</span>
+<span class="w">        </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nyPerTile</span>
+<span class="w">          </span><span class="n">iy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="n">nyPerTile</span><span class="o">*</span><span class="p">(</span><span class="n">tj</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">          </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nxPerTile</span>
+<span class="w">            </span><span class="n">iel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="o">+</span><span class="n">nxPerTile</span><span class="o">*</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">nyPerTile</span><span class="o">*</span><span class="p">(</span><span class="n">ti</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">nTilex</span><span class="o">*</span><span class="p">(</span><span class="n">tj</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+<span class="w">            </span><span class="n">ix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="o">+</span><span class="n">nxPerTile</span><span class="o">*</span><span class="p">(</span><span class="n">ti</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">            </span><span class="k">do </span><span class="n">nj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">              </span><span class="k">do </span><span class="n">ni</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">                </span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ni</span><span class="p">,</span><span class="n">nj</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">real</span><span class="p">(</span><span class="n">ni</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">ix</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">prec</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span>
+<span class="w">                </span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">ni</span><span class="p">,</span><span class="n">nj</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">real</span><span class="p">(</span><span class="n">nj</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">iy</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">prec</span><span class="p">)</span><span class="o">*</span><span class="n">dy</span>
+<span class="w">                </span><span class="n">globalNodeIDs</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span><span class="n">nj</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ni</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="p">(</span><span class="n">nxPerTile</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                           </span><span class="n">nj</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">nyPerTile</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                                           </span><span class="n">ti</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">nTileX</span><span class="o">*</span><span class="p">(</span><span class="n">tj</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+<span class="w">              </span><span class="k">enddo</span>
+<span class="k">            enddo</span>
+<span class="k">          enddo</span>
+<span class="k">        enddo</span>
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
+
+<span class="w">    </span><span class="c">! Edge information</span>
+<span class="w">    </span><span class="c">!  sideInfo(1:5,iSide,iEl)</span>
+<span class="w">    </span><span class="c">!    1 - Side Type (0; a structured mesh has no mortars)</span>
+<span class="w">    </span><span class="c">!    2 - Global Side ID (shared by both sides of an interior or periodic edge)</span>
+<span class="w">    </span><span class="c">!    3 - Neighbor Element ID (0 on a domain boundary)</span>
+<span class="w">    </span><span class="c">!    4 - 10*( neighbor local side ) + flip (flip is 0 throughout)</span>
+<span class="w">    </span><span class="c">!    5 - Boundary Condition ID (0 on an interior edge)</span>
+<span class="w">    </span><span class="k">do </span><span class="n">gy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nY</span>
+<span class="w">      </span><span class="k">do </span><span class="n">gx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nX</span>
+
+<span class="w">        </span><span class="n">iel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StructuredElementId2D</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="n">gy</span><span class="p">,</span><span class="n">nxPerTile</span><span class="p">,</span><span class="n">nyPerTile</span><span class="p">,</span><span class="n">nTileX</span><span class="p">)</span>
+
+<span class="w">        </span><span class="c">! +/- neighbor positions with periodic wrap (1..n)</span>
+<span class="w">        </span><span class="n">gxp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">modulo</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="n">nX</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="n">gxm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">modulo</span><span class="p">(</span><span class="n">gx</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">nX</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="n">gyp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">modulo</span><span class="p">(</span><span class="n">gy</span><span class="p">,</span><span class="n">nY</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="n">gym</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">modulo</span><span class="p">(</span><span class="n">gy</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">nY</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+
+<span class="w">        </span><span class="c">! South (side 1) lies on horizontal grid line gy-1, east (side 2) on vertical</span>
+<span class="w">        </span><span class="c">! line gx, north (side 3) on horizontal line gy and west (side 4) on vertical</span>
+<span class="w">        </span><span class="c">! line gx-1.</span>
+<span class="w">        </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HorizontalEdgeId</span><span class="p">(</span><span class="n">gy</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">gx</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VerticalEdgeId</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="n">gy</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HorizontalEdgeId</span><span class="p">(</span><span class="n">gy</span><span class="p">,</span><span class="n">gx</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VerticalEdgeId</span><span class="p">(</span><span class="n">gx</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">gy</span><span class="p">)</span>
+
+<span class="w">        </span><span class="c">! South &lt;-&gt; north side of the -y neighbor</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">gy</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">periodicY</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StructuredElementId2D</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="n">gym</span><span class="p">,</span><span class="n">nxPerTile</span><span class="p">,</span><span class="n">nyPerTile</span><span class="p">,</span><span class="n">nTileX</span><span class="p">)</span>
+<span class="w">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="n">selfSide2D_North</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bcids</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="k">endif</span>
+
+<span class="w">        </span><span class="c">! East &lt;-&gt; west side of the +x neighbor</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">gx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nX</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">periodicX</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StructuredElementId2D</span><span class="p">(</span><span class="n">gxp</span><span class="p">,</span><span class="n">gy</span><span class="p">,</span><span class="n">nxPerTile</span><span class="p">,</span><span class="n">nyPerTile</span><span class="p">,</span><span class="n">nTileX</span><span class="p">)</span>
+<span class="w">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="n">selfSide2D_West</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bcids</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">        </span><span class="k">endif</span>
+
+<span class="w">        </span><span class="c">! North &lt;-&gt; south side of the +y neighbor</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">gy</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nY</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">periodicY</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StructuredElementId2D</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="n">gyp</span><span class="p">,</span><span class="n">nxPerTile</span><span class="p">,</span><span class="n">nyPerTile</span><span class="p">,</span><span class="n">nTileX</span><span class="p">)</span>
+<span class="w">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="n">selfSide2D_South</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bcids</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="w">        </span><span class="k">endif</span>
+
+<span class="w">        </span><span class="c">! West &lt;-&gt; east side of the -x neighbor</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">gx</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">periodicX</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StructuredElementId2D</span><span class="p">(</span><span class="n">gxm</span><span class="p">,</span><span class="n">gy</span><span class="p">,</span><span class="n">nxPerTile</span><span class="p">,</span><span class="n">nyPerTile</span><span class="p">,</span><span class="n">nTileX</span><span class="p">)</span>
+<span class="w">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">*</span><span class="n">selfSide2D_East</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">          </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bcids</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">        </span><span class="k">endif</span>
+
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
+
+<span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">GenerateDecomposition</span><span class="p">(</span><span class="n">nGlobalElem</span><span class="p">,</span><span class="n">nUniqueSides</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">e1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">    </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">    </span><span class="n">nLocalElems</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e2</span><span class="o">-</span><span class="n">e1</span><span class="o">+</span><span class="mi">1</span>
+
+<span class="w">    </span><span class="n">nLocalSides</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nLocalElems</span><span class="o">*</span><span class="mi">4</span>
+<span class="w">    </span><span class="n">nLocalNodes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nLocalElems</span><span class="o">*</span><span class="mi">4</span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">nGeo</span><span class="p">,</span><span class="n">nLocalElems</span><span class="p">,</span><span class="n">nLocalSides</span><span class="p">,</span><span class="n">nLocalNodes</span><span class="p">,</span><span class="n">nBCs</span><span class="p">)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nUniqueSides</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nUniqueSides</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">quadrature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UNIFORM</span>
+
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nLocalElems</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e1</span><span class="p">:</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">globalNodeIDs</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nLocalElems</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">globalNodeIDs</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e1</span><span class="p">:</span><span class="n">e2</span><span class="p">)</span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nLocalElems</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="n">e1</span><span class="p">:</span><span class="n">e2</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">deallocate</span><span class="p">(</span><span class="n">nodeCoords</span><span class="p">)</span>
+<span class="w">    </span><span class="k">deallocate</span><span class="p">(</span><span class="n">globalNodeIDs</span><span class="p">)</span>
+<span class="w">    </span><span class="k">deallocate</span><span class="p">(</span><span class="n">sideInfo</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">UpdateDevice</span><span class="p">()</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    </span><span class="kt">integer </span><span class="k">function </span><span class="n">VerticalEdgeId</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">row</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="w">    </span><span class="c">!! Global id of the edge on vertical grid line L (0..nX) in element row `row`.</span>
+<span class="w">      </span><span class="k">implicit none</span>
+<span class="k">      </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">L</span>
+<span class="w">      </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">row</span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">periodicX</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">modulo</span><span class="p">(</span><span class="n">L</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nX</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">nX</span><span class="o">*</span><span class="p">(</span><span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">nX</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+
+<span class="k">    endfunction </span><span class="n">VerticalEdgeId</span>
+
+<span class="w">    </span><span class="kt">integer </span><span class="k">function </span><span class="n">HorizontalEdgeId</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">col</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="w">    </span><span class="c">!! Global id of the edge on horizontal grid line L (0..nY) in element column `col`.</span>
+<span class="w">    </span><span class="c">!! The horizontal edges are numbered after all nLx*nY vertical ones.</span>
+<span class="w">      </span><span class="k">implicit none</span>
+<span class="k">      </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">L</span>
+<span class="w">      </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">col</span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">periodicY</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nLx</span><span class="o">*</span><span class="n">nY</span><span class="o">+</span><span class="nb">modulo</span><span class="p">(</span><span class="n">L</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nY</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">nY</span><span class="o">*</span><span class="p">(</span><span class="n">col</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">else</span>
+<span class="k">        </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nLx</span><span class="o">*</span><span class="n">nY</span><span class="o">+</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">nY</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">col</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="k">endif</span>
+
+<span class="k">    endfunction </span><span class="n">HorizontalEdgeId</span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">UniformPeriodicMesh_Mesh2D_t</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-10-18 12:04            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

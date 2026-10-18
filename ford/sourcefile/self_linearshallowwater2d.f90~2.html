@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_LinearShallowWater2D.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_LinearShallowWater2D.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for source files.">6 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_LinearShallowWater2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_LinearShallowWater2D.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_linearshallowwater2d.html">self_LinearShallowWater2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_linearshallowwater2d.f90~2.html#src">SELF_LinearShallowWater2D.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_linearshallowwater2df902EfferentGraph" width="641pt" height="298pt"
+ viewBox="0.00 0.00 641.00 297.58" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph" class="graph" transform="scale(0.21 0.21) rotate(0) translate(4 1386.88)">
+<title>sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1386.88 2992,-1386.88 2992,4 -4,4"/>
+<!-- sourcefile~self_linearshallowwater2d.f90~2 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_linearshallowwater2d.f90~2</title>
+<polygon fill="none" stroke="black" points="2988,-1087 2803,-1087 2803,-1063 2988,-1063 2988,-1087"/>
+<text text-anchor="middle" x="2895.5" y="-1072.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_LinearShallowWater2D.f90</text>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_linearshallowwater2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_linearshallowwater2d_t.f90.html" xlink:title="SELF_LinearShallowWater2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2767,-1087 2573,-1087 2573,-1063 2767,-1063 2767,-1087"/>
+<text text-anchor="middle" x="2670" y="-1072.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2802.95,-1075C2794.46,-1075 2785.81,-1075 2777.2,-1075"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2777.12,-1071.5 2767.12,-1075 2777.12,-1078.5 2777.12,-1071.5"/>
+</g>
+<!-- sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_model.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_model.f90.html" xlink:title="SELF_Model.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="796.5,-858 700.5,-858 700.5,-834 796.5,-834 796.5,-858"/>
+<text text-anchor="middle" x="748.5" y="-843.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2305,-1095C2184.13,-1075 2149.45,-1103.22 2030,-1076 1917.58,-1050.39 1897.47,-1019.09 1789,-980 1696.61,-946.7 1466.02,-855.66 1368.5,-844"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_boundaryconditions.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_boundaryconditions.f90.html" xlink:title="SELF_BoundaryConditions.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2202,-1067 2030,-1067 2030,-1043 2202,-1043 2202,-1067"/>
+<text text-anchor="middle" x="2116" y="-1052.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2638.63,-1087.09C2600.88,-1101.4 2534.14,-1124.38 2474.5,-1133"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2472.5,-1133C2397.81,-1143.79 2381.46,-1107.32 2307,-1095"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2305,-1095C2262.12,-1087.9 2214.2,-1077.67 2177.48,-1069.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2177.96,-1065.86 2167.43,-1067.04 2176.4,-1072.68 2177.96,-1065.86"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_dgmodel2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_dgmodel2d.f90.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2537,-1067 2410,-1067 2410,-1043 2537,-1043 2537,-1067"/>
+<text text-anchor="middle" x="2473.5" y="-1052.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2572.89,-1065.12C2564.25,-1064.23 2555.6,-1063.34 2547.2,-1062.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2547.42,-1058.98 2537.11,-1061.44 2546.7,-1065.94 2547.42,-1058.98"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1229,-1198 1138,-1198 1138,-1174 1229,-1174 1229,-1198"/>
+<text text-anchor="middle" x="1183.5" y="-1183.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2472.5,-1133C1998.79,-1201.45 1417.66,-1192.52 1239.19,-1187.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1239.1,-1184.22 1229.01,-1187.45 1238.91,-1191.22 1239.1,-1184.22"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-1027 152,-1027 152,-1003 303,-1003 303,-1027"/>
+<text text-anchor="middle" x="227.5" y="-1012.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M727.35,-858.23C701.77,-873.33 655.91,-898.96 614,-915 508.72,-955.28 381.19,-984.81 302.45,-1000.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="301.72,-997.53 292.62,-1002.95 303.11,-1004.39 301.72,-997.53"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="613.5,-592 499.5,-592 499.5,-568 613.5,-568 613.5,-592"/>
+<text text-anchor="middle" x="556.5" y="-577.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M733.77,-833.73C713.8,-815.46 676.27,-779.42 650,-744 614.68,-696.38 582.98,-633.92 567.49,-601.55"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="570.49,-599.7 563.05,-592.15 564.16,-602.69 570.49,-599.7"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-436 181,-436 181,-412 274,-412 274,-436"/>
+<text text-anchor="middle" x="227.5" y="-421.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M722.2,-833.99C695.56,-821.54 652.27,-801.85 614,-787 589.3,-777.41 580.22,-781.62 557.5,-768"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2106.62,-1067.33C2068.18,-1122.27 1902.35,-1342 1709,-1342 1709,-1342 1709,-1342 747.5,-1342 593.02,-1342 536.44,-1380.1 402,-1304"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2072.32,-1042.95C2058.69,-1038.84 2043.62,-1034 2030,-1029 1920.5,-988.77 1899.15,-963.41 1789,-925 1635.99,-871.65 1594.64,-867.51 1437,-830 1274.53,-791.34 1232.58,-787.68 1069,-754 882.8,-715.66 818.49,-756.03 650,-668 618.2,-651.38 589.63,-620.6 572.92,-600.2"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="575.48,-597.8 566.51,-592.17 570.01,-602.17 575.48,-597.8"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2409.76,-1055C2355.1,-1055 2275,-1055 2212.4,-1055"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2212.12,-1051.5 2202.12,-1055 2212.12,-1058.5 2212.12,-1051.5"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_dgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_dgmodel2d_t.f90.html" xlink:title="SELF_DGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2374,-514 2238,-514 2238,-490 2374,-490 2374,-514"/>
+<text text-anchor="middle" x="2306" y="-499.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2468.89,-1042.94C2447.88,-972.74 2341.38,-616.87 2313.62,-524.13"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2316.93,-522.96 2310.71,-514.38 2310.22,-524.96 2316.93,-522.96"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_gpuinterfaces.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_gpuinterfaces.f90.html" xlink:title="SELF_GPUInterfaces.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1437,-168 1298,-168 1298,-144 1437,-144 1437,-168"/>
+<text text-anchor="middle" x="1367.5" y="-153.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1908.5,-116C1735.69,-83.39 1527.08,-119.8 1427.27,-141.77"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1426.38,-138.38 1417.38,-143.98 1427.9,-145.22 1426.38,-138.38"/>
+</g>
+<!-- sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_gpu_enums.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_gpu_enums.f90.html" xlink:title="SELF_GPU_enums.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="291,-183 164,-183 164,-159 291,-159 291,-183"/>
+<text text-anchor="middle" x="227.5" y="-168.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2472.12,-1042.63C2469.52,-967.05 2452.24,-568.04 2374,-481 2353.31,-457.98 2327.74,-484.98 2307,-462"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2305,-462C2234.54,-383.94 2275.15,-324.55 2202,-249 2102.94,-146.69 2050.11,-144.08 1910.5,-116"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1908.5,-116C1794.1,-81.87 1562.82,-41.06 1368.5,-40"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1366.5,-40C1192.59,-33.77 1151.02,0 977,0 977,0 977,0 555.5,0 425.6,0 296.33,-107.28 248.19,-151.89"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="245.54,-149.57 240.66,-158.98 250.34,-154.67 245.54,-149.57"/>
+</g>
+<!-- sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node14" class="node">
+<title>sourcefile~self_gpu.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node14"><a xlink:href=".././sourcefile/self_gpu.f90.html" xlink:title="SELF_GPU.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="443.5,-200 358.5,-200 358.5,-176 443.5,-176 443.5,-200"/>
+<text text-anchor="middle" x="401" y="-185.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1366.5,-40C1284.05,-39.55 1266.86,-72.09 1184.5,-76"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1182.5,-76C945.02,-87.27 883.92,-84.5 650,-127 608.1,-134.61 598.93,-142.13 557.5,-152"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M555.5,-152C521.32,-158.53 483.23,-167.45 453.55,-174.78"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="452.68,-171.39 443.82,-177.2 454.37,-178.18 452.68,-171.39"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node15" class="node">
+<title>sourcefile~self_geometry_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node15"><a xlink:href=".././sourcefile/self_geometry_2d.f90.html" xlink:title="SELF_Geometry_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1776.5,-474 1639.5,-474 1639.5,-450 1776.5,-450 1776.5,-474"/>
+<text text-anchor="middle" x="1708" y="-459.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2305,-462C2251.01,-398.23 2200.44,-466.38 2117,-462"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2115,-462C2000.92,-456.01 1868.56,-457.61 1786.79,-459.58"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1786.49,-456.09 1776.58,-459.84 1786.67,-463.09 1786.49,-456.09"/>
+</g>
+<!-- sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node16" class="node">
+<title>sourcefile~self_mesh_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node16"><a xlink:href=".././sourcefile/self_mesh_2d.f90.html" xlink:title="SELF_Mesh_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1588,-740 1476,-740 1476,-716 1588,-716 1588,-740"/>
+<text text-anchor="middle" x="1532" y="-725.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2305,-462C2285,-438.38 2266.89,-469.9 2238,-481 2030.38,-560.78 2002.8,-640.68 1789,-702 1725.9,-720.1 1650.88,-725.99 1598.43,-727.72"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1598.14,-724.22 1588.25,-728.01 1598.34,-731.22 1598.14,-724.22"/>
+</g>
+<!-- sourcefile~self_transferplan_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node17" class="node">
+<title>sourcefile~self_transferplan_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node17"><a xlink:href=".././sourcefile/self_transferplan_2d.f90.html" xlink:title="SELF_TransferPlan_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1984,-1105 1835,-1105 1835,-1081 1984,-1081 1984,-1105"/>
+<text text-anchor="middle" x="1909.5" y="-1090.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TransferPlan_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_transferplan_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_transferplan_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2456.5,-1067.11C2437.85,-1080.4 2405.55,-1100.92 2374,-1109 2236.23,-1144.29 2067.93,-1123.26 1976.81,-1106.84"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1977.36,-1103.38 1966.89,-1105.01 1976.09,-1110.26 1977.36,-1103.38"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1069,-1070 883,-1070 883,-1046 1069,-1046 1069,-1070"/>
+<text text-anchor="middle" x="976" y="-1055.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1137.81,-1177.41C1126.73,-1174.34 1115.14,-1170.28 1105,-1165 1060.92,-1142.03 1018.42,-1101.78 995.19,-1077.73"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="997.5,-1075.08 988.08,-1070.25 992.43,-1079.91 997.5,-1075.08"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node18" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node18"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-820 0,-820 0,-796 116,-796 116,-820"/>
+<text text-anchor="middle" x="58" y="-805.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1137.98,-1184.99C1096.35,-1184.28 1032.43,-1183.81 977,-1186"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node20" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node20"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="846,-1025 651,-1025 651,-1001 846,-1001 846,-1025"/>
+<text text-anchor="middle" x="748.5" y="-1010.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M914.87,-1046C885.68,-1040.18 850.43,-1033.14 819.98,-1027.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="820.35,-1023.57 809.86,-1025.04 818.98,-1030.43 820.35,-1023.57"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M216.77,-1002.98C189.07,-968.75 109.59,-870.52 75.19,-828.01"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="77.77,-825.63 68.76,-820.06 72.33,-830.03 77.77,-825.63"/>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M505.61,-592.03C473.9,-596.9 433.11,-597.8 402,-580"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge32" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1707,-825C1559.9,-792.36 1518.21,-861.07 1368.5,-844"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1366.5,-844C1161.44,-824.54 916.31,-835.45 807.01,-842.08"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="806.63,-838.59 796.86,-842.7 807.06,-845.58 806.63,-838.59"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge33" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2304.28,-514.27C2299.83,-585.86 2273.93,-949.19 2202,-1029 2199.04,-1032.29 2195.67,-1035.17 2192.03,-1037.68"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="2189.94,-1034.85 2183.09,-1042.93 2193.48,-1040.89 2189.94,-1034.85"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2115,-1015C2084.37,-1038.68 2060,-1009.54 2030,-1034 1999.78,-1058.64 2024.84,-1090.14 1994,-1114 1813.27,-1253.84 1205.51,-1266 977,-1266 977,-1266 977,-1266 747.5,-1266 670.26,-1266 468.91,-1342.59 402,-1304"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M400,-1304C299.97,-1238.6 250.21,-1092.82 234.32,-1037.17"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="237.63,-1036 231.59,-1027.3 230.89,-1037.87 237.63,-1036"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge29" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1707,-825C1627.76,-806.46 1609.48,-795.8 1533,-768"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1531,-768C1437.88,-734.15 743.88,-661.68 650,-630 626.58,-622.1 602.06,-608.57 584.15,-597.57"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="585.76,-594.45 575.43,-592.1 582.04,-600.38 585.76,-594.45"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge31" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1531,-768C1380.18,-736.87 1338.5,-768 1184.5,-768 1184.5,-768 1184.5,-768 975,-768 882.22,-768 637.07,-815.71 557.5,-768"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M555.5,-768C486.61,-724.7 522.59,-665.41 463,-610 440.88,-589.43 428.22,-595.01 402,-580"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge27" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2265.87,-489.91C2228.17,-479.17 2169.32,-464.75 2117,-462"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge26" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2305.05,-514.11C2304.59,-579.12 2293,-888.51 2117,-1015"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2115,-1015C2051.43,-1060.69 2062.17,-925.48 1994,-887 1881.11,-823.28 1836.71,-847.21 1709,-825"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1707,-825C1647.99,-811.91 1644.47,-782.2 1591,-754 1584.77,-750.71 1578.04,-747.45 1571.45,-744.4"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1572.52,-741.04 1561.96,-740.11 1569.63,-747.42 1572.52,-741.04"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_transferplan_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge34" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_transferplan_2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2115,-1015C2083.57,-1037.59 2066.5,-1021.12 2030,-1034 1998.03,-1045.28 1963.5,-1062.98 1939.82,-1076.06"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1938.01,-1073.05 1930.99,-1080.99 1941.43,-1079.16 1938.01,-1073.05"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node22" class="node">
+<title>sourcefile~self_mappedscalar_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node22"><a xlink:href=".././sourcefile/self_mappedscalar_2d.f90.html" xlink:title="SELF_MappedScalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2196,-397 2036,-397 2036,-373 2196,-373 2196,-397"/>
+<text text-anchor="middle" x="2116" y="-382.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge28" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2268.3,-489.97C2258.21,-486.07 2247.44,-481.35 2238,-476 2220.37,-466.01 2218.14,-460.26 2202,-448 2181.94,-432.77 2158.99,-415.78 2142,-403.29"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="2143.83,-400.3 2133.7,-397.2 2139.69,-405.94 2143.83,-400.3"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node23" class="node">
+<title>sourcefile~self_mappedvector_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node23"><a xlink:href=".././sourcefile/self_mappedvector_2d.f90.html" xlink:title="SELF_MappedVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2196,-282 2036,-282 2036,-258 2196,-258 2196,-282"/>
+<text text-anchor="middle" x="2116" y="-267.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge30" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2257.71,-489.87C2250.4,-486.34 2243.48,-481.81 2238,-476 2202.14,-437.95 2228.12,-409.29 2202,-364 2185.17,-334.81 2158.06,-306.91 2138.99,-289.2"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="2141.12,-286.4 2131.37,-282.26 2136.41,-291.58 2141.12,-286.4"/>
+</g>
+<!-- sourcefile~self_solutionmigration.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node24" class="node">
+<title>sourcefile~self_solutionmigration.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node24"><a xlink:href=".././sourcefile/self_solutionmigration.f90.html" xlink:title="SELF_SolutionMigration.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1262,-1156 1105,-1156 1105,-1132 1262,-1132 1262,-1156"/>
+<text text-anchor="middle" x="1183.5" y="-1141.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SolutionMigration.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_solutionmigration.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_solutionmigration.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2115,-1015C2107.58,-1020.46 1798.11,-1074.64 1789,-1076 1605.81,-1103.4 1389.89,-1125.18 1272.08,-1136.17"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1271.66,-1132.69 1262.03,-1137.1 1272.31,-1139.66 1271.66,-1132.69"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge35" class="edge">
+<title>sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1338.14,-168.06C1302.62,-181.8 1239.69,-201.69 1184.5,-196"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1182.5,-196C905.5,-167.46 829.76,-93.56 557.5,-152"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge36" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M221.12,-436.34C197.05,-491.52 99.12,-716.02 68.32,-786.63"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="65.07,-785.33 64.28,-795.9 71.49,-788.13 65.07,-785.33"/>
+</g>
+<!-- sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge37" class="edge">
+<title>sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M358.48,-183.88C341.26,-182.18 320.76,-180.15 301.19,-178.21"/>
+<polygon fill="#007fff" stroke="#007fff" points="301.36,-174.71 291.07,-177.2 300.67,-181.67 301.36,-174.71"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge44" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1683.79,-474.11C1635.22,-500.82 1523.2,-569.9 1473,-663 1413.45,-773.44 1524.88,-853.45 1437,-943 1418.91,-961.44 1002.52,-1006.98 977,-1011"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge45" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1699.07,-474.12C1671.73,-515.92 1581.14,-654.4 1546.57,-707.25"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1543.52,-705.52 1540.98,-715.81 1549.38,-709.36 1543.52,-705.52"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge38" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1531,-462C1320.67,-433.45 1277.58,-380.37 1069,-341 818.35,-293.68 744.15,-344.47 499,-274 453.14,-260.82 447.21,-212.74 402,-228"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node21" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node21"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-820 499,-820 499,-796 614,-796 614,-820"/>
+<text text-anchor="middle" x="556.5" y="-805.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge39" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1531,-462C1153.18,-426.43 1127.53,-772.66 749.5,-806"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M747.5,-806C706.67,-809.82 660.69,-810.4 624.19,-809.99"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="624.21,-806.49 614.16,-809.85 624.11,-813.49 624.21,-806.49"/>
+</g>
+<!-- sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node25" class="node">
+<title>sourcefile~self_vector_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node25"><a xlink:href=".././sourcefile/self_vector_2d.f90.html" xlink:title="SELF_Vector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1591,-244 1473,-244 1473,-220 1591,-220 1591,-244"/>
+<text text-anchor="middle" x="1532" y="-229.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge40" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1697.89,-449.96C1669.71,-412.71 1583.72,-299.05 1548.4,-252.36"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1551.05,-250.06 1542.23,-244.2 1545.47,-254.29 1551.05,-250.06"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node26" class="node">
+<title>sourcefile~self_scalar_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node26"><a xlink:href=".././sourcefile/self_scalar_2d.f90.html" xlink:title="SELF_Scalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1591,-360 1473,-360 1473,-336 1591,-336 1591,-360"/>
+<text text-anchor="middle" x="1532" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge41" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1688.38,-449.8C1657.51,-429.57 1595.6,-389.01 1559.95,-365.66"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1561.77,-362.66 1551.49,-360.11 1557.93,-368.52 1561.77,-362.66"/>
+</g>
+<!-- sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node27" class="node">
+<title>sourcefile~self_data.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node27"><a xlink:href=".././sourcefile/self_data.f90.html" xlink:title="SELF_Data.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="793,-474 704,-474 704,-450 793,-450 793,-474"/>
+<text text-anchor="middle" x="748.5" y="-459.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge42" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1531,-462C1258.54,-438.17 930.6,-451.87 803.49,-458.77"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="803.04,-455.29 793.25,-459.33 803.43,-462.28 803.04,-455.29"/>
+</g>
+<!-- sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node28" class="node">
+<title>sourcefile~self_tensor_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node28"><a xlink:href=".././sourcefile/self_tensor_2d.f90.html" xlink:title="SELF_Tensor_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1426.5,-358 1308.5,-358 1308.5,-334 1426.5,-334 1426.5,-358"/>
+<text text-anchor="middle" x="1367.5" y="-343.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge43" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1639.12,-464.74C1606.91,-465.34 1567.91,-465.05 1533,-462"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1531,-462C1473.38,-456.96 1485.91,-402.88 1437,-372 1431.15,-368.3 1424.69,-365 1418.14,-362.1"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1419.13,-358.72 1408.55,-358.13 1416.45,-365.19 1419.13,-358.72"/>
+</g>
+<!-- sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge47" class="edge">
+<title>sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1521.57,-715.74C1505.39,-695.09 1470.83,-652.53 1437,-621 1286.65,-480.88 1255.11,-428.19 1069,-341 836.16,-231.92 735.92,-341.91 499,-242 480.32,-234.12 480.47,-224.28 463,-214 457.07,-210.51 450.58,-207.23 444.12,-204.25"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="445.3,-200.95 434.74,-200.12 442.48,-207.36 445.3,-200.95"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node29" class="node">
+<title>sourcefile~self_mesh_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node29"><a xlink:href=".././sourcefile/self_mesh_2d_t.f90.html" xlink:title="SELF_Mesh_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1428,-934 1307,-934 1307,-910 1428,-910 1428,-934"/>
+<text text-anchor="middle" x="1367.5" y="-919.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge46" class="edge">
+<title>sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1491.21,-740.02C1484.37,-743.59 1477.9,-748.17 1473,-754 1431.11,-803.85 1480.33,-847.4 1437,-896 1433.97,-899.4 1430.44,-902.36 1426.62,-904.94"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1424.77,-901.96 1417.85,-909.98 1428.26,-908.03 1424.77,-901.96"/>
+</g>
+<!-- sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge48" class="edge">
+<title>sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1891.84,-1105.15C1815.26,-1159.77 1487.71,-1380 1184.5,-1380 1184.5,-1380 1184.5,-1380 747.5,-1380 593.71,-1380 552.73,-1391.54 402,-1361"/>
+</g>
+<!-- sourcefile~self_quadtreemesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node19" class="node">
+<title>sourcefile~self_quadtreemesh_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node19"><a xlink:href=".././sourcefile/self_quadtreemesh_2d.f90.html" xlink:title="SELF_QuadTreeMesh_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1789,-1067 1627,-1067 1627,-1043 1789,-1043 1789,-1067"/>
+<text text-anchor="middle" x="1708" y="-1052.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_QuadTreeMesh_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_quadtreemesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge50" class="edge">
+<title>sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_quadtreemesh_2d.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1845.38,-1080.98C1825.27,-1077.15 1802.85,-1072.88 1782.09,-1068.92"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="1782.53,-1065.44 1772.05,-1067.01 1781.22,-1072.32 1782.53,-1065.44"/>
+</g>
+<!-- sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge49" class="edge">
+<title>sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1857.11,-1080.9C1846.13,-1077.26 1834.87,-1072.68 1825,-1067 1806.18,-1056.18 1807.79,-1044.86 1789,-1034 1661.47,-960.27 1600.53,-1007.73 1473,-934 1454.21,-923.14 1455.98,-911.52 1437,-901 1409.37,-885.68 1398.68,-891.35 1368.5,-882"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1366.5,-882C1214.27,-835.21 802.41,-913.2 650,-867 623.21,-858.88 596.7,-840.64 578.97,-826.58"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="580.97,-823.69 571.01,-820.07 576.54,-829.11 580.97,-823.69"/>
+</g>
+<!-- sourcefile~self_solutiontransfer_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node30" class="node">
+<title>sourcefile~self_solutiontransfer_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node30"><a xlink:href=".././sourcefile/self_solutiontransfer_2d.f90.html" xlink:title="SELF_SolutionTransfer_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="833.5,-1238 663.5,-1238 663.5,-1214 833.5,-1214 833.5,-1238"/>
+<text text-anchor="middle" x="748.5" y="-1223.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SolutionTransfer_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_solutiontransfer_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge51" class="edge">
+<title>sourcefile~self_transferplan_2d.f90&#45;&gt;sourcefile~self_solutiontransfer_2d.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1854.79,-1105.06C1744.43,-1129.26 1483.85,-1183.44 1262,-1207 1116.55,-1222.45 946.73,-1225.89 843.71,-1226.38"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="843.63,-1222.88 833.64,-1226.42 843.66,-1229.88 843.63,-1222.88"/>
+</g>
+<!-- sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge54" class="edge">
+<title>sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1702.65,-1042.97C1682.87,-988.29 1601.81,-765.41 1591,-754 1587.84,-750.67 1584.17,-747.73 1580.25,-745.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1581.76,-741.98 1571.35,-740.05 1578.29,-748.06 1581.76,-741.98"/>
+</g>
+<!-- sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge52" class="edge">
+<title>sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1531,-1034C1476.62,-1038.55 1482.17,-1082.37 1437,-1113 1253.79,-1237.25 1198.37,-1304 977,-1304 977,-1304 977,-1304 747.5,-1304 591.87,-1304 556.2,-1382.08 402,-1361"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-1361C318.98,-1344.59 292.01,-1341.91 228.5,-1289"/>
+</g>
+<!-- sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge53" class="edge">
+<title>sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1654.18,-1042.99C1619.74,-1036.56 1573.78,-1030.59 1533,-1034"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1531,-1034C1493.4,-1037.15 1494.64,-1002.91 1473,-972 1452.71,-943.01 1464.38,-923.41 1437,-901 1412.55,-880.99 1398.68,-891.35 1368.5,-882"/>
+</g>
+<!-- sourcefile~self_refinementprimitives_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node31" class="node">
+<title>sourcefile~self_refinementprimitives_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node31"><a xlink:href=".././sourcefile/self_refinementprimitives_2d.f90.html" xlink:title="SELF_RefinementPrimitives_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="847,-1116 650,-1116 650,-1092 847,-1092 847,-1116"/>
+<text text-anchor="middle" x="748.5" y="-1101.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementPrimitives_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_refinementprimitives_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge55" class="edge">
+<title>sourcefile~self_quadtreemesh_2d.f90&#45;&gt;sourcefile~self_refinementprimitives_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1531,-1034C1482.6,-1038.73 1483.75,-1076.62 1437,-1090 1331.47,-1120.21 1022.78,-1114.24 857.27,-1108.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="857.18,-1104.98 847.07,-1108.12 856.94,-1111.97 857.18,-1104.98"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge58" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M400,-1015C371.98,-1010.52 341.06,-1009.37 313.28,-1009.7"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="313.13,-1006.2 303.19,-1009.88 313.26,-1013.2 313.13,-1006.2"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge56" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M650.79,-1021.99C581.16,-1026.42 485.22,-1028.32 402,-1015"/>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M400,-1015C371.38,-1009.57 364.15,-1005.71 339,-991 284.32,-959.02 286.18,-927.17 228.5,-901"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge57" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff7f00" stroke-dasharray="5,2" d="M728.55,-1000.94C707.85,-987.23 674.4,-963.42 650,-938 630.79,-917.98 630.07,-909.62 614,-887 599.88,-867.12 583.68,-844.49 572.26,-828.56"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="574.81,-826.12 566.14,-820.03 569.12,-830.19 574.81,-826.12"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge60" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M551.29,-795.57C540.67,-763.68 512.64,-676.14 499,-601 483.57,-516.02 513.91,-283.77 463,-214 460.1,-210.02 456.47,-206.65 452.43,-203.79"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="454.06,-200.69 443.67,-198.61 450.49,-206.71 454.06,-200.69"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge59" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M498.87,-798.1C433.49,-788.15 322.86,-775.91 228.5,-788"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node35" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node35"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-840 339,-840 339,-816 463,-816 463,-840"/>
+<text text-anchor="middle" x="401" y="-825.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge61" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M498.78,-815.39C490.43,-816.48 481.74,-817.61 473.15,-818.73"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="472.59,-815.27 463.13,-820.04 473.5,-822.21 472.59,-815.27"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge63" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2101.73,-372.97C2053.11,-330.22 1878.71,-188.36 1709,-192"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge64" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2047.75,-372.93C2007.84,-365.75 1956.28,-356.42 1910.5,-348"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1908.5,-348C1868.08,-340.57 1225.47,-199.26 1184.5,-196"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge65" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1908.5,-348C1821.3,-331.97 1796.19,-364.09 1709,-348"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1707,-348C1672.55,-341.64 1633.62,-341.04 1601.32,-342.29"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1600.91,-338.81 1591.08,-342.76 1601.23,-345.8 1600.91,-338.81"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node34" class="node">
+<title>sourcefile~self_mappedscalar_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node34"><a xlink:href=".././sourcefile/self_mappedscalar_2d_t.f90.html" xlink:title="SELF_MappedScalar_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1994,-514 1825,-514 1825,-490 1994,-490 1994,-514"/>
+<text text-anchor="middle" x="1909.5" y="-499.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge62" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2093.89,-397.08C2057.36,-417.98 1982.28,-460.93 1940.4,-484.89"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1938.44,-481.98 1931.5,-489.99 1941.92,-488.06 1938.44,-481.98"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge68" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1908.5,-154C1822.35,-127.07 1799.16,-187.76 1709,-192"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1707,-192C1614.07,-196.37 1507.43,-181.75 1439.09,-169.85"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1439.33,-166.34 1428.87,-168.04 1438.11,-173.23 1439.33,-166.34"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge69" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2099.15,-257.8C2066.17,-233.18 1986.86,-177.86 1910.5,-154"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1908.5,-154C1847.19,-134.84 1525.51,-60.28 1184.5,-76"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge67" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2035.9,-264.84C1921.04,-257.34 1709.97,-243.55 1601.43,-236.47"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1601.46,-232.96 1591.25,-235.8 1601,-239.95 1601.46,-232.96"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node32" class="node">
+<title>sourcefile~self_mappedvector_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node32"><a xlink:href=".././sourcefile/self_mappedvector_2d_t.f90.html" xlink:title="SELF_MappedVector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1994,-400 1825,-400 1825,-376 1994,-376 1994,-400"/>
+<text text-anchor="middle" x="1909.5" y="-385.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge66" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2102.25,-282.14C2081.26,-301.55 2037.39,-339.63 1994,-362 1986.16,-366.04 1977.57,-369.59 1968.98,-372.66"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1967.68,-369.41 1959.32,-375.92 1969.92,-376.04 1967.68,-369.41"/>
+</g>
+<!-- sourcefile~self_solutionmigration.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge71" class="edge">
+<title>sourcefile~self_solutionmigration.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1153.49,-1131.86C1117.31,-1116.72 1055.34,-1090.79 1015.29,-1074.03"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="1016.44,-1070.71 1005.86,-1070.08 1013.73,-1077.17 1016.44,-1070.71"/>
+</g>
+<!-- sourcefile~self_solutionmigration.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge70" class="edge">
+<title>sourcefile~self_solutionmigration.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M1132.58,-1156.01C1081.85,-1167.89 1006.64,-1184.5 977,-1186"/>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M975,-1186C789.47,-1195.36 735.6,-1153.18 557.5,-1206"/>
+</g>
+<!-- sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge73" class="edge">
+<title>sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1501.62,-219.97C1492.31,-215.85 1482.08,-211.02 1473,-206 1456.17,-196.7 1454.1,-190.8 1437,-182 1429.76,-178.27 1421.87,-174.79 1414.09,-171.65"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1415.3,-168.37 1404.71,-168.01 1412.77,-174.89 1415.3,-168.37"/>
+</g>
+<!-- sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge75" class="edge">
+<title>sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1366.5,-196C1286.09,-187.23 1265.13,-202.42 1184.5,-196"/>
+</g>
+<!-- sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge72" class="edge">
+<title>sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1488.66,-219.95C1456.11,-211.34 1409.86,-200.51 1368.5,-196"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1366.5,-196C1232.83,-181.42 1202.49,-157.18 1069,-141 970.88,-129.1 945.69,-133.28 847,-128 718.37,-121.12 685.7,-101.44 557.5,-114"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node33" class="node">
+<title>sourcefile~self_vector_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node33"><a xlink:href=".././sourcefile/self_vector_2d_t.f90.html" xlink:title="SELF_Vector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1039.5,-374 912.5,-374 912.5,-350 1039.5,-350 1039.5,-374"/>
+<text text-anchor="middle" x="976" y="-359.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_vector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge74" class="edge">
+<title>sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_vector_2d_t.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1366.5,-196C1291.18,-186.33 1083.75,-300.39 1006.5,-344.76"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1004.65,-341.79 997.74,-349.82 1008.15,-347.85 1004.65,-341.79"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge77" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M1523.18,-335.89C1511.73,-318 1489.94,-283.38 1473,-253 1455.77,-222.1 1463.31,-205.65 1437,-182 1433.08,-178.48 1428.63,-175.41 1423.94,-172.75"/>
+<polygon fill="#007fff" stroke="#007fff" points="1425.17,-169.46 1414.66,-168.12 1422.04,-175.72 1425.17,-169.46"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge79" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M1497.65,-336C1422.39,-309.51 1233.1,-246.23 1069,-219 844.37,-181.72 784.82,-176.89 557.5,-190"/>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M555.5,-190C521.72,-192.3 483.68,-191.83 453.91,-190.76"/>
+<polygon fill="#007fff" stroke="#007fff" points="453.87,-187.26 443.75,-190.37 453.6,-194.25 453.87,-187.26"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge76" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M555.5,-190C520.44,-192.39 435.3,-216.76 402,-228"/>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M400,-228C302.37,-260.95 306,-316.1 228.5,-384"/>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M226.5,-384C200.8,-406.52 175.87,-378.55 152,-403 97.59,-458.73 68.81,-708.55 61.12,-785.42"/>
+<polygon fill="#007fff" stroke="#007fff" points="57.6,-785.55 60.11,-795.84 64.56,-786.23 57.6,-785.55"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node36" class="node">
+<title>sourcefile~self_scalar_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node36"><a xlink:href=".././sourcefile/self_scalar_2d_t.f90.html" xlink:title="SELF_Scalar_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1039.5,-533 912.5,-533 912.5,-509 1039.5,-509 1039.5,-533"/>
+<text text-anchor="middle" x="976" y="-518.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge78" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d_t.f90</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M1492.48,-360.03C1394.09,-390.75 1133.64,-472.08 1025.32,-505.91"/>
+<polygon fill="#007fff" stroke="#007fff" points="1024.13,-502.62 1015.63,-508.94 1026.22,-509.3 1024.13,-502.62"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge83" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M703.81,-466.01C685.65,-469.5 665.29,-475.99 650,-488 623.73,-508.64 638.42,-531.19 614,-554 610.39,-557.37 606.27,-560.37 601.94,-563.01"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="599.94,-560.11 592.83,-567.97 603.29,-566.26 599.94,-560.11"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge82" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M703.74,-465.75C686.55,-468.21 666.93,-472.28 650,-479 604.23,-497.17 604.69,-525.92 557.5,-540"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge80" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M703.94,-450.64C657.06,-438.82 585.48,-422 557.5,-422"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge81" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M730.91,-474.06C708.57,-491.3 669.38,-525.21 650,-564 606.12,-651.85 673.55,-703.92 614,-782 611.56,-785.19 608.64,-788.01 605.43,-790.48"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="603.45,-787.6 596.95,-795.97 607.25,-793.48 603.45,-787.6"/>
+</g>
+<!-- sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge86" class="edge">
+<title>sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1323.91,-333.93C1287.31,-324.43 1232.92,-312.41 1184.5,-310"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1182.5,-310C1146.49,-308.21 1137.41,-301.8 1105,-286 1087.49,-277.46 1087.39,-267.42 1069,-261 853.91,-185.95 784.84,-242.56 557.5,-228"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M555.5,-228C516.6,-225.71 473.8,-213.73 443.3,-203.47"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="444.05,-200.03 433.46,-200.08 441.77,-206.65 444.05,-200.03"/>
+</g>
+<!-- sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge84" class="edge">
+<title>sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M555.5,-228C487.4,-223.99 466.64,-206.18 402,-228"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node37" class="node">
+<title>sourcefile~self_tensor_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node37"><a xlink:href=".././sourcefile/self_tensor_2d_t.f90.html" xlink:title="SELF_Tensor_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1039.5,-434 912.5,-434 912.5,-410 1039.5,-410 1039.5,-434"/>
+<text text-anchor="middle" x="976" y="-419.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_tensor_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge85" class="edge">
+<title>sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_tensor_2d_t.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1182.5,-310C1122.6,-307.02 1122.03,-354.97 1069,-383 1053,-391.46 1034.75,-399.5 1018.76,-406.06"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1017.09,-402.96 1009.13,-409.95 1019.71,-409.45 1017.09,-402.96"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge92" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1364.98,-934.28C1359.38,-974.06 1336.23,-1100.6 1262,-1165 1255.34,-1170.77 1247.25,-1174.98 1238.83,-1178.03"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="1237.76,-1174.7 1229.25,-1181.02 1239.84,-1181.39 1237.76,-1174.7"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge93" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1353.18,-934.2C1318.32,-965.72 1224.32,-1047.82 1184.5,-1054"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1182.5,-1054C1149.11,-1059.18 1112.3,-1061.08 1079.17,-1061.41"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="1078.99,-1057.91 1069.01,-1061.47 1079.03,-1064.91 1078.99,-1057.91"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge89" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1182.5,-933C1085.78,-946.75 1073.04,-993.11 977,-1011"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M975,-1011C918.18,-1021.59 904.53,-1028.37 847,-1034 622.28,-1055.97 563.85,-1049.54 339,-1029 330.63,-1028.23 321.91,-1027.33 313.21,-1026.34"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="313.36,-1022.84 303.02,-1025.16 312.55,-1029.79 313.36,-1022.84"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge90" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M747.5,-924C664.65,-904.74 639.11,-924.97 557.5,-901"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M555.5,-901C501.82,-885.24 293.75,-535.36 240.81,-445.1"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="243.73,-443.15 235.65,-436.29 237.69,-446.69 243.73,-443.15"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge87" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M400,-901C324.19,-893.11 297.91,-932.49 228.5,-901"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M226.5,-901C175.69,-877.95 119.56,-845.18 86.89,-825.32"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="88.68,-822.32 78.32,-820.08 85.03,-828.29 88.68,-822.32"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge88" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1306.91,-923.83C1271.3,-925.37 1225.2,-928.12 1184.5,-933"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M1182.5,-933C991.38,-955.9 938.64,-959.75 749.5,-924"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M747.5,-924C704.03,-913.9 688.9,-921.86 650,-900 617.72,-881.86 588.95,-849.37 572.37,-828.26"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="575.09,-826.05 566.23,-820.24 569.53,-830.31 575.09,-826.05"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node38" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node38"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-840 165.5,-840 165.5,-816 289.5,-816 289.5,-840"/>
+<text text-anchor="middle" x="227.5" y="-825.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge91" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M555.5,-901C490.04,-881.78 469.86,-908.06 402,-901"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M400,-901C345.57,-895.34 288.22,-865.3 255.55,-845.57"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="257.37,-842.57 247.02,-840.3 253.69,-848.53 257.37,-842.57"/>
+</g>
+<!-- sourcefile~self_solutiontransfer_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge94" class="edge">
+<title>sourcefile~self_solutiontransfer_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M711.02,-1213.91C672.19,-1202.94 609.33,-1190.63 557.5,-1206"/>
+</g>
+<!-- sourcefile~self_solutiontransfer_2d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge95" class="edge">
+<title>sourcefile~self_solutiontransfer_2d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M730.45,-1213.84C707.96,-1196.77 669,-1163.46 650,-1125 602.61,-1029.09 654.23,-986.13 614,-887 604.96,-864.72 588.46,-842.75 575.62,-827.66"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="578.15,-825.24 568.93,-820.02 572.88,-829.85 578.15,-825.24"/>
+</g>
+<!-- sourcefile~self_refinementprimitives_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge96" class="edge">
+<title>sourcefile~self_refinementprimitives_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M729.24,-1116.04C689.25,-1142.03 594.56,-1201.42 557.5,-1206"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-1206C406.69,-1224.39 350.88,-1375.63 228.5,-1289"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M226.5,-1289C79.51,-1166.54 61.34,-907.51 59.23,-830.22"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="62.73,-830.1 59.02,-820.17 55.73,-830.24 62.73,-830.1"/>
+</g>
+<!-- sourcefile~self_refinementprimitives_2d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge97" class="edge">
+<title>sourcefile~self_refinementprimitives_2d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M721.52,-1091.95C699.19,-1080.26 667.85,-1060.42 650,-1034 612.35,-978.26 642.07,-948.13 614,-887 603.97,-865.15 587.58,-843.13 575.03,-827.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="577.65,-825.58 568.52,-820.2 572.3,-830.1 577.65,-825.58"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge104" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1707,-650C1611.06,-697.47 1544.58,-627.41 1473,-707 1392.34,-796.69 1514.9,-883.91 1437,-976 1361.14,-1065.67 1300.3,-1034.35 1184.5,-1054"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge103" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1876,-400.05C1841.95,-412.69 1788.32,-432.58 1751.05,-446.4"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1749.64,-443.19 1741.48,-449.95 1752.08,-449.75 1749.64,-443.19"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge102" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1707,-650C1673.73,-666.46 1661.1,-659.32 1627,-674 1603.34,-684.18 1578.11,-698.92 1559.75,-710.42"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1557.63,-707.62 1551.07,-715.94 1561.39,-713.52 1557.63,-707.62"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge98" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1843.98,-375.98C1836.85,-372.44 1830.27,-367.88 1825,-362 1769.36,-299.97 1847.23,-237.61 1789,-178 1768.05,-156.55 1291.8,-65.24 1262,-62 991.59,-32.59 913.13,6.89 650,-62 604.38,-73.95 604.47,-109.75 557.5,-114"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M555.5,-114C376.05,-128.62 282.54,-26 152,-150 57.77,-239.5 57.37,-681.08 58.63,-785.73"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="55.13,-785.84 58.77,-795.79 62.13,-785.75 55.13,-785.84"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge99" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1896.62,-400.19C1879.92,-417.54 1848.88,-450.64 1825,-481 1768.67,-552.6 1789.19,-606.77 1709,-650"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1707,-650C1661.16,-674.72 1524.35,-654.29 1473,-663 1246.81,-701.38 1205.38,-784.19 977,-806"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M975,-806C875,-812.6 849.29,-796.66 749.5,-806"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge100" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_vector_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1859.19,-375.87C1847.65,-372.16 1835.63,-367.55 1825,-362 1807.03,-352.61 1806.59,-344.07 1789,-334 1721.33,-295.25 1636.05,-264.49 1583.02,-247.26"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1583.77,-243.83 1573.18,-244.1 1581.63,-250.49 1583.77,-243.83"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge101" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1824.64,-388.63C1736.67,-388.29 1594.56,-384.91 1473,-369 1457.29,-366.94 1440.44,-363.7 1424.96,-360.3"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1425.54,-356.84 1415.01,-358.05 1423.99,-363.67 1425.54,-356.84"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge108" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M747.5,-342C706.94,-359.43 681.09,-329.66 650,-361 588.55,-422.95 667.63,-485.17 614,-554 611.53,-557.17 608.59,-559.96 605.36,-562.43"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="603.37,-559.55 596.86,-567.9 607.16,-565.43 603.37,-559.55"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge107" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M400,-384C358.72,-389.17 312.87,-400.14 278.97,-409.29"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="278.02,-405.92 269.3,-411.94 279.87,-412.67 278.02,-405.92"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge105" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M943.23,-350C898.16,-334.95 813.96,-314.3 749.5,-342"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M747.5,-342C711.97,-357.27 440.37,-379.2 402,-384"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M400,-384C324.2,-392.02 285.83,-333.77 228.5,-384"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge106" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M747.5,-342C706.94,-359.43 679.5,-328.16 650,-361 587.26,-430.86 667.98,-705.17 614,-782 611.82,-785.1 609.18,-787.83 606.25,-790.25"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="604.2,-787.41 597.9,-795.93 608.14,-793.2 604.2,-787.41"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge109" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M938.04,-374.08C920.58,-380.66 899.91,-389.77 883,-401 864.41,-413.34 866.41,-424.99 847,-436 833.63,-443.58 817.97,-449.02 803.16,-452.9"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="801.98,-449.58 793.08,-455.34 803.62,-456.39 801.98,-449.58"/>
+</g>
+<!-- sourcefile~self_datapool.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node39" class="node">
+<title>sourcefile~self_datapool.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_node39"><a xlink:href=".././sourcefile/self_datapool.f90.html" xlink:title="SELF_DataPool.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="804.5,-394 692.5,-394 692.5,-370 804.5,-370 804.5,-394"/>
+<text text-anchor="middle" x="748.5" y="-379.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataPool.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_datapool.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge110" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_datapool.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M912.49,-367.54C882.15,-370.23 845.73,-373.47 815.01,-376.19"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="814.48,-372.72 804.83,-377.09 815.1,-379.7 814.48,-372.72"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge117" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1908.07,-514.09C1905.65,-564.89 1889.84,-763.68 1789,-877 1686.52,-992.16 1602.3,-936.06 1473,-1020 1455.04,-1031.66 1456.98,-1044.31 1437,-1052 1332.26,-1092.3 1295.4,-1036.78 1184.5,-1054"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge116" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1848.64,-490C1826.75,-485.61 1801.78,-480.6 1779.07,-476.05"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1779.65,-472.6 1769.16,-474.06 1778.28,-479.46 1779.65,-472.6"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge114" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1707,-688C1687.67,-696.85 1639.09,-707.7 1598.16,-715.87"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1597.34,-712.46 1588.21,-717.83 1598.7,-719.33 1597.34,-712.46"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge111" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1908.14,-514.04C1906.01,-562.83 1891.21,-747.49 1789,-839 1733.9,-888.33 1698.03,-856.39 1627,-877 1541.15,-901.91 1524.8,-926.21 1437,-943 1173.06,-993.46 473.21,-1012.02 228.5,-901"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge112" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1898.7,-514.1C1882.8,-533.85 1850.59,-574.39 1825,-610 1808.17,-633.42 1812.19,-646.84 1789,-664 1759.16,-686.08 1742.75,-672.55 1709,-688"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1707,-688C1659.56,-709.71 1520.2,-684.78 1473,-707 1452.24,-716.77 1457.49,-733.68 1437,-744 1252.75,-836.79 1182.45,-787.34 977,-806"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge115" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_scalar_2d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1899.53,-489.53C1874.26,-455.86 1798.5,-364.52 1709,-348"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge113" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1856.01,-514.03C1768.89,-530.9 1592.27,-551.7 1473,-476 1444.79,-458.09 1457.47,-436.41 1437,-410 1423.83,-393.01 1406.02,-376.52 1391.86,-364.53"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1393.94,-361.71 1384,-358.02 1389.47,-367.1 1393.94,-361.71"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge121" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M386.57,-840.33C373.98,-852.04 354.79,-870.29 339,-887 304.22,-923.81 266.14,-969.13 245,-994.78"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="242.15,-992.73 238.51,-1002.68 247.56,-997.17 242.15,-992.73"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge120" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M385.23,-815.97C371.49,-804.08 351.34,-784.7 339,-764 273.87,-654.81 242.22,-502.67 232.17,-446.22"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="235.6,-445.51 230.45,-436.25 228.7,-446.7 235.6,-445.51"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge118" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M374.15,-815.99C340.84,-801.91 280.96,-781.28 228.5,-788"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge119" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M338.57,-828C325.98,-828 312.63,-828 299.73,-828"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="299.5,-824.5 289.5,-828 299.5,-831.5 299.5,-824.5"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge125" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M956.68,-533.22C932.5,-548.85 888.16,-575.85 847,-592 805.46,-608.3 793.58,-609.06 749.5,-616"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M747.5,-616C695.29,-624.22 635.44,-608.72 597.09,-595.56"/>
+<polygon fill="#003fff" stroke="#003fff" points="597.94,-592.15 587.35,-592.11 595.6,-598.74 597.94,-592.15"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge124" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M912.25,-514.57C829.17,-508.14 679,-503.76 557.5,-540"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge122" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M747.5,-616C704.26,-622.81 692.41,-619.14 650,-630 456.19,-679.62 426.96,-762.76 228.5,-788"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M226.5,-788C193.43,-790.3 156.85,-794.47 126.34,-798.42"/>
+<polygon fill="#003fff" stroke="#003fff" points="125.69,-794.97 116.23,-799.74 126.6,-801.91 125.69,-794.97"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge123" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M962.01,-533.03C939.38,-553.77 890.96,-597.15 847,-630 747.95,-704.01 722.23,-722.22 614,-782 607.97,-785.33 601.43,-788.62 595.02,-791.68"/>
+<polygon fill="#003fff" stroke="#003fff" points="593.37,-788.58 585.78,-795.97 596.32,-794.93 593.37,-788.58"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge126" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M929.09,-508.99C892.57,-499.43 841.39,-486.04 803.01,-476"/>
+<polygon fill="#003fff" stroke="#003fff" points="803.6,-472.54 793.04,-473.39 801.83,-479.31 803.6,-472.54"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_datapool.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge127" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_datapool.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M960.07,-508.87C941.65,-493.79 909.51,-467.07 883,-443 866.48,-428 866.41,-419.01 847,-408 836.98,-402.32 825.68,-397.84 814.41,-394.32"/>
+<polygon fill="#003fff" stroke="#003fff" points="815.13,-390.89 804.55,-391.47 813.19,-397.61 815.13,-390.89"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge131" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M951.79,-434.11C926.43,-447.09 884.43,-467.88 847,-483 765,-516.13 666.91,-547.28 608.54,-564.96"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="607.39,-561.65 598.82,-567.89 609.41,-568.35 607.39,-561.65"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge130" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M747.5,-422C703.84,-428.56 688.62,-419.61 650,-441 597.33,-470.18 615.2,-522.79 557.5,-540"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M555.5,-540C538.61,-545.04 417.3,-588.75 402,-580"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M400,-580C334.9,-542.75 273.7,-477.07 245.22,-444.09"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="247.54,-441.41 238.39,-436.07 242.21,-445.95 247.54,-441.41"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge128" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M912.42,-417.04C866.95,-414.63 804.09,-413.8 749.5,-422"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M747.5,-422C663.99,-434.54 641.86,-425.79 557.5,-422"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge129" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M960.63,-434.13C942.5,-449.44 910.38,-476.6 883,-500 866.95,-513.72 865.23,-520.35 847,-531 766.63,-577.92 710.75,-531.49 650,-602 596.75,-663.81 664.56,-717.97 614,-782 611.51,-785.15 608.55,-787.94 605.32,-790.39"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="603.33,-787.51 596.8,-795.85 607.1,-793.4 603.33,-787.51"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge132" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M912.49,-433.09C878.11,-439.19 835.91,-446.67 803.06,-452.5"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="802.42,-449.06 793.18,-454.25 803.64,-455.95 802.42,-449.06"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_datapool.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge133" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_datapool.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M912.49,-410.91C882.15,-405.53 845.73,-399.07 815.01,-393.62"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="815.29,-390.12 804.83,-391.81 814.07,-397.01 815.29,-390.12"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge134" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M165.08,-820.67C152.48,-819.16 139.16,-817.57 126.36,-816.04"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="126.58,-812.54 116.24,-814.83 125.75,-819.5 126.58,-812.54"/>
+</g>
+<!-- sourcefile~self_datapool.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d.f90~2~~EfferentGraph_edge135" class="edge">
+<title>sourcefile~self_datapool.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M701.37,-394C654.49,-405.78 584.97,-422 557.5,-422"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-422C458.69,-422 435.14,-409.42 339,-398 289.84,-392.16 266.15,-351.86 228.5,-384"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_linearshallowwater2df902EfferentGraph = svgPanZoom('#sourcefileself_linearshallowwater2df902EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_linearshallowwater2d.html">self_LinearShallowWater2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_linearshallowwater2d.f90~2.html#src">SELF_LinearShallowWater2D.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">self_LinearShallowWater2D</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">self_LinearShallowWater2D_t</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">implicit none</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">LinearShallowWater2D</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">  </span><span class="k">endtype </span><span class="n">LinearShallowWater2D</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="k">endmodule </span><span class="n">self_LinearShallowWater2D</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-10-18 12:04            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
