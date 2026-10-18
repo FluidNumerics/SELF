@@ -125,7 +125,7 @@ The mesh records the layer count in `mesh % nLayers`, and the surface element an
 
 The 3-D decomposition is the surface decomposition expanded by $n_z$: rank $r$ owns the columns above the surface elements it owns, and `offsetElem` is $n_z$ times the surface offsets.
 A column is therefore never split across ranks, and the local surface element $e_2$ of a column is element $e_2$ of the surface mesh you passed in.
-The surface mesh is not copied, so keep it if your column operators need its geometry.
+The surface mesh is not copied, so keep it if your column operators need its geometry (see [Column operators](#column-operators)).
 
 The HOHQMesh reader keeps every element on every rank rather than decomposing the mesh, and `ExtrudedMesh` stops with an error when the surface mesh does not hold exactly the elements its decomposition assigns to the rank.
 For a parallel run, read the surface from HOPr or build it with one of the structured constructors.
@@ -173,6 +173,60 @@ We therefore have the following, which the test `geometry_3d_extruded_identities
 - The vertical statements, $J\vec{a}^\zeta_z = J_2$ and the vertical component of $\sum_i J\vec{a}^i D_i Z = J\hat{z}$, compare the curl form of $J_2$ with the determinant $J_2$, and they hold to round-off only for $N \ge 2N_{geo}$ or an affine surface element, also on flat levels.
 - Three weaker properties hold to round-off for every $N$, because each involves only products that are linear in $\zeta$ or constant along a vertical grid line: the vertical components of $J\vec{a}^\xi$ and $J\vec{a}^\eta$ vanish; the stored $J\vec{a}^\zeta_z$ is the same at every node of a vertical grid line, inside an element and from layer to layer; and the slope components $J\vec{a}^\zeta_x$, $J\vec{a}^\zeta_y$ are continuous across the faces between layers.
 - Otherwise the identities hold to truncation error. On the curved Circle surface ($N_{geo} = 7$) with sigma levels at $N = 7$, the measured relative error of the horizontal statements is about $2\times 10^{-9}$ and that of the vertical ones about $3\times 10^{-11}$.
+
+### Column operators
+
+The module `SELF_ColumnOperators_3D` provides the operators that act along the vertical grid lines of an extruded mesh, the lines of constant $(\xi,\eta)$, which are the third index of SELF's `interior` arrays.
+A column is never split across ranks, so none of them communicates.
+Volume fields are `Scalar3D` or `MappedScalar3D` on the extruded mesh, and surface fields are `Scalar2D` or `MappedScalar2D` with one element per column, the same degree and the same number of variables.
+The operators read only nodal values, so neither field needs a geometry of its own; the metric factor they need comes from the `SEMHex` passed to `Init`.
+
+Write $\omega_l$ for the quadrature weights, $M = \mathrm{diag}(\omega)$, $D$ for the derivative matrix, $e_0$ and $e_N$ for the unit vectors of the bottom and top node, and $Z_\zeta = \partial z/\partial\zeta$, the entry `dxds % interior(i,j,l,iel,1,3,3)` of the covariant basis.
+The column integral and its adjoint, the broadcast, are
+
+$$
+(\mathcal{C} q)_{ij} = \sum_{k=1}^{n_z} \sum_{l=0}^{N} \omega_l\, (Z_\zeta)^{(k)}_{ijl}\, q^{(k)}_{ijl}, \qquad
+(\mathcal{B} Q)^{(k)}_{ijl} = Q_{ij} .
+$$
+
+The column integral of a field in units of $[q]$ is in units of $[q]$ metres, and $\mathcal{C}\mathbf{1}$ is the local depth.
+Since the Jacobian of an extruded element is $J = J_2 Z_\zeta$ at every node, $\langle \mathcal{B}A, q\rangle_3 = \langle A, \mathcal{C}q\rangle_2$, where the inner products are weighted by $J\omega_i\omega_j\omega_l$ and $J_2\omega_i\omega_j$.
+This holds to round-off both with the curl-form Jacobian $J^c = (J\vec{a}^\zeta)_z Z_\zeta$ and with the determinant that `SEMHex` stores, since the covariant basis gives $\det J = Z_\zeta \det J_2$ exactly.
+
+The vertical sweeps solve the one dimensional upwind DG problem $\partial_\zeta q = r$ along every vertical line, layer by layer.
+Upward, from a bottom trace, and downward, from a top trace,
+
+$$
+(D + M^{-1}e_0e_0^T)\, q^{(k)} = r^{(k)} + M^{-1}e_0\, q^{(k)}_{in}, \quad q^{(k)}_{in} = q^{(k-1)}_N ; \qquad
+(D - M^{-1}e_Ne_N^T)\, q^{(k)} = r^{(k)} - M^{-1}e_N\, q^{(k)}_{in}, \quad q^{(k)}_{in} = q^{(k+1)}_0 .
+$$
+
+Both matrices map the constant vector to the inflow term, so the solution is the inflow value plus an element-local particular solution with a matrix inverse that `Init` computes once.
+The right hand side $r$ is in reference scaling and the sweeps apply no metric factor: to solve $J^c_2\, \partial_\zeta w = f$, pass $r = f/J^c_2$.
+The sweeps need nodes at $\zeta = \pm 1$, so they require Gauss-Lobatto nodes and stop with an error otherwise; the column integral and the broadcast work with any quadrature.
+By the summation-by-parts property of Gauss-Lobatto nodes the two sweeps are adjoint: with $w$ from the upward sweep and $p$ from the downward sweep, on every vertical line,
+
+$$
+\sum_{k=1}^{n_z} \big( p^{(k)T} M r_w^{(k)} + w^{(k)T} M r_p^{(k)} \big) = p^{(n_z)}_{in}\, w^{(n_z)}_N - p^{(1)}_0\, w^{(1)}_{in} .
+$$
+
+```fortran
+  type(ColumnOperators3D) :: columns
+  type(MappedScalar3D) :: q,r,w
+  type(Scalar2D) :: qbar,wBottom
+
+  ! interp must use GAUSS_LOBATTO nodes for the sweeps
+  call columns % Init(interp,mesh,geometry)
+  call qbar % Init(interp,q % nVar,surface % nElem)
+
+  call columns % ColumnIntegral(q,qbar)      ! qbar = C q
+  call columns % Broadcast(qbar,q)           ! q = B qbar
+  call columns % VerticalSweepUp(r,wBottom,w)
+  call columns % Free()
+```
+
+On GPU builds the operators read and write the device copies of the fields, so upload the inputs with `UpdateDevice` and download the results with `UpdateHost` when you need them on the host.
+The tests `column_integral_3d_extruded`, `column_broadcast_adjoint_3d` and `vertical_sweep_3d` check the exact integrals, the adjoint identities, and the exactness and inverse accuracy of the sweeps, on one and on two ranks.
 
 ### Relation to HOHQMesh extrusion
 

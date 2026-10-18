@@ -226,6 +226,20 @@ add_fortran_tests (
     "geometry_3d_extruded_identities.f90"
     "mappedscalarsideexchange_3d_extruded.f90"
     "mappedvectordgdivergence_3d_extruded.f90"
+    "column_integral_3d_extruded.f90"
+    "column_broadcast_adjoint_3d.f90"
+    "vertical_sweep_3d.f90"
+    "column_operators_3d_guard_notextruded.f90"
+    "column_operators_3d_guard_gauss.f90"
+    "column_operators_3d_guard_layers.f90"
+    "column_operators_3d_guard_geometry.f90"
+    "column_operators_3d_guard_degree.f90"
+    "column_operators_3d_guard_uninit.f90"
+    "column_operators_3d_guard_fielddegree.f90"
+    "column_operators_3d_guard_volumeelems.f90"
+    "column_operators_3d_guard_surfaceelems.f90"
+    "column_operators_3d_guard_nvar.f90"
+    "column_operators_3d_guard_sweepshape.f90"
     "mappedscalarderivative_1d_constant.f90"
     "mappedscalarbrderivative_1d_constant.f90"
     "mappedscalardgderivative_1d_constant.f90"
@@ -392,6 +406,17 @@ set_tests_properties(
     mesh3d_extruded_guard_levels
     mesh3d_extruded_guard_top
     mesh3d_extruded_guard_hybriddepth
+    column_operators_3d_guard_notextruded
+    column_operators_3d_guard_gauss
+    column_operators_3d_guard_layers
+    column_operators_3d_guard_geometry
+    column_operators_3d_guard_degree
+    column_operators_3d_guard_uninit
+    column_operators_3d_guard_fielddegree
+    column_operators_3d_guard_volumeelems
+    column_operators_3d_guard_surfaceelems
+    column_operators_3d_guard_nvar
+    column_operators_3d_guard_sweepshape
     transfer_plan_2d_guard_badleaf
     transfer_plan_3d_guard_badleaf
     transfer_plan_2d_guard_snapshot
@@ -472,6 +497,17 @@ add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
                        "mappedscalarbrgradient_2d_periodic_mpi.f90"
                        "mappedscalarsideexchange_3d_extruded_mpi.f90"
                        "mappedvectordgdivergence_3d_extruded_mpi.f90" )
+
+# The column operator tests are written for any rank count: every reduction goes through the
+# mesh's communicator, and the HOHQMesh surfaces, which the reader does not decompose, are used
+# on one rank only. Each is registered above as a serial test and re-run here on
+# SELF_MPIEXEC_NUMPROCS ranks, with no new sources.
+foreach(COLUMN_TEST column_integral_3d_extruded column_broadcast_adjoint_3d vertical_sweep_3d)
+    add_test(NAME ${COLUMN_TEST}_mpi
+             COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                     ${SELF_MPIEXEC_OPTIONS} ${COLUMN_TEST})
+    set_tests_properties(${COLUMN_TEST}_mpi PROPERTIES LABELS "parallel")
+endforeach()
 
 # Temporal order-of-accuracy test for the low-storage Runge-Kutta integrators. One executable
 # (which carries a device kernel for its time-dependent prescribed boundary condition on GPU
