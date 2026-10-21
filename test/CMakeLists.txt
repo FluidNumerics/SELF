@@ -460,6 +460,8 @@ set_tests_properties(
 
 add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
                        "scalarsideexchange_3d_mpi.f90"
+                       "mappedscalarsideexchange_2d_reupload_mpi.f90"
+                       "mappedscalarsideexchange_3d_reupload_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_sideexchange_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_structuredmesh_mpi.f90"

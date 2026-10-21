@@ -57,6 +57,7 @@ module SELF_MappedScalar_2D
     procedure,public :: Init => Init_MappedScalar2D
     procedure,public :: Resize => Resize_MappedScalar2D
     procedure,public :: Free => Free_MappedScalar2D
+    procedure,public :: UpdateDevice => UpdateDevice_MappedScalar2D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar2D
 
@@ -244,6 +245,27 @@ contains
 
   endsubroutine Free_MappedScalar2D
 
+  subroutine UpdateDevice_MappedScalar2D(this)
+    !! Copy the host arrays to the device, then mark the static halo traces as stale.
+    !!
+    !! The parent upload overwrites extboundary_gpu with the host extBoundary. On rank-shared
+    !! faces the host copy holds whatever the host last saw (zeros after Init, or older values),
+    !! not the traces carried by the device halo exchange. Once halo_static_done is set,
+    !! SideExchangeStart(mesh,nactive) re-sends only the leading nactive (stepped) variables, so
+    !! without this reset the static variables (nactive+1:nvar) would keep the uploaded host
+    !! values on every rank-cut face for the rest of the run (FluidNumerics/SELF#201).
+    !!
+    !! Clearing the flag makes the next exchange carry all nvar variables once. The cost is one
+    !! full-width exchange (and one rebuild of the persistent requests) per upload; uploads
+    !! happen at initialization, pickup, and regrid, not inside the time-stepping loop.
+    implicit none
+    class(MappedScalar2D),intent(inout) :: this
+
+    call UpdateDevice_Scalar2D(this)
+    this%halo_static_done = .false.
+
+  endsubroutine UpdateDevice_MappedScalar2D
+
   subroutine SetInteriorFromEquation_MappedScalar2D(this,geometry,time)
   !!  Sets the this % interior attribute using the eqn attribute,
   !!  geometry (for physical positions), and provided simulation time.
@@ -289,9 +311,10 @@ contains
   !! When `nactive` is provided, only the leading `nactive` variables are
   !! exchanged - the variable index is the outermost dimension of the
   !! boundary arrays, so the leading variables form a contiguous prefix.
-  !! The first exchange always carries all variables so that the boundary
-  !! traces of static (non-stepped) variables are valid; static traces do
-  !! not change thereafter, so later exchanges may carry the prefix only.
+  !! The first exchange after Init, Resize, or UpdateDevice always carries
+  !! all variables so that the boundary traces of static (non-stepped)
+  !! variables are valid; static traces do not change on the device
+  !! thereafter, so later exchanges may carry the prefix only.
   !!
   !! The matching SideExchangeFinish must be called before extBoundary is
   !! read on interior faces. Between Start and Finish, callers may perform
