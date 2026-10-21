@@ -2096,7 +2096,7 @@ contains
     integer :: iUnit
     integer :: ios
     integer :: nNodesFile,nElemFile,polyOrder
-    integer :: nGeo,ng1
+    integer :: nGeo,ng1,nLocal,firstElem,lastElem,eGlobal
     integer :: i,j,k,e,f,s,iSide,l,p
     integer :: cornerIDs(1:8)
     integer :: probe8(1:8)
@@ -2113,6 +2113,7 @@ contains
     integer :: hashSize
     integer,allocatable :: hashHead(:)
     integer,allocatable :: hashNext(:)
+    integer,allocatable :: pairID(:)
     integer,allocatable :: pairKey(:,:) ! sorted corner ids, 4 x 6*nElem
     integer,allocatable :: pairElem(:),pairSide(:)
     integer,allocatable :: ismCorners(:,:) ! 8 x nElem
@@ -2276,13 +2277,17 @@ contains
     ! At least one BC slot must exist so that Init allocates BCNames/BCType
     nBCsLocal = max(nBCsLocal,1)
 
-    ! Set up the domain decomposition arrays (elemToRank, offsetElem,
-    ! request/stat slots) using the file's element count. This is
-    ! required for SideExchange even in the serial single-rank case.
-    call this%decomp%GenerateDecomposition(nElemFile,6*nElemFile)
+    ! Connectivity uses the file's global element ids; geometry and exchange
+    ! buffers belong only to the contiguous slice owned by this rank.
+    call this%decomp%GenerateDecomposition(nElemFile,0)
+    firstElem = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    lastElem = this%decomp%offsetElem(this%decomp%rankId+2)
+    nLocal = lastElem-firstElem+1
+    call this%decomp%ReserveMessages(12*nLocal)
 
     ! ---- 4. Allocate SELF Mesh3D_t and populate ----
-    call this%Init(nGeo,nElemFile,6*nElemFile,nElemFile*ng1**3,nBCsLocal)
+    call this%Init(nGeo,nLocal,6*nLocal,nLocal*ng1**3,nBCsLocal)
+    this%nGlobalElem = nElemFile
     this%nUniqueSides = 0 ! filled below after face matching
     this%quadrature = CHEBYSHEV_GAUSS_LOBATTO ! HOHQMesh face samples are at CGL points
     this%BCType = 0
@@ -2303,11 +2308,13 @@ contains
     else
       this%materialNames(1:nMatsLocal) = matNamesLocal(1:nMatsLocal)
     endif
-    this%elemMaterial = ismMat
+    this%elemMaterial = ismMat(firstElem:lastElem)
 
     ! Place corner nodes and run transfinite interpolation per element
-    do e = 1,nElemFile
-      call build_nodeCoords_for_hex(this,e,nGeo,ismCorners,ismFlag,faceCurve,nodeXYZ)
+    do e = 1,nLocal
+      eGlobal = firstElem+e-1
+      call build_nodeCoords_for_hex(this,e,nGeo,ismCorners(:,firstElem:lastElem), &
+                                    ismFlag(:,firstElem:lastElem),faceCurve(:,:,:,:,firstElem:lastElem),nodeXYZ)
       ! Synthesize globalNodeIDs: stamp the eight corners with their
       ! file IDs and leave interior IDs as 0 (interior nodes are
       ! private to the element under our tensor product layout).
@@ -2316,18 +2323,18 @@ contains
         i = this%CGNSCornerMap(1,l)
         j = this%CGNSCornerMap(2,l)
         k = this%CGNSCornerMap(3,l)
-        this%globalNodeIDs(i,j,k,e) = ismCorners(l,e)
+        this%globalNodeIDs(i,j,k,e) = ismCorners(l,eGlobal)
       enddo
 
       ! Pack elemInfo with simple placeholders; SELF's 3D path does not
       ! depend on the HOPR-style offset fields when the mesh comes from
       ! a non-HOPR reader.
       this%elemInfo(1,e) = 0
-      this%elemInfo(2,e) = ismMat(e) ! Zone = material id
-      this%elemInfo(3,e) = 6*(e-1)
-      this%elemInfo(4,e) = 6*e
-      this%elemInfo(5,e) = ng1**3*(e-1)
-      this%elemInfo(6,e) = ng1**3*e
+      this%elemInfo(2,e) = ismMat(eGlobal) ! Zone = material id
+      this%elemInfo(3,e) = 6*(eGlobal-1)
+      this%elemInfo(4,e) = 6*eGlobal
+      this%elemInfo(5,e) = ng1**3*(eGlobal-1)
+      this%elemInfo(6,e) = ng1**3*eGlobal
     enddo
 
     ! ---- 5. Build sideInfo via face corner matching ----
@@ -2335,6 +2342,7 @@ contains
     ! faces with the same key are the two sides of an interior face.
     allocate(pairKey(1:4,1:6*nElemFile))
     allocate(pairElem(1:6*nElemFile),pairSide(1:6*nElemFile))
+    allocate(pairID(1:6*nElemFile))
     do e = 1,nElemFile
       do iSide = 1,6
         do l = 1,4
@@ -2404,20 +2412,25 @@ contains
           endif
         endif
 
-        this%sideInfo(3,iSide,e) = ePair
-        this%sideInfo(4,iSide,e) = 10*sPair+flip
-        this%sideInfo(5,iSide,e) = ismBCid(iSide,e)
-        ! Allocate a globalSideID (count each shared face once)
+        ! Every rank visits the global pairs in the same order, so the side id
+        ! and message-tag stride agree even when the paired element is remote.
         if(ePair == 0 .or. e < ePair) then
           this%nUniqueSides = this%nUniqueSides+1
-          this%sideInfo(2,iSide,e) = this%nUniqueSides
+          pairID(i) = this%nUniqueSides
         else
-          this%sideInfo(2,iSide,e) = this%sideInfo(2,sPair,ePair)
+          pairID(i) = pairID(sPair+6*(ePair-1))
+        endif
+        if(e >= firstElem .and. e <= lastElem) then
+          j = e-firstElem+1
+          this%sideInfo(2,iSide,j) = pairID(i)
+          this%sideInfo(3,iSide,j) = ePair
+          this%sideInfo(4,iSide,j) = 10*sPair+flip
+          this%sideInfo(5,iSide,j) = ismBCid(iSide,e)
         endif
       enddo
     enddo
 
-    deallocate(hashHead,hashNext,pairKey,pairElem,pairSide)
+    deallocate(hashHead,hashNext,pairID,pairKey,pairElem,pairSide)
     deallocate(nodeXYZ,ismCorners,ismFlag,ismBCid,ismMat,faceCurve)
     deallocate(BCNamesLocal,matNamesLocal)
 
