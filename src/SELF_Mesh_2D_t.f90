@@ -1361,11 +1361,11 @@ contains
     integer :: iUnit
     integer :: ios
     integer :: nNodesFile,nEdgesFile,nElemFile,polyOrder
-    integer :: nGeo,nLocal
+    integer :: nGeo,nLocal,firstElem,lastElem,eGlobal,flip
     integer :: i,j,k,e,iSide
     integer :: cornerIDs(1:4)
     integer :: bCurveFlag(1:4)
-    integer :: cN1,cN2
+    integer :: cN1,cN2,cP1,cP2
     integer :: ePair,sPair
     integer :: bcIdx
     integer :: matIdx
@@ -1376,6 +1376,7 @@ contains
     integer :: hashSize
     integer,allocatable :: hashHead(:)
     integer,allocatable :: hashNext(:)
+    integer,allocatable :: pairID(:)
     integer,allocatable :: pairN1(:),pairN2(:)
     integer,allocatable :: pairElem(:),pairSide(:)
     integer,allocatable :: ismCorners(:,:) ! 4 x nElem
@@ -1513,13 +1514,17 @@ contains
     ! At least one BC slot must exist so that Init allocates BCNames/BCType
     nBCsLocal = max(nBCsLocal,1)
 
-    ! Set up the domain decomposition arrays (elemToRank, offsetElem,
-    ! request/stat slots) using the file's element count. This is
-    ! required for SideExchange even in the serial single-rank case.
-    call this%decomp%GenerateDecomposition(nElemFile,4*nElemFile)
+    ! Connectivity uses the file's global element ids; geometry and exchange
+    ! buffers belong only to the contiguous slice owned by this rank.
+    call this%decomp%GenerateDecomposition(nElemFile,0)
+    firstElem = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    lastElem = this%decomp%offsetElem(this%decomp%rankId+2)
+    nLocal = lastElem-firstElem+1
+    call this%decomp%ReserveMessages(8*nLocal)
 
     ! ---- 4. Allocate SELF Mesh2D_t and populate ----
-    call this%Init(nGeo,nElemFile,4*nElemFile,nElemFile*(nGeo+1)**2,nBCsLocal)
+    call this%Init(nGeo,nLocal,4*nLocal,nLocal*(nGeo+1)**2,nBCsLocal)
+    this%nGlobalElem = nElemFile
     this%nUniqueSides = 0 ! filled below after pair matching
     this%quadrature = CHEBYSHEV_GAUSS_LOBATTO ! HOHQMesh curve samples are at CGL points
     this%BCType = 0
@@ -1540,37 +1545,39 @@ contains
     else
       this%materialNames(1:nMatsLocal) = matNamesLocal(1:nMatsLocal)
     endif
-    this%elemMaterial = ismMat
+    this%elemMaterial = ismMat(firstElem:lastElem)
 
     ! Place corner nodes and run transfinite interpolation per element
-    do e = 1,nElemFile
-      call build_nodeCoords_for_element(this,e,nGeo,cornerIDs=ismCorners(:,e), &
-                                        flag=ismFlag(:,e),edgeCurve=edgeCurve(:,:,:,e), &
+    do e = 1,nLocal
+      eGlobal = firstElem+e-1
+      call build_nodeCoords_for_element(this,e,nGeo,cornerIDs=ismCorners(:,eGlobal), &
+                                        flag=ismFlag(:,eGlobal),edgeCurve=edgeCurve(:,:,:,eGlobal), &
                                         nodeXY=nodeXY)
       ! Synthesize globalNodeIDs: stamp the four corners with their file
       ! IDs and leave interior IDs as 0 (interior nodes are private to
       ! the element under our high-order tensor product layout).
       this%globalNodeIDs(:,:,e) = 0
-      this%globalNodeIDs(1,1,e) = ismCorners(1,e)
-      this%globalNodeIDs(nGeo+1,1,e) = ismCorners(2,e)
-      this%globalNodeIDs(nGeo+1,nGeo+1,e) = ismCorners(3,e)
-      this%globalNodeIDs(1,nGeo+1,e) = ismCorners(4,e)
+      this%globalNodeIDs(1,1,e) = ismCorners(1,eGlobal)
+      this%globalNodeIDs(nGeo+1,1,e) = ismCorners(2,eGlobal)
+      this%globalNodeIDs(nGeo+1,nGeo+1,e) = ismCorners(3,eGlobal)
+      this%globalNodeIDs(1,nGeo+1,e) = ismCorners(4,eGlobal)
 
       ! Pack elemInfo with simple placeholders; SELF's 2D path does not
       ! depend on the HOPR-style offset fields when the mesh comes from
       ! a non-HOPR reader.
       this%elemInfo(1,e) = 0
-      this%elemInfo(2,e) = ismMat(e) ! Zone = material id
-      this%elemInfo(3,e) = 4*(e-1)
-      this%elemInfo(4,e) = 4*e
-      this%elemInfo(5,e) = (nGeo+1)**2*(e-1)
-      this%elemInfo(6,e) = (nGeo+1)**2*e
+      this%elemInfo(2,e) = ismMat(eGlobal) ! Zone = material id
+      this%elemInfo(3,e) = 4*(eGlobal-1)
+      this%elemInfo(4,e) = 4*eGlobal
+      this%elemInfo(5,e) = (nGeo+1)**2*(eGlobal-1)
+      this%elemInfo(6,e) = (nGeo+1)**2*eGlobal
     enddo
 
     ! ---- 5. Build sideInfo via corner-pair matching ----
     nCornerPairs = 4*nElemFile
     allocate(pairN1(1:nCornerPairs),pairN2(1:nCornerPairs))
     allocate(pairElem(1:nCornerPairs),pairSide(1:nCornerPairs))
+    allocate(pairID(1:4*nElemFile))
     do e = 1,nElemFile
       do iSide = 1,4
         call corner_pair_for_side(ismCorners(:,e),iSide,cN1,cN2)
@@ -1611,24 +1618,34 @@ contains
           endif
           probe = hashNext(probe)
         enddo
-        this%sideInfo(3,iSide,e) = ePair
-        this%sideInfo(4,iSide,e) = 10*sPair ! flip resolved by RecalculateFlip
-        this%sideInfo(5,iSide,e) = ismBCid(iSide,e)
-        ! Allocate a globalSideID (count each shared side once)
+        flip = 0
+        if(ePair /= 0) then
+          call corner_pair_for_side(ismCorners(:,e),iSide,cN1,cN2)
+          call corner_pair_for_side(ismCorners(:,ePair),sPair,cP1,cP2)
+          if(cN1 /= cP1) flip = 1
+        endif
+        ! Every rank visits the global pairs in the same order, so the side id
+        ! and message-tag stride agree even when the paired element is remote.
         if(ePair == 0 .or. e < ePair) then
           this%nUniqueSides = this%nUniqueSides+1
-          this%sideInfo(2,iSide,e) = this%nUniqueSides
+          pairID(i) = this%nUniqueSides
         else
-          this%sideInfo(2,iSide,e) = this%sideInfo(2,sPair,ePair)
+          pairID(i) = pairID(sPair+4*(ePair-1))
+        endif
+        if(e >= firstElem .and. e <= lastElem) then
+          j = e-firstElem+1
+          this%sideInfo(2,iSide,j) = pairID(i)
+          this%sideInfo(3,iSide,j) = ePair
+          this%sideInfo(4,iSide,j) = 10*sPair+flip
+          this%sideInfo(5,iSide,j) = ismBCid(iSide,e)
         endif
       enddo
     enddo
 
-    deallocate(hashHead,hashNext,pairN1,pairN2,pairElem,pairSide)
+    deallocate(hashHead,hashNext,pairID,pairN1,pairN2,pairElem,pairSide)
     deallocate(nodeXY,ismCorners,ismFlag,ismBCid,ismMat,edgeCurve)
     deallocate(BCNamesLocal,matNamesLocal)
 
-    call this%RecalculateFlip()
     call this%UpdateDevice()
 
   contains

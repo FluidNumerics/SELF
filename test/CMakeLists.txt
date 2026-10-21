@@ -494,6 +494,8 @@ add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
                        "structuredmesh_external_comm_3d.f90"
                        "structuredmesh_subcomm_2d.f90"
                        "read_hopr_external_comm_2d.f90"
+                       "mesh2d_read_hohqmesh_mpi.f90"
+                       "mesh3d_read_hohqmesh_mpi.f90"
                        "mappedscalarbrgradient_2d_periodic_mpi.f90"
                        "mappedscalarsideexchange_3d_extruded_mpi.f90"
                        "mappedvectordgdivergence_3d_extruded_mpi.f90" )
