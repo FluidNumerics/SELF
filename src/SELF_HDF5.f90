@@ -277,7 +277,7 @@ contains
     call h5aopen_f(fileId,trim(attributeName),attrId,error)
     call h5aget_type_f(attrId,typeId,error)
 
-    call h5aread_f(attrId,typeId,attribute,dims,error)
+    call h5aread_f(attrId,h5kind_to_type(prec,H5_REAL_KIND),attribute,dims,error)
 
     call h5tclose_f(typeId,error)
     call h5aclose_f(attrId,error)
@@ -955,7 +955,6 @@ contains
     ! Local
     integer(HID_T) :: plistId
     integer(HID_T) :: dsetId
-    integer(HID_T) :: dtypeId
     integer(HID_T) :: filespace
     integer(HID_T) :: memspace
     integer(HID_T) :: dims(1)
@@ -968,12 +967,9 @@ contains
     call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
     call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dget_type_f(dsetId,dtypeId,error)
-
-    call h5dread_f(dsetId,dtypeId,hfArray,dims, &
+    call h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims, &
                    error,memspace,filespace,plistId)
 
-    call h5tclose_f(dtypeId,error)
     call h5pclose_f(plistId,error)
     call h5sclose_f(filespace,error)
     call h5dclose_f(dsetId,error)
@@ -990,7 +986,6 @@ contains
     ! Local
     integer(HID_T) :: plistId
     integer(HID_T) :: dsetId
-    integer(HID_T) :: dtypeId
     integer(HID_T) :: filespace
     integer(HID_T) :: memspace
     integer(HID_T) :: dims(1:2)
@@ -1003,12 +998,9 @@ contains
     call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
     call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dget_type_f(dsetId,dtypeId,error)
-
-    call h5dread_f(dsetId,dtypeId,hfArray,dims, &
+    call h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims, &
                    error,memspace,filespace,plistId)
 
-    call h5tclose_f(dtypeId,error)
     call h5pclose_f(plistId,error)
     call h5sclose_f(filespace,error)
     call h5dclose_f(dsetId,error)
@@ -1025,7 +1017,6 @@ contains
     ! Local
     integer(HID_T) :: plistId
     integer(HID_T) :: dsetId
-    integer(HID_T) :: dtypeId
     integer(HID_T) :: filespace
     integer(HID_T) :: memspace
     integer(HID_T) :: dims(1:3)
@@ -1038,12 +1029,9 @@ contains
     call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
     call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dget_type_f(dsetId,dtypeId,error)
-
-    call h5dread_f(dsetId,dtypeId,hfArray,dims, &
+    call h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims, &
                    error,memspace,filespace,plistId)
 
-    call h5tclose_f(dtypeId,error)
     call h5pclose_f(plistId,error)
     call h5sclose_f(filespace,error)
     call h5dclose_f(dsetId,error)
@@ -1060,7 +1048,6 @@ contains
     ! Local
     integer(HID_T) :: plistId
     integer(HID_T) :: dsetId
-    integer(HID_T) :: dtypeId
     integer(HID_T) :: filespace
     integer(HID_T) :: memspace
     integer(HID_T) :: dims(1:4)
@@ -1073,12 +1060,9 @@ contains
     call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
     call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dget_type_f(dsetId,dtypeId,error)
-
-    call h5dread_f(dsetId,dtypeId,hfArray,dims, &
+    call h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims, &
                    error,memspace,filespace,plistId)
 
-    call h5tclose_f(dtypeId,error)
     call h5pclose_f(plistId,error)
     call h5sclose_f(filespace,error)
     call h5dclose_f(dsetId,error)
