@@ -166,6 +166,7 @@ contains
     integer :: msgCount
 
     ! A send and a receive per rank-remote edge, per variable and direction.
+    call mesh%decomp%CheckMessageTags(mesh%nUniqueSides,2*this%nvar)
     call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%decomp%CountRemoteSides(mesh%sideInfo,mesh%nElem,4))
 
     msgCount = 0
@@ -346,6 +347,7 @@ contains
     integer :: msgCount
 
     ! A send and a receive per rank-crossing sub-edge, per variable and direction.
+    call mesh%decomp%CheckMessageTags(mesh%nUniqueSides,2*this%nvar)
     call mesh%decomp%ReserveMessages(2*2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0
@@ -561,6 +563,7 @@ contains
     integer :: msgCount
 
     ! One message per rank-crossing sub-edge, per variable.
+    call mesh%decomp%CheckMessageTags(mesh%nUniqueSides,this%nvar)
     call mesh%decomp%ReserveMessages(this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0

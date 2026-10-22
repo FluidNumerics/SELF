@@ -42,6 +42,7 @@ module SELF_DomainDecomposition_t
     integer :: mpiPrec
     integer :: rankId
     integer :: nRanks
+    integer :: mpiTagUpperBound
     integer :: nElem
     integer :: maxMsg
     integer :: msgCount
@@ -59,6 +60,7 @@ module SELF_DomainDecomposition_t
     procedure :: GenerateDecompositionFromOffsets => GenerateDecompositionFromOffsets_DomainDecomposition_t
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
     procedure :: ReserveMessages => ReserveMessages_DomainDecomposition_t
+    procedure :: CheckMessageTags => CheckMessageTags_DomainDecomposition_t
     procedure :: CountRemoteSides => CountRemoteSides_DomainDecomposition_t
     procedure :: CountRemoteMortarSides => CountRemoteMortarSides_DomainDecomposition_t
 
@@ -77,6 +79,21 @@ module SELF_DomainDecomposition_t
   logical,private :: selfInitializedMpi = .false.
 
 contains
+
+  integer function QueryMPITagUpperBound(mpiComm) result(tagUpperBound)
+  !! Read the communicator's guaranteed upper bound for non-negative MPI tags.
+    implicit none
+    integer,intent(in) :: mpiComm
+    ! Local
+    integer :: ierror
+    logical :: flag
+
+    call MPI_Comm_get_attr(mpiComm,MPI_TAG_UB,tagUpperBound,flag,ierror)
+    if(ierror /= MPI_SUCCESS .or. .not. flag) then
+      error stop "SELF cannot query MPI_TAG_UB for the mesh communicator."
+    endif
+
+  endfunction QueryMPITagUpperBound
 
   subroutine AcquireMPI(mpiComm,ownsMpi,comm)
   !! Resolve the communicator a new decomposition will run on and register it
@@ -166,6 +183,7 @@ contains
 
     call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
     call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
+    this%mpiTagUpperBound = QueryMPITagUpperBound(this%mpiComm)
     print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
 
     if(this%nRanks > 1) then
@@ -321,6 +339,32 @@ contains
     this%maxMsg = nMsg
 
   endsubroutine ReserveMessages_DomainDecomposition_t
+
+  subroutine CheckMessageTags_DomainDecomposition_t(this,nUniqueSides,nTags)
+  !! Stop before posting messages whose side-id-based tags cannot fit under
+  !! MPI_TAG_UB. The tag span is nUniqueSides*nTags; division checks that
+  !! product without first overflowing the default integer kind.
+  !!
+  !!  Input
+  !!    - nUniqueSides : global side-id stride used by the exchange
+  !!    - nTags : number of variable or variable-and-direction tag blocks
+    implicit none
+    class(DomainDecomposition_t),intent(in) :: this
+    integer,intent(in) :: nUniqueSides
+    integer,intent(in) :: nTags
+
+    if(nUniqueSides <= 0 .or. nTags <= 0) then
+      error stop "SELF cannot check side-exchange message tags with a non-positive range."
+    endif
+
+    if(nUniqueSides > this%mpiTagUpperBound .or. &
+       nTags > this%mpiTagUpperBound/nUniqueSides) then
+      print*,"SELF cannot post side-exchange messages: nUniqueSides = ",nUniqueSides, &
+        ", nTags = ",nTags,", MPI_TAG_UB = ",this%mpiTagUpperBound
+      error stop "SELF cannot post side-exchange messages: MPI_TAG_UB exceeded"
+    endif
+
+  endsubroutine CheckMessageTags_DomainDecomposition_t
 
   integer function CountRemoteSides_DomainDecomposition_t(this,sideInfo,nElem,nSidesPerElem) result(nRemote)
   !! Counts the conforming sides of the local elements whose neighbor element is

@@ -459,6 +459,7 @@ set_tests_properties(
     PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
+                       "mappedscalarsideexchange_2d_tag_guard_mpi.f90"
                        "scalarsideexchange_3d_mpi.f90"
                        "mappedscalarsideexchange_2d_reupload_mpi.f90"
                        "mappedscalarsideexchange_3d_reupload_mpi.f90"
@@ -499,6 +500,9 @@ add_mpi_fortran_tests( "scalarsideexchange_2d_mpi.f90"
                        "mappedscalarbrgradient_2d_periodic_mpi.f90"
                        "mappedscalarsideexchange_3d_extruded_mpi.f90"
                        "mappedvectordgdivergence_3d_extruded_mpi.f90" )
+
+set_tests_properties(mappedscalarsideexchange_2d_tag_guard_mpi PROPERTIES
+                     PASS_REGULAR_EXPRESSION "SELF cannot post side-exchange messages: MPI_TAG_UB exceeded")
 
 # The column operator tests are written for any rank count: every reduction goes through the
 # mesh's communicator, and the HOHQMesh surfaces, which the reader does not decompose, are used
