@@ -173,6 +173,7 @@ contains
     integer :: msgCount
 
     ! A send and a receive per rank-remote face, per variable and direction.
+    call mesh%decomp%CheckMessageTags(mesh%nUniqueSides,3*this%nvar)
     call mesh%decomp%ReserveMessages(2*3*this%nvar*mesh%decomp%CountRemoteSides(mesh%sideInfo,mesh%nElem,6))
 
     msgCount = 0
@@ -488,6 +489,7 @@ contains
     integer :: msgCount
 
     ! A send and a receive per rank-crossing sub-face, per variable and direction.
+    call mesh%decomp%CheckMessageTags(mesh%nUniqueSides,3*this%nvar)
     call mesh%decomp%ReserveMessages(2*3*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,4))
 
     msgCount = 0
@@ -749,6 +751,7 @@ contains
     integer :: msgCount
 
     ! One message per rank-crossing sub-face, per variable.
+    call mesh%decomp%CheckMessageTags(mesh%nUniqueSides,this%nvar)
     call mesh%decomp%ReserveMessages(this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,4))
 
     msgCount = 0

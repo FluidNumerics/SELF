@@ -86,6 +86,7 @@ contains
 
     call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
     call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
+    this%mpiTagUpperBound = QueryMPITagUpperBound(this%mpiComm)
     print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
 
     if(this%nRanks > 1) then

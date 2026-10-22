@@ -442,6 +442,7 @@ contains
     real(prec),pointer :: mortarBuff(:,:,:,:)
 
     ! A send and a receive per rank-crossing sub-edge, per variable.
+    call mesh%decomp%CheckMessageTags(mesh%nUniqueSides,this%nvar)
     call mesh%decomp%ReserveMessages(2*this%nvar*mesh%decomp%CountRemoteMortarSides(mesh%mortarInfo,mesh%nMortars,2))
 
     msgCount = 0
